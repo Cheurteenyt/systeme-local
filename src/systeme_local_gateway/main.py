@@ -1,6 +1,6 @@
 from fastapi import FastAPI, HTTPException
 
-from .audit import append_audit
+from .audit import AuditLog
 from .auth import ReplayGuard, verify_task
 from .config import settings
 from .executor import CapabilityExecutor
@@ -15,6 +15,8 @@ executor = CapabilityExecutor(
     policy.limits,
     sandbox_root=settings.sandbox_root,
 )
+audit_log = AuditLog(settings.audit_log, settings.audit_key)
+audit_log.verify()
 replay_guard = ReplayGuard()
 
 
@@ -28,31 +30,42 @@ def submit_task(task: TaskEnvelope) -> TaskResult:
     try:
         verify_task(task, settings.shared_secret, replay_guard=replay_guard)
     except ValueError as exc:
-        audit_id = append_audit(settings.audit_log, {
-            "task_id": task.task_id,
-            "capability": task.capability,
-            "status": "denied",
-            "reason": str(exc),
-        })
+        audit_id = audit_log.append(
+            {
+                "task_id": task.task_id,
+                "capability": task.capability,
+                "status": "denied",
+                "reason": str(exc),
+            }
+        )
         raise HTTPException(status_code=401, detail=str(exc)) from exc
 
     decision = policy.evaluate(task.capability)
     if decision.decision == "deny":
-        audit_id = append_audit(settings.audit_log, {
-            "task_id": task.task_id,
-            "capability": task.capability,
-            "status": "denied",
-            "reason": decision.reason,
-        })
-        return TaskResult(task_id=task.task_id, status="denied", error=decision.reason, audit_id=audit_id)
+        audit_id = audit_log.append(
+            {
+                "task_id": task.task_id,
+                "capability": task.capability,
+                "status": "denied",
+                "reason": decision.reason,
+            }
+        )
+        return TaskResult(
+            task_id=task.task_id,
+            status="denied",
+            error=decision.reason,
+            audit_id=audit_id,
+        )
 
     if decision.decision == "require_approval":
-        audit_id = append_audit(settings.audit_log, {
-            "task_id": task.task_id,
-            "capability": task.capability,
-            "status": "approval_required",
-            "arguments": task.arguments,
-        })
+        audit_id = audit_log.append(
+            {
+                "task_id": task.task_id,
+                "capability": task.capability,
+                "status": "approval_required",
+                "arguments": task.arguments,
+            }
+        )
         return TaskResult(
             task_id=task.task_id,
             status="approval_required",
@@ -69,13 +82,21 @@ def submit_task(task: TaskEnvelope) -> TaskResult:
         status = "failed"
         error = str(exc)
 
-    audit_id = append_audit(settings.audit_log, {
-        "task_id": task.task_id,
-        "agent": task.agent.model_dump(),
-        "capability": task.capability,
-        "status": status,
-        "arguments": task.arguments,
-        "output": output,
-        "error": error,
-    })
-    return TaskResult(task_id=task.task_id, status=status, output=output, error=error, audit_id=audit_id)
+    audit_id = audit_log.append(
+        {
+            "task_id": task.task_id,
+            "agent": task.agent.model_dump(),
+            "capability": task.capability,
+            "status": status,
+            "arguments": task.arguments,
+            "output": output,
+            "error": error,
+        }
+    )
+    return TaskResult(
+        task_id=task.task_id,
+        status=status,
+        output=output,
+        error=error,
+        audit_id=audit_id,
+    )

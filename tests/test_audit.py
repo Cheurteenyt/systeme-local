@@ -1,39 +1,146 @@
-import hashlib
 import json
 from pathlib import Path
 
-from systeme_local_gateway.audit import append_audit
+import pytest
+
+from systeme_local_gateway.audit import AuditIntegrityError, AuditLog, summarize_payload
+
+AUDIT_KEY = "audit-key-" + ("a" * 64)
+OTHER_KEY = "audit-key-" + ("b" * 64)
 
 
-def _expected_hash(record: dict) -> str:
-    unsigned = {key: value for key, value in record.items() if key != "sha256"}
-    encoded = json.dumps(
-        unsigned,
-        sort_keys=True,
-        separators=(",", ":"),
-        default=str,
-    )
-    return hashlib.sha256(encoded.encode("utf-8")).hexdigest()
+def _records(path: Path) -> list[dict]:
+    return [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines()]
 
 
-def test_append_audit_writes_verifiable_json_lines(tmp_path: Path) -> None:
+def test_audit_log_writes_chained_verifiable_records(tmp_path: Path) -> None:
     log_path = tmp_path / "audit.jsonl"
+    audit = AuditLog(log_path, AUDIT_KEY)
 
-    first_id = append_audit(
-        log_path,
-        {"task_id": "task-12345678", "status": "completed"},
-    )
-    second_id = append_audit(
-        log_path,
-        {"task_id": "task-87654321", "status": "denied"},
-    )
+    first_id = audit.append({"task_id": "task-12345678", "status": "completed"})
+    second_id = audit.append({"task_id": "task-87654321", "status": "denied"})
 
-    records = [
-        json.loads(line)
-        for line in log_path.read_text(encoding="utf-8").splitlines()
-    ]
+    records = _records(log_path)
+    verification = audit.verify()
 
-    assert len(records) == 2
+    assert verification.records == 2
     assert records[0]["audit_id"] == first_id
     assert records[1]["audit_id"] == second_id
+    assert records[0]["previous_hmac"] == "0" * 64
+    assert records[1]["previous_hmac"] == records[0]["entry_hmac"]
+    assert verification.last_hmac == records[1]["entry_hmac"]
     assert first_id != second_id
+
+
+def test_audit_log_never_persists_raw_arguments_outputs_or_session_ids(tmp_path: Path) -> None:
+    log_path = tmp_path / "audit.jsonl"
+    audit = AuditLog(log_path, AUDIT_KEY)
+
+    audit.append(
+        {
+            "task_id": "task-sensitive",
+            "agent": {
+                "provider": "example",
+                "model": "model-1",
+                "session_id": "session-secret-value",
+            },
+            "capability": "sandbox.run_tests",
+            "status": "failed",
+            "arguments": {
+                "password": "hunter2",
+                "command": ["python", "-c", "print('secret-command-value')"],
+            },
+            "output": {
+                "returncode": 1,
+                "stdout": "private-output-value",
+                "stderr": "Bearer very-secret-token",
+                "truncated": False,
+                "workspace_isolated": True,
+                "workspace_changes": {
+                    "added": ["private-name.txt"],
+                    "modified": [],
+                    "deleted": [],
+                    "truncated": False,
+                },
+            },
+            "error": "password=hunter2 Bearer very-secret-token",
+        }
+    )
+
+    raw_log = log_path.read_text(encoding="utf-8")
+    record = _records(log_path)[0]
+
+    for secret in (
+        "hunter2",
+        "session-secret-value",
+        "secret-command-value",
+        "private-output-value",
+        "very-secret-token",
+        "private-name.txt",
+    ):
+        assert secret not in raw_log
+
+    assert record["agent"]["provider"] == "example"
+    assert "session_id" not in record["agent"]
+    assert len(record["agent"]["session_id_hmac"]) == 64
+    assert "error" not in record
+    assert len(record["error_summary"]["hmac_sha256"]) == 64
+    assert record["arguments_summary"]["metadata"]["command_argv_items"] == 3
+    output_metadata = record["output_summary"]["metadata"]
+    assert output_metadata["returncode"] == 1
+    assert output_metadata["workspace_isolated"] is True
+    assert output_metadata["workspace_changes"]["added_count"] == 1
+
+
+def test_audit_log_rejects_tampering_before_append(tmp_path: Path) -> None:
+    log_path = tmp_path / "audit.jsonl"
+    audit = AuditLog(log_path, AUDIT_KEY)
+    audit.append({"task_id": "task-12345678", "status": "completed"})
+
+    records = _records(log_path)
+    records[0]["status"] = "failed"
+    log_path.write_text(json.dumps(records[0]) + "\n", encoding="utf-8")
+
+    with pytest.raises(AuditIntegrityError, match="invalid audit HMAC"):
+        audit.verify()
+    with pytest.raises(AuditIntegrityError, match="invalid audit HMAC"):
+        audit.append({"task_id": "task-87654321", "status": "completed"})
+
+    assert len(_records(log_path)) == 1
+
+
+def test_audit_log_rejects_wrong_key_and_legacy_records(tmp_path: Path) -> None:
+    log_path = tmp_path / "audit.jsonl"
+    AuditLog(log_path, AUDIT_KEY).append(
+        {"task_id": "task-12345678", "status": "completed"}
+    )
+
+    with pytest.raises(AuditIntegrityError, match="invalid audit HMAC"):
+        AuditLog(log_path, OTHER_KEY).verify()
+
+    legacy_path = tmp_path / "legacy.jsonl"
+    legacy_path.write_text(
+        json.dumps({"audit_id": "legacy", "sha256": "0" * 64}) + "\n",
+        encoding="utf-8",
+    )
+    with pytest.raises(AuditIntegrityError, match="unsupported audit record version"):
+        AuditLog(legacy_path, AUDIT_KEY).verify()
+
+
+def test_audit_log_requires_complete_newline_terminated_records(tmp_path: Path) -> None:
+    log_path = tmp_path / "audit.jsonl"
+    log_path.write_text('{"version":2}', encoding="utf-8")
+
+    with pytest.raises(AuditIntegrityError, match="must end with a newline"):
+        AuditLog(log_path, AUDIT_KEY).verify()
+
+
+def test_payload_summary_is_deterministic_and_bounded() -> None:
+    key = AUDIT_KEY.encode("utf-8")
+    first = summarize_payload({"b": 2, "a": 1}, key)
+    second = summarize_payload({"a": 1, "b": 2}, key)
+
+    assert first == second
+    assert first["type"] == "object"
+    assert first["keys"] == ["a", "b"]
+    assert len(first["hmac_sha256"]) == 64

@@ -13,7 +13,7 @@ Passerelle locale sécurisée permettant à un agent IA distant de demander des 
 - Répertoire de travail dédié, jamais le disque complet.
 - Quotas CPU, mémoire, durée et taille de sortie.
 - Approbation humaine pour les actions sensibles.
-- Journal d'audit append-only avec empreintes des entrées/sorties.
+- Journal d'audit minimal, chaîné par HMAC, sans arguments ni sorties brutes.
 - Adaptateurs fournisseurs remplaçables : GLM/z.ai, API compatible OpenAI, MCP, GitHub, relais HTTPS.
 
 ## Portée du produit
@@ -39,6 +39,7 @@ python -m venv .venv
 . .venv/bin/activate  # Windows PowerShell: .venv\\Scripts\\Activate.ps1
 pip install -e '.[dev]'
 cp .env.example .env
+# Remplacez SLG_SHARED_SECRET et SLG_AUDIT_KEY par deux secrets aléatoires distincts.
 make sandbox-image
 pytest
 uvicorn systeme_local_gateway.main:app --host 127.0.0.1 --port 8765
@@ -83,6 +84,24 @@ python -m pytest -m integration -q
 Remove-Item Env:SYSTEME_LOCAL_RUN_DOCKER_TESTS
 Remove-Item Env:SYSTEME_LOCAL_SANDBOX_IMAGE
 ```
+
+### Intégrité du journal d’audit
+
+`SLG_AUDIT_KEY` doit être un secret aléatoire distinct de `SLG_SHARED_SECRET`. Le journal ne conserve jamais les arguments, sorties, identifiants de session ou messages d’erreur bruts. Il enregistre seulement des métadonnées sûres et des empreintes HMAC à domaines séparés. Chaque entrée inclut également le HMAC de l’entrée précédente.
+
+Générez deux valeurs indépendantes avec :
+
+```bash
+python -c "import secrets; print(secrets.token_urlsafe(48))"
+```
+
+Vérifiez la chaîne complète avec :
+
+```bash
+python -m systeme_local_gateway.audit
+```
+
+Le service refuse de démarrer ou d’ajouter une entrée lorsque le journal est tronqué, altéré, signé avec une autre clé ou utilise l’ancien format non chaîné. Avant la première utilisation de ce format, archivez un éventuel `audit.jsonl` historique sous un autre nom. La clé HMAC protège contre les modifications hors ligne tant qu’elle reste secrète ; l’ancrage externe du dernier HMAC reste une amélioration future.
 
 ## Connectivité avec les IA web
 
