@@ -11,6 +11,7 @@ class Settings(BaseSettings):
     workspace: Path = Path("./workspace")
     policy_file: Path = Path("./policy.yaml")
     audit_log: Path = Path("./audit.jsonl")
+    sandbox_root: Path = Path("./.systeme-local/sandboxes")
     docker_image: str = "python:3.12-slim"
 
     @field_validator("shared_secret")

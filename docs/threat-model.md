@@ -26,6 +26,9 @@
 - images de sandbox épinglées par digest ;
 - réseau désactivé par défaut ;
 - aucun montage du home, du socket Docker ou des secrets ;
+- aucun montage en écriture du workspace source : snapshot temporaire borné par tâche ;
+- rejet des liens symboliques et fichiers spéciaux dans les snapshots ;
+- suppression garantie du conteneur et du snapshot après succès, erreur ou timeout ;
 - approbation pour écriture, réseau, installation, Git push et contrôle GUI ;
 - limites CPU/RAM/PIDs/durée/sortie ;
 - jeux de tests protégés en lecture seule ;

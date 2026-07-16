@@ -9,6 +9,7 @@ Passerelle locale sécurisée permettant à un agent IA distant de demander des 
 - Connexion **sortante uniquement** depuis le poste local vers un relais ou un adaptateur.
 - Capacités explicites plutôt qu'un shell libre.
 - Exécution dans des conteneurs éphémères, sans réseau par défaut.
+- Snapshot temporaire par tâche : le workspace source n’est jamais monté en écriture.
 - Répertoire de travail dédié, jamais le disque complet.
 - Quotas CPU, mémoire, durée et taille de sortie.
 - Approbation humaine pour les actions sensibles.
@@ -62,7 +63,7 @@ curl -X POST http://127.0.0.1:8765/v1/tasks \
 - `sandbox.run_tests`
 - `git.diff`
 
-Les capacités sont définies dans `policy.yaml`. L’image de sandbox est construite avec `make sandbox-image` et devra être épinglée par digest avant un usage de production. Toute capacité inconnue est refusée.
+Les capacités sont définies dans `policy.yaml`. Pour les commandes sandboxées, le gateway copie les fichiers réguliers dans un snapshot borné, écarte certains fichiers secrets courants et les métadonnées Git sensibles, exécute la commande uniquement sur cette copie, rapporte les fichiers ajoutés/modifiés/supprimés, puis détruit le snapshot. L’image de sandbox est construite avec `make sandbox-image` et devra être épinglée par digest avant un usage de production. Toute capacité inconnue est refusée.
 
 ## Connectivité avec les IA web
 

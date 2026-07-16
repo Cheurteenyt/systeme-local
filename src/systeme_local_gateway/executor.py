@@ -1,24 +1,56 @@
-import subprocess
 from pathlib import Path
-from typing import Any
+from typing import Any, Protocol
 
 from .paths import resolve_inside
+from .sandbox import DockerSandboxRunner
+
+
+class SandboxRunner(Protocol):
+    def run(
+        self,
+        workspace: Path,
+        command: list[str],
+        *,
+        include_git: bool,
+    ) -> dict[str, object]: ...
 
 
 class CapabilityExecutor:
-    def __init__(self, workspace: Path, docker_image: str, limits: dict[str, Any]):
+    def __init__(
+        self,
+        workspace: Path,
+        docker_image: str,
+        limits: dict[str, Any],
+        sandbox_root: Path | None = None,
+        sandbox_runner: SandboxRunner | None = None,
+    ):
         self.workspace = workspace.resolve()
         self.workspace.mkdir(parents=True, exist_ok=True)
         self.docker_image = docker_image
         self.limits = limits
+        resolved_sandbox_root = (
+            sandbox_root.resolve()
+            if sandbox_root is not None
+            else (self.workspace.parent / ".systeme-local" / "sandboxes").resolve()
+        )
+        self.sandbox_runner = sandbox_runner or DockerSandboxRunner(
+            docker_image,
+            resolved_sandbox_root,
+            limits,
+        )
 
-    def execute(self, capability: str, arguments: dict[str, Any], config: dict[str, Any]) -> dict[str, Any]:
+    def execute(
+        self,
+        capability: str,
+        arguments: dict[str, Any],
+        config: dict[str, Any],
+    ) -> dict[str, Any]:
         handlers = {
             "workspace.list": self._list,
             "workspace.read_text": self._read_text,
             "workspace.write_text": self._write_text,
-            "sandbox.run_tests": self._run_sandbox_command,
-            "git.diff": self._run_sandbox_command,
+            "sandbox.run_tests": self._run_tests,
+            "git.diff": self._run_git_command,
         }
         handler = handlers.get(capability)
         if handler is None:
@@ -53,47 +85,22 @@ class CapabilityExecutor:
         target.write_bytes(encoded)
         return {"path": str(target.relative_to(self.workspace)), "bytes_written": len(encoded)}
 
-    def _run_sandbox_command(self, arguments: dict[str, Any], config: dict[str, Any]) -> dict[str, Any]:
+    def _run_tests(self, arguments: dict[str, Any], config: dict[str, Any]) -> dict[str, Any]:
+        command = self._validated_command(arguments, config)
+        return self.sandbox_runner.run(self.workspace, command, include_git=False)
+
+    def _run_git_command(self, arguments: dict[str, Any], config: dict[str, Any]) -> dict[str, Any]:
+        command = self._validated_command(arguments, config)
+        return self.sandbox_runner.run(self.workspace, command, include_git=True)
+
+    @staticmethod
+    def _validated_command(arguments: dict[str, Any], config: dict[str, Any]) -> list[str]:
         command = arguments.get("command")
+        if not isinstance(command, list) or not command or not all(
+            isinstance(item, str) and item for item in command
+        ):
+            raise ValueError("command must be a non-empty argv array")
         allowed = config.get("allowed_commands", [])
         if command not in allowed:
             raise ValueError("command is not allowlisted")
-        if not isinstance(command, list) or not all(isinstance(x, str) for x in command):
-            raise ValueError("command must be an argv array")
-
-        timeout = int(self.limits.get("max_task_seconds", 120))
-        memory_mb = int(self.limits.get("memory_mb", 1024))
-        cpu_count = float(self.limits.get("cpu_count", 1))
-        max_output = int(self.limits.get("max_output_bytes", 200_000))
-
-        docker_command = [
-            "docker", "run", "--rm",
-            "--network", "none",
-            "--read-only",
-            "--cap-drop", "ALL",
-            "--security-opt", "no-new-privileges",
-            "--pids-limit", "256",
-            "--cpus", str(cpu_count),
-            "--memory", f"{memory_mb}m",
-            "--tmpfs", "/tmp:rw,noexec,nosuid,size=128m",
-            "-v", f"{self.workspace}:/workspace:rw",
-            "-w", "/workspace",
-            self.docker_image,
-            *command,
-        ]
-        completed = subprocess.run(
-            docker_command,
-            shell=False,
-            capture_output=True,
-            timeout=timeout,
-            check=False,
-        )
-        stdout = completed.stdout[:max_output].decode("utf-8", errors="replace")
-        stderr = completed.stderr[:max_output].decode("utf-8", errors="replace")
-        return {
-            "command": command,
-            "returncode": completed.returncode,
-            "stdout": stdout,
-            "stderr": stderr,
-            "truncated": len(completed.stdout) > max_output or len(completed.stderr) > max_output,
-        }
+        return command
