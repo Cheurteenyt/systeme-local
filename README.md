@@ -90,7 +90,7 @@ Remove-Item Env:SYSTEME_LOCAL_SANDBOX_IMAGE
 
 `SLG_AUDIT_KEY` doit être un secret aléatoire distinct de `SLG_SHARED_SECRET`. Le journal ne conserve jamais les arguments, sorties, identifiants de session ou messages d’erreur bruts. Il enregistre seulement des métadonnées sûres et des empreintes HMAC à domaines séparés. Chaque entrée inclut également le HMAC de l’entrée précédente.
 
-Générez deux valeurs indépendantes avec :
+Générez des valeurs indépendantes avec :
 
 ```bash
 python -c "import secrets; print(secrets.token_urlsafe(48))"
@@ -123,8 +123,27 @@ Le cœur du journal peut désormais recevoir ce fournisseur. La vérification re
 rollback ou une divergence, et avance automatiquement l’ancre lorsque le journal local
 contient un suffixe valide après une panne survenue entre les deux écritures.
 
-La configuration du gateway et la commande de bootstrap explicite restent volontairement
-hors de cette étape afin de conserver une frontière de revue petite et testable.
+L’activation reste optionnelle. Gateway arrêté et avant de définir les variables
+d’ancrage, vérifiez d’abord le journal actuel :
+
+```bash
+python -m systeme_local_gateway.audit
+```
+
+Configurez ensuite ensemble `SLG_AUDIT_ANCHOR_LOG` et `SLG_AUDIT_ANCHOR_KEY`,
+avec une troisième clé indépendante de `SLG_SHARED_SECRET` et `SLG_AUDIT_KEY`.
+Le chemin de l’ancre doit être distinct du journal et de leurs fichiers de verrou.
+Initialisez alors exactement une fois, puis vérifiez l’état couplé :
+
+```bash
+python -m systeme_local_gateway.audit anchor-init
+python -m systeme_local_gateway.audit
+```
+
+Dès que les deux variables sont configurées, le gateway et la CLI d’approbation refusent
+de démarrer ou d’agir tant que le bootstrap explicite n’a pas réussi. Aucun bootstrap
+implicite n’est effectué. La commande `--log` ne peut pas viser un autre journal lorsque
+l’ancrage est actif.
 
 Un fichier local ne constitue pas, à lui seul, une protection forte contre le rollback.
 Le fournisseur est destiné à un support administré séparément dont les propriétés
