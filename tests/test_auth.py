@@ -38,3 +38,12 @@ def test_replay_is_rejected() -> None:
     verify_task(task, SECRET, replay_guard=guard)
     with pytest.raises(ValueError, match="replayed"):
         verify_task(task, SECRET, replay_guard=guard)
+
+
+def test_excessive_task_lifetime_is_rejected() -> None:
+    task = signed_task()
+    task.expires_at = task.issued_at + timedelta(minutes=10)
+    digest = hmac.new(SECRET.encode(), canonical_payload(task), hashlib.sha256).digest()
+    task.signature = base64.urlsafe_b64encode(digest).decode().rstrip("=")
+    with pytest.raises(ValueError, match="lifetime"):
+        verify_task(task, SECRET)
