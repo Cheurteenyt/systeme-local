@@ -143,6 +143,13 @@ Pour l’exemple fourni, conservez `SLG_TASK_ID` entre les deux soumissions et d
 `SLG_APPROVAL_ID` pour la seconde. `SLG_TASK_CAPABILITY` et
 `SLG_TASK_ARGUMENTS_JSON` permettent de choisir l’action signée.
 
+### Erreurs d’exécution distantes
+
+Une exception interne d’exécution n’est jamais renvoyée telle quelle à l’agent distant.
+La réponse contient seulement `task execution failed` et l’`audit_id` associé. Le message
+interne est transmis uniquement au journal d’audit, qui n’en conserve pas le texte brut :
+il enregistre une empreinte HMAC et des métadonnées de taille et de type.
+
 ## Connectivité avec les IA web
 
 Le projet distingue strictement trois modes :
