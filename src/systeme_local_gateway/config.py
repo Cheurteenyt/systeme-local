@@ -13,6 +13,8 @@ class Settings(BaseSettings):
     workspace: Path = Path("./workspace")
     policy_file: Path = Path("./policy.yaml")
     audit_log: Path = Path("./audit.jsonl")
+    replay_db: Path = Path("./.systeme-local/replay.sqlite3")
+    replay_max_entries: int = Field(default=10_000, ge=1, le=1_000_000)
     sandbox_root: Path = Path("./.systeme-local/sandboxes")
     docker_image: str = "python:3.12-slim"
 

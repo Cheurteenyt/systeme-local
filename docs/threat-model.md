@@ -22,7 +22,7 @@
 ## Contrôles minimaux
 
 - deny-by-default ;
-- signatures, expiration courte et cache de nonces ;
+- signatures, expiration courte et base transactionnelle persistante d’empreintes HMAC de nonces ;
 - images de sandbox épinglées par digest ;
 - réseau désactivé par défaut ;
 - aucun montage du home, du socket Docker ou des secrets ;
@@ -40,7 +40,8 @@
 
 - le verrou du journal protège les threads du processus courant, pas plusieurs processus writers ;
 - un attaquant qui compromet à la fois le processus et `SLG_AUDIT_KEY` peut fabriquer de futures entrées ;
-- le dernier HMAC n’est pas encore ancré dans un stockage externe append-only.
+- le dernier HMAC n’est pas encore ancré dans un stockage externe append-only ;
+- une restauration ancienne ou une suppression de la base anti-rejeu peut oublier des nonces encore actifs ; un ancrage monotone externe reste à ajouter.
 
 ## Actions exclues du MVP
 

@@ -1,7 +1,7 @@
 from fastapi import FastAPI, HTTPException
 
 from .audit import AuditLog
-from .auth import ReplayGuard, verify_task
+from .auth import ReplayGuardUnavailableError, SQLiteReplayGuard, verify_task
 from .config import settings
 from .executor import CapabilityExecutor
 from .models import TaskEnvelope, TaskResult
@@ -17,7 +17,11 @@ executor = CapabilityExecutor(
 )
 audit_log = AuditLog(settings.audit_log, settings.audit_key)
 audit_log.verify()
-replay_guard = ReplayGuard()
+replay_guard = SQLiteReplayGuard(
+    settings.replay_db,
+    settings.shared_secret,
+    max_entries=settings.replay_max_entries,
+)
 
 
 @app.get("/health")
@@ -29,6 +33,19 @@ def health() -> dict[str, str]:
 def submit_task(task: TaskEnvelope) -> TaskResult:
     try:
         verify_task(task, settings.shared_secret, replay_guard=replay_guard)
+    except ReplayGuardUnavailableError as exc:
+        audit_log.append(
+            {
+                "task_id": task.task_id,
+                "capability": task.capability,
+                "status": "failed",
+                "reason": "replay protection unavailable",
+            }
+        )
+        raise HTTPException(
+            status_code=503,
+            detail="replay protection unavailable",
+        ) from exc
     except ValueError as exc:
         audit_id = audit_log.append(
             {
