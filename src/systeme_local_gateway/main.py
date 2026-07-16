@@ -192,11 +192,13 @@ def submit_task(task: TaskEnvelope) -> TaskResult:
     try:
         output = executor.execute(task.capability, task.arguments, decision.config)
         status = "completed"
-        error = None
-    except Exception as exc:  # Boundary: never leak a traceback to a remote agent.
+        response_error = None
+        audit_error = None
+    except Exception as exc:  # Boundary: never leak internal details to a remote agent.
         output = {}
         status = "failed"
-        error = str(exc)
+        response_error = "task execution failed"
+        audit_error = str(exc)
 
     audit_id = audit_log.append(
         {
@@ -206,7 +208,7 @@ def submit_task(task: TaskEnvelope) -> TaskResult:
             "status": status,
             "arguments": task.arguments,
             "output": output,
-            "error": error,
+            "error": audit_error,
             "approval_id": task.approval_id,
         }
     )
@@ -214,6 +216,6 @@ def submit_task(task: TaskEnvelope) -> TaskResult:
         task_id=task.task_id,
         status=status,
         output=output,
-        error=error,
+        error=response_error,
         audit_id=audit_id,
     )

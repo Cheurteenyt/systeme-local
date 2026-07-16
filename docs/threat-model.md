@@ -34,6 +34,7 @@
 - jeux de tests protégés en lecture seule ;
 - bouton d'arrêt local et révocation immédiate des sessions ;
 - journal d’audit minimal : aucune charge utile brute, empreintes HMAC à domaines séparés et chaîne vérifiée avant chaque ajout ;
+- erreurs d’exécution génériques vers les agents distants ; les détails internes ne quittent jamais la frontière locale ;
 - clé d’audit distincte du secret d’authentification ;
 - base d’approbation transactionnelle : aucune charge utile brute, liaison HMAC à la tâche et décision locale uniquement.
 
