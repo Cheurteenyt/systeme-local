@@ -7,7 +7,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 def _normalized_path(path: Path) -> str:
-    return os.path.normcase(os.path.abspath(os.fspath(path)))
+    return os.path.normcase(os.fspath(path.resolve(strict=False)))
 
 
 def _lock_path(path: Path) -> Path:
@@ -15,7 +15,12 @@ def _lock_path(path: Path) -> Path:
 
 
 class Settings(BaseSettings):
-    model_config = SettingsConfigDict(env_file=".env", env_prefix="SLG_", extra="ignore")
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        env_prefix="SLG_",
+        extra="ignore",
+        hide_input_in_errors=True,
+    )
 
     shared_secret: str = Field(min_length=32)
     audit_key: str = Field(min_length=32)

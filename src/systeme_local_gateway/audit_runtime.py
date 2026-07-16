@@ -18,7 +18,7 @@ class AuditRuntimeSettings(Protocol):
 
 
 def _normalized_path(path: Path) -> str:
-    return os.path.normcase(os.path.abspath(os.fspath(path)))
+    return os.path.normcase(os.fspath(path.resolve(strict=False)))
 
 
 def _lock_path(path: Path) -> Path:

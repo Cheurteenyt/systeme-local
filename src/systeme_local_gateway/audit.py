@@ -579,7 +579,7 @@ def verify_audit_log(log_path: Path, key: str) -> AuditVerification:
 
 
 def _normalized_path(path: Path) -> str:
-    return os.path.normcase(os.path.abspath(os.fspath(path)))
+    return os.path.normcase(os.fspath(path.resolve(strict=False)))
 
 
 def main(argv: list[str] | None = None) -> int:

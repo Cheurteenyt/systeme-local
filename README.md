@@ -123,15 +123,19 @@ Le cœur du journal peut désormais recevoir ce fournisseur. La vérification re
 rollback ou une divergence, et avance automatiquement l’ancre lorsque le journal local
 contient un suffixe valide après une panne survenue entre les deux écritures.
 
-L’activation reste optionnelle. Configurez ensemble `SLG_AUDIT_ANCHOR_LOG` et
-`SLG_AUDIT_ANCHOR_KEY`, avec une troisième clé indépendante de
-`SLG_SHARED_SECRET` et `SLG_AUDIT_KEY`. Le chemin de l’ancre doit être distinct du
-journal et de leurs fichiers de verrou.
-
-Gateway arrêté, vérifiez d’abord le journal actuel puis initialisez exactement une fois :
+L’activation reste optionnelle. Gateway arrêté et avant de définir les variables
+d’ancrage, vérifiez d’abord le journal actuel :
 
 ```bash
 python -m systeme_local_gateway.audit
+```
+
+Configurez ensuite ensemble `SLG_AUDIT_ANCHOR_LOG` et `SLG_AUDIT_ANCHOR_KEY`,
+avec une troisième clé indépendante de `SLG_SHARED_SECRET` et `SLG_AUDIT_KEY`.
+Le chemin de l’ancre doit être distinct du journal et de leurs fichiers de verrou.
+Initialisez alors exactement une fois, puis vérifiez l’état couplé :
+
+```bash
 python -m systeme_local_gateway.audit anchor-init
 python -m systeme_local_gateway.audit
 ```

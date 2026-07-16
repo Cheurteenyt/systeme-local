@@ -122,6 +122,57 @@ def test_anchor_and_audit_paths_must_not_overlap(
         )
 
 
+
+def test_validation_errors_hide_secret_values(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    Settings = _settings_class(monkeypatch, tmp_path)
+    secret = "hidden-anchor-secret-" + ("x" * 48)
+
+    with pytest.raises(ValidationError) as captured:
+        Settings(
+            _env_file=None,
+            shared_secret=secret,
+            audit_key="a" * 48,
+            audit_log=tmp_path / "audit.jsonl",
+            audit_anchor_log=tmp_path / "anchor.jsonl",
+            audit_anchor_key=secret,
+        )
+
+    rendered = str(captured.value)
+    assert secret not in rendered
+    assert "input_value" not in rendered
+
+
+def test_symlinked_parent_alias_is_rejected(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    Settings = _settings_class(monkeypatch, tmp_path)
+    real_directory = tmp_path / "real"
+    alias_directory = tmp_path / "alias"
+    real_directory.mkdir()
+
+    try:
+        alias_directory.symlink_to(
+            real_directory,
+            target_is_directory=True,
+        )
+    except OSError:
+        pytest.skip("directory symbolic links are unavailable")
+
+    with pytest.raises(ValidationError, match="must not overlap"):
+        Settings(
+            _env_file=None,
+            shared_secret="s" * 48,
+            audit_key="a" * 48,
+            audit_log=real_directory / "audit.jsonl",
+            audit_anchor_log=alias_directory / "audit.jsonl",
+            audit_anchor_key="b" * 48,
+        )
+
+
 def test_valid_anchor_configuration_is_accepted(
     monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,
