@@ -1,0 +1,46 @@
+name: Feature request
+description: Proposer une capacité, un adaptateur ou une amélioration d’architecture
+title: "feat: "
+labels: ["type: enhancement", "status: needs-triage"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problème utilisateur
+      description: Quel besoin concret cette évolution résout-elle ?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Solution proposée
+      description: Décrivez le comportement attendu, sans imposer nécessairement l’implémentation.
+    validations:
+      required: true
+  - type: textarea
+    id: security
+    attributes:
+      label: Effets de sécurité et de confidentialité
+      description: Permissions, données exposées, réseau, isolation, approbations ou risques nouveaux.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives étudiées
+  - type: dropdown
+    id: scope
+    attributes:
+      label: Portée
+      options:
+        - Protocole LDP
+        - MCP
+        - Fournisseur d’IA
+        - Browser companion
+        - Policy engine
+        - Runtime / sandbox
+        - Interface utilisateur
+        - Documentation
+        - Autre
+    validations:
+      required: true

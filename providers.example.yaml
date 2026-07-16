@@ -1,0 +1,49 @@
+providers:
+  - provider_id: zai-glm-web
+    display_name: GLM web via MCP
+    transport: mcp_client
+    priority: 100
+    capabilities:
+      - coding
+      - architecture
+      - debugging
+      - long_context
+      - structured_output
+      - tool_use
+    availability: unknown
+    max_parallel_tasks: 1
+    allowed_data_classes:
+      - public
+      - internal
+    exact_quota_visibility: false
+
+  - provider_id: zai-glm-api
+    display_name: GLM official API
+    transport: official_api
+    priority: 90
+    capabilities:
+      - coding
+      - architecture
+      - debugging
+      - long_context
+      - structured_output
+      - tool_use
+    availability: unknown
+    max_parallel_tasks: 2
+    allowed_data_classes:
+      - public
+      - internal
+    exact_quota_visibility: false
+
+  - provider_id: generic-web-handoff
+    display_name: Manual web handoff
+    transport: interactive_handoff
+    priority: 10
+    capabilities:
+      - general_reasoning
+      - coding
+    availability: user_action_required
+    max_parallel_tasks: 1
+    allowed_data_classes:
+      - public
+    exact_quota_visibility: false

@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://systeme-local.dev/schemas/task-envelope-v1.json",
+  "title": "Système Local Task Envelope",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["version", "task_id", "issued_at", "expires_at", "agent", "capability", "arguments", "nonce", "signature"],
+  "properties": {
+    "version": {"const": "1"},
+    "task_id": {"type": "string", "minLength": 8, "maxLength": 128},
+    "issued_at": {"type": "string", "format": "date-time"},
+    "expires_at": {"type": "string", "format": "date-time"},
+    "agent": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["provider", "session_id"],
+      "properties": {
+        "provider": {"type": "string", "maxLength": 64},
+        "model": {"type": "string", "maxLength": 128},
+        "session_id": {"type": "string", "maxLength": 128}
+      }
+    },
+    "capability": {"type": "string", "pattern": "^[a-z][a-z0-9_.-]{2,80}$"},
+    "arguments": {"type": "object"},
+    "nonce": {"type": "string", "minLength": 16, "maxLength": 128},
+    "signature": {"type": "string", "minLength": 43, "maxLength": 128}
+  }
+}

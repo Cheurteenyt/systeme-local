@@ -1,0 +1,26 @@
+version: 1
+default: deny
+limits:
+  max_task_seconds: 120
+  max_output_bytes: 200000
+  max_read_bytes: 1000000
+  max_write_bytes: 1000000
+  cpu_count: 1
+  memory_mb: 1024
+capabilities:
+  workspace.list:
+    decision: allow
+  workspace.read_text:
+    decision: allow
+  workspace.write_text:
+    decision: require_approval
+  sandbox.run_tests:
+    decision: allow
+    allowed_commands:
+      - ["python", "-m", "pytest", "-q"]
+      - ["python", "-m", "unittest", "discover"]
+  git.diff:
+    decision: allow
+    allowed_commands:
+      - ["git", "diff", "--no-ext-diff"]
+      - ["git", "status", "--short"]

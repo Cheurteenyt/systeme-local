@@ -1,0 +1,73 @@
+name: Bug report
+description: Signaler un comportement reproductible ou une régression
+title: "bug: "
+labels: ["type: bug", "status: needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: Merci de retirer tout secret, jeton, cookie, chemin personnel ou donnée sensible.
+  - type: textarea
+    id: summary
+    attributes:
+      label: Résumé
+      description: Décrivez clairement le comportement observé.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Étapes de reproduction
+      placeholder: |
+        1. Configurer…
+        2. Soumettre…
+        3. Observer…
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Comportement attendu
+    validations:
+      required: true
+  - type: dropdown
+    id: component
+    attributes:
+      label: Composant
+      options:
+        - MCP adapter
+        - Control plane
+        - Policy engine
+        - Runtime / sandbox
+        - Brain router
+        - Browser companion
+        - Documentation
+        - Autre
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Version ou commit
+      placeholder: v0.1.0 ou SHA du commit
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environnement
+      description: OS, version Python, runtime de sandbox et navigateur si pertinent.
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs expurgés
+      description: Ajoutez uniquement les extraits utiles, sans données sensibles.
+      render: shell
+  - type: checkboxes
+    id: safety
+    attributes:
+      label: Vérifications
+      options:
+        - label: J’ai retiré les secrets et informations personnelles.
+          required: true
+        - label: J’ai vérifié qu’une issue équivalente n’existe pas déjà.
+          required: true
