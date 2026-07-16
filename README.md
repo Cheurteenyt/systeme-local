@@ -149,6 +149,17 @@ Un fichier local ne constitue pas, à lui seul, une protection forte contre le r
 Le fournisseur est destiné à un support administré séparément dont les propriétés
 append-only sont imposées en dehors du processus.
 
+### Watchdog Rust de l’ancre
+
+Le workspace Rust contient un premier vérificateur indépendant et strict des témoins
+non secrets : reçu de bootstrap, préfixe SHA-256, schémas JSON, monotonie et chaîne des
+checkpoints. Il ne lit jamais `SLG_AUDIT_ANCHOR_KEY` et indique explicitement qu’il ne
+réauthentifie pas les HMAC. Consultez [`docs/rust-audit-watchdog.md`](docs/rust-audit-watchdog.md).
+
+```bash
+cargo run --locked -p systeme-local-audit-watchdog -- verify --project-root .
+```
+
 ### Protection anti-rejeu persistante
 
 Le gateway conserve les empreintes HMAC des nonces dans `SLG_REPLAY_DB`, qui vaut par défaut `.systeme-local/replay.sqlite3`. Les nonces bruts ne sont jamais écrits. L’insertion est transactionnelle : deux processus qui reçoivent simultanément la même tâche ne peuvent pas tous les deux l’accepter.

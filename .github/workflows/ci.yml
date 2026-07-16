@@ -74,3 +74,78 @@ jobs:
 
       - name: Run tests
         run: python -m pytest -q
+
+  rust-quality:
+    name: rust quality
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
+        with:
+          persist-credentials: false
+
+      - name: Install Rust 1.97.1
+        run: >-
+          rustup toolchain install 1.97.1
+          --profile minimal
+          --component rustfmt,clippy
+
+      - name: Select Rust toolchain
+        run: rustup override set 1.97.1
+
+      - name: Check formatting
+        run: cargo fmt --all -- --check
+
+      - name: Lint
+        run: >-
+          cargo clippy
+          --workspace
+          --all-targets
+          --all-features
+          --locked
+          --
+          -D warnings
+
+      - name: Test
+        run: cargo test --workspace --all-features --locked
+
+      - name: Check documentation
+        env:
+          RUSTDOCFLAGS: -D warnings
+        run: >-
+          cargo doc
+          --workspace
+          --no-deps
+          --document-private-items
+          --locked
+
+      - name: Install cargo-audit
+        run: cargo install cargo-audit --version 0.22.2 --locked
+
+      - name: Audit dependencies
+        run: cargo audit
+
+  rust-windows:
+    name: rust tests (Windows)
+    runs-on: windows-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
+        with:
+          persist-credentials: false
+
+      - name: Install Rust 1.97.1
+        run: >-
+          rustup toolchain install 1.97.1
+          --profile minimal
+          --component rustfmt,clippy
+
+      - name: Select Rust toolchain
+        run: rustup override set 1.97.1
+
+      - name: Test
+        run: cargo test --workspace --all-features --locked
