@@ -14,6 +14,7 @@ Passerelle locale sécurisée permettant à un agent IA distant de demander des 
 - Quotas CPU, mémoire, durée et taille de sortie.
 - Approbation humaine pour les actions sensibles.
 - Journal d'audit minimal, chaîné par HMAC, sans arguments ni sorties brutes.
+- Protection anti-rejeu persistante et transactionnelle entre les redémarrages.
 - Adaptateurs fournisseurs remplaçables : GLM/z.ai, API compatible OpenAI, MCP, GitHub, relais HTTPS.
 
 ## Portée du produit
@@ -102,6 +103,14 @@ python -m systeme_local_gateway.audit
 ```
 
 Le service refuse de démarrer ou d’ajouter une entrée lorsque le journal est tronqué, altéré, signé avec une autre clé ou utilise l’ancien format non chaîné. Avant la première utilisation de ce format, archivez un éventuel `audit.jsonl` historique sous un autre nom. La clé HMAC protège contre les modifications hors ligne tant qu’elle reste secrète ; l’ancrage externe du dernier HMAC reste une amélioration future.
+
+### Protection anti-rejeu persistante
+
+Le gateway conserve les empreintes HMAC des nonces dans `SLG_REPLAY_DB`, qui vaut par défaut `.systeme-local/replay.sqlite3`. Les nonces bruts ne sont jamais écrits. L’insertion est transactionnelle : deux processus qui reçoivent simultanément la même tâche ne peuvent pas tous les deux l’accepter.
+
+Les entrées expirées sont supprimées avant chaque insertion. Lorsque `SLG_REPLAY_MAX_ENTRIES` est atteint avec des tâches encore valides, le gateway refuse les nouvelles tâches avec une erreur temporaire au lieu d’évincer une protection active. La base est vérifiée au démarrage et une corruption empêche le service de démarrer.
+
+La base peut être supprimée uniquement lorsque le gateway est arrêté et qu’aucune tâche signée encore valide ne pourra être rejouée. Une restauration de sauvegarde ancienne peut oublier des nonces récents ; un compteur monotone externe reste une amélioration future.
 
 ## Connectivité avec les IA web
 
