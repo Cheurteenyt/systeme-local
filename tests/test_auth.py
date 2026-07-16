@@ -1,7 +1,10 @@
 import base64
 import hashlib
 import hmac
+import json
+import runpy
 from datetime import UTC, datetime, timedelta
+from pathlib import Path
 
 import pytest
 
@@ -47,3 +50,34 @@ def test_excessive_task_lifetime_is_rejected() -> None:
     task.signature = base64.urlsafe_b64encode(digest).decode().rstrip("=")
     with pytest.raises(ValueError, match="lifetime"):
         verify_task(task, SECRET)
+
+
+def test_optional_approval_id_preserves_legacy_signature_payload() -> None:
+    task = signed_task()
+    payload = json.loads(canonical_payload(task))
+    assert "approval_id" not in payload
+
+    task.approval_id = "approval-id-1234567890"
+    payload_with_approval = json.loads(canonical_payload(task))
+    assert payload_with_approval["approval_id"] == "approval-id-1234567890"
+
+
+def test_sign_task_example_produces_a_verifiable_canonical_payload(
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    monkeypatch.setenv("SLG_SHARED_SECRET", SECRET)
+    monkeypatch.setenv("SLG_TASK_ID", "example-task-12345678")
+    monkeypatch.setenv("SLG_TASK_CAPABILITY", "workspace.write_text")
+    monkeypatch.setenv(
+        "SLG_TASK_ARGUMENTS_JSON",
+        '{"path":"example.txt","content":"example content"}',
+    )
+    monkeypatch.delenv("SLG_APPROVAL_ID", raising=False)
+
+    script = Path(__file__).resolve().parents[1] / "examples" / "sign_task.py"
+    runpy.run_path(str(script), run_name="__main__")
+
+    task = TaskEnvelope.model_validate_json(capsys.readouterr().out)
+    verify_task(task, SECRET)
+    assert task.approval_id is None

@@ -22,6 +22,12 @@ class TaskEnvelope(StrictModel):
     agent: AgentIdentity
     capability: str = Field(pattern=r"^[a-z][a-z0-9_.-]{2,80}$")
     arguments: dict[str, Any] = Field(default_factory=dict)
+    approval_id: str | None = Field(
+        default=None,
+        min_length=16,
+        max_length=128,
+        pattern=r"^[A-Za-z0-9_-]+$",
+    )
     nonce: str = Field(min_length=16, max_length=128)
     signature: str = Field(min_length=43, max_length=128)
 

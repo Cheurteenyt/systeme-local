@@ -29,19 +29,21 @@
 - aucun montage en écriture du workspace source : snapshot temporaire borné par tâche ;
 - rejet des liens symboliques et fichiers spéciaux dans les snapshots ;
 - suppression garantie du conteneur et du snapshot après succès, erreur ou timeout ;
-- approbation pour écriture, réseau, installation, Git push et contrôle GUI ;
+- approbation locale, expirante et à usage unique pour écriture, réseau, installation, Git push et contrôle GUI ;
 - limites CPU/RAM/PIDs/durée/sortie ;
 - jeux de tests protégés en lecture seule ;
 - bouton d'arrêt local et révocation immédiate des sessions ;
 - journal d’audit minimal : aucune charge utile brute, empreintes HMAC à domaines séparés et chaîne vérifiée avant chaque ajout ;
-- clé d’audit distincte du secret d’authentification.
+- clé d’audit distincte du secret d’authentification ;
+- base d’approbation transactionnelle : aucune charge utile brute, liaison HMAC à la tâche et décision locale uniquement.
 
 ## Limites résiduelles
 
 - le verrou du journal protège les threads du processus courant, pas plusieurs processus writers ;
 - un attaquant qui compromet à la fois le processus et `SLG_AUDIT_KEY` peut fabriquer de futures entrées ;
 - le dernier HMAC n’est pas encore ancré dans un stockage externe append-only ;
-- une restauration ancienne ou une suppression de la base anti-rejeu peut oublier des nonces encore actifs ; un ancrage monotone externe reste à ajouter.
+- une restauration ancienne ou une suppression de la base anti-rejeu peut oublier des nonces encore actifs ; un ancrage monotone externe reste à ajouter ;
+- la base d’approbation et le journal d’audit ne forment pas une transaction atomique commune ; une panne entre les deux écritures peut demander une réconciliation locale.
 
 ## Actions exclues du MVP
 
