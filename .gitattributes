@@ -1,8 +1,18 @@
-# Keep Rust toolchain inputs byte-stable across Windows and CI.
-/Cargo.toml text eol=lf
-/Cargo.lock text eol=lf
-/rust-toolchain.toml text eol=lf
-/rustfmt.toml text eol=lf
-/.cargo/config.toml text eol=lf
-/crates/**/*.toml text eol=lf
-/crates/**/*.rs text eol=lf
+* text=auto
+
+.gitattributes text eol=lf
+.gitignore text eol=lf
+*.py text eol=lf
+*.rs text eol=lf
+*.toml text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+*.json text eol=lf
+*.md text eol=lf
+*.txt text eol=lf
+Cargo.lock text eol=lf
+Dockerfile* text eol=lf
+Makefile text eol=lf
+
+*.ps1 text eol=crlf
+*.bat text eol=crlf
