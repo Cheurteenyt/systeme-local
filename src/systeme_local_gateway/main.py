@@ -11,7 +11,7 @@ from .approvals import (
     ApprovalStore,
     ApprovalStoreUnavailableError,
 )
-from .audit import AuditLog
+from .audit_runtime import create_configured_audit_log
 from .auth import ReplayGuardUnavailableError, SQLiteReplayGuard, verify_task
 from .config import settings
 from .executor import CapabilityExecutor
@@ -26,7 +26,7 @@ executor = CapabilityExecutor(
     policy.limits,
     sandbox_root=settings.sandbox_root,
 )
-audit_log = AuditLog(settings.audit_log, settings.audit_key)
+audit_log = create_configured_audit_log(settings)
 audit_log.verify()
 replay_guard = SQLiteReplayGuard(
     settings.replay_db,

@@ -858,7 +858,9 @@ def _request_display(task: TaskEnvelope, record: ApprovalRecord) -> dict[str, ob
 
 
 def _configured_components() -> tuple[ApprovalStore, object, str]:
-    from .audit import AuditLog
+    from .audit import AuditIntegrityError, AuditLockError
+    from .audit_anchor import AuditAnchorError
+    from .audit_runtime import create_configured_audit_log
     from .config import settings
 
     store = ApprovalStore(
@@ -867,8 +869,15 @@ def _configured_components() -> tuple[ApprovalStore, object, str]:
         max_entries=settings.approval_max_entries,
         ttl_seconds=settings.approval_ttl_seconds,
     )
-    audit_log = AuditLog(settings.audit_log, settings.audit_key)
-    audit_log.verify()
+    audit_log = create_configured_audit_log(settings)
+    try:
+        audit_log.verify()
+    except (
+        AuditAnchorError,
+        AuditIntegrityError,
+        AuditLockError,
+    ) as exc:
+        raise ApprovalStoreUnavailableError(str(exc)) from exc
     return store, audit_log, settings.shared_secret
 
 

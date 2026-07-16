@@ -8,6 +8,7 @@ import json
 import os
 import re
 import stat
+import sys
 import threading
 import time
 from collections.abc import Iterator, Mapping, Sequence
@@ -18,7 +19,12 @@ from pathlib import Path
 from typing import Any
 from uuid import uuid4
 
-from .audit_anchor import AuditAnchorTransaction, FileAuditAnchor
+from .audit_anchor import (
+    AuditAnchorError,
+    AuditAnchorTransaction,
+    FileAuditAnchor,
+    derive_audit_log_id,
+)
 
 if os.name == "nt":
     import msvcrt
@@ -572,25 +578,87 @@ def verify_audit_log(log_path: Path, key: str) -> AuditVerification:
     return AuditLog(log_path, key).verify()
 
 
+def _normalized_path(path: Path) -> str:
+    return os.path.normcase(os.path.abspath(os.fspath(path)))
+
+
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description="Verify a Système Local audit log")
-    parser.add_argument("--log", type=Path, help="override the configured audit log path")
+    parser = argparse.ArgumentParser(
+        description="Verify or initialize a Système Local audit anchor"
+    )
+    parser.add_argument(
+        "command",
+        nargs="?",
+        choices=("verify", "anchor-init"),
+        default="verify",
+    )
+    parser.add_argument(
+        "--log",
+        type=Path,
+        help="override the configured audit log path when anchoring is disabled",
+    )
     args = parser.parse_args(argv)
 
-    from .config import settings
+    try:
+        from .config import settings
 
-    verification = verify_audit_log(args.log or settings.audit_log, settings.audit_key)
-    print(
-        json.dumps(
-            {
-                "status": "valid",
-                "records": verification.records,
-                "last_hmac": verification.last_hmac,
-            },
-            sort_keys=True,
+        log_path = args.log or settings.audit_log
+        if (
+            args.log is not None
+            and settings.audit_anchor_log is not None
+            and _normalized_path(args.log)
+            != _normalized_path(settings.audit_log)
+        ):
+            raise ValueError(
+                "--log cannot be overridden while audit anchoring is configured"
+            )
+
+        anchor = None
+        if settings.audit_anchor_log is not None:
+            assert settings.audit_anchor_key is not None
+            anchor = FileAuditAnchor(
+                settings.audit_anchor_log,
+                settings.audit_anchor_key,
+                derive_audit_log_id(settings.audit_key),
+            )
+
+        audit_log = AuditLog(
+            log_path,
+            settings.audit_key,
+            anchor=anchor,
         )
-    )
-    return 0
+        if args.command == "anchor-init":
+            verification = audit_log.bootstrap_anchor()
+            status = "anchor_initialized"
+        else:
+            verification = audit_log.verify()
+            status = "valid"
+
+        payload: dict[str, object] = {
+            "status": status,
+            "records": verification.records,
+            "last_hmac": verification.last_hmac,
+        }
+        if verification.anchor_checkpoints is not None:
+            payload["anchor_checkpoints"] = (
+                verification.anchor_checkpoints
+            )
+        print(json.dumps(payload, sort_keys=True))
+        return 0
+    except (
+        AuditAnchorError,
+        AuditIntegrityError,
+        AuditLockError,
+        ValueError,
+    ) as exc:
+        print(
+            json.dumps(
+                {"status": "error", "error": str(exc)},
+                sort_keys=True,
+            ),
+            file=sys.stderr,
+        )
+        return 1
 
 
 if __name__ == "__main__":
