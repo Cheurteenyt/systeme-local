@@ -1,22 +1,33 @@
 from __future__ import annotations
 
 import argparse
+import errno
 import hashlib
 import hmac
 import json
 import os
 import re
+import stat
 import threading
-from collections.abc import Mapping, Sequence
+import time
+from collections.abc import Iterator, Mapping, Sequence
+from contextlib import contextmanager
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 from uuid import uuid4
 
+if os.name == "nt":
+    import msvcrt
+else:
+    import fcntl
+
 _RECORD_VERSION = 2
 _GENESIS_HMAC = "0" * 64
 _LOCK = threading.RLock()
+_DEFAULT_LOCK_TIMEOUT_SECONDS = 5.0
+_LOCK_POLL_INTERVAL_SECONDS = 0.05
 _MAX_TEXT_LENGTH = 512
 _MAX_KEYS = 64
 
@@ -38,6 +49,9 @@ _KEY_VALUE_SECRET_PATTERN = re.compile(
 class AuditIntegrityError(RuntimeError):
     """Raised when an audit log is malformed, legacy, or cryptographically invalid."""
 
+
+class AuditLockError(RuntimeError):
+    """Raised when the audit log cannot be locked safely."""
 
 @dataclass(frozen=True)
 class AuditVerification:
@@ -189,46 +203,173 @@ def _entry_hmac(key: bytes, record: Mapping[str, object]) -> str:
     return _keyed_digest(key, b"audit-entry-v2", _canonical_bytes(record))
 
 
+def _is_lock_contention_error(exc: OSError) -> bool:
+    contention_codes = {
+        errno.EACCES,
+        errno.EAGAIN,
+        getattr(errno, "EDEADLK", -1),
+    }
+    return isinstance(exc, BlockingIOError) or exc.errno in contention_codes
+
+
 class AuditLog:
-    def __init__(self, log_path: Path, key: str):
+    def __init__(
+        self,
+        log_path: Path,
+        key: str,
+        *,
+        lock_timeout_seconds: float = _DEFAULT_LOCK_TIMEOUT_SECONDS,
+    ):
         key_bytes = key.encode("utf-8")
         if len(key_bytes) < 32:
             raise ValueError("audit key must contain at least 32 UTF-8 bytes")
+        if lock_timeout_seconds <= 0:
+            raise ValueError("audit lock timeout must be positive")
         self.log_path = log_path
+        self.lock_path = self.log_path.parent / f"{self.log_path.name}.lock"
         self._key = key_bytes
+        self._lock_timeout_seconds = lock_timeout_seconds
 
     def verify(self) -> AuditVerification:
         with _LOCK:
-            return self._verify_unlocked()
+            with self._process_lock():
+                return self._verify_unlocked()
 
     def append(self, event: Mapping[str, object]) -> str:
         with _LOCK:
-            verification = self._verify_unlocked()
-            audit_id = str(uuid4())
-            record: dict[str, object] = {
-                "version": _RECORD_VERSION,
-                "audit_id": audit_id,
-                "timestamp": datetime.now(UTC).isoformat(),
-                "previous_hmac": verification.last_hmac,
-                **project_audit_event(event, self._key),
-            }
-            record["entry_hmac"] = _entry_hmac(self._key, record)
+            with self._process_lock():
+                verification = self._verify_unlocked()
+                audit_id = str(uuid4())
+                record: dict[str, object] = {
+                    "version": _RECORD_VERSION,
+                    "audit_id": audit_id,
+                    "timestamp": datetime.now(UTC).isoformat(),
+                    "previous_hmac": verification.last_hmac,
+                    **project_audit_event(event, self._key),
+                }
+                record["entry_hmac"] = _entry_hmac(self._key, record)
 
-            self.log_path.parent.mkdir(parents=True, exist_ok=True)
-            descriptor = os.open(
-                self.log_path,
-                os.O_WRONLY | os.O_CREAT | os.O_APPEND,
-                0o600,
-            )
-            with os.fdopen(descriptor, "a", encoding="utf-8", newline="\n") as handle:
-                handle.write(_canonical_bytes(record).decode("utf-8") + "\n")
-                handle.flush()
-                os.fsync(handle.fileno())
+                self.log_path.parent.mkdir(parents=True, exist_ok=True)
+                descriptor = os.open(
+                    self.log_path,
+                    os.O_WRONLY | os.O_CREAT | os.O_APPEND,
+                    0o600,
+                )
+                with os.fdopen(
+                    descriptor,
+                    "a",
+                    encoding="utf-8",
+                    newline="\n",
+                ) as handle:
+                    handle.write(_canonical_bytes(record).decode("utf-8") + "\n")
+                    handle.flush()
+                    os.fsync(handle.fileno())
+                try:
+                    os.chmod(self.log_path, 0o600)
+                except OSError:
+                    pass
+                return audit_id
+
+    @contextmanager
+    def _process_lock(self) -> Iterator[None]:
+        try:
+            self.lock_path.parent.mkdir(parents=True, exist_ok=True)
+        except OSError as exc:
+            raise AuditLockError("audit lock directory is unavailable") from exc
+
+        self._assert_safe_lock_path()
+        flags = os.O_RDWR | os.O_CREAT | getattr(os, "O_NOFOLLOW", 0)
+
+        try:
+            descriptor = os.open(self.lock_path, flags, 0o600)
+        except OSError as exc:
+            raise AuditLockError("audit lock file is unavailable") from exc
+
+        acquired = False
+        try:
+            descriptor_stat = os.fstat(descriptor)
+            self._verify_lock_file_identity(descriptor_stat)
+
+            if descriptor_stat.st_size == 0:
+                os.lseek(descriptor, 0, os.SEEK_SET)
+                os.write(descriptor, b"\0")
+                os.fsync(descriptor)
+
             try:
-                os.chmod(self.log_path, 0o600)
+                os.chmod(self.lock_path, 0o600)
             except OSError:
                 pass
-            return audit_id
+
+            deadline = time.monotonic() + self._lock_timeout_seconds
+            while True:
+                try:
+                    self._try_acquire_process_lock(descriptor)
+                    acquired = True
+                    break
+                except OSError as exc:
+                    if not _is_lock_contention_error(exc):
+                        raise AuditLockError("audit lock acquisition failed") from exc
+                    remaining = deadline - time.monotonic()
+                    if remaining <= 0:
+                        raise AuditLockError(
+                            "audit lock acquisition timed out"
+                        ) from exc
+                    time.sleep(min(_LOCK_POLL_INTERVAL_SECONDS, remaining))
+
+            self._verify_lock_file_identity(os.fstat(descriptor))
+            yield
+        except AuditLockError:
+            raise
+        except OSError as exc:
+            raise AuditLockError("audit lock is unavailable") from exc
+        finally:
+            try:
+                if acquired:
+                    try:
+                        self._release_process_lock(descriptor)
+                    except OSError:
+                        pass
+            finally:
+                os.close(descriptor)
+
+    def _assert_safe_lock_path(self) -> None:
+        if not self.lock_path.exists() and not self.lock_path.is_symlink():
+            return
+
+        file_stat = self.lock_path.lstat()
+        if stat.S_ISLNK(file_stat.st_mode):
+            raise AuditLockError("audit lock file cannot be a symbolic link")
+        if not stat.S_ISREG(file_stat.st_mode):
+            raise AuditLockError("audit lock path is not a regular file")
+
+    def _verify_lock_file_identity(self, descriptor_stat: os.stat_result) -> None:
+        if not stat.S_ISREG(descriptor_stat.st_mode):
+            raise AuditLockError("audit lock path is not a regular file")
+
+        path_stat = self.lock_path.lstat()
+        if stat.S_ISLNK(path_stat.st_mode):
+            raise AuditLockError("audit lock file cannot be a symbolic link")
+        if (path_stat.st_dev, path_stat.st_ino) != (
+            descriptor_stat.st_dev,
+            descriptor_stat.st_ino,
+        ):
+            raise AuditLockError("audit lock file changed during open")
+
+    @staticmethod
+    def _try_acquire_process_lock(descriptor: int) -> None:
+        if os.name == "nt":
+            os.lseek(descriptor, 0, os.SEEK_SET)
+            msvcrt.locking(descriptor, msvcrt.LK_NBLCK, 1)
+            return
+        fcntl.flock(descriptor, fcntl.LOCK_EX | fcntl.LOCK_NB)
+
+    @staticmethod
+    def _release_process_lock(descriptor: int) -> None:
+        if os.name == "nt":
+            os.lseek(descriptor, 0, os.SEEK_SET)
+            msvcrt.locking(descriptor, msvcrt.LK_UNLCK, 1)
+            return
+        fcntl.flock(descriptor, fcntl.LOCK_UN)
 
     def _verify_unlocked(self) -> AuditVerification:
         if not self.log_path.exists():

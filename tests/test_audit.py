@@ -1,9 +1,18 @@
 import json
+import subprocess
+import sys
+import textwrap
+import time
 from pathlib import Path
 
 import pytest
 
-from systeme_local_gateway.audit import AuditIntegrityError, AuditLog, summarize_payload
+from systeme_local_gateway.audit import (
+    AuditIntegrityError,
+    AuditLockError,
+    AuditLog,
+    summarize_payload,
+)
 
 AUDIT_KEY = "audit-key-" + ("a" * 64)
 OTHER_KEY = "audit-key-" + ("b" * 64)
@@ -132,6 +141,121 @@ def test_audit_log_requires_complete_newline_terminated_records(tmp_path: Path) 
     log_path.write_text('{"version":2}', encoding="utf-8")
 
     with pytest.raises(AuditIntegrityError, match="must end with a newline"):
+        AuditLog(log_path, AUDIT_KEY).verify()
+
+
+def test_audit_log_serializes_concurrent_process_writers(tmp_path: Path) -> None:
+    log_path = tmp_path / "audit.jsonl"
+    child_code = textwrap.dedent(
+        """
+        import sys
+        import time
+        from pathlib import Path
+
+        from systeme_local_gateway.audit import AuditLog
+
+        audit = AuditLog(Path(sys.argv[1]), sys.argv[2])
+        original_verify = audit._verify_unlocked
+
+        def delayed_verify():
+            verification = original_verify()
+            time.sleep(0.15)
+            return verification
+
+        audit._verify_unlocked = delayed_verify
+        audit.append({"task_id": sys.argv[3], "status": "completed"})
+        """
+    )
+    processes = [
+        subprocess.Popen(
+            [
+                sys.executable,
+                "-c",
+                child_code,
+                str(log_path),
+                AUDIT_KEY,
+                f"concurrent-task-{index}",
+            ],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+        )
+        for index in range(6)
+    ]
+
+    for process in processes:
+        stdout, stderr = process.communicate(timeout=20)
+        assert process.returncode == 0, stderr or stdout
+
+    verification = AuditLog(log_path, AUDIT_KEY).verify()
+    assert verification.records == 6
+    assert len(_records(log_path)) == 6
+
+
+def test_audit_log_lock_timeout_fails_closed(tmp_path: Path) -> None:
+    log_path = tmp_path / "audit.jsonl"
+    ready_path = tmp_path / "holder-ready"
+    child_code = textwrap.dedent(
+        """
+        import sys
+        import time
+        from pathlib import Path
+
+        from systeme_local_gateway.audit import AuditLog
+
+        audit = AuditLog(Path(sys.argv[1]), sys.argv[2])
+        with audit._process_lock():
+            Path(sys.argv[3]).write_text("ready", encoding="utf-8")
+            time.sleep(10)
+        """
+    )
+    process = subprocess.Popen(
+        [
+            sys.executable,
+            "-c",
+            child_code,
+            str(log_path),
+            AUDIT_KEY,
+            str(ready_path),
+        ],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True,
+    )
+
+    try:
+        deadline = time.monotonic() + 10
+        while not ready_path.exists():
+            if process.poll() is not None:
+                stdout, stderr = process.communicate()
+                pytest.fail(stderr or stdout or "lock holder stopped unexpectedly")
+            if time.monotonic() >= deadline:
+                pytest.fail("lock holder did not become ready")
+            time.sleep(0.05)
+
+        with pytest.raises(AuditLockError, match="timed out"):
+            AuditLog(
+                log_path,
+                AUDIT_KEY,
+                lock_timeout_seconds=0.1,
+            ).append({"task_id": "blocked-task", "status": "completed"})
+    finally:
+        process.terminate()
+        try:
+            process.communicate(timeout=5)
+        except subprocess.TimeoutExpired:
+            process.kill()
+            process.communicate(timeout=5)
+
+    assert AuditLog(log_path, AUDIT_KEY).verify().records == 0
+
+
+def test_audit_log_rejects_non_regular_lock_path(tmp_path: Path) -> None:
+    log_path = tmp_path / "audit.jsonl"
+    lock_path = tmp_path / "audit.jsonl.lock"
+    lock_path.mkdir()
+
+    with pytest.raises(AuditLockError, match="regular file"):
         AuditLog(log_path, AUDIT_KEY).verify()
 
 
