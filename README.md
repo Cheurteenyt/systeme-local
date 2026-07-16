@@ -63,7 +63,26 @@ curl -X POST http://127.0.0.1:8765/v1/tasks \
 - `sandbox.run_tests`
 - `git.diff`
 
-Les capacités sont définies dans `policy.yaml`. Pour les commandes sandboxées, le gateway copie les fichiers réguliers dans un snapshot borné, écarte certains fichiers secrets courants et les métadonnées Git sensibles, exécute la commande uniquement sur cette copie, rapporte les fichiers ajoutés/modifiés/supprimés, puis détruit le snapshot. L’image de sandbox est construite avec `make sandbox-image` et devra être épinglée par digest avant un usage de production. Toute capacité inconnue est refusée.
+Les capacités sont définies dans `policy.yaml`. Pour les commandes sandboxées, le gateway copie les fichiers réguliers dans un snapshot borné, écarte certains fichiers secrets courants et les métadonnées Git sensibles, exécute la commande uniquement sur cette copie, rapporte les fichiers ajoutés/modifiés/supprimés, puis détruit le snapshot. L’image locale est construite avec une image Python de base épinglée par digest et le runner utilise `--pull never`. Pour un déploiement distribué, l’image finale devra elle aussi être référencée par digest. Toute capacité inconnue est refusée.
+
+### Test d’intégration Docker
+
+Le test d’intégration construit l’image et exécute de vrais conteneurs. Il vérifie que le workspace source reste inchangé, que le réseau et le système de fichiers racine sont bloqués, que les sorties sont bornées et que les ressources sont nettoyées après timeout.
+
+```bash
+make docker-integration
+```
+
+Sous PowerShell :
+
+```powershell
+docker build --pull -f Dockerfile.sandbox -t systeme-local-sandbox:dev .
+$env:SYSTEME_LOCAL_RUN_DOCKER_TESTS = "1"
+$env:SYSTEME_LOCAL_SANDBOX_IMAGE = "systeme-local-sandbox:dev"
+python -m pytest -m integration -q
+Remove-Item Env:SYSTEME_LOCAL_RUN_DOCKER_TESTS
+Remove-Item Env:SYSTEME_LOCAL_SANDBOX_IMAGE
+```
 
 ## Connectivité avec les IA web
 
