@@ -5,6 +5,7 @@ __pycache__/
 .coverage
 .env
 audit.jsonl
+audit.jsonl.lock
 workspace/*
 !workspace/.gitkeep
 

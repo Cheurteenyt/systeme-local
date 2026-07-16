@@ -34,13 +34,14 @@
 - jeux de tests protégés en lecture seule ;
 - bouton d'arrêt local et révocation immédiate des sessions ;
 - journal d’audit minimal : aucune charge utile brute, empreintes HMAC à domaines séparés et chaîne vérifiée avant chaque ajout ;
+- verrou interprocessus borné autour de la vérification et de l’ajout au journal d’audit ;
 - erreurs d’exécution génériques vers les agents distants ; les détails internes ne quittent jamais la frontière locale ;
 - clé d’audit distincte du secret d’authentification ;
 - base d’approbation transactionnelle : aucune charge utile brute, liaison HMAC à la tâche et décision locale uniquement.
 
 ## Limites résiduelles
 
-- le verrou du journal protège les threads du processus courant, pas plusieurs processus writers ;
+- le verrou interprocessus suppose un système de fichiers local dont les verrous OS sont fiables ; les partages réseau ne sont pas pris en charge ;
 - un attaquant qui compromet à la fois le processus et `SLG_AUDIT_KEY` peut fabriquer de futures entrées ;
 - le dernier HMAC n’est pas encore ancré dans un stockage externe append-only ;
 - une restauration ancienne ou une suppression de la base anti-rejeu peut oublier des nonces encore actifs ; un ancrage monotone externe reste à ajouter ;

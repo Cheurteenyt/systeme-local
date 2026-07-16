@@ -102,6 +102,13 @@ Vérifiez la chaîne complète avec :
 python -m systeme_local_gateway.audit
 ```
 
+Les opérations `verify` et `append` prennent également un verrou interprocessus sur
+`<audit_log>.lock`. Le verrou est libéré automatiquement si un processus s’arrête et son
+acquisition échoue de manière fermée après cinq secondes. Cela empêche un gateway et une
+commande locale de calculer simultanément deux entrées à partir du même HMAC précédent.
+Le fichier de verrou doit rester sur un système de fichiers local et ne doit pas être supprimé
+pendant que des processus utilisent le journal.
+
 Le service refuse de démarrer ou d’ajouter une entrée lorsque le journal est tronqué, altéré, signé avec une autre clé ou utilise l’ancien format non chaîné. Avant la première utilisation de ce format, archivez un éventuel `audit.jsonl` historique sous un autre nom. La clé HMAC protège contre les modifications hors ligne tant qu’elle reste secrète ; l’ancrage externe du dernier HMAC reste une amélioration future.
 
 ### Protection anti-rejeu persistante
