@@ -277,6 +277,74 @@ def test_signature_is_verified_before_local_approval() -> None:
         verify_approval_task(approved_envelope, KEY)
 
 
+
+
+def test_generated_approval_id_is_cli_safe(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    now = datetime(2026, 1, 1, tzinfo=UTC)
+    raw_token = "-" + ("a" * 31)
+    monkeypatch.setattr(
+        "systeme_local_gateway.approvals.secrets.token_urlsafe",
+        lambda _size: raw_token,
+    )
+
+    store = ApprovalStore(tmp_path / "approvals.sqlite3", KEY, clock=lambda: now)
+    pending = store.create(_task(now))
+
+    assert pending.approval_id == f"apr_{raw_token}"
+    assert not pending.approval_id.startswith("-")
+
+
+def test_cli_accepts_legacy_leading_dash_approval_id(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    now = datetime(2026, 1, 1, tzinfo=UTC)
+    task = _sign_task(_task(now))
+    task_file = tmp_path / "legacy-task.json"
+    task_file.write_text(task.model_dump_json(), encoding="utf-8")
+    legacy_id = "-" + ("b" * 31)
+
+    monkeypatch.setattr(
+        "systeme_local_gateway.approvals._APPROVAL_ID_PREFIX",
+        "",
+    )
+    monkeypatch.setattr(
+        "systeme_local_gateway.approvals.secrets.token_urlsafe",
+        lambda _size: legacy_id,
+    )
+
+    store = ApprovalStore(tmp_path / "approvals.sqlite3", KEY, clock=lambda: now)
+    pending = store.create(task)
+    assert pending.approval_id == legacy_id
+
+    class FakeAuditLog:
+        def append(self, _event: dict[str, object]) -> str:
+            return "audit-id"
+
+    monkeypatch.setattr(
+        "systeme_local_gateway.approvals._configured_components",
+        lambda: (store, FakeAuditLog(), KEY),
+    )
+
+    result = approvals_main(
+        [
+            "approve",
+            legacy_id,
+            "--task-file",
+            str(task_file),
+            "--yes",
+        ]
+    )
+
+    assert result == 0
+    assert store.inspect(legacy_id, task).state == "approved"
+    assert json.dumps("secret-content") in capsys.readouterr().out
+
+
 def test_cli_approval_requires_and_displays_exact_signed_task(
     monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,

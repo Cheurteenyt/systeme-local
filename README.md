@@ -136,6 +136,10 @@ python -m systeme_local_gateway.approvals approve <approval_id> --task-file /tmp
 python -m systeme_local_gateway.approvals deny <approval_id>
 ```
 
+Les nouvelles demandes utilisent un identifiant préfixé par `apr_`, qui ne peut pas être
+interprété comme une option de ligne de commande. La CLI continue d’accepter les anciens
+identifiants URL-safe qui commencent par `-`.
+
 La commande `approve` vérifie la signature du fichier, confirme qu’il correspond exactement
 à l’empreinte HMAC de la demande, affiche localement l’identité, la capacité et les arguments,
 puis exige de saisir l’identifiant complet. L’option `--yes` est réservée aux tests locaux

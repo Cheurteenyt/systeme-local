@@ -6,6 +6,7 @@ import hashlib
 import hmac
 import json
 import os
+import re
 import secrets
 import sqlite3
 import stat
@@ -24,6 +25,10 @@ _REQUEST_HMAC_DOMAIN = b"approval-request-v1"
 _ROW_HMAC_DOMAIN = b"approval-row-v1"
 _DEFAULT_BUSY_TIMEOUT_SECONDS = 5.0
 _APPROVAL_STATES = {"pending", "approved", "denied", "consumed"}
+_APPROVAL_ID_PREFIX = "apr_"
+_LEGACY_LEADING_DASH_APPROVAL_ID_PATTERN = re.compile(
+    r"^-[A-Za-z0-9_-]{31}$"
+)
 
 ApprovalState = Literal["pending", "approved", "denied", "consumed"]
 
@@ -636,7 +641,7 @@ class ApprovalStore:
         expires_at_us: int,
     ) -> _StoredApproval:
         fields: dict[str, object] = {
-            "approval_id": secrets.token_urlsafe(24),
+            "approval_id": _APPROVAL_ID_PREFIX + secrets.token_urlsafe(24),
             "request_hmac": request_hmac,
             "task_id": task.task_id,
             "capability": task.capability,
@@ -867,6 +872,29 @@ def _configured_components() -> tuple[ApprovalStore, object, str]:
     return store, audit_log, settings.shared_secret
 
 
+def _parse_cli_args(
+    parser: argparse.ArgumentParser,
+    argv: list[str] | None,
+) -> argparse.Namespace:
+    effective_argv = list(sys.argv[1:] if argv is None else argv)
+    legacy_approval_id: str | None = None
+
+    if (
+        len(effective_argv) >= 2
+        and effective_argv[0] in {"approve", "deny"}
+        and _LEGACY_LEADING_DASH_APPROVAL_ID_PATTERN.fullmatch(
+            effective_argv[1]
+        )
+    ):
+        legacy_approval_id = effective_argv[1]
+        effective_argv[1] = "legacy-approval-id-placeholder"
+
+    args = parser.parse_args(effective_argv)
+    if legacy_approval_id is not None:
+        args.approval_id = legacy_approval_id
+    return args
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
         description="Manage local Système Local approval requests"
@@ -887,7 +915,7 @@ def main(argv: list[str] | None = None) -> int:
     )
     deny_parser = subparsers.add_parser("deny", help="deny one request")
     deny_parser.add_argument("approval_id")
-    args = parser.parse_args(argv)
+    args = _parse_cli_args(parser, argv)
 
     try:
         store, audit_log, shared_secret = _configured_components()
