@@ -116,6 +116,68 @@ def _is_lock_contention_error(exc: OSError) -> bool:
     return isinstance(exc, BlockingIOError) or exc.errno in contention_codes
 
 
+class AuditAnchorTransaction:
+    """Operations performed while one anchor lock remains held."""
+
+    def __init__(self, anchor: FileAuditAnchor):
+        self._anchor = anchor
+        self._active = True
+
+    def verify(self) -> AuditAnchorVerification:
+        self._require_active()
+        return self._anchor._verify_unlocked()
+
+    def bootstrap(
+        self,
+        records: int,
+        last_hmac: str,
+    ) -> AuditAnchorVerification:
+        self._require_active()
+        self._anchor._validate_state(records, last_hmac)
+        self._anchor._assert_safe_anchor_path()
+        if (
+            self._anchor.path.exists()
+            and self._anchor.path.stat().st_size != 0
+        ):
+            raise AuditAnchorIntegrityError(
+                "audit anchor is already initialized"
+            )
+        self._anchor._append_checkpoint_unlocked(
+            records=records,
+            last_hmac=last_hmac,
+            previous_checkpoint_hmac=_ANCHOR_GENESIS_HMAC,
+        )
+        return self._anchor._verify_unlocked()
+
+    def append(
+        self,
+        records: int,
+        last_hmac: str,
+    ) -> AuditAnchorVerification:
+        self._require_active()
+        self._anchor._validate_state(records, last_hmac)
+        verification = self._anchor._verify_unlocked()
+        if records <= verification.records:
+            raise AuditAnchorIntegrityError(
+                "audit anchor record count must increase"
+            )
+        self._anchor._append_checkpoint_unlocked(
+            records=records,
+            last_hmac=last_hmac,
+            previous_checkpoint_hmac=verification.last_checkpoint_hmac,
+        )
+        return self._anchor._verify_unlocked()
+
+    def _close(self) -> None:
+        self._active = False
+
+    def _require_active(self) -> None:
+        if not self._active:
+            raise AuditAnchorError(
+                "audit anchor transaction is no longer active"
+            )
+
+
 class FileAuditAnchor:
     """HMAC-chained checkpoints intended for separately protected storage."""
 
@@ -139,42 +201,35 @@ class FileAuditAnchor:
         self._audit_log_id = audit_log_id
         self._lock_timeout_seconds = lock_timeout_seconds
 
+    @contextmanager
+    def transaction(self) -> Iterator[AuditAnchorTransaction]:
+        with _THREAD_LOCK:
+            with self._process_lock():
+                transaction = AuditAnchorTransaction(self)
+                try:
+                    yield transaction
+                finally:
+                    transaction._close()
+
     def verify(self) -> AuditAnchorVerification:
-        with _THREAD_LOCK:
-            with self._process_lock():
-                return self._verify_unlocked()
+        with self.transaction() as transaction:
+            return transaction.verify()
 
-    def bootstrap(self, records: int, last_hmac: str) -> AuditAnchorVerification:
-        self._validate_state(records, last_hmac)
-        with _THREAD_LOCK:
-            with self._process_lock():
-                self._assert_safe_anchor_path()
-                if self.path.exists() and self.path.stat().st_size != 0:
-                    raise AuditAnchorIntegrityError(
-                        "audit anchor is already initialized"
-                    )
-                self._append_checkpoint_unlocked(
-                    records=records,
-                    last_hmac=last_hmac,
-                    previous_checkpoint_hmac=_ANCHOR_GENESIS_HMAC,
-                )
-                return self._verify_unlocked()
+    def bootstrap(
+        self,
+        records: int,
+        last_hmac: str,
+    ) -> AuditAnchorVerification:
+        with self.transaction() as transaction:
+            return transaction.bootstrap(records, last_hmac)
 
-    def append(self, records: int, last_hmac: str) -> AuditAnchorVerification:
-        self._validate_state(records, last_hmac)
-        with _THREAD_LOCK:
-            with self._process_lock():
-                verification = self._verify_unlocked()
-                if records <= verification.records:
-                    raise AuditAnchorIntegrityError(
-                        "audit anchor record count must increase"
-                    )
-                self._append_checkpoint_unlocked(
-                    records=records,
-                    last_hmac=last_hmac,
-                    previous_checkpoint_hmac=verification.last_checkpoint_hmac,
-                )
-                return self._verify_unlocked()
+    def append(
+        self,
+        records: int,
+        last_hmac: str,
+    ) -> AuditAnchorVerification:
+        with self.transaction() as transaction:
+            return transaction.append(records, last_hmac)
 
     def _verify_unlocked(self) -> AuditAnchorVerification:
         self._assert_safe_anchor_path()
