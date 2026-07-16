@@ -109,7 +109,7 @@ commande locale de calculer simultanément deux entrées à partir du même HMAC
 Le fichier de verrou doit rester sur un système de fichiers local et ne doit pas être supprimé
 pendant que des processus utilisent le journal.
 
-Le service refuse de démarrer ou d’ajouter une entrée lorsque le journal est tronqué, altéré, signé avec une autre clé ou utilise l’ancien format non chaîné. Avant la première utilisation de ce format, archivez un éventuel `audit.jsonl` historique sous un autre nom. La clé HMAC protège contre les modifications hors ligne tant qu’elle reste secrète ; l’ancrage externe du dernier HMAC reste une amélioration future.
+Le service refuse de démarrer ou d’ajouter une entrée lorsque le journal est tronqué, altéré, signé avec une autre clé ou utilise l’ancien format non chaîné. Avant la première utilisation de ce format, archivez un éventuel `audit.jsonl` historique sous un autre nom. La clé HMAC protège contre les modifications hors ligne tant qu’elle reste secrète ; le couplage à un fournisseur d’ancrage existe désormais dans le cœur du journal, mais reste désactivé dans le gateway tant qu’il n’est pas configuré.
 
 ### Fondation du fournisseur d’ancrage
 
@@ -119,9 +119,12 @@ clés incorrectes, l’altération, la troncature, les schémas inattendus, les 
 monotones, les chemins non réguliers et les écritures concurrentes non sérialisées. La clé
 d’ancrage n’est jamais écrite dans le fichier.
 
-Cette PR n’active pas encore l’ancrage dans le gateway. L’intégration de la configuration,
-du bootstrap explicite et de la réconciliation avec le journal local fera l’objet d’une PR
-séparée afin de conserver une frontière de revue petite et testable.
+Le cœur du journal peut désormais recevoir ce fournisseur. La vérification refuse un
+rollback ou une divergence, et avance automatiquement l’ancre lorsque le journal local
+contient un suffixe valide après une panne survenue entre les deux écritures.
+
+La configuration du gateway et la commande de bootstrap explicite restent volontairement
+hors de cette étape afin de conserver une frontière de revue petite et testable.
 
 Un fichier local ne constitue pas, à lui seul, une protection forte contre le rollback.
 Le fournisseur est destiné à un support administré séparément dont les propriétés

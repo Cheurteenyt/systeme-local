@@ -44,7 +44,7 @@
 
 - le verrou interprocessus suppose un système de fichiers local dont les verrous OS sont fiables ; les partages réseau ne sont pas pris en charge ;
 - un attaquant qui compromet à la fois le processus et `SLG_AUDIT_KEY` peut fabriquer de futures entrées ;
-- le fournisseur de checkpoints existe, mais son intégration runtime et son bootstrap explicite restent à activer ;
+- le couplage transactionnel entre le journal et le fournisseur existe, mais sa configuration dans le gateway et son bootstrap explicite restent à activer ;
 - un fichier d’ancrage ne résiste au rollback que sur un support séparé dont l’append-only est réellement imposé ;
 - une restauration ancienne ou une suppression de la base anti-rejeu peut oublier des nonces encore actifs ; un ancrage monotone externe reste à ajouter ;
 - la base d’approbation et le journal d’audit ne forment pas une transaction atomique commune ; une panne entre les deux écritures peut demander une réconciliation locale.

@@ -18,6 +18,8 @@ from pathlib import Path
 from typing import Any
 from uuid import uuid4
 
+from .audit_anchor import AuditAnchorTransaction, FileAuditAnchor
+
 if os.name == "nt":
     import msvcrt
 else:
@@ -57,6 +59,7 @@ class AuditLockError(RuntimeError):
 class AuditVerification:
     records: int
     last_hmac: str
+    anchor_checkpoints: int | None = None
 
 
 def _canonical_bytes(value: Any) -> bytes:
@@ -218,6 +221,7 @@ class AuditLog:
         log_path: Path,
         key: str,
         *,
+        anchor: FileAuditAnchor | None = None,
         lock_timeout_seconds: float = _DEFAULT_LOCK_TIMEOUT_SECONDS,
     ):
         key_bytes = key.encode("utf-8")
@@ -228,47 +232,134 @@ class AuditLog:
         self.log_path = log_path
         self.lock_path = self.log_path.parent / f"{self.log_path.name}.lock"
         self._key = key_bytes
+        self._anchor = anchor
         self._lock_timeout_seconds = lock_timeout_seconds
 
     def verify(self) -> AuditVerification:
         with _LOCK:
             with self._process_lock():
-                return self._verify_unlocked()
+                if self._anchor is None:
+                    return self._verify_unlocked()
+                with self._anchor.transaction() as anchor:
+                    return self._verify_anchored_unlocked(anchor)
+
+    def bootstrap_anchor(self) -> AuditVerification:
+        if self._anchor is None:
+            raise ValueError("audit anchoring is not configured")
+        with _LOCK:
+            with self._process_lock():
+                with self._anchor.transaction() as anchor:
+                    verification = self._verify_unlocked()
+                    anchor_verification = anchor.bootstrap(
+                        verification.records,
+                        verification.last_hmac,
+                    )
+                    return AuditVerification(
+                        records=verification.records,
+                        last_hmac=verification.last_hmac,
+                        anchor_checkpoints=anchor_verification.checkpoints,
+                    )
 
     def append(self, event: Mapping[str, object]) -> str:
         with _LOCK:
             with self._process_lock():
-                verification = self._verify_unlocked()
-                audit_id = str(uuid4())
-                record: dict[str, object] = {
-                    "version": _RECORD_VERSION,
-                    "audit_id": audit_id,
-                    "timestamp": datetime.now(UTC).isoformat(),
-                    "previous_hmac": verification.last_hmac,
-                    **project_audit_event(event, self._key),
-                }
-                record["entry_hmac"] = _entry_hmac(self._key, record)
+                if self._anchor is None:
+                    verification = self._verify_unlocked()
+                    audit_id, _ = self._append_verified_unlocked(
+                        event,
+                        verification,
+                    )
+                    return audit_id
 
-                self.log_path.parent.mkdir(parents=True, exist_ok=True)
-                descriptor = os.open(
-                    self.log_path,
-                    os.O_WRONLY | os.O_CREAT | os.O_APPEND,
-                    0o600,
-                )
-                with os.fdopen(
-                    descriptor,
-                    "a",
-                    encoding="utf-8",
-                    newline="\n",
-                ) as handle:
-                    handle.write(_canonical_bytes(record).decode("utf-8") + "\n")
-                    handle.flush()
-                    os.fsync(handle.fileno())
-                try:
-                    os.chmod(self.log_path, 0o600)
-                except OSError:
-                    pass
-                return audit_id
+                with self._anchor.transaction() as anchor:
+                    verification = self._verify_anchored_unlocked(anchor)
+                    audit_id, next_verification = (
+                        self._append_verified_unlocked(
+                            event,
+                            verification,
+                        )
+                    )
+                    anchor.append(
+                        next_verification.records,
+                        next_verification.last_hmac,
+                    )
+                    return audit_id
+
+    def _verify_anchored_unlocked(
+        self,
+        anchor: AuditAnchorTransaction,
+    ) -> AuditVerification:
+        anchor_verification = anchor.verify()
+        verification, anchored_hmac = self._scan_unlocked(
+            anchor_verification.records
+        )
+
+        if anchor_verification.records > verification.records:
+            raise AuditIntegrityError(
+                "audit log rollback detected against external anchor"
+            )
+        if anchored_hmac is None or not hmac.compare_digest(
+            anchored_hmac,
+            anchor_verification.last_hmac,
+        ):
+            raise AuditIntegrityError(
+                "audit log diverges from external anchor"
+            )
+
+        if verification.records > anchor_verification.records:
+            anchor_verification = anchor.append(
+                verification.records,
+                verification.last_hmac,
+            )
+
+        return AuditVerification(
+            records=verification.records,
+            last_hmac=verification.last_hmac,
+            anchor_checkpoints=anchor_verification.checkpoints,
+        )
+
+    def _append_verified_unlocked(
+        self,
+        event: Mapping[str, object],
+        verification: AuditVerification,
+    ) -> tuple[str, AuditVerification]:
+        audit_id = str(uuid4())
+        record: dict[str, object] = {
+            "version": _RECORD_VERSION,
+            "audit_id": audit_id,
+            "timestamp": datetime.now(UTC).isoformat(),
+            "previous_hmac": verification.last_hmac,
+            **project_audit_event(event, self._key),
+        }
+        record["entry_hmac"] = _entry_hmac(self._key, record)
+
+        self.log_path.parent.mkdir(parents=True, exist_ok=True)
+        descriptor = os.open(
+            self.log_path,
+            os.O_WRONLY | os.O_CREAT | os.O_APPEND,
+            0o600,
+        )
+        with os.fdopen(
+            descriptor,
+            "a",
+            encoding="utf-8",
+            newline="\n",
+        ) as handle:
+            handle.write(_canonical_bytes(record).decode("utf-8") + "\n")
+            handle.flush()
+            os.fsync(handle.fileno())
+        try:
+            os.chmod(self.log_path, 0o600)
+        except OSError:
+            pass
+
+        return (
+            audit_id,
+            AuditVerification(
+                records=verification.records + 1,
+                last_hmac=str(record["entry_hmac"]),
+            ),
+        )
 
     @contextmanager
     def _process_lock(self) -> Iterator[None]:
@@ -372,17 +463,43 @@ class AuditLog:
         fcntl.flock(descriptor, fcntl.LOCK_UN)
 
     def _verify_unlocked(self) -> AuditVerification:
+        verification, _ = self._scan_unlocked()
+        return verification
+
+    def _scan_unlocked(
+        self,
+        checkpoint_records: int | None = None,
+    ) -> tuple[AuditVerification, str | None]:
+        checkpoint_hmac = (
+            _GENESIS_HMAC if checkpoint_records == 0 else None
+        )
         if not self.log_path.exists():
-            return AuditVerification(records=0, last_hmac=_GENESIS_HMAC)
+            return (
+                AuditVerification(
+                    records=0,
+                    last_hmac=_GENESIS_HMAC,
+                ),
+                checkpoint_hmac,
+            )
         if not self.log_path.is_file():
-            raise AuditIntegrityError("audit log path is not a regular file")
+            raise AuditIntegrityError(
+                "audit log path is not a regular file"
+            )
         if self.log_path.stat().st_size == 0:
-            return AuditVerification(records=0, last_hmac=_GENESIS_HMAC)
+            return (
+                AuditVerification(
+                    records=0,
+                    last_hmac=_GENESIS_HMAC,
+                ),
+                checkpoint_hmac,
+            )
 
         with self.log_path.open("rb") as raw_handle:
             raw_handle.seek(-1, os.SEEK_END)
             if raw_handle.read(1) != b"\n":
-                raise AuditIntegrityError("audit log must end with a newline")
+                raise AuditIntegrityError(
+                    "audit log must end with a newline"
+                )
 
         previous_hmac = _GENESIS_HMAC
         records = 0
@@ -392,7 +509,9 @@ class AuditLog:
             for line_number, raw_line in enumerate(handle, start=1):
                 line = raw_line.rstrip("\n")
                 if not line:
-                    raise AuditIntegrityError(f"blank audit record at line {line_number}")
+                    raise AuditIntegrityError(
+                        f"blank audit record at line {line_number}"
+                    )
                 try:
                     record = json.loads(line)
                 except json.JSONDecodeError as exc:
@@ -408,16 +527,22 @@ class AuditLog:
                         f"unsupported audit record version at line {line_number}"
                     )
                 if record.get("previous_hmac") != previous_hmac:
-                    raise AuditIntegrityError(f"broken audit chain at line {line_number}")
+                    raise AuditIntegrityError(
+                        f"broken audit chain at line {line_number}"
+                    )
 
                 entry_hmac = record.get("entry_hmac")
                 if not isinstance(entry_hmac, str):
-                    raise AuditIntegrityError(f"missing audit HMAC at line {line_number}")
+                    raise AuditIntegrityError(
+                        f"missing audit HMAC at line {line_number}"
+                    )
                 unsigned = dict(record)
                 unsigned.pop("entry_hmac", None)
                 expected_hmac = _entry_hmac(self._key, unsigned)
                 if not hmac.compare_digest(entry_hmac, expected_hmac):
-                    raise AuditIntegrityError(f"invalid audit HMAC at line {line_number}")
+                    raise AuditIntegrityError(
+                        f"invalid audit HMAC at line {line_number}"
+                    )
 
                 audit_id = record.get("audit_id")
                 if not isinstance(audit_id, str) or audit_id in audit_ids:
@@ -427,8 +552,16 @@ class AuditLog:
                 audit_ids.add(audit_id)
                 previous_hmac = entry_hmac
                 records += 1
+                if records == checkpoint_records:
+                    checkpoint_hmac = entry_hmac
 
-        return AuditVerification(records=records, last_hmac=previous_hmac)
+        return (
+            AuditVerification(
+                records=records,
+                last_hmac=previous_hmac,
+            ),
+            checkpoint_hmac,
+        )
 
 
 def append_audit(log_path: Path, key: str, event: Mapping[str, object]) -> str:
