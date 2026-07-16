@@ -1,11 +1,24 @@
-FROM python:3.12-slim
+FROM python:3.12-slim@sha256:c3d81d25b3154142b0b42eb1e61300024426268edeb5b5a26dd7ddf64d9daf28
+
+ARG PYTEST_VERSION=8.4.2
+
+LABEL org.opencontainers.image.title="Système Local sandbox" \
+      org.opencontainers.image.description="Restricted execution image for Système Local" \
+      org.opencontainers.image.licenses="Apache-2.0"
+
+ENV HOME=/tmp \
+    PIP_NO_CACHE_DIR=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1
 
 RUN apt-get update \
     && apt-get install -y --no-install-recommends git \
-    && pip install --no-cache-dir pytest \
+    && python -m pip install "pytest==${PYTEST_VERSION}" \
     && rm -rf /var/lib/apt/lists/*
 
-RUN useradd --create-home --uid 10001 runner
-USER runner
+RUN groupadd --gid 10001 runner \
+    && useradd --create-home --uid 10001 --gid 10001 --shell /usr/sbin/nologin runner
+
+USER 10001:10001
 WORKDIR /workspace
 ENTRYPOINT []

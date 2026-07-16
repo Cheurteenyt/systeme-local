@@ -1,0 +1,66 @@
+name: docker-integration
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/docker-integration.yml"
+      - ".dockerignore"
+      - "Dockerfile.sandbox"
+      - "src/systeme_local_gateway/sandbox.py"
+      - "tests/integration/**"
+  pull_request:
+    paths:
+      - ".github/workflows/docker-integration.yml"
+      - ".dockerignore"
+      - "Dockerfile.sandbox"
+      - "src/systeme_local_gateway/sandbox.py"
+      - "tests/integration/**"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: docker-integration-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  docker-integration:
+    name: docker-integration
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
+        with:
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: pyproject.toml
+
+      - name: Install project
+        run: python -m pip install -e ".[dev]"
+
+      - name: Build sandbox image
+        run: >-
+          docker build
+          --pull
+          --file Dockerfile.sandbox
+          --tag systeme-local-sandbox:test
+          .
+
+      - name: Verify non-root image default
+        run: test "$(docker image inspect systeme-local-sandbox:test --format '{{.Config.User}}')" = "10001:10001"
+
+      - name: Run live Docker integration tests
+        env:
+          SYSTEME_LOCAL_RUN_DOCKER_TESTS: "1"
+          SYSTEME_LOCAL_SANDBOX_IMAGE: systeme-local-sandbox:test
+        run: python -m pytest -m integration -q

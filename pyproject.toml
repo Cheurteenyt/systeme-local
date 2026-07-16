@@ -32,6 +32,9 @@ packages = ["src/systeme_local_gateway"]
 [tool.pytest.ini_options]
 pythonpath = ["src"]
 testpaths = ["tests"]
+markers = [
+  "integration: requires a live Docker Engine and the sandbox image",
+]
 
 [tool.ruff]
 line-length = 100
