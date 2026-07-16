@@ -6,6 +6,7 @@ import hmac
 import sqlite3
 import threading
 from concurrent.futures import ThreadPoolExecutor
+from contextlib import closing
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
@@ -84,7 +85,7 @@ def test_expired_entries_are_pruned_before_capacity_check(tmp_path: Path) -> Non
     clock_value[0] += timedelta(seconds=2)
     guard.check_and_mark("second-" + "n" * 16, clock_value[0] + timedelta(seconds=30))
 
-    with sqlite3.connect(database) as connection:
+    with closing(sqlite3.connect(database)) as connection:
         rows = connection.execute(
             "SELECT nonce_hmac, expires_at_us FROM seen_nonces"
         ).fetchall()
@@ -132,6 +133,44 @@ def test_concurrent_duplicate_is_accepted_only_once(tmp_path: Path) -> None:
         outcomes = list(pool.map(lambda _: attempt(), range(2)))
 
     assert sorted(outcomes) == ["accepted", "replayed"]
+
+
+class _TrackingConnection(sqlite3.Connection):
+    was_closed = False
+
+    def close(self) -> None:
+        self.was_closed = True
+        super().close()
+
+
+def test_every_sqlite_connection_is_closed(tmp_path: Path, monkeypatch) -> None:
+    database = tmp_path / "replay.sqlite3"
+    now = datetime(2026, 1, 1, tzinfo=UTC)
+    connections: list[_TrackingConnection] = []
+    real_connect = sqlite3.connect
+
+    def tracked_connect(*args, **kwargs):
+        kwargs["factory"] = _TrackingConnection
+        connection = real_connect(*args, **kwargs)
+        connections.append(connection)
+        return connection
+
+    monkeypatch.setattr(sqlite3, "connect", tracked_connect)
+
+    guard = SQLiteReplayGuard(
+        database,
+        SECRET,
+        max_entries=10,
+        clock=lambda: now,
+    )
+    guard.verify()
+    guard.check_and_mark(
+        "closed-connection-" + "n" * 16,
+        now + timedelta(minutes=1),
+    )
+
+    assert connections
+    assert all(connection.was_closed for connection in connections)
 
 
 def test_corrupt_database_is_rejected(tmp_path: Path) -> None:

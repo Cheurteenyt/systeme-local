@@ -9,6 +9,7 @@ import sqlite3
 import stat
 import threading
 from collections.abc import Callable
+from contextlib import closing
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Protocol
@@ -103,7 +104,7 @@ class SQLiteReplayGuard:
     def verify(self) -> None:
         self._assert_safe_database_path()
         try:
-            with self._connect() as connection:
+            with closing(self._connect()) as connection:
                 quick_check = connection.execute("PRAGMA quick_check").fetchone()
                 if quick_check is None or quick_check[0] != "ok":
                     raise ReplayGuardUnavailableError("replay database integrity check failed")
@@ -136,7 +137,7 @@ class SQLiteReplayGuard:
         nonce_hmac = self._nonce_hmac(nonce)
 
         try:
-            with self._connect() as connection:
+            with closing(self._connect()) as connection:
                 connection.execute("BEGIN IMMEDIATE")
                 try:
                     connection.execute(
@@ -185,7 +186,7 @@ class SQLiteReplayGuard:
         self._assert_safe_database_path()
 
         try:
-            with self._connect() as connection:
+            with closing(self._connect()) as connection:
                 connection.execute("BEGIN IMMEDIATE")
                 try:
                     connection.execute(
@@ -251,12 +252,16 @@ class SQLiteReplayGuard:
             timeout=self._busy_timeout_seconds,
             isolation_level=None,
         )
-        connection.execute(
-            f"PRAGMA busy_timeout = {int(self._busy_timeout_seconds * 1000)}"
-        )
-        connection.execute("PRAGMA foreign_keys = ON")
-        connection.execute("PRAGMA synchronous = FULL")
-        connection.execute("PRAGMA trusted_schema = OFF")
+        try:
+            connection.execute(
+                f"PRAGMA busy_timeout = {int(self._busy_timeout_seconds * 1000)}"
+            )
+            connection.execute("PRAGMA foreign_keys = ON")
+            connection.execute("PRAGMA synchronous = FULL")
+            connection.execute("PRAGMA trusted_schema = OFF")
+        except Exception:
+            connection.close()
+            raise
         return connection
 
     def _assert_safe_database_path(self) -> None:
