@@ -43,8 +43,12 @@ def verify_task(
     *,
     replay_guard: ReplayGuard | None = None,
     max_clock_skew_seconds: int = 60,
+    max_task_lifetime_seconds: int = 300,
 ) -> None:
     now = datetime.now(UTC)
+    lifetime_seconds = (task.expires_at - task.issued_at).total_seconds()
+    if lifetime_seconds > max_task_lifetime_seconds:
+        raise ValueError("task lifetime exceeds maximum")
     if task.expires_at <= now:
         raise ValueError("task expired")
     if task.issued_at.timestamp() - now.timestamp() > max_clock_skew_seconds:
