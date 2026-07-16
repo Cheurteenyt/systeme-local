@@ -111,6 +111,22 @@ pendant que des processus utilisent le journal.
 
 Le service refuse de démarrer ou d’ajouter une entrée lorsque le journal est tronqué, altéré, signé avec une autre clé ou utilise l’ancien format non chaîné. Avant la première utilisation de ce format, archivez un éventuel `audit.jsonl` historique sous un autre nom. La clé HMAC protège contre les modifications hors ligne tant qu’elle reste secrète ; l’ancrage externe du dernier HMAC reste une amélioration future.
 
+### Fondation du fournisseur d’ancrage
+
+Cette étape définit un format de checkpoint externe versionné, chaîné par HMAC et lié
+cryptographiquement à une identité opaque du journal. Le fournisseur fichier refuse les
+clés incorrectes, l’altération, la troncature, les schémas inattendus, les compteurs non
+monotones, les chemins non réguliers et les écritures concurrentes non sérialisées. La clé
+d’ancrage n’est jamais écrite dans le fichier.
+
+Cette PR n’active pas encore l’ancrage dans le gateway. L’intégration de la configuration,
+du bootstrap explicite et de la réconciliation avec le journal local fera l’objet d’une PR
+séparée afin de conserver une frontière de revue petite et testable.
+
+Un fichier local ne constitue pas, à lui seul, une protection forte contre le rollback.
+Le fournisseur est destiné à un support administré séparément dont les propriétés
+append-only sont imposées en dehors du processus.
+
 ### Protection anti-rejeu persistante
 
 Le gateway conserve les empreintes HMAC des nonces dans `SLG_REPLAY_DB`, qui vaut par défaut `.systeme-local/replay.sqlite3`. Les nonces bruts ne sont jamais écrits. L’insertion est transactionnelle : deux processus qui reçoivent simultanément la même tâche ne peuvent pas tous les deux l’accepter.

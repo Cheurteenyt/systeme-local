@@ -35,6 +35,7 @@
 - bouton d'arrêt local et révocation immédiate des sessions ;
 - journal d’audit minimal : aucune charge utile brute, empreintes HMAC à domaines séparés et chaîne vérifiée avant chaque ajout ;
 - verrou interprocessus borné autour de la vérification et de l’ajout au journal d’audit ;
+- format de checkpoint d’ancrage externe versionné, monotone, chaîné par HMAC et verrouillé entre processus ;
 - erreurs d’exécution génériques vers les agents distants ; les détails internes ne quittent jamais la frontière locale ;
 - clé d’audit distincte du secret d’authentification ;
 - base d’approbation transactionnelle : aucune charge utile brute, liaison HMAC à la tâche et décision locale uniquement.
@@ -43,7 +44,8 @@
 
 - le verrou interprocessus suppose un système de fichiers local dont les verrous OS sont fiables ; les partages réseau ne sont pas pris en charge ;
 - un attaquant qui compromet à la fois le processus et `SLG_AUDIT_KEY` peut fabriquer de futures entrées ;
-- le dernier HMAC n’est pas encore ancré dans un stockage externe append-only ;
+- le fournisseur de checkpoints existe, mais son intégration runtime et son bootstrap explicite restent à activer ;
+- un fichier d’ancrage ne résiste au rollback que sur un support séparé dont l’append-only est réellement imposé ;
 - une restauration ancienne ou une suppression de la base anti-rejeu peut oublier des nonces encore actifs ; un ancrage monotone externe reste à ajouter ;
 - la base d’approbation et le journal d’audit ne forment pas une transaction atomique commune ; une panne entre les deux écritures peut demander une réconciliation locale.
 
