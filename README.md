@@ -12,7 +12,7 @@ Passerelle locale sécurisée permettant à un agent IA distant de demander des 
 - Snapshot temporaire par tâche : le workspace source n’est jamais monté en écriture.
 - Répertoire de travail dédié, jamais le disque complet.
 - Quotas CPU, mémoire, durée et taille de sortie.
-- Approbation humaine pour les actions sensibles.
+- Approbation humaine locale, explicite et à usage unique pour les actions sensibles.
 - Journal d'audit minimal, chaîné par HMAC, sans arguments ni sorties brutes.
 - Protection anti-rejeu persistante et transactionnelle entre les redémarrages.
 - Adaptateurs fournisseurs remplaçables : GLM/z.ai, API compatible OpenAI, MCP, GitHub, relais HTTPS.
@@ -111,6 +111,31 @@ Le gateway conserve les empreintes HMAC des nonces dans `SLG_REPLAY_DB`, qui vau
 Les entrées expirées sont supprimées avant chaque insertion. Lorsque `SLG_REPLAY_MAX_ENTRIES` est atteint avec des tâches encore valides, le gateway refuse les nouvelles tâches avec une erreur temporaire au lieu d’évincer une protection active. La base est vérifiée au démarrage et une corruption empêche le service de démarrer.
 
 La base peut être supprimée uniquement lorsque le gateway est arrêté et qu’aucune tâche signée encore valide ne pourra être rejouée. Une restauration de sauvegarde ancienne peut oublier des nonces récents ; un compteur monotone externe reste une amélioration future.
+
+### Approbations humaines locales
+
+Les capacités marquées `require_approval` ne peuvent pas être exécutées directement par
+l’agent. La première soumission crée une demande locale et renvoie un `approval_id` opaque.
+La base par défaut est `.systeme-local/approvals.sqlite3` et ne conserve ni arguments,
+ni contenu, ni identifiant de session bruts.
+
+Consultez et décidez localement :
+
+```bash
+python -m systeme_local_gateway.approvals list
+python -m systeme_local_gateway.approvals approve <approval_id>
+# ou
+python -m systeme_local_gateway.approvals deny <approval_id>
+```
+
+Après une approbation, l’agent doit soumettre une nouvelle enveloppe signée avec un nouveau
+nonce, le même `task_id`, la même identité, la même capacité et les mêmes arguments, ainsi
+que `approval_id`. Toute modification invalide l’approbation. Une approbation expire, ne peut
+servir qu’une fois et sa consommation est transactionnelle entre plusieurs processus.
+
+Pour l’exemple fourni, conservez `SLG_TASK_ID` entre les deux soumissions et définissez
+`SLG_APPROVAL_ID` pour la seconde. `SLG_TASK_CAPABILITY` et
+`SLG_TASK_ARGUMENTS_JSON` permettent de choisir l’action signée.
 
 ## Connectivité avec les IA web
 

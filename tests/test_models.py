@@ -39,3 +39,17 @@ def test_task_requires_ordered_time_window() -> None:
     data["expires_at"] = data["issued_at"]
     with pytest.raises(ValidationError, match="expires_at"):
         TaskEnvelope(**data)
+
+
+def test_task_accepts_an_opaque_approval_identifier() -> None:
+    data = task_data()
+    data["approval_id"] = "approval_id-1234567890"
+    task = TaskEnvelope(**data)
+    assert task.approval_id == "approval_id-1234567890"
+
+
+def test_task_rejects_malformed_approval_identifier() -> None:
+    data = task_data()
+    data["approval_id"] = "contains spaces and punctuation!"
+    with pytest.raises(ValidationError, match="approval_id"):
+        TaskEnvelope(**data)

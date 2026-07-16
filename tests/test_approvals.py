@@ -1,0 +1,237 @@
+from __future__ import annotations
+
+import sqlite3
+import threading
+from concurrent.futures import ThreadPoolExecutor
+from contextlib import closing
+from datetime import UTC, datetime, timedelta
+from pathlib import Path
+
+import pytest
+
+from systeme_local_gateway.approvals import (
+    ApprovalConsumedError,
+    ApprovalDeniedError,
+    ApprovalMismatchError,
+    ApprovalPendingError,
+    ApprovalStore,
+    ApprovalStoreUnavailableError,
+)
+from systeme_local_gateway.models import AgentIdentity, TaskEnvelope
+
+KEY = "a" * 48
+
+
+def _task(
+    now: datetime,
+    *,
+    task_id: str = "approval-task-12345678",
+    arguments: dict[str, object] | None = None,
+    nonce: str = "n" * 24,
+    approval_id: str | None = None,
+) -> TaskEnvelope:
+    return TaskEnvelope(
+        task_id=task_id,
+        issued_at=now,
+        expires_at=now + timedelta(minutes=2),
+        agent=AgentIdentity(
+            provider="test",
+            model="model",
+            session_id="secret-session-value",
+        ),
+        capability="workspace.write_text",
+        arguments=arguments or {"path": "result.txt", "content": "secret-content"},
+        approval_id=approval_id,
+        nonce=nonce,
+        signature="s" * 43,
+    )
+
+
+def test_approval_is_local_single_use_and_bound_to_action(tmp_path: Path) -> None:
+    database = tmp_path / "approvals.sqlite3"
+    now = datetime(2026, 1, 1, tzinfo=UTC)
+    store = ApprovalStore(database, KEY, clock=lambda: now)
+
+    pending = store.create(_task(now))
+    assert pending.state == "pending"
+
+    approved = store.approve(pending.approval_id)
+    assert approved.state == "approved"
+
+    fresh_task = _task(
+        now + timedelta(seconds=1),
+        nonce="m" * 24,
+        approval_id=pending.approval_id,
+    )
+    consumed = store.consume(pending.approval_id, fresh_task)
+    assert consumed.state == "consumed"
+
+    with pytest.raises(ApprovalConsumedError, match="already used"):
+        store.consume(pending.approval_id, fresh_task)
+
+
+def test_pending_and_denied_requests_cannot_be_consumed(tmp_path: Path) -> None:
+    now = datetime(2026, 1, 1, tzinfo=UTC)
+    store = ApprovalStore(tmp_path / "approvals.sqlite3", KEY, clock=lambda: now)
+
+    pending = store.create(_task(now))
+    with pytest.raises(ApprovalPendingError, match="pending"):
+        store.consume(pending.approval_id, _task(now, approval_id=pending.approval_id))
+
+    store.deny(pending.approval_id)
+    with pytest.raises(ApprovalDeniedError, match="denied"):
+        store.consume(pending.approval_id, _task(now, approval_id=pending.approval_id))
+
+
+def test_modified_action_does_not_match_approval(tmp_path: Path) -> None:
+    now = datetime(2026, 1, 1, tzinfo=UTC)
+    store = ApprovalStore(tmp_path / "approvals.sqlite3", KEY, clock=lambda: now)
+    pending = store.create(_task(now))
+    store.approve(pending.approval_id)
+
+    changed = _task(
+        now,
+        arguments={"path": "different.txt", "content": "changed"},
+        approval_id=pending.approval_id,
+    )
+    with pytest.raises(ApprovalMismatchError, match="does not match"):
+        store.consume(pending.approval_id, changed)
+
+
+def test_database_contains_no_raw_arguments_or_session_id(tmp_path: Path) -> None:
+    database = tmp_path / "approvals.sqlite3"
+    now = datetime(2026, 1, 1, tzinfo=UTC)
+    store = ApprovalStore(database, KEY, clock=lambda: now)
+    store.create(_task(now))
+
+    raw = database.read_bytes()
+    assert b"secret-content" not in raw
+    assert b"secret-session-value" not in raw
+    assert b"result.txt" not in raw
+
+
+def test_duplicate_active_request_reuses_identifier(tmp_path: Path) -> None:
+    now = datetime(2026, 1, 1, tzinfo=UTC)
+    store = ApprovalStore(tmp_path / "approvals.sqlite3", KEY, clock=lambda: now)
+
+    first = store.create(_task(now))
+    second = store.create(_task(now + timedelta(seconds=1), nonce="m" * 24))
+    assert second.approval_id == first.approval_id
+
+    store.approve(first.approval_id)
+    third = store.create(_task(now + timedelta(seconds=2), nonce="p" * 24))
+    assert third.approval_id == first.approval_id
+    assert third.state == "approved"
+
+
+def test_expired_request_is_pruned_before_capacity_check(tmp_path: Path) -> None:
+    clock_value = [datetime(2026, 1, 1, tzinfo=UTC)]
+    store = ApprovalStore(
+        tmp_path / "approvals.sqlite3",
+        KEY,
+        max_entries=1,
+        ttl_seconds=30,
+        clock=lambda: clock_value[0],
+    )
+
+    first = store.create(_task(clock_value[0]))
+    clock_value[0] += timedelta(seconds=31)
+    second = store.create(
+        _task(clock_value[0], task_id="approval-task-87654321", nonce="m" * 24)
+    )
+    assert second.approval_id != first.approval_id
+
+
+def test_capacity_exhaustion_fails_closed(tmp_path: Path) -> None:
+    now = datetime(2026, 1, 1, tzinfo=UTC)
+    store = ApprovalStore(
+        tmp_path / "approvals.sqlite3",
+        KEY,
+        max_entries=1,
+        clock=lambda: now,
+    )
+    store.create(_task(now))
+
+    with pytest.raises(ApprovalStoreUnavailableError, match="capacity"):
+        store.create(
+            _task(now, task_id="approval-task-87654321", nonce="m" * 24)
+        )
+
+
+def test_concurrent_consumption_succeeds_only_once(tmp_path: Path) -> None:
+    database = tmp_path / "approvals.sqlite3"
+    now = datetime(2026, 1, 1, tzinfo=UTC)
+    store = ApprovalStore(database, KEY, clock=lambda: now)
+    pending = store.create(_task(now))
+    store.approve(pending.approval_id)
+    barrier = threading.Barrier(2)
+
+    def attempt(index: int) -> str:
+        local = ApprovalStore(database, KEY, clock=lambda: now)
+        task = _task(
+            now,
+            nonce=("m" if index else "p") * 24,
+            approval_id=pending.approval_id,
+        )
+        barrier.wait(timeout=5)
+        try:
+            local.consume(pending.approval_id, task)
+        except ApprovalConsumedError:
+            return "consumed"
+        return "accepted"
+
+    with ThreadPoolExecutor(max_workers=2) as pool:
+        outcomes = list(pool.map(attempt, range(2)))
+
+    assert sorted(outcomes) == ["accepted", "consumed"]
+
+
+def test_tampered_row_is_rejected(tmp_path: Path) -> None:
+    database = tmp_path / "approvals.sqlite3"
+    now = datetime(2026, 1, 1, tzinfo=UTC)
+    store = ApprovalStore(database, KEY, clock=lambda: now)
+    pending = store.create(_task(now))
+
+    with closing(sqlite3.connect(database)) as connection:
+        connection.execute(
+            "UPDATE approvals SET capability = 'workspace.read_text' "
+            "WHERE approval_id = ?",
+            (pending.approval_id,),
+        )
+        connection.commit()
+
+    with pytest.raises(ApprovalStoreUnavailableError, match="HMAC"):
+        store.verify()
+
+
+def test_corrupt_database_is_rejected(tmp_path: Path) -> None:
+    database = tmp_path / "approvals.sqlite3"
+    database.write_bytes(b"not sqlite")
+
+    with pytest.raises(ApprovalStoreUnavailableError, match="unavailable"):
+        ApprovalStore(database, KEY)
+
+
+def test_connections_are_closed(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+    real_connect = sqlite3.connect
+    connections: list[sqlite3.Connection] = []
+
+    def tracked_connect(*args: object, **kwargs: object) -> sqlite3.Connection:
+        connection = real_connect(*args, **kwargs)
+        connections.append(connection)
+        return connection
+
+    monkeypatch.setattr(
+        "systeme_local_gateway.approvals.sqlite3.connect",
+        tracked_connect,
+    )
+    now = datetime(2026, 1, 1, tzinfo=UTC)
+    store = ApprovalStore(tmp_path / "approvals.sqlite3", KEY, clock=lambda: now)
+    pending = store.create(_task(now))
+    store.approve(pending.approval_id)
+    store.list_pending()
+    store.verify()
+
+    for connection in connections:
+        with pytest.raises(sqlite3.ProgrammingError, match="closed"):
+            connection.execute("SELECT 1")

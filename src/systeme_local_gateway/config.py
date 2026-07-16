@@ -15,6 +15,9 @@ class Settings(BaseSettings):
     audit_log: Path = Path("./audit.jsonl")
     replay_db: Path = Path("./.systeme-local/replay.sqlite3")
     replay_max_entries: int = Field(default=10_000, ge=1, le=1_000_000)
+    approval_db: Path = Path("./.systeme-local/approvals.sqlite3")
+    approval_max_entries: int = Field(default=1_000, ge=1, le=100_000)
+    approval_ttl_seconds: int = Field(default=900, ge=30, le=3_600)
     sandbox_root: Path = Path("./.systeme-local/sandboxes")
     docker_image: str = "python:3.12-slim"
 
