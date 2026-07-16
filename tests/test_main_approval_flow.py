@@ -112,11 +112,12 @@ def test_gateway_executes_a_locally_approved_action_once(
     sys.modules.pop("systeme_local_gateway.main", None)
     gateway = importlib.import_module("systeme_local_gateway.main")
 
-    first = gateway.submit_task(_task(nonce="n" * 24))
+    original_task = _task(nonce="n" * 24)
+    first = gateway.submit_task(original_task)
     assert first.status == "approval_required"
     approval_id = str(first.output["approval_id"])
 
-    gateway.approval_store.approve(approval_id)
+    gateway.approval_store.approve(approval_id, original_task)
 
     second = gateway.submit_task(
         _task(nonce="m" * 24, approval_id=approval_id)

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import base64
 import hashlib
 import hmac
 import json
@@ -62,6 +63,7 @@ class ApprovalStateError(ValueError):
 @dataclass(frozen=True)
 class ApprovalRecord:
     approval_id: str
+    request_fingerprint: str
     task_id: str
     capability: str
     provider: str
@@ -75,6 +77,7 @@ class ApprovalRecord:
     def safe_dict(self) -> dict[str, object]:
         return {
             "approval_id": self.approval_id,
+            "request_fingerprint": self.request_fingerprint,
             "task_id": self.task_id,
             "capability": self.capability,
             "provider": self.provider,
@@ -313,8 +316,35 @@ class ApprovalStore:
                 "approval database is unavailable"
             ) from exc
 
-    def approve(self, approval_id: str) -> ApprovalRecord:
-        return self._decide(approval_id, "approved")
+    def inspect(self, approval_id: str, task: TaskEnvelope) -> ApprovalRecord:
+        now_us = _datetime_to_microseconds(self._clock())
+        request_hmac = self._request_hmac(task)
+
+        try:
+            with closing(self._connect()) as connection:
+                stored = self._load(connection, approval_id)
+                if stored.expires_at_us <= now_us:
+                    raise ApprovalExpiredError("approval expired")
+                if not hmac.compare_digest(stored.request_hmac, request_hmac):
+                    raise ApprovalMismatchError(
+                        "approval does not match submitted task"
+                    )
+                return self._record_from_stored(stored)
+        except (
+            ApprovalNotFoundError,
+            ApprovalExpiredError,
+            ApprovalMismatchError,
+        ):
+            raise
+        except ApprovalStoreUnavailableError:
+            raise
+        except (sqlite3.DatabaseError, OSError) as exc:
+            raise ApprovalStoreUnavailableError(
+                "approval database is unavailable"
+            ) from exc
+
+    def approve(self, approval_id: str, task: TaskEnvelope) -> ApprovalRecord:
+        return self._decide(approval_id, "approved", task=task)
 
     def deny(self, approval_id: str) -> ApprovalRecord:
         return self._decide(approval_id, "denied")
@@ -372,8 +402,11 @@ class ApprovalStore:
         self,
         approval_id: str,
         decision: Literal["approved", "denied"],
+        *,
+        task: TaskEnvelope | None = None,
     ) -> ApprovalRecord:
         now_us = _datetime_to_microseconds(self._clock())
+        request_hmac = self._request_hmac(task) if task is not None else None
 
         try:
             with closing(self._connect()) as connection:
@@ -382,6 +415,12 @@ class ApprovalStore:
                     stored = self._load(connection, approval_id)
                     if stored.expires_at_us <= now_us:
                         raise ApprovalExpiredError("approval expired")
+                    if request_hmac is not None and not hmac.compare_digest(
+                        stored.request_hmac, request_hmac
+                    ):
+                        raise ApprovalMismatchError(
+                            "approval does not match submitted task"
+                        )
                     if stored.state == decision:
                         connection.commit()
                         return self._record_from_stored(stored)
@@ -404,6 +443,7 @@ class ApprovalStore:
         except (
             ApprovalNotFoundError,
             ApprovalExpiredError,
+            ApprovalMismatchError,
             ApprovalStateError,
         ):
             raise
@@ -709,6 +749,7 @@ class ApprovalStore:
     def _record_from_stored(stored: _StoredApproval) -> ApprovalRecord:
         return ApprovalRecord(
             approval_id=stored.approval_id,
+            request_fingerprint=stored.request_hmac[:16],
             task_id=stored.task_id,
             capability=stored.capability,
             provider=stored.provider,
@@ -773,7 +814,45 @@ def _microseconds_to_datetime(value: int) -> datetime:
     return datetime.fromtimestamp(value / 1_000_000, tz=UTC)
 
 
-def _configured_components() -> tuple[ApprovalStore, object]:
+def verify_approval_task(task: TaskEnvelope, secret: str) -> None:
+    from .auth import canonical_payload
+
+    if task.approval_id is not None:
+        raise ValueError(
+            "approval task file must contain the original request without approval_id"
+        )
+    digest = hmac.new(
+        secret.encode("utf-8"),
+        canonical_payload(task),
+        hashlib.sha256,
+    ).digest()
+    expected = base64.urlsafe_b64encode(digest).decode("ascii").rstrip("=")
+    if not hmac.compare_digest(expected, task.signature):
+        raise ValueError("invalid task signature")
+
+
+def _read_task_file(path: str, *, max_bytes: int = 2_000_000) -> TaskEnvelope:
+    if path == "-":
+        data = sys.stdin.buffer.read(max_bytes + 1)
+    else:
+        data = Path(path).read_bytes()
+    if len(data) > max_bytes:
+        raise ValueError("approval task file exceeds size limit")
+    return TaskEnvelope.model_validate_json(data)
+
+
+def _request_display(task: TaskEnvelope, record: ApprovalRecord) -> dict[str, object]:
+    request = task.model_dump(
+        mode="json",
+        include={"version", "task_id", "agent", "capability", "arguments"},
+    )
+    return {
+        "approval": record.safe_dict(),
+        "request": request,
+    }
+
+
+def _configured_components() -> tuple[ApprovalStore, object, str]:
     from .audit import AuditLog
     from .config import settings
 
@@ -785,7 +864,7 @@ def _configured_components() -> tuple[ApprovalStore, object]:
     )
     audit_log = AuditLog(settings.audit_log, settings.audit_key)
     audit_log.verify()
-    return store, audit_log
+    return store, audit_log, settings.shared_secret
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -796,12 +875,22 @@ def main(argv: list[str] | None = None) -> int:
     subparsers.add_parser("list", help="list pending approvals")
     approve_parser = subparsers.add_parser("approve", help="approve one request")
     approve_parser.add_argument("approval_id")
+    approve_parser.add_argument(
+        "--task-file",
+        required=True,
+        help="exact original signed task JSON, or - for stdin",
+    )
+    approve_parser.add_argument(
+        "--yes",
+        action="store_true",
+        help="skip the interactive approval-ID confirmation",
+    )
     deny_parser = subparsers.add_parser("deny", help="deny one request")
     deny_parser.add_argument("approval_id")
     args = parser.parse_args(argv)
 
     try:
-        store, audit_log = _configured_components()
+        store, audit_log, shared_secret = _configured_components()
         if args.command == "list":
             print(
                 json.dumps(
@@ -813,7 +902,26 @@ def main(argv: list[str] | None = None) -> int:
             return 0
 
         if args.command == "approve":
-            record = store.approve(args.approval_id)
+            task = _read_task_file(args.task_file)
+            verify_approval_task(task, shared_secret)
+            pending_record = store.inspect(args.approval_id, task)
+            print(
+                json.dumps(
+                    _request_display(task, pending_record),
+                    indent=2,
+                    sort_keys=True,
+                )
+            )
+            if not args.yes:
+                try:
+                    confirmation = input(
+                        "Type the full approval ID to approve this exact request: "
+                    ).strip()
+                except EOFError as exc:
+                    raise ValueError("approval confirmation was not provided") from exc
+                if not hmac.compare_digest(confirmation, args.approval_id):
+                    raise ValueError("approval confirmation did not match")
+            record = store.approve(args.approval_id, task)
             status = "approved"
         else:
             record = store.deny(args.approval_id)

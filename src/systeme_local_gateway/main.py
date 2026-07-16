@@ -51,6 +51,7 @@ def _approval_output(record: ApprovalRecord) -> dict[str, object]:
         "approval_id": record.approval_id,
         "approval_state": record.state,
         "approval_expires_at": record.expires_at.isoformat(),
+        "request_fingerprint": record.request_fingerprint,
     }
 
 

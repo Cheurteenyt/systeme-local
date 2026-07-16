@@ -119,14 +119,20 @@ l’agent. La première soumission crée une demande locale et renvoie un `appro
 La base par défaut est `.systeme-local/approvals.sqlite3` et ne conserve ni arguments,
 ni contenu, ni identifiant de session bruts.
 
-Consultez et décidez localement :
+Conservez le JSON signé exact utilisé pour la première soumission. Consultez ensuite la file
+locale, puis fournissez ce fichier à la commande d’approbation :
 
 ```bash
 python -m systeme_local_gateway.approvals list
-python -m systeme_local_gateway.approvals approve <approval_id>
+python -m systeme_local_gateway.approvals approve <approval_id> --task-file /tmp/task.json
 # ou
 python -m systeme_local_gateway.approvals deny <approval_id>
 ```
+
+La commande `approve` vérifie la signature du fichier, confirme qu’il correspond exactement
+à l’empreinte HMAC de la demande, affiche localement l’identité, la capacité et les arguments,
+puis exige de saisir l’identifiant complet. L’option `--yes` est réservée aux tests locaux
+contrôlés et ne doit pas être utilisée pour une approbation humaine ordinaire.
 
 Après une approbation, l’agent doit soumettre une nouvelle enveloppe signée avec un nouveau
 nonce, le même `task_id`, la même identité, la même capacité et les mêmes arguments, ainsi

@@ -32,6 +32,8 @@ class ReplayGuardProtocol(Protocol):
 
 def canonical_payload(task: TaskEnvelope) -> bytes:
     data = task.model_dump(mode="json", exclude={"signature"})
+    if task.approval_id is None:
+        data.pop("approval_id", None)
     return json.dumps(data, sort_keys=True, separators=(",", ":")).encode("utf-8")
 
 
