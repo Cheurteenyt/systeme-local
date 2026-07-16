@@ -7,6 +7,9 @@ limits:
   max_write_bytes: 1000000
   cpu_count: 1
   memory_mb: 1024
+  max_snapshot_files: 50000
+  max_snapshot_bytes: 536870912
+  max_change_entries: 1000
 capabilities:
   workspace.list:
     decision: allow

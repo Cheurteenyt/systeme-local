@@ -9,7 +9,12 @@ from .policy import PolicyEngine
 
 app = FastAPI(title="Système Local Agent Gateway", version="0.1.0")
 policy = PolicyEngine(settings.policy_file)
-executor = CapabilityExecutor(settings.workspace, settings.docker_image, policy.limits)
+executor = CapabilityExecutor(
+    settings.workspace,
+    settings.docker_image,
+    policy.limits,
+    sandbox_root=settings.sandbox_root,
+)
 replay_guard = ReplayGuard()
 
 

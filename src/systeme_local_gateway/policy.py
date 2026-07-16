@@ -19,6 +19,9 @@ class LimitsConfig(BaseModel):
     max_write_bytes: int = Field(default=1_000_000, ge=1, le=100_000_000)
     cpu_count: float = Field(default=1, gt=0, le=64)
     memory_mb: int = Field(default=1_024, ge=64, le=262_144)
+    max_snapshot_files: int = Field(default=50_000, ge=1, le=1_000_000)
+    max_snapshot_bytes: int = Field(default=536_870_912, ge=1, le=10_737_418_240)
+    max_change_entries: int = Field(default=1_000, ge=1, le=100_000)
 
 
 class CapabilityConfig(BaseModel):
