@@ -74,6 +74,46 @@ Endpoint MCP : `http://127.0.0.1:8765/mcp`.
 N'exposez jamais cet endpoint directement sur Internet et ne placez pas de
 proxy public devant lui.
 
+### Smoke test opÃ©rateur MCP
+
+Le smoke test utilise le client Python MCP officiel contre un serveur rÃ©ellement
+lancÃ©. Il accepte uniquement une URL HTTP contenant une adresse IP loopback
+littÃ©rale, ne suit pas les redirections et ignore les variables de proxy. Le jeton
+n'est acceptÃ© que dans la variable de processus `SLG_MCP_TOKEN` : il n'existe pas
+d'option de ligne de commande pour le transmettre.
+
+Dans un second terminal PowerShell, chargez le jeton sans l'inscrire dans
+l'historique, listez les outils annoncÃ©s, puis supprimez la variable :
+
+```powershell
+$env:SLG_MCP_TOKEN = [System.Net.NetworkCredential]::new(
+    "",
+    (Read-Host "SLG_MCP_TOKEN" -AsSecureString)
+).Password
+python -m systeme_local_gateway.mcp_smoke
+python -m systeme_local_gateway.mcp_smoke `
+  --call-tool workspace.list `
+  --arguments-json '{"path":"."}'
+Remove-Item Env:SLG_MCP_TOKEN
+```
+
+Sous Bash ou Zsh :
+
+```bash
+read -r -s SLG_MCP_TOKEN
+export SLG_MCP_TOKEN
+printf '\n'
+python -m systeme_local_gateway.mcp_smoke
+python -m systeme_local_gateway.mcp_smoke \
+  --call-tool workspace.list \
+  --arguments-json '{"path":"."}'
+unset SLG_MCP_TOKEN
+```
+
+L'appel facultatif est volontairement limitÃ© Ã  `workspace.list`. Un Ã©chec de
+transport ou d'authentification produit une erreur gÃ©nÃ©rique afin de ne jamais
+rÃ©afficher le bearer token.
+
 ## Exemple de tâche
 
 ```bash
