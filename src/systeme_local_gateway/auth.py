@@ -37,6 +37,15 @@ def canonical_payload(task: TaskEnvelope) -> bytes:
     return json.dumps(data, sort_keys=True, separators=(",", ":")).encode("utf-8")
 
 
+def compute_task_signature(task: TaskEnvelope, secret: str) -> str:
+    digest = hmac.new(
+        secret.encode("utf-8"),
+        canonical_payload(task),
+        hashlib.sha256,
+    ).digest()
+    return base64.urlsafe_b64encode(digest).decode("ascii").rstrip("=")
+
+
 class ReplayGuard:
     """Bounded in-memory replay guard used by tests and ephemeral processes."""
 
@@ -313,8 +322,7 @@ def verify_task(
     if task.issued_at.timestamp() - now.timestamp() > max_clock_skew_seconds:
         raise ValueError("task issued in the future")
 
-    digest = hmac.new(secret.encode("utf-8"), canonical_payload(task), hashlib.sha256).digest()
-    expected = base64.urlsafe_b64encode(digest).decode("ascii").rstrip("=")
+    expected = compute_task_signature(task, secret)
     if not hmac.compare_digest(expected, task.signature):
         raise ValueError("invalid task signature")
 

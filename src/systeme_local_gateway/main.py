@@ -1,24 +1,21 @@
-from fastapi import FastAPI, HTTPException
+from collections.abc import AsyncIterator
+from contextlib import asynccontextmanager
 
-from .approvals import (
-    ApprovalConsumedError,
-    ApprovalDeniedError,
-    ApprovalExpiredError,
-    ApprovalMismatchError,
-    ApprovalNotFoundError,
-    ApprovalPendingError,
-    ApprovalRecord,
-    ApprovalStore,
-    ApprovalStoreUnavailableError,
-)
+from fastapi import FastAPI, HTTPException, Request, Response
+
+from .approvals import ApprovalStore
 from .audit_runtime import create_configured_audit_log
 from .auth import ReplayGuardUnavailableError, SQLiteReplayGuard, verify_task
 from .config import settings
 from .executor import CapabilityExecutor
 from .models import TaskEnvelope, TaskResult
 from .policy import PolicyEngine
+from .task_processor import (
+    TaskAuthenticationError,
+    TaskProcessor,
+    TaskServiceUnavailableError,
+)
 
-app = FastAPI(title="Système Local Agent Gateway", version="0.1.0")
 policy = PolicyEngine(settings.policy_file)
 executor = CapabilityExecutor(
     settings.workspace,
@@ -39,6 +36,50 @@ approval_store = ApprovalStore(
     max_entries=settings.approval_max_entries,
     ttl_seconds=settings.approval_ttl_seconds,
 )
+task_processor = TaskProcessor(
+    shared_secret=settings.shared_secret,
+    replay_guard=replay_guard,
+    policy=policy,
+    executor=executor,
+    audit_log=audit_log,
+    approval_store=approval_store,
+    task_verifier=verify_task,
+    replay_unavailable_error=ReplayGuardUnavailableError,
+)
+
+mcp_runtime = None
+if settings.mcp_enabled:
+    if settings.mcp_token is None:
+        raise RuntimeError("MCP is enabled without a configured token")
+
+    from .mcp_runtime import McpRuntime
+    from .mcp_tools import McpToolRegistry
+
+    mcp_runtime = McpRuntime(
+        token=settings.mcp_token,
+        shared_secret=settings.shared_secret,
+        registry=McpToolRegistry(policy),
+        task_processor=task_processor,
+        max_request_bytes=settings.mcp_max_request_bytes,
+        requests_per_minute=settings.mcp_requests_per_minute,
+        max_concurrency=settings.mcp_max_concurrency,
+    )
+
+
+@asynccontextmanager
+async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
+    if mcp_runtime is None:
+        yield
+    else:
+        async with mcp_runtime.run():
+            yield
+
+
+app = FastAPI(
+    title="Système Local Agent Gateway",
+    version="0.1.0",
+    lifespan=lifespan,
+)
 
 
 @app.get("/health")
@@ -46,176 +87,22 @@ def health() -> dict[str, str]:
     return {"status": "ok"}
 
 
-def _approval_output(record: ApprovalRecord) -> dict[str, object]:
-    return {
-        "approval_id": record.approval_id,
-        "approval_state": record.state,
-        "approval_expires_at": record.expires_at.isoformat(),
-        "request_fingerprint": record.request_fingerprint,
-    }
-
-
-def _approval_required(
-    task: TaskEnvelope,
-    *,
-    record: ApprovalRecord | None = None,
-    reason: str | None = None,
-) -> TaskResult:
-    approval_id = record.approval_id if record else task.approval_id
-    event: dict[str, object] = {
-        "task_id": task.task_id,
-        "capability": task.capability,
-        "status": "approval_required",
-        "arguments": task.arguments,
-    }
-    if approval_id is not None:
-        event["approval_id"] = approval_id
-    if reason is not None:
-        event["reason"] = reason
-    audit_id = audit_log.append(event)
-
-    output: dict[str, object]
-    if record is not None:
-        output = _approval_output(record)
-    else:
-        output = {
-            "approval_id": approval_id,
-            "approval_state": "pending",
-        }
-    return TaskResult(
-        task_id=task.task_id,
-        status="approval_required",
-        output=output,
-        audit_id=audit_id,
-    )
-
-
-def _denied(task: TaskEnvelope, reason: str) -> TaskResult:
-    audit_id = audit_log.append(
-        {
-            "task_id": task.task_id,
-            "capability": task.capability,
-            "status": "denied",
-            "reason": reason,
-            "approval_id": task.approval_id,
-        }
-    )
-    return TaskResult(
-        task_id=task.task_id,
-        status="denied",
-        error=reason,
-        audit_id=audit_id,
-    )
-
-
-def _approval_unavailable(task: TaskEnvelope, exc: Exception) -> None:
-    audit_log.append(
-        {
-            "task_id": task.task_id,
-            "capability": task.capability,
-            "status": "failed",
-            "reason": "approval service unavailable",
-        }
-    )
-    raise HTTPException(
-        status_code=503,
-        detail="approval service unavailable",
-    ) from exc
-
-
 @app.post("/v1/tasks", response_model=TaskResult)
 def submit_task(task: TaskEnvelope) -> TaskResult:
     try:
-        verify_task(task, settings.shared_secret, replay_guard=replay_guard)
-    except ReplayGuardUnavailableError as exc:
-        audit_log.append(
-            {
-                "task_id": task.task_id,
-                "capability": task.capability,
-                "status": "failed",
-                "reason": "replay protection unavailable",
-            }
-        )
-        raise HTTPException(
-            status_code=503,
-            detail="replay protection unavailable",
-        ) from exc
-    except ValueError as exc:
-        audit_log.append(
-            {
-                "task_id": task.task_id,
-                "capability": task.capability,
-                "status": "denied",
-                "reason": str(exc),
-            }
-        )
-        raise HTTPException(status_code=401, detail=str(exc)) from exc
+        return task_processor.process(task)
+    except TaskAuthenticationError as exc:
+        raise HTTPException(status_code=401, detail=exc.detail) from exc
+    except TaskServiceUnavailableError as exc:
+        raise HTTPException(status_code=503, detail=exc.detail) from exc
 
-    decision = policy.evaluate(task.capability)
-    if decision.decision == "deny":
-        return _denied(task, decision.reason)
 
-    if decision.decision == "require_approval":
-        if task.approval_id is None:
-            try:
-                record = approval_store.create(task)
-            except ApprovalStoreUnavailableError as exc:
-                _approval_unavailable(task, exc)
-            return _approval_required(task, record=record)
+if mcp_runtime is not None:
 
-        try:
-            record = approval_store.consume(task.approval_id, task)
-        except ApprovalPendingError:
-            return _approval_required(task, reason="approval is still pending")
-        except (
-            ApprovalNotFoundError,
-            ApprovalDeniedError,
-            ApprovalConsumedError,
-            ApprovalExpiredError,
-            ApprovalMismatchError,
-        ) as exc:
-            return _denied(task, str(exc))
-        except ApprovalStoreUnavailableError as exc:
-            _approval_unavailable(task, exc)
-
-        audit_log.append(
-            {
-                "task_id": task.task_id,
-                "capability": task.capability,
-                "status": "approval_consumed",
-                "approval_id": record.approval_id,
-            }
-        )
-    elif task.approval_id is not None:
-        return _denied(task, "approval ID is not valid for this capability")
-
-    try:
-        output = executor.execute(task.capability, task.arguments, decision.config)
-        status = "completed"
-        response_error = None
-        audit_error = None
-    except Exception as exc:  # Boundary: never leak internal details to a remote agent.
-        output = {}
-        status = "failed"
-        response_error = "task execution failed"
-        audit_error = str(exc)
-
-    audit_id = audit_log.append(
-        {
-            "task_id": task.task_id,
-            "agent": task.agent.model_dump(),
-            "capability": task.capability,
-            "status": status,
-            "arguments": task.arguments,
-            "output": output,
-            "error": audit_error,
-            "approval_id": task.approval_id,
-        }
+    @app.api_route(
+        "/mcp",
+        methods=["GET", "POST", "DELETE"],
+        include_in_schema=False,
     )
-    return TaskResult(
-        task_id=task.task_id,
-        status=status,
-        output=output,
-        error=response_error,
-        audit_id=audit_id,
-    )
+    async def mcp_endpoint(request: Request) -> Response:
+        return await mcp_runtime.handle_http_request(request)

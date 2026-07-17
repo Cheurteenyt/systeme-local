@@ -41,12 +41,38 @@ python -m venv .venv
 pip install -e '.[dev]'
 cp .env.example .env
 # Remplacez SLG_SHARED_SECRET et SLG_AUDIT_KEY par deux secrets aléatoires distincts.
+# Pour MCP, activez SLG_MCP_ENABLED et définissez aussi SLG_MCP_TOKEN.
 make sandbox-image
 pytest
 uvicorn systeme_local_gateway.main:app --host 127.0.0.1 --port 8765
 ```
 
 Le service écoute uniquement sur `127.0.0.1`. Pour une communication distante, utilisez un relais authentifié avec un modèle **pull** : le poste local récupère les tâches, il n'accepte pas de connexion entrante publique.
+
+### MCP local, désactivé par défaut
+
+Le transport MCP Streamable HTTP est monté sur `/mcp` uniquement lorsque
+`SLG_MCP_ENABLED=true` et qu'un `SLG_MCP_TOKEN` aléatoire indépendant est
+configuré. Le client doit envoyer ce jeton dans l'en-tête
+`Authorization: Bearer <jeton>`.
+
+Le runtime MCP est stateless, répond en JSON, refuse les clients non loopback,
+valide `Host` et `Origin`, borne la taille des requêtes, limite le débit et la
+concurrence, puis transforme chaque appel en enveloppe locale signée avant de
+passer par le même `TaskProcessor` que `/v1/tasks`.
+
+Les outils publiés sont dérivés de `policy.yaml`. Les capacités inconnues,
+refusées ou marquées `require_approval` ne sont pas annoncées. Le service doit
+être lancé avec une écoute explicite sur `127.0.0.1` :
+
+```bash
+uvicorn systeme_local_gateway.main:app --host 127.0.0.1 --port 8765
+```
+
+Endpoint MCP : `http://127.0.0.1:8765/mcp`.
+
+N'exposez jamais cet endpoint directement sur Internet et ne placez pas de
+proxy public devant lui.
 
 ## Exemple de tâche
 
