@@ -1,7 +1,18 @@
+import importlib
+import os
+from unittest.mock import patch
+
 import pytest
 from pydantic import ValidationError
 
-from systeme_local_gateway.config import Settings
+with patch.dict(
+    os.environ,
+    {
+        "SLG_SHARED_SECRET": "s" * 48,
+        "SLG_AUDIT_KEY": "a" * 48,
+    },
+):
+    Settings = importlib.import_module("systeme_local_gateway.config").Settings
 
 
 def _settings(**overrides):
