@@ -12,6 +12,7 @@ license = { text = "Apache-2.0" }
 authors = [{ name = "Système Local contributors" }]
 dependencies = [
   "fastapi>=0.115,<1",
+  "mcp>=1.27.2,<2",
   "pydantic>=2.8,<3",
   "pydantic-settings>=2.4,<3",
   "PyYAML>=6.0,<7",

@@ -36,8 +36,22 @@ class Settings(BaseSettings):
     approval_ttl_seconds: int = Field(default=900, ge=30, le=3_600)
     sandbox_root: Path = Path("./.systeme-local/sandboxes")
     docker_image: str = "python:3.12-slim"
+    mcp_enabled: bool = False
+    mcp_token: str | None = Field(default=None, min_length=32, max_length=512)
+    mcp_max_request_bytes: int = Field(
+        default=1_048_576,
+        ge=1_024,
+        le=10_485_760,
+    )
+    mcp_requests_per_minute: int = Field(default=120, ge=1, le=10_000)
+    mcp_max_concurrency: int = Field(default=4, ge=1, le=64)
 
-    @field_validator("shared_secret", "audit_key", "audit_anchor_key")
+    @field_validator(
+        "shared_secret",
+        "audit_key",
+        "audit_anchor_key",
+        "mcp_token",
+    )
     @classmethod
     def reject_insecure_secret(
         cls,
@@ -50,6 +64,7 @@ class Settings(BaseSettings):
             "replace-with-at-least-32-random-characters",
             "replace-with-different-at-least-32-random-characters",
             "replace-with-third-independent-at-least-32-random-characters",
+            "replace-with-fourth-independent-at-least-32-random-characters",
             "change-me-change-me-change-me-change-me",
         }
         if value in insecure_values:
@@ -89,6 +104,26 @@ class Settings(BaseSettings):
                     "SLG_AUDIT_ANCHOR_KEY must be different from "
                     "SLG_AUDIT_KEY"
                 )
+
+        if self.mcp_enabled and self.mcp_token is None:
+            raise ValueError(
+                "SLG_MCP_TOKEN must be configured when SLG_MCP_ENABLED is true"
+            )
+
+        if self.mcp_token is not None:
+            secrets_to_compare = {
+                "SLG_SHARED_SECRET": self.shared_secret,
+                "SLG_AUDIT_KEY": self.audit_key,
+            }
+            if self.audit_anchor_key is not None:
+                secrets_to_compare["SLG_AUDIT_ANCHOR_KEY"] = (
+                    self.audit_anchor_key
+                )
+            for variable, secret in secrets_to_compare.items():
+                if hmac.compare_digest(self.mcp_token, secret):
+                    raise ValueError(
+                        f"SLG_MCP_TOKEN must be different from {variable}"
+                    )
 
         if self.audit_anchor_log is not None:
             audit_paths = {
