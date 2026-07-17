@@ -216,6 +216,7 @@ impl AnchorScan {
 
 pub(crate) struct VerifiedProjectWitness {
     pub report: VerificationReport,
+    #[cfg(windows)]
     pub receipt: BootstrapReceipt,
 }
 
@@ -226,8 +227,7 @@ pub(crate) struct VerifiedProjectWitness {
 /// Returns [`VerificationError`] when either witness file is unavailable,
 /// unsafe, malformed, inconsistent, or outside the accepted resource bounds.
 pub fn verify_project_root(project_root: &Path) -> Result<VerificationReport, VerificationError> {
-    let VerifiedProjectWitness { report, receipt: _ } =
-        verify_project_root_with_receipt(project_root)?;
+    let VerifiedProjectWitness { report, .. } = verify_project_root_with_receipt(project_root)?;
     Ok(report)
 }
 
@@ -251,7 +251,7 @@ pub fn verify_files(
     receipt_path: &Path,
     anchor_path: &Path,
 ) -> Result<VerificationReport, VerificationError> {
-    let VerifiedProjectWitness { report, receipt: _ } =
+    let VerifiedProjectWitness { report, .. } =
         verify_files_with_receipt(receipt_path, anchor_path)?;
     Ok(report)
 }
@@ -266,7 +266,11 @@ fn verify_files_with_receipt(
 
     let anchor_bytes = read_limited(anchor_path, MAX_ANCHOR_BYTES)?;
     let report = scan_anchor(anchor_path, &anchor_bytes, &receipt)?;
-    Ok(VerifiedProjectWitness { report, receipt })
+    Ok(VerifiedProjectWitness {
+        report,
+        #[cfg(windows)]
+        receipt,
+    })
 }
 
 fn read_receipt(path: &Path) -> Result<BootstrapReceipt, VerificationError> {
