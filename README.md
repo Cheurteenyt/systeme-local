@@ -160,6 +160,15 @@ réauthentifie pas les HMAC. Consultez [`docs/rust-audit-watchdog.md`](docs/rust
 cargo run --locked -p systeme-local-audit-watchdog -- verify --project-root .
 ```
 
+Sur l’hôte Windows activé, le backend local prend le verrou de l’ancre, valide
+les ACL NTFS de `.env` et des témoins, puis corrèle l’événement
+`SystemeLocalAuditAnchor` ID `18001` avec le reçu de bootstrap. Il ne lit aucune
+clé HMAC ni le contenu de `.env`.
+
+```powershell
+cargo run --locked -p systeme-local-audit-watchdog -- verify-windows --project-root .
+```
+
 ### Protection anti-rejeu persistante
 
 Le gateway conserve les empreintes HMAC des nonces dans `SLG_REPLAY_DB`, qui vaut par défaut `.systeme-local/replay.sqlite3`. Les nonces bruts ne sont jamais écrits. L’insertion est transactionnelle : deux processus qui reçoivent simultanément la même tâche ne peuvent pas tous les deux l’accepter.

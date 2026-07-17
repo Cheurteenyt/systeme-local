@@ -214,6 +214,11 @@ impl AnchorScan {
     }
 }
 
+pub(crate) struct VerifiedProjectWitness {
+    pub report: VerificationReport,
+    pub receipt: BootstrapReceipt,
+}
+
 /// Verifies the conventional watchdog files beneath one project root.
 ///
 /// # Errors
@@ -221,8 +226,16 @@ impl AnchorScan {
 /// Returns [`VerificationError`] when either witness file is unavailable,
 /// unsafe, malformed, inconsistent, or outside the accepted resource bounds.
 pub fn verify_project_root(project_root: &Path) -> Result<VerificationReport, VerificationError> {
+    let VerifiedProjectWitness { report, receipt: _ } =
+        verify_project_root_with_receipt(project_root)?;
+    Ok(report)
+}
+
+pub(crate) fn verify_project_root_with_receipt(
+    project_root: &Path,
+) -> Result<VerifiedProjectWitness, VerificationError> {
     let state_directory = project_root.join(".systeme-local").join("audit-anchor");
-    verify_files(
+    verify_files_with_receipt(
         &state_directory.join("bootstrap-receipt.json"),
         &state_directory.join("audit-anchor.jsonl"),
     )
@@ -238,12 +251,22 @@ pub fn verify_files(
     receipt_path: &Path,
     anchor_path: &Path,
 ) -> Result<VerificationReport, VerificationError> {
+    let VerifiedProjectWitness { report, receipt: _ } =
+        verify_files_with_receipt(receipt_path, anchor_path)?;
+    Ok(report)
+}
+
+fn verify_files_with_receipt(
+    receipt_path: &Path,
+    anchor_path: &Path,
+) -> Result<VerifiedProjectWitness, VerificationError> {
     let receipt = read_receipt(receipt_path)?;
     validate_receipt(&receipt)?;
     validate_anchor_path(&receipt, anchor_path)?;
 
     let anchor_bytes = read_limited(anchor_path, MAX_ANCHOR_BYTES)?;
-    scan_anchor(anchor_path, &anchor_bytes, &receipt)
+    let report = scan_anchor(anchor_path, &anchor_bytes, &receipt)?;
+    Ok(VerifiedProjectWitness { report, receipt })
 }
 
 fn read_receipt(path: &Path) -> Result<BootstrapReceipt, VerificationError> {
@@ -378,7 +401,7 @@ fn validate_uuid_v4(value: &str) -> Result<(), String> {
     Ok(())
 }
 
-fn ensure_regular_file(path: &Path) -> Result<(), VerificationError> {
+pub(crate) fn ensure_regular_file(path: &Path) -> Result<(), VerificationError> {
     let metadata = fs::symlink_metadata(path)
         .map_err(|error| VerificationError::io("reading metadata", path, error))?;
     if metadata.file_type().is_symlink() || !metadata.file_type().is_file() {

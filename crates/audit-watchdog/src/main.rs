@@ -1,30 +1,36 @@
 use std::env;
-use std::ffi::OsStr;
+use std::ffi::{OsStr, OsString};
 use std::io::{self, Write as _};
 use std::path::PathBuf;
 use std::process::ExitCode;
 
 use serde::Serialize;
-use systeme_local_audit_watchdog::{VerificationReport, verify_project_root};
+use systeme_local_audit_watchdog::{verify_project_root, verify_windows_project_root};
 
 const USAGE: &str = "\
 Usage:
   systeme-local-audit-watchdog verify [--project-root PATH]
+  systeme-local-audit-watchdog verify-windows [--project-root PATH]
   systeme-local-audit-watchdog --help
 
-The command emits one JSON object and never reads audit HMAC keys.
+Both commands emit one JSON object and never read audit HMAC keys.
+The Windows command also validates hardened ACLs and the bootstrap Event Log witness.
 ";
 
-#[derive(Debug)]
+#[derive(Debug, Eq, PartialEq)]
 enum ParsedCommand {
     Help,
     Verify { project_root: PathBuf },
+    VerifyWindows { project_root: PathBuf },
 }
 
 #[derive(Serialize)]
-struct SuccessOutput<'a> {
+struct SuccessOutput<'a, T>
+where
+    T: Serialize,
+{
     status: &'static str,
-    report: &'a VerificationReport,
+    report: &'a T,
 }
 
 #[derive(Serialize)]
@@ -40,6 +46,12 @@ fn main() -> ExitCode {
             Ok(report) => emit_success(&report),
             Err(error) => emit_error(&error.to_string(), 1),
         },
+        Ok(ParsedCommand::VerifyWindows { project_root }) => {
+            match verify_windows_project_root(&project_root) {
+                Ok(report) => emit_success(&report),
+                Err(error) => emit_error(&error.to_string(), 1),
+            }
+        }
         Err(message) => {
             let code = emit_error(&message, 64);
             let _write_result = write_stderr(USAGE);
@@ -49,21 +61,39 @@ fn main() -> ExitCode {
 }
 
 fn parse_command() -> Result<ParsedCommand, String> {
-    let mut arguments = env::args_os();
-    let _program = arguments.next();
+    parse_arguments(env::args_os().skip(1))
+}
 
+fn parse_arguments<I>(arguments: I) -> Result<ParsedCommand, String>
+where
+    I: IntoIterator<Item = OsString>,
+{
+    let mut arguments = arguments.into_iter();
     let Some(command) = arguments.next() else {
         return Err("missing command".to_owned());
     };
     if command == OsStr::new("--help") || command == OsStr::new("-h") {
         return Ok(ParsedCommand::Help);
     }
-    if command != OsStr::new("verify") {
-        return Err(format!("unknown command {}", command.to_string_lossy()));
-    }
 
+    let windows = if command == OsStr::new("verify") {
+        false
+    } else if command == OsStr::new("verify-windows") {
+        true
+    } else {
+        return Err(format!("unknown command {}", command.to_string_lossy()));
+    };
+
+    parse_project_root(arguments, windows)
+}
+
+fn parse_project_root<I>(mut arguments: I, windows: bool) -> Result<ParsedCommand, String>
+where
+    I: Iterator<Item = OsString>,
+{
     let mut project_root = PathBuf::from(".");
     let mut project_root_seen = false;
+
     while let Some(argument) = arguments.next() {
         if argument == OsStr::new("--help") || argument == OsStr::new("-h") {
             return Ok(ParsedCommand::Help);
@@ -81,7 +111,11 @@ fn parse_command() -> Result<ParsedCommand, String> {
         project_root_seen = true;
     }
 
-    Ok(ParsedCommand::Verify { project_root })
+    if windows {
+        Ok(ParsedCommand::VerifyWindows { project_root })
+    } else {
+        Ok(ParsedCommand::Verify { project_root })
+    }
 }
 
 fn write_help() -> ExitCode {
@@ -91,7 +125,10 @@ fn write_help() -> ExitCode {
     }
 }
 
-fn emit_success(report: &VerificationReport) -> ExitCode {
+fn emit_success<T>(report: &T) -> ExitCode
+where
+    T: Serialize,
+{
     let output = SuccessOutput {
         status: "valid",
         report,
@@ -107,7 +144,10 @@ fn emit_error(message: &str, code: u8) -> ExitCode {
     emit_json(&output, true, code)
 }
 
-fn emit_json<T: Serialize>(value: &T, to_stderr: bool, code: u8) -> ExitCode {
+fn emit_json<T>(value: &T, to_stderr: bool, code: u8) -> ExitCode
+where
+    T: Serialize,
+{
     let encoded = match serde_json::to_string(value) {
         Ok(encoded) => encoded,
         Err(error) => {
@@ -141,4 +181,59 @@ fn write_stderr(value: &str) -> io::Result<()> {
     let mut handle = stderr.lock();
     handle.write_all(value.as_bytes())?;
     handle.flush()
+}
+
+#[cfg(test)]
+mod tests {
+    use std::ffi::OsString;
+    use std::path::PathBuf;
+
+    use super::{ParsedCommand, parse_arguments};
+
+    #[test]
+    fn parses_portable_verification() {
+        let parsed = parse_arguments([OsString::from("verify")]);
+        assert_eq!(
+            parsed,
+            Ok(ParsedCommand::Verify {
+                project_root: PathBuf::from("."),
+            })
+        );
+    }
+
+    #[test]
+    fn parses_windows_verification_with_project_root() {
+        let parsed = parse_arguments([
+            OsString::from("verify-windows"),
+            OsString::from("--project-root"),
+            OsString::from(r"D:\systeme-local"),
+        ]);
+        assert_eq!(
+            parsed,
+            Ok(ParsedCommand::VerifyWindows {
+                project_root: PathBuf::from(r"D:\systeme-local"),
+            })
+        );
+    }
+
+    #[test]
+    fn rejects_duplicate_project_root() {
+        let parsed = parse_arguments([
+            OsString::from("verify"),
+            OsString::from("--project-root"),
+            OsString::from("."),
+            OsString::from("--project-root"),
+            OsString::from("."),
+        ]);
+        assert_eq!(
+            parsed,
+            Err("--project-root may be supplied only once".to_owned())
+        );
+    }
+
+    #[test]
+    fn rejects_unknown_commands() {
+        let parsed = parse_arguments([OsString::from("unknown")]);
+        assert_eq!(parsed, Err("unknown command unknown".to_owned()));
+    }
 }
