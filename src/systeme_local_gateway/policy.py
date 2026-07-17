@@ -59,6 +59,13 @@ class PolicyDocument(BaseModel):
 
 
 @dataclass(frozen=True)
+class DeclaredCapability:
+    name: str
+    decision: Decision
+    allowed_commands: tuple[tuple[str, ...], ...]
+
+
+@dataclass(frozen=True)
 class PolicyDecision:
     decision: Decision
     reason: str
@@ -72,6 +79,16 @@ class PolicyEngine:
         self._default: Decision = document.default
         self.limits: dict[str, Any] = document.limits.model_dump(mode="json")
         self._capabilities = document.capabilities
+
+    def declared_capabilities(self) -> tuple[DeclaredCapability, ...]:
+        return tuple(
+            DeclaredCapability(
+                name=name,
+                decision=config.decision,
+                allowed_commands=tuple(tuple(command) for command in config.allowed_commands),
+            )
+            for name, config in sorted(self._capabilities.items())
+        )
 
     def evaluate(self, capability: str) -> PolicyDecision:
         config = self._capabilities.get(capability)
