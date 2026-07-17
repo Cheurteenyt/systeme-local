@@ -54,6 +54,28 @@ pub enum VerificationError {
         /// Path actually verified.
         actual: PathBuf,
     },
+    /// A coordinated snapshot could not acquire the runtime lock in time.
+    LockTimeout {
+        /// Runtime lock file.
+        path: PathBuf,
+        /// Bounded acquisition timeout.
+        seconds: u64,
+    },
+    /// The bundled Windows metadata collector failed.
+    WindowsCollector {
+        /// Bounded failure description.
+        message: String,
+    },
+    /// Windows-local witness metadata violates an invariant.
+    WindowsWitness {
+        /// Invariant failure.
+        message: String,
+    },
+    /// A platform-specific command was requested on another operating system.
+    UnsupportedPlatform {
+        /// Feature requiring a different operating system.
+        feature: &'static str,
+    },
 }
 
 impl VerificationError {
@@ -74,6 +96,20 @@ impl VerificationError {
     pub(crate) fn checkpoint(line: usize, message: impl Into<String>) -> Self {
         Self::Checkpoint {
             line,
+            message: message.into(),
+        }
+    }
+
+    #[cfg(windows)]
+    pub(crate) fn windows_collector(message: impl Into<String>) -> Self {
+        Self::WindowsCollector {
+            message: message.into(),
+        }
+    }
+
+    #[cfg(any(windows, test))]
+    pub(crate) fn windows_witness(message: impl Into<String>) -> Self {
+        Self::WindowsWitness {
             message: message.into(),
         }
     }
@@ -134,6 +170,20 @@ impl fmt::Display for VerificationError {
                 recorded.display(),
                 actual.display()
             ),
+            Self::LockTimeout { path, seconds } => write!(
+                formatter,
+                "timed out after {seconds} seconds acquiring {}",
+                path.display()
+            ),
+            Self::WindowsCollector { message } => {
+                write!(formatter, "Windows witness collector failed: {message}")
+            }
+            Self::WindowsWitness { message } => {
+                write!(formatter, "invalid Windows witness: {message}")
+            }
+            Self::UnsupportedPlatform { feature } => {
+                write!(formatter, "{feature} is unsupported on this platform")
+            }
         }
     }
 }

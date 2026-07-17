@@ -147,5 +147,20 @@ jobs:
       - name: Select Rust toolchain
         run: rustup override set 1.97.1
 
+      - name: Check bundled PowerShell collector syntax
+        shell: powershell
+        run: |
+          $tokens = $null
+          $errors = $null
+          [void][System.Management.Automation.Language.Parser]::ParseFile(
+            (Resolve-Path "crates/audit-watchdog/src/windows_snapshot.ps1"),
+            [ref]$tokens,
+            [ref]$errors
+          )
+          if (@($errors).Count -ne 0) {
+            $errors | ForEach-Object { Write-Error $_.Message }
+            exit 1
+          }
+
       - name: Test
         run: cargo test --workspace --all-features --locked
