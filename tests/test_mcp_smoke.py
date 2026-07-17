@@ -109,3 +109,8 @@ def test_main_redacts_unexpected_client_errors(monkeypatch, capsys) -> None:
         "error": "MCP smoke check failed",
     }
     assert token not in captured.err
+
+def test_parser_description_preserves_utf8_project_name() -> None:
+    description = mcp_smoke._build_parser().description
+    assert description is not None
+    assert "Système Local" in description

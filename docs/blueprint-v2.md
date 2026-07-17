@@ -45,9 +45,11 @@ Le poste local établit lui-même une connexion vers un relais ou un endpoint ap
 
 ### 3.5 Les transports de modèles sont séparés
 
-Le produit distingue un agent web qui **appelle le MCP** d'un fournisseur que le nœud peut **appeler par API**. Le premier est un client entrant et ne peut pas être sélectionné automatiquement comme s'il s'agissait d'une API. Le second est un fournisseur sortant documenté. Les interfaces fermées utilisent un handoff interactif signé.
+Le produit distingue un agent web qui **appelle le MCP** d'un fournisseur que le nœud peut **appeler par un contrat machine documenté**. Le premier est un client entrant et ne peut pas être sélectionné automatiquement comme s'il s'agissait d'un fournisseur sortant. Le second passe par un adaptateur propre au fournisseur. Les interfaces sans contrat fiable utilisent un handoff interactif signé ou restent en phase de caractérisation.
 
-Cette distinction est spécifiée dans [`connectivity-model.md`](connectivity-model.md).
+Chaque fournisseur web possède un profil de capacités explicite. ChatGPT est le premier fournisseur caractérisé ; ses surfaces MCP, API et conversation web visible ne sont jamais supposées équivalentes.
+
+Les règles communes sont spécifiées dans [`connectivity-model.md`](connectivity-model.md) et le profil ChatGPT dans [`providers/chatgpt.md`](providers/chatgpt.md).
 
 ### 3.6 Les actions sont transactionnelles
 
@@ -379,8 +381,10 @@ Multi-tenant, SSO, politiques centrales, attestations de machines, intégration 
 
 ### Interopérabilité
 
-- adaptateur MCP ;
-- adaptateur function calling GLM/OpenAI-compatible ;
+- profils de capacités par fournisseur et cycle de vie normalisé ;
+- caractérisation ChatGPT en premier fournisseur ;
+- adaptateur MCP entrant ;
+- adaptateur fournisseur sortant par contrat documenté ;
 - capsules manuelles ;
 - matrice de compatibilité automatisée.
 

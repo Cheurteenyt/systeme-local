@@ -154,7 +154,7 @@ def _redact_secret(value: Any, secret: str) -> Any:
 def _build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         description=(
-            "Verify the local SystÃ¨me Local MCP endpoint with the official MCP client"
+            "Verify the local Système Local MCP endpoint with the official MCP client"
         )
     )
     parser.add_argument(

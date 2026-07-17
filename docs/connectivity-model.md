@@ -1,143 +1,292 @@
-# Connectivity model — manual web prompts, MCP and provider APIs
+# Connectivity model — provider-specific web AI channels
 
 ## Decision
 
-Système Local supports three distinct connectivity modes. They share the same
-provider-neutral task ledger, but they must never be confused in code or in the
-user interface.
+Système Local supports separate connectivity channels that share the same provider-neutral task ledger, policy engine, audit trail and local execution plane. A protocol façade, a provider transport and a visible provider conversation are different concepts and must never be merged into one implicit abstraction.
 
-| Mode | Who starts the exchange? | Fully automatic? | Requires provider API? |
-|---|---|---:|---:|
-| Inbound MCP client | The web agent calls Système Local | During an open agent session | No |
-| Outbound official API | Système Local calls the model | Yes | Yes |
-| Interactive handoff | The user or an approved companion transfers a capsule | No | No |
+Every web AI provider has a dedicated capability profile and adapter. ChatGPT is the first provider to be characterized, but the common core must not assume that later providers expose the same conversation identifiers, streaming events, tool calls, cancellation semantics or browser features.
 
-A prompt typed manually into a provider website is not a call to the provider's
-public developer API. The browser still communicates with the provider's own
-backend, but those internal endpoints are private implementation details. They
-are not a stable or supported integration contract and Système Local must not
-reverse engineer or automate them.
+| Mode | Who starts the exchange? | Direction | Machine contract required? |
+|---|---|---|---:|
+| Inbound MCP tools | The web host | web host → local tools | MCP |
+| Outbound provider adapter | The authenticated local agent | local orchestrator → provider | Yes, provider-specific |
+| Provider-approved web-session bridge | The local agent through a visible, supported companion | local orchestrator → visible web session | Provider-supported mechanism |
+| Interactive handoff | The user | manual in both directions | No |
 
-## Priority path: the web agent drives through MCP
+A prompt displayed in a provider website is not automatically equivalent to a public developer API request. Private browser endpoints, cookies and undocumented DOM behavior are not stable integration contracts.
 
-This is the preferred flow for a web product that can connect to a remote MCP
-server:
+Provider-specific details belong under `docs/providers/`. This document is the only normative cross-provider connectivity source of truth.
+
+## Two directions must coexist
+
+A complete integration can require two independent channels:
 
 ```text
-User types a prompt into GLM/web agent
-              │
-              ▼
-The provider's agent reasons in its normal web session
-              │ MCP tool call
-              ▼
-Public MCP Edge (authenticated, no execution authority)
-              │ encrypted task delivery / outbound local connection
-              ▼
-Local Control Plane
-              │ policy + approval + sandbox
-              ▼
-Local worker executes and emits structured observations
-              │
-              └──────── MCP result ───────► web agent continues reasoning
+local agent
+    │ committed, authenticated turn
+    ▼
+provider adapter
+    │ provider-specific outbound transport
+    ▼
+web AI
+    │ structured tool request
+    ▼
+local MCP façade
+    │ policy + approval + execution + audit
+    ▼
+tool result returned through the provider adapter
+```
+
+The current MCP implementation covers the lower half of this loop: a client calls governed local tools. It remains useful even when a separate provider adapter is added for local-agent initiated turns.
+
+MCP must not be treated as a generic prompt-submission API. Likewise, a provider API or web-session bridge must not bypass the local capability registry, policy engine, approval store or audit trail.
+
+## Provider capability profiles
+
+Before an adapter is implemented, it must publish an evidence-backed profile. Unknown capabilities remain `unknown`; they are never inferred from another provider.
+
+Minimum fields:
+
+```yaml
+provider: example
+profile_version: 1
+surfaces:
+  inbound_mcp:
+    status: supported | unsupported | unknown
+    evidence: documented | observed | none
+  outbound_machine_turns:
+    status: supported | unsupported | unknown
+    evidence: documented | observed | none
+  visible_web_session:
+    status: supported | unsupported | research | unknown
+    evidence: documented | observed | none
+capabilities:
+  can_initiate_turn: true | false | unknown
+  can_create_conversation: true | false | unknown
+  can_enumerate_conversations: true | false | unknown
+  exposes_conversation_id: true | false | unknown
+  exposes_terminal_response_event: true | false | unknown
+  supports_streaming: true | false | unknown
+  supports_tool_calls: true | false | unknown
+  supports_cancellation: true | false | unknown
+  supports_resume: true | false | unknown
+```
+
+The profile records what is proven for a specific surface. A capability available through an official API does not prove that the same capability exists in the provider's visible web interface.
+
+## Local-agent identity
+
+The local agent is authenticated before any provider-specific transport is used. Its identity is not established by prompt text.
+
+A committed turn binds at least:
+
+- `agent_id`;
+- `instance_id`;
+- `key_id`;
+- `conversation_id`;
+- `turn_id`;
+- creation and expiry timestamps;
+- nonce;
+- content hash;
+- signature.
+
+The provider may receive a descriptive claim that the turn came from an authenticated local agent, but the model does not perform the authentication. Cryptographic verification and authorization remain local.
+
+A provider conversation identifier, browser tab, MCP connection identifier or model-generated statement is never sufficient proof of identity.
+
+## Turn and completion semantics
+
+Système Local uses explicit lifecycle events instead of silence, punctuation or UI animation heuristics.
+
+```text
+local_turn.started
+local_turn.content.delta
+local_turn.committed
+provider_run.submitted
+provider_response.started
+provider_response.event
+provider_response.terminal
+tool_loop.completed
+delegation.completed
+receipt.verified
+```
+
+`local_turn.committed` means the local agent has finished the immutable input. The final content hash, byte count and part count are verified before submission.
+
+`provider_response.terminal` means the provider-specific response reached a documented terminal state such as completed, failed, cancelled or incomplete. It does not necessarily mean the delegation is finished.
+
+`delegation.completed` requires all of the following:
+
+- a successful terminal provider response;
+- no pending tool call;
+- no pending approval;
+- required outputs validated;
+- audit and receipt persisted.
+
+Adapters must normalize provider events into this lifecycle while retaining the original provider identifiers and sequence numbers as evidence.
+
+## Conversation ownership
+
+Tasks and conversations belong to the local ledger, not to a provider sidebar or browser tab.
+
+The local registry uses its own identifiers:
+
+```text
+conversation_id
+turn_id
+task_id
+provider_run_id
+tool_call_id
+trace_id
+```
+
+Provider identifiers are optional mappings:
+
+```json
+{
+  "conversation_id": "slconv_...",
+  "provider": "example",
+  "provider_conversation_id": null,
+  "last_provider_run_id": "provider-specific",
+  "state": "active"
+}
+```
+
+Creating a new visible provider chat, detecting that a new chat was opened or enumerating existing chats are provider-specific capabilities. They remain unsupported or unknown until the provider profile contains evidence.
+
+A disconnect never silently creates a new conversation. A retry never repeats a local effect without the same idempotency key and a verified state transition.
+
+## Inbound MCP tools
+
+Inbound MCP is the path where a compatible web host initiates tool calls:
+
+```text
+web host
+    │ MCP tool call
+    ▼
+authenticated MCP edge or supported tunnel
+    │ outbound local delivery
+    ▼
+local control plane
+    │ policy + approval + sandbox
+    ▼
+structured tool result
 ```
 
 In this mode:
 
-- the user keeps the web subscription and its interface;
-- Système Local does not submit the original prompt to a model API;
-- the provider remains the MCP client and initiates every model turn;
-- the local node can return tool results, progress and artifacts;
-- the local node cannot force the web model to answer when no session is active;
-- exact web quota information is generally unavailable unless the host exposes it.
+- the provider host initiates model turns;
+- the local node exposes only policy-advertised tools;
+- the local node cannot force a model response when no host session is active;
+- the MCP session is transport state, not a trusted conversation identity;
+- tool calls still become signed local tasks and pass through the same `TaskProcessor`.
 
-## Autonomous routing requires an official API
+The local loopback MCP runtime, bearer authentication, host and origin checks, request limits, rate limits, concurrency limits, policy-derived registry, audit integration and official-client smoke workflow are retained.
 
-The Brain Router can choose a provider and call it without the user only when a
-supported machine-to-machine contract exists. That normally means an official
-API with documented authentication, request schemas, errors and rate limits.
+## Outbound provider adapters
 
-```text
-Task Ledger -> Context Compiler -> Brain Router -> Official Provider API
-```
+A local agent initiates a provider turn only through a dedicated adapter whose capability profile proves a supported machine contract.
 
-Only profiles with `transport=official_api` are eligible for autonomous outbound
-selection. An MCP client is never silently treated as an API provider.
+A supported contract may be an official API, SDK, agent protocol or another documented provider mechanism. The common core does not require every provider to use an API, but it refuses to invent one from private browser traffic.
 
-## Interactive handoff for closed web interfaces
+The adapter is responsible for:
 
-When an interface has neither an API usable by the project nor an MCP client,
-Système Local creates a signed `TaskCapsule` containing:
+- provider authentication;
+- request and conversation identifiers;
+- event ordering;
+- terminal-state detection;
+- tool-call normalization;
+- bounded retries and idempotency;
+- cancellation and resume when supported;
+- error and quota evidence;
+- redaction of secrets and sensitive content.
 
-- the provider-neutral checkpoint;
+When the provider emits a tool call, the orchestrator validates it locally, invokes the governed capability through the local execution path, then returns the structured result through the provider adapter.
+
+## Provider-approved web-session bridges
+
+A visible web-session bridge is a separate provider surface. It may be considered only when the mechanism is documented or explicitly supported, remains visible to the user and does not depend on private endpoints or credential extraction.
+
+Before implementation, characterization must answer:
+
+- how the local agent submits a complete turn;
+- how the source agent is represented;
+- whether a stable conversation identifier is exposed;
+- whether a new conversation can be created explicitly;
+- how a response terminal state is observed;
+- how human interruption is detected;
+- how login expiry, moderation, quotas and provider UI changes are surfaced;
+- whether the mechanism permits reliable cancellation and resume.
+
+If these questions cannot be answered with evidence, the surface remains `research` or `unsupported`. The system falls back to an official provider contract or interactive handoff.
+
+## Interactive handoff
+
+When no supported autonomous transport exists, Système Local creates a signed task capsule containing:
+
+- a provider-neutral checkpoint;
 - a minimal prompt brief;
 - references to exportable artifacts;
-- the expected structured response schema;
-- an expiry and an idempotency key.
+- an expected structured response schema;
+- expiry;
+- idempotency key.
 
-The user pastes the capsule into the web interface and returns the response. An
-optional browser companion may assist with copying and validating the response,
-but it must remain visible, user-controlled and limited to supported browser
-extension APIs. It must not replay private web endpoints or bypass service
-restrictions.
+The user transfers the capsule and returns the response. An optional companion may assist only through documented browser extension or accessibility APIs, remain visible and user-controlled, and never replay private provider endpoints.
 
-## Switching web brains without losing the task
+## Switching providers without losing work
 
-A task belongs to the Task Ledger, not to a provider conversation. Every remote
-reasoning step consumes a provider-neutral `Checkpoint` and produces a typed
-result.
+A task belongs to the local ledger. Every provider reasoning step consumes a provider-neutral checkpoint and produces a typed result.
 
-For inbound MCP clients, switching is intentionally simple:
+Switching providers:
 
-1. the current agent releases or loses its short task claim;
-2. the checkpoint remains in the local ledger;
-3. the user opens another compatible web agent connected to the same MCP edge;
-4. the new agent calls `task.list_pending` and `task.claim`;
-5. it receives a newly compiled brief, not the previous provider's raw chat.
+1. closes or releases the current provider claim;
+2. preserves the checkpoint and idempotency state;
+3. selects an adapter with a compatible capability profile;
+4. compiles a new provider-specific brief;
+5. creates or maps a provider conversation only when supported;
+6. continues from the local checkpoint, not from an assumed copy of another provider's raw chat.
 
-Claims are leases with expiration. Responses include the task ID, step ID,
-checkpoint hash and idempotency key, preventing duplicate local effects.
-
-## Availability and usage limits
+## Availability and usage evidence
 
 Availability is represented as a state with evidence and confidence:
 
-- `available`
-- `degraded`
-- `temporary_capacity`
-- `rate_limited`
-- `quota_exhausted`
-- `user_action_required`
-- `offline`
-- `unknown`
+- `available`;
+- `degraded`;
+- `temporary_capacity`;
+- `rate_limited`;
+- `quota_exhausted`;
+- `user_action_required`;
+- `offline`;
+- `unknown`.
 
-For official APIs, adapters may use documented status codes, error bodies,
-`Retry-After` and quota endpoints. For web sessions, Système Local should only
-report observations it can actually prove, such as a disconnected MCP session,
-a task-claim timeout or a provider error explicitly relayed by the host. It must
-not invent a remaining request count.
+Adapters may report only what their surface proves. They must not invent remaining quotas, conversation state or completion from UI appearance.
 
-Retries are bounded, idempotent and policy-controlled. A temporary failure may
-be retried with backoff and jitter. A quota exhaustion, authentication failure
-or policy refusal does not trigger an automatic retry loop.
+Retries are bounded, idempotent and policy-controlled. Authentication failures, quota exhaustion, policy refusals and ambiguous local-effect outcomes do not trigger an automatic retry loop.
 
-## Installation experience
+## Provider onboarding sequence
 
-The desired user journey is:
+Each new provider follows the same order:
 
-1. install the local node;
-2. pair the node with a Système Local MCP Edge or a self-hosted edge;
-3. copy one authenticated MCP URL into the chosen web agent;
-4. approve which workspaces and capabilities that agent may see;
-5. type normal prompts in the web agent.
+1. create a provider-specific document under `docs/providers/`;
+2. record surfaces, capability states and evidence;
+3. define normalized lifecycle mappings;
+4. implement a deterministic mock adapter;
+5. add conformance fixtures for completion, failure, cancellation and tool calls;
+6. perform a manual characterization run with secrets excluded from logs;
+7. implement one supported real transport;
+8. connect tool calls to the existing governed local execution path;
+9. add provider-specific recovery and drift tests.
 
-The MCP URL exposes only capabilities that are currently authorized. The public
-edge never obtains direct host execution authority; the local node keeps an
-outbound connection and independently validates every task.
+ChatGPT is the first provider in this sequence. See [`providers/chatgpt.md`](providers/chatgpt.md).
 
 ## Non-goals
 
-- automating undocumented provider web endpoints;
-- bypassing account limits, risk controls or provider policies;
-- claiming that a closed text-only UI can be switched automatically;
-- using browser cookies as durable provider credentials;
-- allowing a remote model to change its own permissions.
+- treating MCP as a prompt-submission API;
+- treating one provider's behavior as universal;
+- automating undocumented provider endpoints;
+- persisting browser cookies as provider credentials;
+- scraping hidden account or conversation data;
+- guessing response completion from silence or animations;
+- allowing a provider to change local permissions;
+- bypassing provider limits, safety controls or terms;
+- exposing a shell or public local MCP endpoint.

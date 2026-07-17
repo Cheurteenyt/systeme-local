@@ -15,11 +15,24 @@ Passerelle locale sécurisée permettant à un agent IA distant de demander des 
 - Approbation humaine locale, explicite et à usage unique pour les actions sensibles.
 - Journal d'audit minimal, chaîné par HMAC, sans arguments ni sorties brutes.
 - Protection anti-rejeu persistante et transactionnelle entre les redémarrages.
-- Adaptateurs fournisseurs remplaçables : GLM/z.ai, API compatible OpenAI, MCP, GitHub, relais HTTPS.
+- Adaptateurs de fournisseurs web remplaçables, chacun avec un profil de capacités explicite.
+- Façades et transports séparés du fournisseur : MCP, contrat machine officiel, GitHub, relais HTTPS ou handoff interactif.
 
 ## Portée du produit
 
 Le projet vise une infrastructure générique de délégation sécurisée entre agents distants et ressources locales. L'amélioration d'un harness d'évaluation d'IA locales est un scénario de validation, pas la finalité du produit.
+
+### Directions d'intégration
+
+Système Local sépare trois responsabilités qui ne doivent jamais être confondues :
+
+- **MCP entrant** : un hôte web appelle des outils locaux gouvernés ;
+- **adaptateur fournisseur sortant** : une IA locale initie un tour vers une IA web par un mécanisme explicitement pris en charge par ce fournisseur ;
+- **handoff interactif** : un utilisateur ou un compagnon visible transfère une capsule lorsqu'aucun contrat machine fiable n'existe.
+
+Le runtime MCP actuellement implémenté couvre le premier canal. Il reste la façade d'outils locale sécurisée et réutilisable ; il ne prétend pas créer, lister ou observer les conversations d'un fournisseur web.
+
+Les règles communes sont définies dans [`docs/connectivity-model.md`](docs/connectivity-model.md). La caractérisation initiale de ChatGPT est définie dans [`docs/providers/chatgpt.md`](docs/providers/chatgpt.md).
 
 ### Scénario de validation initial
 
@@ -74,16 +87,11 @@ Endpoint MCP : `http://127.0.0.1:8765/mcp`.
 N'exposez jamais cet endpoint directement sur Internet et ne placez pas de
 proxy public devant lui.
 
-### Smoke test opÃ©rateur MCP
+### Smoke test opérateur MCP
 
-Le smoke test utilise le client Python MCP officiel contre un serveur rÃ©ellement
-lancÃ©. Il accepte uniquement une URL HTTP contenant une adresse IP loopback
-littÃ©rale, ne suit pas les redirections et ignore les variables de proxy. Le jeton
-n'est acceptÃ© que dans la variable de processus `SLG_MCP_TOKEN` : il n'existe pas
-d'option de ligne de commande pour le transmettre.
+Le smoke test utilise le client Python MCP officiel contre un serveur réellement lancé. Il accepte uniquement une URL HTTP contenant une adresse IP loopback littérale, ne suit pas les redirections et ignore les variables de proxy. Le jeton n'est accepté que dans la variable de processus `SLG_MCP_TOKEN` : il n'existe pas d'option de ligne de commande pour le transmettre.
 
-Dans un second terminal PowerShell, chargez le jeton sans l'inscrire dans
-l'historique, listez les outils annoncÃ©s, puis supprimez la variable :
+Dans un second terminal PowerShell, chargez le jeton sans l'inscrire dans l'historique, listez les outils annoncés, puis supprimez la variable :
 
 ```powershell
 $env:SLG_MCP_TOKEN = [System.Net.NetworkCredential]::new(
@@ -102,18 +110,14 @@ Sous Bash ou Zsh :
 ```bash
 read -r -s SLG_MCP_TOKEN
 export SLG_MCP_TOKEN
-printf '\n'
+printf '
+'
 python -m systeme_local_gateway.mcp_smoke
-python -m systeme_local_gateway.mcp_smoke \
-  --call-tool workspace.list \
-  --arguments-json '{"path":"."}'
+python -m systeme_local_gateway.mcp_smoke   --call-tool workspace.list   --arguments-json '{"path":"."}'
 unset SLG_MCP_TOKEN
 ```
 
-L'appel facultatif est volontairement limitÃ© Ã  `workspace.list`. Un Ã©chec de
-transport ou d'authentification produit une erreur gÃ©nÃ©rique afin de ne jamais
-rÃ©afficher le bearer token.
-
+L'appel facultatif est volontairement limité à `workspace.list`. Un échec de transport ou d'authentification produit une erreur générique afin de ne jamais réafficher le bearer token.
 ## Exemple de tâche
 
 ```bash
