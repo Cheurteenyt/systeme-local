@@ -262,6 +262,8 @@ Answers must cite current official documentation or be labeled as controlled obs
 
 ### Phase 1 — deterministic ChatGPT mock adapter
 
+Status: provider lifecycle foundation implemented. The implementation is deterministic, metadata-only and performs no network request. It does not connect to ChatGPT, `chatgpt.com`, the OpenAI API or Secure MCP Tunnel.
+
 - simulate successful, failed, cancelled and incomplete responses;
 - simulate one or more tool calls;
 - test committed-turn boundaries;
@@ -269,7 +271,7 @@ Answers must cite current official documentation or be labeled as controlled obs
 - test separate new-conversation and continue-conversation operations;
 - emit verifiable delegation receipts.
 
-No network credential is required for this phase.
+No network credential is required for this phase. Raw prompts, raw outputs, raw tool arguments and raw provider errors are excluded from the lifecycle event store.
 
 ### Phase 2 — one supported outbound surface
 
