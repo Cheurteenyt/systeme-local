@@ -237,19 +237,11 @@ This document is the provider-neutral contract. Provider-specific facts, volatil
 
 `docs/connectivity-model.md` remains the cross-provider connectivity source of truth. The lifecycle ledger remains authoritative for submitted turns and provider events; this context registry remains authoritative for local account/project/conversation bindings and quota observations.
 
-## Next lot: multimodal attachments
+## Attachment foundation
 
-Screenshots and files are intentionally separate. The next foundation will define:
+The committed attachment and deterministic batching foundation is defined in [`provider-attachments.md`](provider-attachments.md). It binds bounded attachment metadata to committed turns, validates five locally verifiable media types, engages revisioned capability profiles and required quota evidence, and models idempotent completed, partial, cancelled, rejected and ambiguous simulated transfer outcomes.
 
-- `CommittedAttachment` and ordered manifests;
-- content hashes, MIME types, sizes and image dimensions;
-- encrypted local blob storage;
-- redaction and approval state;
-- batching and provider limits;
-- partial upload and ambiguous-acceptance recovery;
-- retention and verified deletion.
-
-No attachment bytes or screenshots are stored by the provider context registry.
+The provider context registry still stores no attachment bytes or screenshots. Encrypted blob storage, redaction, approval, retention and verified deletion remain a separate security lot.
 
 ## Non-goals
 

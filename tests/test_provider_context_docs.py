@@ -15,11 +15,17 @@ def test_provider_context_contract_is_documented() -> None:
         "existing conversation may be moved into a project created later",
         "quota observation is fresh",
         "contiguous version history",
-        "Next lot: multimodal attachments",
-        "No attachment bytes or screenshots are stored",
+        "## Attachment foundation",
+        "provider-attachments.md",
+        "The provider context registry still stores no attachment bytes or screenshots.",
+        (
+            "Encrypted blob storage, redaction, approval, retention and verified "
+            "deletion remain a separate security lot."
+        ),
     )
     for marker in required:
         assert marker in document
+    assert "Next lot: multimodal attachments" not in document
 
 
 def test_connectivity_document_contains_context_registry_contract() -> None:

@@ -122,7 +122,9 @@ Project and chat enumeration remain `unknown` for a personal visible-account aut
 
 Chat conversations are modeled separately from Work threads. Synchronization scope is explicit because current official documentation distinguishes cloud Work threads from desktop-local Work threads and files. Temporary conversations cannot be bound to a project.
 
-File and image limits are observations, not schema constants. Current documentation lists 512 MB per general file, 2 million tokens per text/document file, about 50 MB per spreadsheet and 20 MB per image, plus upload-rate and storage caps. The next separate phase will model ordered screenshots, redaction, batching and ambiguous upload recovery. See [File Uploads FAQ](https://help.openai.com/en/articles/8555545-file-uploads-faq).
+File and image limits are observations, not schema constants. Current documentation lists 512 MB per general file, 2 million tokens per text/document file, about 50 MB per spreadsheet and 20 MB per image, plus upload-rate and storage caps. See [File Uploads FAQ](https://help.openai.com/en/articles/8555545-file-uploads-faq).
+
+The provider-neutral attachment foundation validates local bytes, commits ordered manifests, binds capability and quota evidence, plans deterministic batches and simulates ambiguous acceptance recovery. Real ChatGPT upload capability for an outbound local-agent surface remains `unknown`. No local format validator or fake receipt proves a supported ChatGPT transport. See [`../provider-attachments.md`](../provider-attachments.md).
 
 The provider context registry stores metadata, evidence and optional stable mappings only. Local memory remains canonical if provider memory, a project or a conversation becomes unavailable.
 
