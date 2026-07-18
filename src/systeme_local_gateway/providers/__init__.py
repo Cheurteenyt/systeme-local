@@ -1,5 +1,46 @@
-"""Provider-neutral lifecycle, context primitives and deterministic fixtures."""
+"""Provider-neutral lifecycle, context, attachment primitives and deterministic fixtures."""
 
+from .attachment_commit import (
+    AttachmentInspectionError,
+    AttachmentInspectionReason,
+    AttachmentVerificationError,
+    AttachmentVerificationReason,
+    commit_attachment,
+    commit_attachment_manifest,
+    inspect_attachment_bytes,
+    verify_attachment_bytes,
+    verify_attachment_manifest,
+)
+from .attachment_models import (
+    AttachmentBatch,
+    AttachmentBatchPlan,
+    AttachmentBatchReceipt,
+    AttachmentCapabilityProfile,
+    AttachmentInspection,
+    AttachmentManifest,
+    AttachmentMediaFamily,
+    AttachmentMediaType,
+    AttachmentQuotaRequirement,
+    AttachmentRetryDirective,
+    AttachmentRole,
+    AttachmentSource,
+    AttachmentTransferStatus,
+    CommittedAttachment,
+    attachment_quota_snapshot_sha256,
+    commit_attachment_capability_profile,
+)
+from .attachment_policy import (
+    AttachmentPlanningError,
+    AttachmentPlanningReason,
+    plan_attachment_batches,
+    verify_attachment_batch_plan,
+)
+from .fake_attachment_provider import (
+    AttachmentIdempotencyConflictError,
+    DeterministicFakeAttachmentProvider,
+    FakeAttachmentScenario,
+    verify_attachment_batch_receipt,
+)
 from .fake_chatgpt import (
     DeterministicFakeChatGptAdapter,
     FakeChatGptPlan,
@@ -83,6 +124,39 @@ from .fake_chatgpt_context import (
 )
 
 __all__ = [
+    "AttachmentBatch",
+    "AttachmentBatchPlan",
+    "AttachmentBatchReceipt",
+    "AttachmentCapabilityProfile",
+    "AttachmentIdempotencyConflictError",
+    "AttachmentInspection",
+    "AttachmentInspectionError",
+    "AttachmentInspectionReason",
+    "AttachmentManifest",
+    "AttachmentMediaFamily",
+    "AttachmentMediaType",
+    "AttachmentPlanningError",
+    "AttachmentPlanningReason",
+    "AttachmentQuotaRequirement",
+    "AttachmentRetryDirective",
+    "AttachmentRole",
+    "AttachmentSource",
+    "AttachmentTransferStatus",
+    "AttachmentVerificationError",
+    "AttachmentVerificationReason",
+    "CommittedAttachment",
+    "DeterministicFakeAttachmentProvider",
+    "FakeAttachmentScenario",
+    "attachment_quota_snapshot_sha256",
+    "commit_attachment",
+    "commit_attachment_capability_profile",
+    "commit_attachment_manifest",
+    "inspect_attachment_bytes",
+    "plan_attachment_batches",
+    "verify_attachment_batch_plan",
+    "verify_attachment_batch_receipt",
+    "verify_attachment_bytes",
+    "verify_attachment_manifest",
     "AgentPrincipalRef",
     "AppendResult",
     "ApprovalDecision",

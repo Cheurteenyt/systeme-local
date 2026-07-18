@@ -102,6 +102,12 @@ A known project or conversation binding does not prove that the provider support
 
 Provider quota observations are append-only. The local system records only what a supported surface proves and never estimates remaining usage from task counts or UI appearance.
 
+## Committed attachments and deterministic batching
+
+Attachment bytes are inspected locally and represented by metadata-only `CommittedAttachment` records. Ordered `AttachmentManifest` values bind attachment metadata to an existing `CommittedTurn`. Capability profiles are revisioned and digest-bound. Deterministic batch plans preserve manifest order, engage the exact capability profile and required quota snapshot, and fail as one unit when any attachment or evidence violates policy. See [`provider-attachments.md`](provider-attachments.md).
+
+Raw attachment bytes, local paths and provider credentials are excluded from lifecycle, context, plan and receipt models. No real provider upload capability is inferred from successful local format validation or simulated batching.
+
 ## Local-agent identity
 
 The local agent is authenticated before any provider-specific transport is used. Its identity is not established by prompt text.
