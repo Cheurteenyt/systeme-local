@@ -235,6 +235,18 @@ and every plan, role, client, transport, authentication and runtime gate is sati
 decision does not claim that Secure MCP Tunnel, OAuth or a live ChatGPT connection is already
 installed.
 
+## Evidence reconciliation and connection readiness
+
+A capability profile is not a live connection. Provider-specific readiness reconciles current
+official evidence, commits secret-free operator checks and authorizes only the next bounded
+configuration stage. Ambiguous plan evidence fails closed instead of inheriting a permissive
+interpretation from a general product matrix. See
+[`providers/chatgpt-mcp-connection-readiness.md`](providers/chatgpt-mcp-connection-readiness.md).
+
+Readiness observations bind only digests, bounded counts and typed states. Passwords, cookies,
+access tokens, refresh-token values, client secrets, private keys and endpoint contents remain
+outside public models. A ready decision still records that no real connection exists.
+
 ## Outbound provider adapters
 
 A local agent initiates a provider turn only through a dedicated adapter whose capability profile proves a supported machine contract.
