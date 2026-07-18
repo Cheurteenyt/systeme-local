@@ -168,6 +168,18 @@ evaluated_at
 Re-verification recomputes the exact decision. Tampered stages, reasons, check partitions,
 digests, timestamps or transport selections are rejected.
 
+## Sealed operator evidence bundle
+
+The observation layer now has a separate sealed provenance contract in
+[`chatgpt-mcp-operator-evidence.md`](chatgpt-mcp-operator-evidence.md). It contains exactly one
+short-lived record for every readiness check, constrains which evidence sources may support each
+check, and compiles deterministically into `McpConnectionReadinessObservation`.
+
+The bundle stores only typed states, bounded counts and SHA-256 digests. Endpoint values,
+metadata bodies, tool definitions, passwords, cookies, access tokens, refresh-token values,
+client secrets and private keys remain outside public models. A compiled or ready result still
+records `real_connection_established=false` and `secrets_stored=false`.
+
 ## Operator facts required later
 
 A real-connection lot may start only after the operator supplies bounded evidence for:

@@ -247,6 +247,16 @@ Readiness observations bind only digests, bounded counts and typed states. Passw
 access tokens, refresh-token values, client secrets, private keys and endpoint contents remain
 outside public models. A ready decision still records that no real connection exists.
 
+## Sealed operator evidence bundles
+
+Operator and workspace observations are committed through a complete, short-lived evidence
+bundle before they become readiness checks. Each record binds a typed assertion, an allowed
+source, a freshness window and a SHA-256 digest. See
+[`providers/chatgpt-mcp-operator-evidence.md`](providers/chatgpt-mcp-operator-evidence.md).
+
+The bundle stores no endpoint values, metadata documents, tool definitions or secrets. It does not establish a connection; it only compiles sanitized evidence into the existing readiness
+observation and decision contracts.
+
 ## Outbound provider adapters
 
 A local agent initiates a provider turn only through a dedicated adapter whose capability profile proves a supported machine contract.

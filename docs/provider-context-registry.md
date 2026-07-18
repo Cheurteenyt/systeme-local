@@ -260,6 +260,15 @@ contents or token values. See
 An unknown or ambiguous readiness fact remains a typed blocker. It cannot enrich a provider
 identifier, prove account-wide discovery or change Chat-first experience selection.
 
+## Sealed operator evidence provenance
+
+The operator-evidence bundle is a separate short-lived deployment artifact. It may bind an
+operator-confirmed plan and role to the readiness request, but it does not become provider account identity and cannot enrich project or conversation mappings. See
+[`providers/chatgpt-mcp-operator-evidence.md`](providers/chatgpt-mcp-operator-evidence.md).
+
+Raw UI exports, endpoint values, metadata documents and tool definitions remain outside the
+context registry. Only sanitized digests may be referenced by the bundle.
+
 ## Attachment foundation
 
 The committed attachment and deterministic batching foundation is defined in [`provider-attachments.md`](provider-attachments.md). It binds bounded attachment metadata to committed turns, validates five locally verifiable media types, engages revisioned capability profiles and required quota evidence, and models idempotent completed, partial, cancelled, rejected and ambiguous simulated transfer outcomes.
