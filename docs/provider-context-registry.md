@@ -249,6 +249,17 @@ conversation binding may record that operator-confirmed context, but it never cl
 account-wide chat or project enumeration. ChatGPT credentials, browser cookies and MCP OAuth
 tokens remain outside the provider context registry.
 
+## MCP connection-readiness observations
+
+Connection-readiness evidence is a separate digest-bound deployment artifact, not provider
+account, project or conversation identity. It may reference the account profile through an
+operator-confirmed plan and role, but it never stores credentials, browser state, endpoint
+contents or token values. See
+[`providers/chatgpt-mcp-connection-readiness.md`](providers/chatgpt-mcp-connection-readiness.md).
+
+An unknown or ambiguous readiness fact remains a typed blocker. It cannot enrich a provider
+identifier, prove account-wide discovery or change Chat-first experience selection.
+
 ## Attachment foundation
 
 The committed attachment and deterministic batching foundation is defined in [`provider-attachments.md`](provider-attachments.md). It binds bounded attachment metadata to committed turns, validates five locally verifiable media types, engages revisioned capability profiles and required quota evidence, and models idempotent completed, partial, cancelled, rejected and ambiguous simulated transfer outcomes.

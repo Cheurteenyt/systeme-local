@@ -165,6 +165,21 @@ Expired evidence, unknown plan/role/client/location, unsupported access, missing
 absent refresh tokens, required chat/project enumeration, agent mode and deep-research writes
 all fail closed with typed reasons.
 
+## Conflict-aware connection-readiness handoff
+
+The next layer is implemented in
+[`chatgpt-mcp-connection-readiness.md`](chatgpt-mcp-connection-readiness.md). It reconciles
+current official sources before accepting operator evidence. The general Apps plan matrix now
+lists Custom (MCP) for Plus, while the dedicated developer-mode article does not document a
+Plus deployment path. Système Local records that scope as ambiguous and
+fails closed on that ambiguity. The rule is explicit: never treat a
+general availability mark as deployment authorization.
+
+The readiness layer commits all required checks exactly once, binds tool and local-policy
+digests, refuses write tools in a read/fetch snapshot, and requires a separate review for
+high-risk tools. Its stages authorize only the next bounded operator step and always record
+`real_connection_established=false` and `secrets_stored=false`.
+
 ## Deployment sequence after this lot
 
 A real connection may begin only after the operator supplies and verifies:
