@@ -217,6 +217,24 @@ In this mode:
 
 The local loopback MCP runtime, bearer authentication, host and origin checks, request limits, rate limits, concurrency limits, policy-derived registry, audit integration and official-client smoke workflow are retained.
 
+## Evidence-bound MCP deployment
+
+Before a ChatGPT MCP connection is implemented, Système Local commits an expiring,
+evidence-bound deployment profile. The profile records plan eligibility, workspace roles,
+client restrictions, server location, authentication, refresh-token requirements, tool drift
+and unsupported discovery assumptions. See
+[`providers/chatgpt-mcp-deployment.md`](providers/chatgpt-mcp-deployment.md).
+
+The operator opens the intended ChatGPT chat and selects the configured app there. The MCP
+session is not a ChatGPT conversation identifier, and no account-wide chat or project
+enumeration is inferred. MCP app authentication is not ChatGPT account authentication: the
+server never receives ChatGPT passwords, browser cookies or ChatGPT session tokens.
+
+A decision may approve a proposed configuration only when its official evidence is current
+and every plan, role, client, transport, authentication and runtime gate is satisfied. That
+decision does not claim that Secure MCP Tunnel, OAuth or a live ChatGPT connection is already
+installed.
+
 ## Outbound provider adapters
 
 A local agent initiates a provider turn only through a dedicated adapter whose capability profile proves a supported machine contract.
