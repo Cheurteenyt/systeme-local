@@ -1,7 +1,7 @@
 # ChatGPT provider characterization
 
 Status: architecture and capability characterization
-Last reviewed: 2026-07-17
+Last reviewed: 2026-07-18
 Cross-provider rules: [`../connectivity-model.md`](../connectivity-model.md)
 
 ## Purpose
@@ -105,6 +105,26 @@ capabilities:
 ```
 
 The profile must be revised when evidence changes. “Unknown” is an intentional safe state.
+
+## Chat, Work, projects and provider context
+
+Last characterized: 2026-07-18.
+
+Chat is the Système Local default. Automatic selection never upgrades a request to Work. Work requires an explicit user request, proven availability for the active account and a fresh usable `work_agentic` quota observation. The default local freshness window is five minutes. If Work support or quota is stale, unknown, unavailable, reset-pending or exhausted, the local policy falls back to Chat. Système Local never purchases provider credits automatically.
+
+Current official documentation describes Chat as the conversational experience and Work as the longer-running research and deliverable experience. Work is rolling out to eligible paid accounts and follows the same usage structure as Codex; actual consumption varies by task. The registry therefore stores qualitative, time-stamped evidence and does not invent a numeric remainder. See [ChatGPT Work and Codex](https://help.openai.com/en/articles/20001275) and the current [ChatGPT release notes](https://help.openai.com/en/articles/6825453-chatgpt-release-notes).
+
+Projects are available across free and paid ChatGPT plans. They group chats, files and project instructions, and can use project-only memory selected when a new project is created. Chats in a project may reference other chats in that project when the account and memory settings allow it. Current file-slot observations are volatile: only 10 files can be uploaded at once, with documented per-project limits of 5 for Free, 25 for Go/Plus and 40 for Edu/Pro/Business/Enterprise. See [Projects in ChatGPT](https://help.openai.com/en/articles/10169521-projects-in-chatgpt).
+
+Current official documentation also permits moving an eligible existing chat into a project. The registry preserves the chat's original `created_at` and records project membership as mutable revision state; it does not require the project to predate the chat.
+
+Project and chat enumeration remain `unknown` for a personal visible-account automation surface. The local registry may hold operator-confirmed bindings without claiming account-wide discovery. It never scrapes the sidebar, observes private DOM state, replays cookies or calls undocumented endpoints.
+
+Chat conversations are modeled separately from Work threads. Synchronization scope is explicit because current official documentation distinguishes cloud Work threads from desktop-local Work threads and files. Temporary conversations cannot be bound to a project.
+
+File and image limits are observations, not schema constants. Current documentation lists 512 MB per general file, 2 million tokens per text/document file, about 50 MB per spreadsheet and 20 MB per image, plus upload-rate and storage caps. The next separate phase will model ordered screenshots, redaction, batching and ambiguous upload recovery. See [File Uploads FAQ](https://help.openai.com/en/articles/8555545-file-uploads-faq).
+
+The provider context registry stores metadata, evidence and optional stable mappings only. Local memory remains canonical if provider memory, a project or a conversation becomes unavailable.
 
 ## Identity of the local AI
 
@@ -273,13 +293,29 @@ Status: provider lifecycle foundation implemented. The implementation is determi
 
 No network credential is required for this phase. Raw prompts, raw outputs, raw tool arguments and raw provider errors are excluded from the lifecycle event store.
 
-### Phase 2 — one supported outbound surface
+### Phase 2 — Chat-first context registry
+
+Status: provider context foundation implemented. The implementation is deterministic, metadata-only and offline.
+
+- model account availability, plan category and evidence;
+- keep project/chat discovery capabilities explicit;
+- select Chat for every automatic request;
+- require an explicit request and fresh usable quota for Work;
+- persist append-only quota observations;
+- version project and conversation bindings with compare-and-swap updates;
+- keep local state canonical and prohibit automatic credit purchase.
+
+### Phase 3 — multimodal attachment foundation
+
+Define ordered, committed screenshots and files with hashes, size and MIME limits, redaction state, encrypted local storage, batching, partial-upload recovery and verified retention. This phase remains separate from account/project context.
+
+### Phase 4 — one supported outbound surface
 
 Select exactly one documented ChatGPT/OpenAI machine surface. Implement it behind the provider interface without changing the local task and policy semantics.
 
 A real integration test is opt-in and receives credentials only through the process environment.
 
-### Phase 3 — tool-call bridge
+### Phase 5 — tool-call bridge
 
 Normalize provider tool requests and route them through the existing governed local capability path. The bridge must preserve:
 
@@ -290,11 +326,11 @@ Normalize provider tool requests and route them through the existing governed lo
 - audit correlation;
 - secret redaction.
 
-### Phase 4 — ChatGPT custom MCP app
+### Phase 6 — ChatGPT custom MCP app
 
 Connect the existing MCP façade to ChatGPT through the currently supported app and tunnel mechanism. This is the inbound direction and remains independent from the outbound provider adapter.
 
-### Phase 5 — visible web-session research
+### Phase 7 — visible web-session research
 
 Investigate only documented or explicitly supported mechanisms. If no reliable contract exists, retain `research` or `unsupported` and use an official provider transport or interactive handoff.
 
@@ -311,8 +347,12 @@ Investigate only documented or explicitly supported mechanisms. If no reliable c
 
 ## Evidence sources
 
-Recheck these official sources before implementation because product availability and permissions can change:
+Recheck these official sources before implementation because product availability, quotas and permissions can change:
 
+- [ChatGPT Work and Codex](https://help.openai.com/en/articles/20001275)
+- [Projects in ChatGPT](https://help.openai.com/en/articles/10169521-projects-in-chatgpt)
+- [File Uploads FAQ](https://help.openai.com/en/articles/8555545-file-uploads-faq)
+- [ChatGPT release notes](https://help.openai.com/en/articles/6825453-chatgpt-release-notes)
 - [Developer mode and MCP apps in ChatGPT](https://help.openai.com/en/articles/12584461)
 - [Apps in ChatGPT](https://help.openai.com/en/articles/11487775-connectors-in)
 - [OpenAI Responses API reference](https://platform.openai.com/docs/api-reference/responses)

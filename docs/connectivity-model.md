@@ -74,6 +74,34 @@ capabilities:
 
 The profile records what is proven for a specific surface. A capability available through an official API does not prove that the same capability exists in the provider's visible web interface.
 
+## Provider account context and experience selection
+
+Provider execution state and provider account context are separate. The lifecycle ledger records submitted turns and normalized provider events. The context registry records evidence-backed account availability, quota observations, project bindings and conversation bindings. See [`provider-context-registry.md`](provider-context-registry.md).
+
+For providers that expose conversational and agentic experiences, the local policy is deterministic:
+
+- Automatic selection uses Chat;
+- an explicit Chat request uses Chat when the account is available;
+- Work is selected only after an explicit request, proven support and a fresh usable quota observation;
+- unknown, unavailable or exhausted Work state falls back to Chat with a typed reason;
+- automatic credit purchase is forbidden.
+
+Minimum context capability fields:
+
+```yaml
+context_capabilities:
+  can_create_projects: supported | unsupported | unknown
+  can_enumerate_projects: supported | unsupported | unknown
+  exposes_project_id: supported | unsupported | unknown
+  can_create_conversations: supported | unsupported | unknown
+  can_enumerate_conversations: supported | unsupported | unknown
+  exposes_conversation_id: supported | unsupported | unknown
+```
+
+A known project or conversation binding does not prove that the provider supports account-wide enumeration. Provider identifiers remain optional mappings and are never guessed from display labels, copied URLs, browser tabs or model output.
+
+Provider quota observations are append-only. The local system records only what a supported surface proves and never estimates remaining usage from task counts or UI appearance.
+
 ## Local-agent identity
 
 The local agent is authenticated before any provider-specific transport is used. Its identity is not established by prompt text.
@@ -259,9 +287,19 @@ Availability is represented as a state with evidence and confidence:
 - `offline`;
 - `unknown`.
 
-Adapters may report only what their surface proves. They must not invent remaining quotas, conversation state or completion from UI appearance.
+Quota is a separate append-only observation stream. Common dimensions include:
 
-Retries are bounded, idempotent and policy-controlled. Authentication failures, quota exhaustion, policy refusals and ambiguous local-effect outcomes do not trigger an automatic retry loop.
+- conversational message usage;
+- agentic or Work usage;
+- file-upload rate;
+- file-storage capacity;
+- project file slots.
+
+A quota snapshot records the account, dimension, qualitative state, observation time, evidence and optional numeric values. Numeric values require an explicit unit. Unknown quota uses `evidence=none`; exhausted quota cannot report a positive remainder.
+
+Adapters may report only what their surface proves. They must not invent remaining quotas, project state, conversation state or completion from UI appearance. A task count is not a quota counter.
+
+Retries are bounded, idempotent and policy-controlled. Authentication failures, quota exhaustion, policy refusals and ambiguous local-effect outcomes do not trigger an automatic retry loop. Credit purchase is always an explicit user action outside automatic provider selection.
 
 ## Provider onboarding sequence
 
@@ -270,12 +308,14 @@ Each new provider follows the same order:
 1. create a provider-specific document under `docs/providers/`;
 2. record surfaces, capability states and evidence;
 3. define normalized lifecycle mappings;
-4. implement a deterministic mock adapter;
-5. add conformance fixtures for completion, failure, cancellation and tool calls;
-6. perform a manual characterization run with secrets excluded from logs;
-7. implement one supported real transport;
-8. connect tool calls to the existing governed local execution path;
-9. add provider-specific recovery and drift tests.
+4. implement a deterministic lifecycle mock adapter;
+5. add a deterministic account, quota, project and conversation context fixture;
+6. define Chat/agentic selection and fallback policy;
+7. add a separate multimodal attachment foundation when needed;
+8. perform a manual characterization run with secrets excluded from logs;
+9. implement one supported real transport;
+10. connect tool calls to the existing governed local execution path;
+11. add provider-specific recovery and drift tests.
 
 ChatGPT is the first provider in this sequence. See [`providers/chatgpt.md`](providers/chatgpt.md).
 
