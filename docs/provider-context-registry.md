@@ -237,6 +237,18 @@ This document is the provider-neutral contract. Provider-specific facts, volatil
 
 `docs/connectivity-model.md` remains the cross-provider connectivity source of truth. The lifecycle ledger remains authoritative for submitted turns and provider events; this context registry remains authoritative for local account/project/conversation bindings and quota observations.
 
+## ChatGPT MCP deployment evidence
+
+The current ChatGPT custom-MCP eligibility matrix is committed separately in
+[`providers/chatgpt-mcp-deployment.md`](providers/chatgpt-mcp-deployment.md). It expires on a
+bounded revalidation date and fails closed for unknown plans, roles, clients, server locations
+or authentication state.
+
+The operator opens the intended chat and invokes the configured app there. A local
+conversation binding may record that operator-confirmed context, but it never claims
+account-wide chat or project enumeration. ChatGPT credentials, browser cookies and MCP OAuth
+tokens remain outside the provider context registry.
+
 ## Attachment foundation
 
 The committed attachment and deterministic batching foundation is defined in [`provider-attachments.md`](provider-attachments.md). It binds bounded attachment metadata to committed turns, validates five locally verifiable media types, engages revisioned capability profiles and required quota evidence, and models idempotent completed, partial, cancelled, rejected and ambiguous simulated transfer outcomes.

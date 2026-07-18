@@ -53,6 +53,23 @@ This channel answers: “How can ChatGPT or another MCP host call safe local too
 
 It does not answer: “How can a local agent initiate or manage a ChatGPT conversation?” That requires a separate ChatGPT provider adapter or a separately characterized web-session bridge.
 
+## Current custom MCP deployment contract
+
+The current official-source review is committed in
+[`chatgpt-mcp-deployment.md`](chatgpt-mcp-deployment.md). Full write/modify MCP is currently a
+web beta for Business and Enterprise/Edu. Pro is limited to read/fetch custom MCP in developer
+mode. Unsupported or unknown plans fail closed rather than inheriting another plan's rights.
+
+ChatGPT cannot connect directly to the loopback MCP endpoint. A private, on-premises or
+developer-machine deployment requires Secure MCP Tunnel; a public remote endpoint may use a
+direct remote MCP connection. This characterization does not claim that either transport is
+already configured.
+
+The user opens the intended ChatGPT conversation and selects or mentions the Système Local
+app. Custom MCP does not prove account-wide chat/project enumeration or a stable visible-chat
+identifier. The MCP server never receives a ChatGPT password, browser cookie or ChatGPT
+session token; OAuth/OIDC authorizes access to Système Local as a separate security context.
+
 ## Initial capability profile
 
 The following profile distinguishes documented capability from unknown visible-web behavior.
