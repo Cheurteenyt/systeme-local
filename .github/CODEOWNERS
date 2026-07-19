@@ -1,0 +1,27 @@
+# Default owner for the experimental repository.
+* @Cheurteenyt
+
+# Security-sensitive runtime and policy surfaces.
+/src/systeme_local_gateway/ @Cheurteenyt
+/crates/audit-watchdog/ @Cheurteenyt
+/policy.yaml @Cheurteenyt
+/Dockerfile.sandbox @Cheurteenyt
+
+# Provider contracts, evidence and normative documentation.
+/src/systeme_local_gateway/providers/ @Cheurteenyt
+/docs/connectivity-model.md @Cheurteenyt
+/docs/provider-*.md @Cheurteenyt
+/docs/providers/ @Cheurteenyt
+/docs/threat-model.md @Cheurteenyt
+/docs/adr/ @Cheurteenyt
+
+# Repository governance and automation.
+/.github/ @Cheurteenyt
+/governance/ @Cheurteenyt
+/scripts/audit_*.py @Cheurteenyt
+/scripts/check_*.py @Cheurteenyt
+/tools/requirements-bootstrap.txt @Cheurteenyt
+/pyproject.toml @Cheurteenyt
+/uv.lock @Cheurteenyt
+/Cargo.toml @Cheurteenyt
+/Cargo.lock @Cheurteenyt

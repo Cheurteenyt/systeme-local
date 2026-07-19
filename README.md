@@ -2,7 +2,7 @@
 
 Passerelle locale sécurisée permettant à un agent IA distant de demander des actions limitées sur un poste de travail, sans lui donner un accès direct au système hôte.
 
-> **État : fondation expérimentale.** Le code actuel valide quelques invariants de sécurité. L'architecture produit universelle est décrite dans [`docs/blueprint-v2.md`](docs/blueprint-v2.md). Le contrôle graphique complet du poste, l'accès arbitraire au shell et l'exposition directe sur Internet sont volontairement exclus de cette fondation.
+> **État : fondation expérimentale, locale et fail-closed.** Le gateway sécurisé, le MCP loopback, le lifecycle provider, le registre de contexte, les manifests de pièces jointes et les contrats ChatGPT MCP jusqu’au bundle de preuves opérateur sont implémentés de manière déterministe. Aucun transport provider réel, tunnel, client OAuth/OIDC ou app ChatGPT n’est configuré.
 
 ## Principes
 
@@ -291,13 +291,32 @@ il enregistre une empreinte HMAC et des métadonnées de taille et de type.
 
 ## Connectivité avec les IA web
 
-Le projet distingue strictement trois modes :
+Le projet maintient quatre canaux distincts :
 
-- **MCP entrant** : l'utilisateur écrit dans l'interface web et l'agent web appelle le MCP ; aucune API modèle n'est requise par Système Local ;
-- **API officielle sortante** : le Brain Router peut choisir et appeler automatiquement un fournisseur ;
-- **handoff interactif** : une capsule signée est transférée par l'utilisateur lorsqu'une interface ne propose ni MCP ni API exploitable.
+- **MCP entrant** : un hôte compatible appelle les outils locaux gouvernés ;
+- **adaptateur fournisseur sortant** : l’orchestrateur local initie un tour uniquement par un
+  contrat machine officiel et provider-specific ;
+- **bridge de session web approuvé** : surface visible et interruptible, uniquement lorsqu’un
+  mécanisme documenté existe ;
+- **handoff interactif** : capsule signée transférée par l’utilisateur lorsqu’aucun contrat
+  autonome fiable n’existe.
 
-Une interface web privée n'est jamais traitée comme une API publique. Consultez le [`connectivity model`](docs/connectivity-model.md) pour le flux GLM prioritaire, le changement d'IA et la gestion des limites. Un exemple de registre est fourni dans [`providers.example.yaml`](providers.example.yaml).
+Le MCP local couvre aujourd’hui le premier canal. Le lifecycle, le contexte, les attachments et
+les contrats ChatGPT MCP sont déterministes et hors ligne. Aucun transport OpenAI réel, tunnel,
+OAuth client, app ChatGPT ou automatisation du site privé n’est implémenté.
+
+Les autorités documentaires sont :
+
+- [`docs/blueprint-v2.md`](docs/blueprint-v2.md) pour l’architecture cible ;
+- [`docs/architecture.md`](docs/architecture.md) pour l’architecture actuellement implémentée ;
+- [`docs/connectivity-model.md`](docs/connectivity-model.md) pour les règles normatives
+  cross-provider ;
+- [`docs/providers/chatgpt.md`](docs/providers/chatgpt.md) pour la caractérisation ChatGPT ;
+- [`docs/documentation-governance.md`](docs/documentation-governance.md) pour la propriété et la
+  cohérence des documents.
+
+Une interface web privée n’est jamais traitée comme une API publique. Les cookies, endpoints
+privés, sidebars et signaux DOM ne sont pas des contrats d’intégration.
 
 ## Architecture
 

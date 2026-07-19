@@ -1,0 +1,21 @@
+version = 1
+
+[[profiles]]
+id = "chatgpt_mcp_capability_profile"
+source = "src/systeme_local_gateway/providers/chatgpt_mcp_deployment.py"
+document = "docs/providers/chatgpt-mcp-deployment.md"
+reviewed_assignment = "_REVIEWED_AT"
+revalidate_assignment = "_REVALIDATE_AFTER"
+reviewed_at = "2026-07-18T00:00:00Z"
+revalidate_after = "2026-08-17T00:00:00Z"
+warning_days = 14
+
+[[profiles]]
+id = "chatgpt_mcp_evidence_reconciliation_profile"
+source = "src/systeme_local_gateway/providers/chatgpt_mcp_readiness.py"
+document = "docs/providers/chatgpt-mcp-connection-readiness.md"
+reviewed_assignment = "_REVIEWED_AT"
+revalidate_assignment = "_REVALIDATE_AFTER"
+reviewed_at = "2026-07-18T14:00:00Z"
+revalidate_after = "2026-08-01T14:00:00Z"
+warning_days = 7

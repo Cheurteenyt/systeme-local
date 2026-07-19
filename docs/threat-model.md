@@ -1,60 +1,142 @@
 # Modèle de menace
 
+Status: current through the deterministic ChatGPT MCP operator-evidence foundation
+
 ## Actifs à protéger
 
 - fichiers personnels et professionnels ;
-- secrets, clés API, cookies et jetons Git ;
-- intégrité du système hôte ;
-- confidentialité des prompts, modèles et jeux de données ;
-- budget GPU/CPU, API et tokens ;
-- dépôts Git et chaîne de publication.
+- secrets, clés API, cookies, jetons Git et futurs credentials provider ;
+- intégrité du système hôte et des workspaces ;
+- confidentialité des prompts, modèles, pièces jointes et preuves opérateur ;
+- budget GPU/CPU, API, stockage et tokens ;
+- dépôts Git et chaîne de publication ;
+- identité locale canonique des agents, tâches, projets et conversations ;
+- décisions de politique, approbations, journaux et profils de preuves officielles.
+
+## Frontières de confiance
+
+Aucune des surfaces suivantes n’est une autorité locale :
+
+- modèle distant ou réponse de modèle ;
+- relais, provider, client MCP ou session de transport ;
+- navigateur, DOM, URL copiée, label d’app ou sidebar ;
+- attestation opérateur non vérifiée ;
+- export UI brut ;
+- document OAuth/OIDC ou métadonnée distante ;
+- tunnel, endpoint TLS ou scan d’outils non attesté ;
+- résultat de CI après expiration des preuves officielles.
+
+Le gateway local, la politique locale, les approbations, les stores transactionnels et les
+vérificateurs déterministes restent les autorités.
 
 ## Menaces principales
 
-1. Prompt injection contenue dans une page, un dépôt ou une sortie de modèle.
-2. Tâche falsifiée, rejouée ou modifiée par le relais.
-3. Évasion du conteneur ou abus d'une image compromise.
-4. Exfiltration par réseau, logs, erreurs ou dépendances.
+1. Prompt injection contenue dans une page, un dépôt, une pièce jointe ou une sortie de modèle.
+2. Tâche falsifiée, rejouée, expirée ou modifiée par un relais.
+3. Évasion du conteneur ou abus d’une image compromise.
+4. Exfiltration par réseau, logs, erreurs, artefacts, dépendances ou preuves temporaires.
 5. Escalade progressive : une suite de petites actions autorisées produit un effet dangereux.
-6. Empoisonnement des benchmarks pour faire accepter une « amélioration » trompeuse.
-7. Consommation incontrôlée de GPU, disque, tokens ou temps.
+6. Empoisonnement de tests, benchmarks ou preuves pour faire accepter une fausse amélioration.
+7. Consommation incontrôlée de GPU, disque, tokens, appels provider ou temps.
+8. Confusion entre identité locale, compte provider, conversation visible et session MCP.
+9. Preuve officielle périmée, contradictoire ou interprétée à un niveau de généralité incorrect.
+10. Attestation opérateur mensongère, mal cadrée ou produite sur le mauvais compte/workspace.
+11. Collecteur de preuves compromis, qui substitue une source, un digest ou un horodatage.
+12. Export UI brut contenant cookies, tokens, identifiants privés ou données d’autres workspaces.
+13. Métadonnées OAuth/OIDC malveillantes : issuer, discovery, endpoints ou scopes substitués.
+14. Attestation tunnel/TLS forgée ou endpoint public différent de celui qui a été revu.
+15. Dérive des outils ou permissions entre scan, action review, publication et usage.
+16. Ambiguïté d’acceptation après un appel provider ou une action locale.
+17. Rollback ou divergence des stores d’audit, de contexte, de replay ou d’approbation.
+18. Compromission de la chaîne GitHub, d’une action CI ou d’un outil d’audit non épinglé.
 
-## Contrôles minimaux
+## Contrôles minimaux implémentés
 
 - deny-by-default ;
 - signatures, expiration courte et base transactionnelle persistante d’empreintes HMAC de nonces ;
-- images de sandbox épinglées par digest ;
-- réseau désactivé par défaut ;
-- aucun montage du home, du socket Docker ou des secrets ;
-- aucun montage en écriture du workspace source : snapshot temporaire borné par tâche ;
-- rejet des liens symboliques et fichiers spéciaux dans les snapshots ;
-- suppression garantie du conteneur et du snapshot après succès, erreur ou timeout ;
-- approbation locale, expirante et à usage unique pour écriture, réseau, installation, Git push et contrôle GUI ;
-- limites CPU/RAM/PIDs/durée/sortie ;
-- jeux de tests protégés en lecture seule ;
-- bouton d'arrêt local et révocation immédiate des sessions ;
-- journal d’audit minimal : aucune charge utile brute, empreintes HMAC à domaines séparés et chaîne vérifiée avant chaque ajout ;
-- verrou interprocessus borné autour de la vérification et de l’ajout au journal d’audit ;
-- format de checkpoint d’ancrage externe versionné, monotone, chaîné par HMAC et verrouillé entre processus ;
-- erreurs d’exécution génériques vers les agents distants ; les détails internes ne quittent jamais la frontière locale ;
-- clé d’audit distincte du secret d’authentification ;
-- base d’approbation transactionnelle : aucune charge utile brute, liaison HMAC à la tâche et décision locale uniquement.
+- outils MCP dérivés de la politique ;
+- loopback, `Host`, `Origin`, taille, débit et concurrence bornés ;
+- snapshots de workspace temporaires, liens symboliques et fichiers spéciaux refusés ;
+- réseau de sandbox désactivé par défaut ;
+- quotas CPU/RAM/PIDs/durée/sortie ;
+- approbation locale expirante, exacte et à usage unique ;
+- journal minimal HMAC-chaîné et verrou interprocessus ;
+- ancrage externe optionnel et vérificateur Rust secret-free ;
+- erreurs génériques vers les agents distants ;
+- stores SQLite versionnés, transactionnels et vérifiés sémantiquement ;
+- identités locales canoniques et mappings provider optionnels ;
+- modèles stricts, immuables et `extra=forbid` pour les contrats provider sensibles ;
+- digests SHA-256 à domaines séparés ;
+- profils officiels avec dates de revue et de revalidation ;
+- ambiguïtés officielles fail-closed ;
+- snapshots d’outils et action reviews liés à des digests et comptes bornés ;
+- aucune donnée brute de pièce jointe ou preuve opérateur dans les modèles publics.
+
+## Cycle obligatoire des futures preuves brutes
+
+Une future procédure de collecte doit appliquer l’ordre suivant :
+
+```text
+scope exact du compte/workspace
+  -> création dans un emplacement temporaire dédié
+  -> permissions locales minimales
+  -> inspection de type et de taille
+  -> sanitisation déterministe
+  -> vérification que les secrets et valeurs interdites sont absents
+  -> calcul du digest
+  -> création d’une attestation ou d’un record typé
+  -> destruction vérifiée ou rétention explicitement autorisée
+  -> reçu local sans contenu brut
+```
+
+Règles :
+
+- aucune preuve brute dans Git, les fixtures, SQLite provider, les logs ou les modèles Pydantic ;
+- aucune valeur d’endpoint, métadonnée OAuth, définition d’outil ou capture UI dans le bundle public ;
+- un digest ne prouve pas l’authenticité de la source sans une attestation compatible ;
+- absence, contradiction, échec de sanitisation ou dépassement de durée produit `unknown` ou
+  `failed`, jamais `verified` ;
+- une panne avant destruction doit laisser un état récupérable et visible localement ;
+- la rétention doit avoir une durée, un propriétaire, une justification et une procédure de
+  suppression vérifiable.
+
+## Contrôles requis avant une connexion ChatGPT MCP réelle
+
+- revalidation des sources officielles ;
+- preuve du plan, rôle, client et workspace exacts ;
+- attestation de transport liée à l’endpoint réellement prévu ;
+- issuer OAuth/OIDC allowlisté et métadonnées sanitizées ;
+- secret storage séparé, rotation et révocation ;
+- refresh-token capability vérifiée sans stocker sa valeur dans les modèles ;
+- scan exact des outils, comparaison de drift et action review ;
+- digest exact de la politique locale ;
+- bundle complet encore valide dans sa fenêtre de quinze minutes ;
+- approbation opérateur distincte pour chaque étape ayant un effet externe.
 
 ## Limites résiduelles
 
-- le verrou interprocessus suppose un système de fichiers local dont les verrous OS sont fiables ; les partages réseau ne sont pas pris en charge ;
-- un attaquant qui compromet à la fois le processus et `SLG_AUDIT_KEY` peut fabriquer de futures entrées ;
-- l’ancrage est optionnel et exige un bootstrap local explicite ; une mauvaise configuration ou une ancre absente bloque le gateway et la CLI d’approbation ;
-- un fichier d’ancrage ne résiste au rollback que sur un support séparé dont l’append-only est réellement imposé ;
-- une restauration ancienne ou une suppression de la base anti-rejeu peut oublier des nonces encore actifs ; un ancrage monotone externe reste à ajouter ;
-- la base d’approbation et le journal d’audit ne forment pas une transaction atomique commune ; une panne entre les deux écritures peut demander une réconciliation locale.
+- le verrou interprocessus suppose un système de fichiers local fiable ;
+- un attaquant qui compromet le processus et une clé HMAC peut fabriquer de futures entrées ;
+- l’ancrage fichier ne résiste au rollback que sur un support séparé réellement append-only ;
+- une restauration ancienne de la base anti-rejeu peut oublier des nonces actifs ;
+- approbation et audit ne forment pas encore une transaction atomique commune ;
+- un opérateur autorisé peut fournir une attestation fausse ; la provenance réduit mais
+  n’élimine pas ce risque ;
+- un digest sanitizé ne garantit pas que le document source était authentique ;
+- les contrats provider peuvent changer avant la date planifiée de revalidation ;
+- GitHub CI ne remplace pas une revue des permissions et paramètres effectifs du dépôt ;
+- le package provider public reste large et doit être refactoré sans casser les imports ni les
+  domaines de digest.
 
-## Actions exclues du MVP
+## Actions exclues
 
-- shell arbitraire sur l'hôte ;
-- ouverture de ports publics ;
-- persistance automatique ;
+- shell arbitraire sur l’hôte ;
+- ouverture automatique de ports publics ;
+- persistance furtive ;
 - accès aux navigateurs personnels ;
-- récupération de secrets ;
-- désactivation des protections de l'OS ;
-- clics GUI sans confirmation et capture globale permanente.
+- récupération ou rejeu de secrets ;
+- désactivation des protections de l’OS ou du provider ;
+- clics GUI sans confirmation ;
+- scraping de sidebar, DOM privé ou endpoints non documentés ;
+- traitement d’une session MCP comme identité de conversation ;
+- collecte réelle de preuves tant que son cycle de vie n’est pas implémenté et audité.

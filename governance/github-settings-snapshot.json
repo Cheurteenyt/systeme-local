@@ -1,0 +1,88 @@
+{
+  "main_sha": "164b69bbfebab18db65b2ae5b990756db59c5518",
+  "observations": {
+    "branch_protection": {
+      "endpoint": "repos/Cheurteenyt/systeme-local/branches/main/protection",
+      "error": "gh: Branch not protected (HTTP 404)\n{\"message\":\"Branch not protected\",\"documentation_url\":\"https://docs.github.com/rest/branches/branch-protection#get-branch-protection\",\"status\":\"404\"}",
+      "name": "branch_protection",
+      "status": "unknown"
+    },
+    "code_security_configuration": {
+      "data": null,
+      "endpoint": "repos/Cheurteenyt/systeme-local/code-security-configuration",
+      "name": "code_security_configuration",
+      "status": "observed"
+    },
+    "private_vulnerability_reporting": {
+      "data": {
+        "enabled": true
+      },
+      "endpoint": "repos/Cheurteenyt/systeme-local/private-vulnerability-reporting",
+      "name": "private_vulnerability_reporting",
+      "status": "observed"
+    },
+    "repository": {
+      "data": {
+        "allow_merge_commit": false,
+        "allow_rebase_merge": false,
+        "allow_squash_merge": true,
+        "archived": false,
+        "default_branch": "main",
+        "delete_branch_on_merge": true,
+        "security_and_analysis": {
+          "dependabot_security_updates": {
+            "status": "enabled"
+          },
+          "secret_scanning": {
+            "status": "enabled"
+          },
+          "secret_scanning_non_provider_patterns": {
+            "status": "disabled"
+          },
+          "secret_scanning_push_protection": {
+            "status": "enabled"
+          },
+          "secret_scanning_validity_checks": {
+            "status": "disabled"
+          }
+        },
+        "visibility": "public"
+      },
+      "endpoint": "repos/Cheurteenyt/systeme-local",
+      "name": "repository",
+      "status": "observed"
+    },
+    "rulesets": {
+      "data": {
+        "Count": 1,
+        "value": [
+          {
+            "_links": {
+              "html": {
+                "href": "https://github.com/Cheurteenyt/systeme-local/rules/19023933"
+              },
+              "self": {
+                "href": "https://api.github.com/repos/Cheurteenyt/systeme-local/rulesets/19023933"
+              }
+            },
+            "created_at": "2026-07-16T05:07:25.997+02:00",
+            "enforcement": "active",
+            "id": 19023933,
+            "name": "Protect main",
+            "node_id": "RRS_lACqUmVwb3NpdG9yec5NnhtWzgEiSD0",
+            "source": "Cheurteenyt/systeme-local",
+            "source_type": "Repository",
+            "target": "branch",
+            "updated_at": "2026-07-16T05:07:26.032+02:00"
+          }
+        ]
+      },
+      "endpoint": "repos/Cheurteenyt/systeme-local/rulesets",
+      "name": "rulesets",
+      "status": "observed"
+    }
+  },
+  "observed_at": "2026-07-18T22:06:49Z",
+  "repository": "Cheurteenyt/systeme-local",
+  "version": 1
+}

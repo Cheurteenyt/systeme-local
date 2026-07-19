@@ -13,36 +13,82 @@ concurrency:
   group: ci-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+env:
+  UV_VERSION: "0.11.29"
+
 jobs:
   test:
     name: test
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
 
     steps:
       - name: Check out repository
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
         with:
           persist-credentials: false
+          fetch-depth: 0
 
       - name: Set up Python
         uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
         with:
           python-version: "3.12"
           cache: pip
-          cache-dependency-path: pyproject.toml
+          cache-dependency-path: tools/requirements-bootstrap.txt
 
-      - name: Upgrade pip
-        run: python -m pip install --upgrade pip
+      - name: Install pinned dependency manager
+        run: python -m pip install --disable-pip-version-check "uv==${UV_VERSION}"
 
-      - name: Install project
-        run: python -m pip install -e ".[dev]"
+      - name: Sync frozen environment
+        run: uv sync --frozen --extra dev --python python
+
+      - name: Check lock
+        run: uv lock --check
 
       - name: Lint
-        run: python -m ruff check .
+        run: uv run --frozen --extra dev ruff check .
+
+      - name: Check formatting ratchet
+        env:
+          SLG_FORMAT_BASE: ${{ github.event.pull_request.base.sha || github.event.before }}
+          SLG_FORMAT_HEAD: ${{ github.sha }}
+        run: >-
+          uv run --frozen --extra dev
+          python scripts/check_python_format.py
+          --base "$SLG_FORMAT_BASE"
+          --head "$SLG_FORMAT_HEAD"
+
+      - name: Check typing ratchet
+        env:
+          SLG_TYPING_BASE: ${{ github.event.pull_request.base.sha || github.event.before }}
+          SLG_TYPING_HEAD: ${{ github.sha }}
+        run: >-
+          uv run --frozen --extra dev
+          python scripts/check_python_typing.py
+          --base "$SLG_TYPING_BASE"
+          --head "$SLG_TYPING_HEAD"
+
+      - name: Check Markdown links
+        run: uv run --frozen --extra dev python scripts/check_markdown_links.py
+
+      - name: Check deterministic evidence governance
+        run: >-
+          uv run --frozen --extra dev
+          python scripts/check_evidence_governance.py
+          --as-of 2026-07-18T20:00:00Z
+          --fail-within-days 0
+
+      - name: Check documentation contracts
+        run: uv run --frozen --extra dev pytest -q tests/test_documentation_governance.py
+
+      - name: Audit frozen Python dependencies
+        run: >-
+          uv run --frozen --extra dev
+          python scripts/audit_python_dependencies.py
 
       - name: Test with coverage
         run: >-
+          uv run --frozen --extra dev
           python -m pytest
           --cov=systeme_local_gateway
           --cov-report=term-missing
@@ -51,7 +97,7 @@ jobs:
   compatibility:
     name: compatibility (Python 3.14)
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
 
     steps:
       - name: Check out repository
@@ -64,16 +110,16 @@ jobs:
         with:
           python-version: "3.14"
           cache: pip
-          cache-dependency-path: pyproject.toml
+          cache-dependency-path: tools/requirements-bootstrap.txt
 
-      - name: Upgrade pip
-        run: python -m pip install --upgrade pip
+      - name: Install pinned dependency manager
+        run: python -m pip install --disable-pip-version-check "uv==${UV_VERSION}"
 
-      - name: Install project
-        run: python -m pip install -e ".[dev]"
+      - name: Sync frozen environment
+        run: uv sync --frozen --extra dev --python python
 
       - name: Run tests
-        run: python -m pytest -q
+        run: uv run --frozen --extra dev python -m pytest -q
 
   rust-quality:
     name: rust quality
