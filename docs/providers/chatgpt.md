@@ -353,26 +353,37 @@ endpoint, metadata or tool content is stored.
 
 ### Phase 7 — architecture and provider-package reconciliation
 
-Status: `in_progress`
+Status: `implemented`
 
-Align repository documentation, threat model, CI, evidence expiry and GitHub governance. Measure
-the current provider public surface and define a compatibility-preserving refactor boundary.
+Pull request #40 merged as `c720f4ae9d295e3e2af6993b40a0b03bfd14c2b9`. It reconciled
+repository documentation, threat modeling, CI, evidence expiry, dependency reproducibility and
+GitHub governance, then measured the provider public surface and fixed the compatibility boundary.
+It added no capability and performed no provider connection.
 
-### Phase 8 — provider package compatibility refactor
+### Phase 8 — private provider canonicalization compatibility refactor
 
-Status: `planned`
+Status: `implemented`
 
-Extract shared canonicalization primitives and clearer subpackages while preserving public
-imports, model semantics and digest domains.
+Pull request #42 merged as `1c84538369eb662b61cc4f56a79131569b9ca200`. One private
+provider-neutral module now owns canonical JSON, aware-datetime UTC normalization and sorted-unique
+validation. Deterministic oracles preserve all 179 ordered public exports, 18 affected Pydantic
+contracts, 22 enums and 13 digest domains. The provider Mypy baseline is zero diagnostics and the
+Ruff formatting baseline is 54 files.
+
+This phase did not split the public façade or move public classes and functions. A future
+provider-neutral versus ChatGPT-specific public package reorganization remains a separate planned
+compatibility and versioning decision.
 
 ### Phase 9 — bounded local operator-evidence collection
 
 Status: `planned`
 
-Implement temporary raw-evidence governance, sanitization, source compatibility, hashing,
-destruction or explicit retention, bundle construction and a local blocked/next-step report.
+This is the next product implementation phase. Implement temporary raw-evidence governance,
+sanitization, source compatibility, hashing, destruction or explicit retention, bundle construction
+and a local blocked/next-step report for exactly the eleven required observations.
 
-This phase still performs no tunnel installation, OAuth registration or provider call.
+This phase still performs no tunnel installation, OAuth registration, app configuration or provider
+call.
 
 ### Phase 10 — one supported real transport
 
