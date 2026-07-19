@@ -294,4 +294,4 @@ LifecycleEvent: TypeAlias = Annotated[
     Field(discriminator="kind"),
 ]
 
-LIFECYCLE_EVENT_ADAPTER = TypeAdapter(LifecycleEvent)
+LIFECYCLE_EVENT_ADAPTER: TypeAdapter[LifecycleEvent] = TypeAdapter(LifecycleEvent)

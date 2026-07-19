@@ -179,16 +179,23 @@ def test_python_format_governance_uses_a_non_growing_ratchet() -> None:
     provider_audit = text("docs/provider-package-audit.md")
 
     entries = [line for line in baseline.splitlines() if line and not line.startswith("#")]
-    assert len(entries) == 57
+    assert len(entries) == 54
     assert entries == sorted(entries)
     assert len(entries) == len(set(entries))
+
+    retired = {
+        "src/systeme_local_gateway/providers/mcp_deployment_models.py",
+        "src/systeme_local_gateway/providers/mcp_operator_evidence_models.py",
+        "src/systeme_local_gateway/providers/mcp_readiness_models.py",
+    }
+    assert retired.isdisjoint(entries)
 
     assert "new Ruff formatting debt outside the approved baseline" in checker
     assert "changed Python files must be Ruff-formatted" in checker
     assert "scripts/check_python_format.py" in workflow
     assert "ruff format --check ." not in workflow
     assert "formatting ratchet" in contributing
-    assert "57 legacy Python files" in provider_audit
+    assert "decreases from 57 to 54 files" in provider_audit
 
 
 def test_python_typing_governance_uses_a_non_growing_ratchet() -> None:
@@ -201,16 +208,17 @@ def test_python_typing_governance_uses_a_non_growing_ratchet() -> None:
 
     assert baseline["version"] == 1
     assert baseline["scope"] == sorted(baseline["scope"])
-    assert len(baseline["diagnostics"]) == 2
-    assert sum(item["count"] for item in baseline["diagnostics"]) == 3
+    assert "src/systeme_local_gateway/providers/_canonicalization.py" in baseline["scope"]
+    assert baseline["diagnostics"] == []
 
     assert "new Mypy diagnostics outside the approved baseline" in checker
     assert "changed Python files must retire" in checker
     assert 'files = [\n  "scripts",' in pyproject
+    assert "src/systeme_local_gateway/providers/_canonicalization.py" in pyproject
     assert "scripts/check_python_typing.py" in workflow
     assert "uv run --frozen --extra dev mypy\n" not in workflow
     assert "Mypy ratchet" in contributing
-    assert "three diagnostics in two provider-model files" in provider_audit
+    assert "retired from three diagnostics to zero" in provider_audit
 
 
 def test_python_dependency_audit_uses_frozen_hashed_lock_export() -> None:

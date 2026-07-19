@@ -50,6 +50,7 @@ cache_dir = ".systeme-local/mypy-cache"
 plugins = ["pydantic.mypy"]
 files = [
   "scripts",
+  "src/systeme_local_gateway/providers/_canonicalization.py",
   "src/systeme_local_gateway/providers/mcp_deployment_models.py",
   "src/systeme_local_gateway/providers/mcp_operator_evidence_models.py",
   "src/systeme_local_gateway/providers/mcp_readiness_models.py",
