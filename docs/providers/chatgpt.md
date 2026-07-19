@@ -1,6 +1,6 @@
 # ChatGPT provider characterization
 
-Status: architecture and capability characterization
+Status: provider characterization plus deterministic lifecycle, context, attachment and ChatGPT MCP evidence foundations implemented; no live provider transport or connection
 Last reviewed: 2026-07-18
 Cross-provider rules: [`../connectivity-model.md`](../connectivity-model.md)
 
@@ -293,65 +293,118 @@ Answers must cite current official documentation or be labeled as controlled obs
 
 ### Phase 0 — documentation and invariants
 
-- maintain this capability profile;
-- preserve the existing MCP tool channel;
-- define normalized local lifecycle events;
-- define provider-neutral conversation identifiers;
-- prohibit undocumented web automation in production code.
+Status: `implemented`
 
-### Phase 1 — deterministic ChatGPT mock adapter
+- cross-provider connectivity authority is defined;
+- ChatGPT surfaces remain distinct;
+- private web automation is prohibited;
+- lifecycle, identity and conversation boundaries are explicit.
 
-Status: provider lifecycle foundation implemented. The implementation is deterministic, metadata-only and performs no network request. It does not connect to ChatGPT, `chatgpt.com`, the OpenAI API or Secure MCP Tunnel.
+### Phase 1 — deterministic ChatGPT lifecycle adapter
 
-- simulate successful, failed, cancelled and incomplete responses;
-- simulate one or more tool calls;
-- test committed-turn boundaries;
-- test crash recovery and idempotency;
-- test separate new-conversation and continue-conversation operations;
-- emit verifiable delegation receipts.
+Status: `implemented`
 
-No network credential is required for this phase. Raw prompts, raw outputs, raw tool arguments and raw provider errors are excluded from the lifecycle event store.
+The implementation is deterministic, metadata-only and performs no network request. It covers
+completed, failed, cancelled, incomplete and tool-call scenarios, committed-turn boundaries,
+idempotency, crash recovery and exact event replay.
 
 ### Phase 2 — Chat-first context registry
 
-Status: provider context foundation implemented. The implementation is deterministic, metadata-only and offline.
+Status: `implemented`
 
-- model account availability, plan category and evidence;
-- keep project/chat discovery capabilities explicit;
-- select Chat for every automatic request;
-- require an explicit request and fresh usable quota for Work;
-- persist append-only quota observations;
-- version project and conversation bindings with compare-and-swap updates;
-- keep local state canonical and prohibit automatic credit purchase.
+The provider-neutral registry models account availability, qualitative quota evidence, projects,
+conversations and deterministic Chat/Work selection. It performs no account-wide discovery and
+never purchases credits automatically.
 
 ### Phase 3 — multimodal attachment foundation
 
-Define ordered, committed screenshots and files with hashes, size and MIME limits, redaction state, encrypted local storage, batching, partial-upload recovery and verified retention. This phase remains separate from account/project context.
+Status: `implemented`
 
-### Phase 4 — one supported outbound surface
+The implemented foundation validates bounded local bytes, commits metadata-only attachments and
+ordered manifests, applies provider capability and quota evidence, creates deterministic batches
+and verifies simulated receipts.
 
-Select exactly one documented ChatGPT/OpenAI machine surface. Implement it behind the provider interface without changing the local task and policy semantics.
+Encrypted blob storage, redaction, OCR, approval, retention and verified deletion are **not**
+part of this phase. They remain a separate security lot.
 
-A real integration test is opt-in and receives credentials only through the process environment.
+### Phase 4 — ChatGPT MCP deployment eligibility
 
-### Phase 5 — tool-call bridge
+Status: `implemented`
 
-Normalize provider tool requests and route them through the existing governed local capability path. The bridge must preserve:
+An expiring official-evidence profile commits plan, role, client, transport, authentication,
+refresh-token, tool-drift and workspace boundaries. It does not install a tunnel, create
+credentials or configure an app.
 
-- policy-derived visibility;
-- approval requirements;
-- idempotency;
-- request and output limits;
-- audit correlation;
-- secret redaction.
+### Phase 5 — evidence reconciliation and connection readiness
 
-### Phase 6 — ChatGPT custom MCP app
+Status: `implemented`
 
-Connect the existing MCP façade to ChatGPT through the currently supported app and tunnel mechanism. This is the inbound direction and remains independent from the outbound provider adapter.
+Current official evidence is reconciled before operator observations are accepted. Ambiguous Plus
+scope fails closed. The complete eleven-check observation authorizes only bounded configure, test,
+publish-review or use-review stages and never claims a live connection.
 
-### Phase 7 — visible web-session research
+### Phase 6 — sealed operator-evidence bundle
 
-Investigate only documented or explicitly supported mechanisms. If no reliable contract exists, retain `research` or `unsupported` and use an official provider transport or interactive handoff.
+Status: `implemented`
+
+One short-lived record is required for every readiness check. Public models contain only typed
+states, bounded counts and SHA-256 commitments. No live evidence is collected and no raw UI,
+endpoint, metadata or tool content is stored.
+
+### Phase 7 — architecture and provider-package reconciliation
+
+Status: `in_progress`
+
+Align repository documentation, threat model, CI, evidence expiry and GitHub governance. Measure
+the current provider public surface and define a compatibility-preserving refactor boundary.
+
+### Phase 8 — provider package compatibility refactor
+
+Status: `planned`
+
+Extract shared canonicalization primitives and clearer subpackages while preserving public
+imports, model semantics and digest domains.
+
+### Phase 9 — bounded local operator-evidence collection
+
+Status: `planned`
+
+Implement temporary raw-evidence governance, sanitization, source compatibility, hashing,
+destruction or explicit retention, bundle construction and a local blocked/next-step report.
+
+This phase still performs no tunnel installation, OAuth registration or provider call.
+
+### Phase 10 — one supported real transport
+
+Status: `planned`
+
+Select exactly one documented machine surface. A real integration test is opt-in and receives
+credentials only through the process environment or an approved secret store.
+
+Inbound ChatGPT custom MCP connectivity remains a separate path from an outbound Responses API or
+other provider adapter.
+
+### Phase 11 — tool-call bridge
+
+Status: `planned`
+
+Normalize provider tool requests and route them through policy-derived visibility, approval,
+idempotency, limits, audit correlation and secret redaction.
+
+### Phase 12 — ChatGPT custom MCP app connection
+
+Status: `planned`
+
+Only after fresh evidence and operator approval, consider Secure MCP Tunnel, OAuth/OIDC, draft app
+configuration, tool scan, action review, publication and access controls as separate reversible
+lots.
+
+### Phase 13 — visible web-session research
+
+Status: `blocked_by_evidence`
+
+Investigate only documented or explicitly supported mechanisms. If no reliable contract exists,
+retain `research` or `unsupported` and use an official provider transport or interactive handoff.
 
 ## Security invariants
 
