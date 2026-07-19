@@ -1,6 +1,7 @@
 # Roadmap
 
-Status: reconciled with the implementation through pull request #38
+Status: reconciled with the implementation through pull request #42 at commit
+`1c84538369eb662b61cc4f56a79131569b9ca200`.
 
 The target architecture remains defined in [`blueprint-v2.md`](blueprint-v2.md). This roadmap
 tracks delivery state and gates; it does not redefine normative connectivity or security
@@ -32,39 +33,53 @@ contracts.
 | ChatGPT MCP deployment capability profile | implemented | official evidence expires |
 | ChatGPT MCP evidence reconciliation and readiness | implemented | ready means next bounded step only |
 | sealed operator-evidence bundle | implemented | no live evidence collection |
+| architecture, evidence and repository governance | implemented | merged in PR #40 without adding capability |
+| private provider canonicalization and compatibility oracles | implemented | merged in PR #42 without public API or digest drift |
 
-## Consolidation gate
+## Completed consolidation
 
 ### Architecture and evidence governance
 
-Status: `in_progress`
+Status: `implemented`
 
-This lot aligns README, implemented architecture, roadmap, ChatGPT characterization, threat
-model, ADRs, CI, dependency reproducibility and GitHub governance. It adds no capability and
-performs no provider connection.
+Pull request #40 merged as `c720f4ae9d295e3e2af6993b40a0b03bfd14c2b9`. It reconciled
+README, implemented architecture, roadmap, ChatGPT characterization, threat model, ADRs, CI,
+dependency reproducibility, evidence expiry and GitHub governance without adding a capability or
+performing a provider connection.
 
-Promotion gate:
+Completion evidence:
 
 - documentation roles are explicit and non-overlapping;
 - provider evidence expiry is visible in scheduled governance checks;
 - Python lint, format, typing, dependency audit and lock checks are reproducible;
 - GitHub governance is recorded from direct evidence or marked unknown;
-- complete Python and Rust validation remains green.
+- complete Python and Rust validation remained green.
 
 ## Near-term delivery order
 
-### Provider package compatibility refactor
+### Provider canonicalization compatibility refactor
 
-Status: `planned`
+Status: `implemented`
 
-- measure and preserve the current public import surface;
-- extract shared UTC, canonical JSON and sorted-unique validation helpers;
-- split provider-neutral and ChatGPT-specific subpackages without changing digest domains;
-- retain compatibility imports and exact behavior.
+Pull request #42 merged as `1c84538369eb662b61cc4f56a79131569b9ca200` and:
+
+- preserved all 179 ordered public provider exports;
+- preserved 18 affected Pydantic contracts, 22 enums and 13 digest domains;
+- extracted shared UTC, canonical JSON and sorted-unique validation helpers into one private
+  provider-neutral module;
+- added deterministic compatibility and ownership oracles;
+- retired the provider Mypy baseline from three diagnostics to zero;
+- reduced the Ruff formatting baseline from 57 to 54 files.
+
+This completed private implementation ownership only. It did not split the public façade, move
+public classes or functions, or authorize a provider-neutral versus ChatGPT-specific public package
+reorganization.
 
 ### Bounded operator-evidence collection
 
 Status: `planned`
+
+This is the next product implementation lot. It must:
 
 - collect exactly the eleven required observations;
 - enforce source compatibility and freshness;
@@ -73,11 +88,14 @@ Status: `planned`
 - compile and evaluate one fifteen-minute bundle;
 - produce only a local blocked/next-step report.
 
-No tunnel, OAuth client or provider call belongs in this lot.
+No tunnel, OAuth client, app configuration or provider call belongs in this lot.
 
 ### Secure MCP Tunnel
 
 Status: `planned`
+
+This lot may start only after fresh bounded operator evidence and a separate explicit approval. It
+must:
 
 - revalidate current official documentation;
 - define installation, update, revocation and rollback;
@@ -89,6 +107,7 @@ Status: `planned`
 
 Status: `planned`
 
+This remains separate from tunnel installation and requires fresh evidence plus explicit approval.
 Separate lots must define:
 
 - issuer and discovery trust;
@@ -102,8 +121,9 @@ Separate lots must define:
 
 Status: `planned`
 
-Select one official machine contract. It must preserve committed turns, idempotency, lifecycle
-events, tool-call governance, cancellation semantics, quota evidence and secret redaction.
+Select one official machine contract only after its own evidence and approval gate. It must preserve
+committed turns, idempotency, lifecycle events, tool-call governance, cancellation semantics, quota
+evidence and secret redaction.
 
 ### Visible ChatGPT web-session automation
 
@@ -112,6 +132,18 @@ Status: `blocked_by_evidence`
 No browser cookie replay, private endpoint, sidebar scraping or DOM completion heuristic is
 permitted. The surface remains research unless OpenAI provides a documented, visible and
 interruptible mechanism.
+
+## Deferred compatibility decision
+
+### Public provider package reorganization
+
+Status: `planned`
+
+A future provider-neutral versus ChatGPT-specific public package split requires a separate issue and
+an explicit compatibility and versioning decision. It must preserve or deliberately version the
+179-export façade, public object origins, schemas and digest domains. PR #42 does not grant implicit
+permission for that reorganization, and this decision is not a prerequisite for bounded
+operator-evidence collection.
 
 ## Longer-term target phases
 

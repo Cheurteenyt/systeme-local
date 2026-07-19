@@ -12,6 +12,20 @@ def text(path: str) -> str:
     return (ROOT / path).read_text(encoding="utf-8")
 
 
+def section(content: str, heading: str) -> str:
+    start = content.index(heading)
+    boundaries = [
+        index
+        for marker in ("\n### ", "\n## ")
+        if (index := content.find(marker, start + len(heading))) >= 0
+    ]
+    return content[start : min(boundaries, default=len(content))]
+
+
+def normalized_prose(value: str) -> str:
+    return " ".join(value.split())
+
+
 def test_document_authority_is_explicit() -> None:
     governance = text("docs/documentation-governance.md")
     for marker in (
@@ -52,16 +66,69 @@ def test_implemented_architecture_has_complete_status_matrix() -> None:
 
 def test_roadmap_matches_merged_foundations() -> None:
     roadmap = text("docs/roadmap.md")
+    assert "through pull request #42" in roadmap
+    assert "1c84538369eb662b61cc4f56a79131569b9ca200" in roadmap
+
+    architecture = section(roadmap, "### Architecture and evidence governance")
+    canonicalization = section(
+        roadmap,
+        "### Provider canonicalization compatibility refactor",
+    )
+    operator_evidence = section(roadmap, "### Bounded operator-evidence collection")
+    tunnel = section(roadmap, "### Secure MCP Tunnel")
+    oauth = section(roadmap, "### OAuth/OIDC and app configuration")
+    outbound = section(roadmap, "### One supported outbound provider transport")
+    public_reorganization = section(roadmap, "### Public provider package reorganization")
+
+    architecture_prose = normalized_prose(architecture)
+    canonicalization_prose = normalized_prose(canonicalization)
+    operator_evidence_prose = normalized_prose(operator_evidence)
+    public_reorganization_prose = normalized_prose(public_reorganization)
+
+    assert "Status: `implemented`" in architecture
+    assert "pull request #40" in architecture_prose.lower()
+    assert "c720f4ae9d295e3e2af6993b40a0b03bfd14c2b9" in architecture_prose
+
+    assert "Status: `implemented`" in canonicalization
     for marker in (
-        "loopback MCP Streamable HTTP façade",
-        "provider lifecycle and deterministic ChatGPT adapter",
-        "attachment metadata, manifests and batching",
-        "sealed operator-evidence bundle",
-        "Provider package compatibility refactor",
-        "Bounded operator-evidence collection",
+        "179 ordered public provider exports",
+        "18 affected Pydantic contracts",
+        "22 enums",
+        "13 digest domains",
+        "three diagnostics to zero",
+        "57 to 54 files",
+        "did not split the public façade",
     ):
-        assert marker in roadmap
-    assert "Status: `implemented`" not in roadmap.split("### Secure MCP Tunnel", maxsplit=1)[1]
+        assert marker in canonicalization_prose
+
+    assert "Status: `planned`" in operator_evidence
+    for marker in (
+        "next product implementation lot",
+        "exactly the eleven required observations",
+        "No tunnel, OAuth client, app configuration or provider call",
+    ):
+        assert marker in operator_evidence_prose
+
+    assert "Status: `planned`" in public_reorganization
+    for marker in (
+        "separate issue",
+        "explicit compatibility and versioning decision",
+        "does not grant implicit permission",
+    ):
+        assert marker in public_reorganization_prose
+
+    assert roadmap.index("### Bounded operator-evidence collection") < roadmap.index(
+        "### Secure MCP Tunnel"
+    )
+    assert roadmap.index("### Secure MCP Tunnel") < roadmap.index(
+        "### OAuth/OIDC and app configuration"
+    )
+    assert roadmap.index("### OAuth/OIDC and app configuration") < roadmap.index(
+        "### One supported outbound provider transport"
+    )
+
+    for future_section in (tunnel, oauth, outbound, public_reorganization):
+        assert "Status: `implemented`" not in future_section
 
 
 def test_chatgpt_phases_are_reconciled() -> None:
@@ -69,8 +136,88 @@ def test_chatgpt_phases_are_reconciled() -> None:
     assert "deterministic lifecycle, context, attachment" in content
     for phase in range(14):
         assert f"### Phase {phase} " in content
+
+    phase_7 = section(
+        content,
+        "### Phase 7 — architecture and provider-package reconciliation",
+    )
+    phase_8 = section(
+        content,
+        "### Phase 8 — private provider canonicalization compatibility refactor",
+    )
+    phase_9 = section(
+        content,
+        "### Phase 9 — bounded local operator-evidence collection",
+    )
+    phase_12 = section(content, "### Phase 12 — ChatGPT custom MCP app connection")
+
+    phase_7_prose = normalized_prose(phase_7)
+    phase_8_prose = normalized_prose(phase_8)
+    phase_9_prose = normalized_prose(phase_9)
+
+    assert "Status: `implemented`" in phase_7
+    for marker in (
+        "pull request #40",
+        "added no capability",
+        "performed no provider connection",
+    ):
+        assert marker in phase_7_prose.lower()
+
+    assert "Status: `implemented`" in phase_8
+    for marker in (
+        "179 ordered public exports",
+        "18 affected Pydantic contracts",
+        "22 enums",
+        "13 digest domains",
+        "Mypy baseline is zero diagnostics",
+        "Ruff formatting baseline is 54 files",
+        "did not split the public façade",
+        "separate planned compatibility and versioning decision",
+    ):
+        assert marker in phase_8_prose
+
+    assert "Status: `planned`" in phase_9
+    for marker in (
+        "next product implementation phase",
+        "exactly the eleven required observations",
+        "no tunnel installation, OAuth registration, app configuration or provider",
+    ):
+        assert marker in phase_9_prose
+
+    assert "Status: `planned`" in phase_12
+    assert content.index("### Phase 9 ") < content.index("### Phase 12 ")
     assert "Encrypted blob storage, redaction, OCR, approval, retention" in content
     assert "Status: `blocked_by_evidence`" in content
+
+
+def test_provider_reconciliation_metrics_match_governance_contracts() -> None:
+    roadmap = text("docs/roadmap.md")
+    chatgpt = text("docs/providers/chatgpt.md")
+    provider_audit = text("docs/provider-package-audit.md")
+    mypy_baseline = json.loads(text("governance/mypy-baseline.json"))
+    ruff_entries = [
+        line
+        for line in text("governance/ruff-format-baseline.txt").splitlines()
+        if line and not line.startswith("#")
+    ]
+
+    assert mypy_baseline["diagnostics"] == []
+    assert len(ruff_entries) == 54
+
+    for content in (roadmap, chatgpt, provider_audit):
+        assert "179" in content
+        assert "zero" in content
+        assert "54" in content
+
+    assert "18 affected Pydantic" in roadmap
+    assert "18 affected Pydantic" in chatgpt
+    assert "18 affected public Pydantic" in provider_audit
+    assert "22 enums" in roadmap
+    assert "22 enums" in chatgpt
+    assert "22 affected public enum" in provider_audit
+    assert "13 digest domains" in roadmap
+    assert "13 digest domains" in chatgpt
+    assert "13 domain-separated SHA-256" in provider_audit
 
 
 def test_attachment_security_lot_remains_separate() -> None:
