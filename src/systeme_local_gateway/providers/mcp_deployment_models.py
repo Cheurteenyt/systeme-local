@@ -1,13 +1,19 @@
 from __future__ import annotations
 
-import json
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta
 from enum import StrEnum
 from hashlib import sha256
 from typing import Literal
 from urllib.parse import urlsplit
 
 from pydantic import ConfigDict, Field, field_validator, model_validator
+from ._canonicalization import (
+    _canonical_json,
+    _require_aware,
+    _validate_sorted_unique_enum_tuple,
+    _validate_sorted_unique_string_tuple,
+)
+
 
 from .models import CapabilityClaim, CapabilitySupport, StrictModel
 
@@ -24,44 +30,6 @@ _ALLOWED_OFFICIAL_HOSTS = frozenset(
 )
 _PROFILE_DOMAIN = b"systeme-local:chatgpt-mcp-capability-profile:v1\x00"
 _SOURCE_DOMAIN = b"systeme-local:openai-official-source:v1\x00"
-
-
-def _require_aware(value: datetime) -> datetime:
-    if value.tzinfo is None or value.utcoffset() is None:
-        raise ValueError("timestamps must include a timezone")
-    return value.astimezone(timezone.utc)
-
-
-def _canonical_json(value: object) -> bytes:
-    return json.dumps(
-        value,
-        ensure_ascii=False,
-        sort_keys=True,
-        separators=(",", ":"),
-    ).encode("utf-8")
-
-
-def _validate_sorted_unique_enum_tuple(
-    values: tuple[StrEnum, ...],
-    *,
-    field_name: str,
-) -> None:
-    rendered = tuple(item.value for item in values)
-    if len(rendered) != len(set(rendered)):
-        raise ValueError(f"{field_name} must not contain duplicates")
-    if rendered != tuple(sorted(rendered)):
-        raise ValueError(f"{field_name} must be sorted")
-
-
-def _validate_sorted_unique_string_tuple(
-    values: tuple[str, ...],
-    *,
-    field_name: str,
-) -> None:
-    if len(values) != len(set(values)):
-        raise ValueError(f"{field_name} must not contain duplicates")
-    if values != tuple(sorted(values)):
-        raise ValueError(f"{field_name} must be sorted")
 
 
 class ChatGptPlan(StrEnum):
@@ -332,9 +300,7 @@ class ChatGptMcpCapabilityProfile(StrictModel):
         )
         for source in self.sources:
             if source.reviewed_at != self.reviewed_at:
-                raise ValueError(
-                    "official source review timestamps must match profile reviewed_at"
-                )
+                raise ValueError("official source review timestamps must match profile reviewed_at")
 
         capabilities = tuple(row.capability for row in self.rows)
         _validate_sorted_unique_enum_tuple(capabilities, field_name="capability rows")
@@ -342,8 +308,7 @@ class ChatGptMcpCapabilityProfile(StrictModel):
             missing = sorted(item.value for item in set(McpCapabilityId) - set(capabilities))
             extra = sorted(item.value for item in set(capabilities) - set(McpCapabilityId))
             raise ValueError(
-                "capability matrix must be complete; "
-                f"missing={missing}, extra={extra}"
+                f"capability matrix must be complete; missing={missing}, extra={extra}"
             )
 
         entitlement_keys = tuple(
@@ -362,11 +327,10 @@ class ChatGptMcpCapabilityProfile(StrictModel):
             for access_mode in McpAccessMode
         }
         if set(entitlement_keys) != expected_keys:
-            missing = sorted(expected_keys - set(entitlement_keys))
-            extra = sorted(set(entitlement_keys) - expected_keys)
+            missing_entitlement_keys = sorted(expected_keys - set(entitlement_keys))
+            extra_entitlement_keys = sorted(set(entitlement_keys) - expected_keys)
             raise ValueError(
-                "plan entitlement matrix must be complete; "
-                f"missing={missing}, extra={extra}"
+                f"plan entitlement matrix must be complete; missing={missing_entitlement_keys}, extra={extra_entitlement_keys}"
             )
 
         known_sources = set(source_ids)
@@ -426,8 +390,7 @@ class McpDeploymentRequest(StrictModel):
         if self.authentication is McpAuthenticationKind.NONE:
             if self.refresh_token_capability is not RefreshTokenCapability.NOT_APPLICABLE:
                 raise ValueError(
-                    "authentication=none requires "
-                    "refresh_token_capability=not_applicable"
+                    "authentication=none requires refresh_token_capability=not_applicable"
                 )
         elif self.authentication in (
             McpAuthenticationKind.OAUTH,

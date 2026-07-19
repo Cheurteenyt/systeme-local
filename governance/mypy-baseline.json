@@ -1,20 +1,8 @@
 {
-  "diagnostics": [
-    {
-      "code": "arg-type",
-      "count": 2,
-      "message_contains": "Argument 1 to \"sorted\"",
-      "path": "src/systeme_local_gateway/providers/mcp_deployment_models.py"
-    },
-    {
-      "code": "var-annotated",
-      "count": 1,
-      "message_contains": "LIFECYCLE_EVENT_ADAPTER",
-      "path": "src/systeme_local_gateway/providers/models.py"
-    }
-  ],
+  "diagnostics": [],
   "scope": [
     "scripts",
+    "src/systeme_local_gateway/providers/_canonicalization.py",
     "src/systeme_local_gateway/providers/mcp_deployment_models.py",
     "src/systeme_local_gateway/providers/mcp_operator_evidence_models.py",
     "src/systeme_local_gateway/providers/mcp_readiness_models.py",

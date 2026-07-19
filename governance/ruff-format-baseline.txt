@@ -22,9 +22,6 @@ src/systeme_local_gateway/providers/chatgpt_mcp_readiness.py
 src/systeme_local_gateway/providers/context_models.py
 src/systeme_local_gateway/providers/context_store.py
 src/systeme_local_gateway/providers/fake_attachment_provider.py
-src/systeme_local_gateway/providers/mcp_deployment_models.py
-src/systeme_local_gateway/providers/mcp_operator_evidence_models.py
-src/systeme_local_gateway/providers/mcp_readiness_models.py
 src/systeme_local_gateway/providers/state_machine.py
 src/systeme_local_gateway/providers/store.py
 src/systeme_local_gateway/sandbox.py

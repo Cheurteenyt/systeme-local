@@ -1,12 +1,18 @@
 from __future__ import annotations
 
-import json
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta
 from enum import StrEnum
 from hashlib import sha256
 from typing import Literal
 
 from pydantic import ConfigDict, Field, field_validator, model_validator
+from ._canonicalization import (
+    _canonical_json,
+    _require_aware,
+    _validate_sorted_unique_enum_tuple,
+    _validate_sorted_unique_string_tuple,
+)
+
 
 from .mcp_deployment_models import (
     McpDecisionReason,
@@ -23,44 +29,6 @@ _FINDING_DOMAIN = b"systeme-local:chatgpt-mcp-evidence-finding:v1\x00"
 _RECONCILIATION_DOMAIN = b"systeme-local:chatgpt-mcp-evidence-profile:v1\x00"
 _CHECK_DOMAIN = b"systeme-local:chatgpt-mcp-readiness-check:v1\x00"
 _OBSERVATION_DOMAIN = b"systeme-local:chatgpt-mcp-readiness-observation:v1\x00"
-
-
-def _require_aware(value: datetime) -> datetime:
-    if value.tzinfo is None or value.utcoffset() is None:
-        raise ValueError("timestamps must include a timezone")
-    return value.astimezone(timezone.utc)
-
-
-def _canonical_json(value: object) -> bytes:
-    return json.dumps(
-        value,
-        ensure_ascii=False,
-        sort_keys=True,
-        separators=(",", ":"),
-    ).encode("utf-8")
-
-
-def _validate_sorted_unique_enum_tuple(
-    values: tuple[StrEnum, ...],
-    *,
-    field_name: str,
-) -> None:
-    rendered = tuple(item.value for item in values)
-    if len(rendered) != len(set(rendered)):
-        raise ValueError(f"{field_name} must not contain duplicates")
-    if rendered != tuple(sorted(rendered)):
-        raise ValueError(f"{field_name} must be sorted")
-
-
-def _validate_sorted_unique_string_tuple(
-    values: tuple[str, ...],
-    *,
-    field_name: str,
-) -> None:
-    if len(values) != len(set(values)):
-        raise ValueError(f"{field_name} must not contain duplicates")
-    if values != tuple(sorted(values)):
-        raise ValueError(f"{field_name} must be sorted")
 
 
 class McpEvidenceFindingId(StrEnum):
@@ -168,28 +136,19 @@ class ChatGptMcpEvidenceReconciliationProfile(StrictModel):
             field_name="evidence finding identifiers",
         )
         if set(finding_ids) != set(McpEvidenceFindingId):
-            missing = sorted(
-                item.value for item in set(McpEvidenceFindingId) - set(finding_ids)
-            )
-            extra = sorted(
-                item.value for item in set(finding_ids) - set(McpEvidenceFindingId)
-            )
+            missing = sorted(item.value for item in set(McpEvidenceFindingId) - set(finding_ids))
+            extra = sorted(item.value for item in set(finding_ids) - set(McpEvidenceFindingId))
             raise ValueError(
-                "evidence reconciliation must be complete; "
-                f"missing={missing}, extra={extra}"
+                f"evidence reconciliation must be complete; missing={missing}, extra={extra}"
             )
 
         known_sources = set(source_ids)
         referenced_sources: set[str] = set()
         for finding in self.findings:
             if not set(finding.source_ids).issubset(known_sources):
-                raise ValueError(
-                    f"finding {finding.finding_id} references an unknown source"
-                )
+                raise ValueError(f"finding {finding.finding_id} references an unknown source")
             if finding.reviewed_at != self.reviewed_at:
-                raise ValueError(
-                    "finding review timestamps must match reconciliation reviewed_at"
-                )
+                raise ValueError("finding review timestamps must match reconciliation reviewed_at")
             referenced_sources.update(finding.source_ids)
         if referenced_sources != known_sources:
             unused = sorted(known_sources - referenced_sources)
@@ -280,14 +239,10 @@ class McpReadinessReason(StrEnum):
     DEPLOYMENT_POLICY_REFUSED = "DEPLOYMENT_POLICY_REFUSED"
     EVALUATION_PREDATES_OBSERVATION = "EVALUATION_PREDATES_OBSERVATION"
     EVIDENCE_PROFILE_EXPIRED = "EVIDENCE_PROFILE_EXPIRED"
-    HIGH_RISK_TOOLS_REQUIRE_SEPARATE_REVIEW = (
-        "HIGH_RISK_TOOLS_REQUIRE_SEPARATE_REVIEW"
-    )
+    HIGH_RISK_TOOLS_REQUIRE_SEPARATE_REVIEW = "HIGH_RISK_TOOLS_REQUIRE_SEPARATE_REVIEW"
     OBSERVATION_PREDATES_EVIDENCE = "OBSERVATION_PREDATES_EVIDENCE"
     PLUS_PLAN_SCOPE_AMBIGUOUS = "PLUS_PLAN_SCOPE_AMBIGUOUS"
-    READ_FETCH_SNAPSHOT_CONTAINS_WRITE_TOOLS = (
-        "READ_FETCH_SNAPSHOT_CONTAINS_WRITE_TOOLS"
-    )
+    READ_FETCH_SNAPSHOT_CONTAINS_WRITE_TOOLS = "READ_FETCH_SNAPSHOT_CONTAINS_WRITE_TOOLS"
     REQUIRED_CHECK_FAILED = "REQUIRED_CHECK_FAILED"
     REQUIRED_CHECK_NOT_APPLICABLE = "REQUIRED_CHECK_NOT_APPLICABLE"
     REQUIRED_CHECK_UNKNOWN = "REQUIRED_CHECK_UNKNOWN"
@@ -332,9 +287,7 @@ class McpConnectionReadinessObservation(StrictModel):
             field_name="readiness check identifiers",
         )
         if set(check_ids) != set(McpReadinessCheckId):
-            missing = sorted(
-                item.value for item in set(McpReadinessCheckId) - set(check_ids)
-            )
+            missing = sorted(item.value for item in set(McpReadinessCheckId) - set(check_ids))
             extra = sorted(item.value for item in set(check_ids) - set(McpReadinessCheckId))
             raise ValueError(
                 "readiness observation must contain every check exactly once; "
@@ -346,8 +299,7 @@ class McpConnectionReadinessObservation(StrictModel):
 
         by_id = {check.check_id: check for check in self.checks}
         tool_verified = (
-            by_id[McpReadinessCheckId.TOOL_SNAPSHOT].state
-            is McpReadinessCheckState.VERIFIED
+            by_id[McpReadinessCheckId.TOOL_SNAPSHOT].state is McpReadinessCheckState.VERIFIED
         )
         tool_values = (
             self.tool_snapshot_sha256,
@@ -369,8 +321,7 @@ class McpConnectionReadinessObservation(StrictModel):
             raise ValueError("unverified tool snapshots cannot carry digest or counts")
 
         local_policy_verified = (
-            by_id[McpReadinessCheckId.LOCAL_POLICY].state
-            is McpReadinessCheckState.VERIFIED
+            by_id[McpReadinessCheckId.LOCAL_POLICY].state is McpReadinessCheckState.VERIFIED
         )
         if local_policy_verified and self.local_policy_sha256 is None:
             raise ValueError("verified local policy requires local_policy_sha256")

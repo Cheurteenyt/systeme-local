@@ -1,12 +1,17 @@
 from __future__ import annotations
 
-import json
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta
 from enum import StrEnum
 from hashlib import sha256
 from typing import Literal
 
 from pydantic import ConfigDict, Field, field_validator, model_validator
+from ._canonicalization import (
+    _canonical_json,
+    _require_aware,
+    _validate_sorted_unique_enum_tuple,
+)
+
 
 from .mcp_deployment_models import (
     ChatGptClientSurface,
@@ -35,33 +40,6 @@ _TOOL_DOMAIN = b"systeme-local:chatgpt-mcp-tool-review-evidence-summary:v1\x00"
 _BUNDLE_DOMAIN = b"systeme-local:chatgpt-mcp-operator-evidence-bundle:v1\x00"
 _COMPILATION_DOMAIN = b"systeme-local:chatgpt-mcp-operator-evidence-compilation:v1\x00"
 _EVALUATION_DOMAIN = b"systeme-local:chatgpt-mcp-operator-evidence-evaluation:v1\x00"
-
-
-def _require_aware(value: datetime) -> datetime:
-    if value.tzinfo is None or value.utcoffset() is None:
-        raise ValueError("timestamps must include a timezone")
-    return value.astimezone(timezone.utc)
-
-
-def _canonical_json(value: object) -> bytes:
-    return json.dumps(
-        value,
-        ensure_ascii=False,
-        sort_keys=True,
-        separators=(",", ":"),
-    ).encode("utf-8")
-
-
-def _validate_sorted_unique_enum_tuple(
-    values: tuple[StrEnum, ...],
-    *,
-    field_name: str,
-) -> None:
-    rendered = tuple(item.value for item in values)
-    if len(rendered) != len(set(rendered)):
-        raise ValueError(f"{field_name} must not contain duplicates")
-    if rendered != tuple(sorted(rendered)):
-        raise ValueError(f"{field_name} must be sorted")
 
 
 class McpOperatorEvidenceAssertion(StrEnum):
@@ -113,55 +91,35 @@ _ASSERTION_BY_CHECK = {
     McpReadinessCheckId.AUTHENTICATION_METADATA: (
         McpOperatorEvidenceAssertion.AUTHENTICATION_METADATA_SANITIZED
     ),
-    McpReadinessCheckId.DEVELOPER_MODE: (
-        McpOperatorEvidenceAssertion.DEVELOPER_MODE_CONFIRMED
-    ),
+    McpReadinessCheckId.DEVELOPER_MODE: (McpOperatorEvidenceAssertion.DEVELOPER_MODE_CONFIRMED),
     McpReadinessCheckId.LOCAL_POLICY: McpOperatorEvidenceAssertion.LOCAL_POLICY_PINNED,
-    McpReadinessCheckId.PLAN_ROLE_OBSERVATION: (
-        McpOperatorEvidenceAssertion.PLAN_ROLE_CONFIRMED
-    ),
+    McpReadinessCheckId.PLAN_ROLE_OBSERVATION: (McpOperatorEvidenceAssertion.PLAN_ROLE_CONFIRMED),
     McpReadinessCheckId.REFRESH_TOKEN: (
         McpOperatorEvidenceAssertion.REFRESH_TOKEN_CAPABILITY_CONFIRMED
     ),
-    McpReadinessCheckId.TOOL_SNAPSHOT: (
-        McpOperatorEvidenceAssertion.TOOL_SNAPSHOT_REVIEWED
-    ),
+    McpReadinessCheckId.TOOL_SNAPSHOT: (McpOperatorEvidenceAssertion.TOOL_SNAPSHOT_REVIEWED),
     McpReadinessCheckId.TRANSPORT: McpOperatorEvidenceAssertion.TRANSPORT_CLASS_CONFIRMED,
     McpReadinessCheckId.WEB_CLIENT: McpOperatorEvidenceAssertion.WEB_CLIENT_CONFIRMED,
-    McpReadinessCheckId.WORKSPACE_ACCESS: (
-        McpOperatorEvidenceAssertion.WORKSPACE_ACCESS_CONFIRMED
-    ),
+    McpReadinessCheckId.WORKSPACE_ACCESS: (McpOperatorEvidenceAssertion.WORKSPACE_ACCESS_CONFIRMED),
 }
 
 _FAILURE_BY_CHECK = {
-    McpReadinessCheckId.ACTION_REVIEW: (
-        McpOperatorEvidenceFailureCode.ACTION_REVIEW_INCOMPLETE
-    ),
+    McpReadinessCheckId.ACTION_REVIEW: (McpOperatorEvidenceFailureCode.ACTION_REVIEW_INCOMPLETE),
     McpReadinessCheckId.APP_CONFIGURATION: McpOperatorEvidenceFailureCode.APP_NOT_CONFIGURED,
     McpReadinessCheckId.AUTHENTICATION_METADATA: (
         McpOperatorEvidenceFailureCode.AUTHENTICATION_METADATA_INVALID
     ),
-    McpReadinessCheckId.DEVELOPER_MODE: (
-        McpOperatorEvidenceFailureCode.DEVELOPER_MODE_DISABLED
-    ),
-    McpReadinessCheckId.LOCAL_POLICY: (
-        McpOperatorEvidenceFailureCode.LOCAL_POLICY_DIGEST_MISMATCH
-    ),
+    McpReadinessCheckId.DEVELOPER_MODE: (McpOperatorEvidenceFailureCode.DEVELOPER_MODE_DISABLED),
+    McpReadinessCheckId.LOCAL_POLICY: (McpOperatorEvidenceFailureCode.LOCAL_POLICY_DIGEST_MISMATCH),
     McpReadinessCheckId.PLAN_ROLE_OBSERVATION: (
         McpOperatorEvidenceFailureCode.PLAN_ROLE_NOT_CONFIRMED
     ),
     McpReadinessCheckId.REFRESH_TOKEN: (
         McpOperatorEvidenceFailureCode.REFRESH_TOKEN_CAPABILITY_MISSING
     ),
-    McpReadinessCheckId.TOOL_SNAPSHOT: (
-        McpOperatorEvidenceFailureCode.TOOL_SNAPSHOT_NOT_REVIEWED
-    ),
-    McpReadinessCheckId.TRANSPORT: (
-        McpOperatorEvidenceFailureCode.TRANSPORT_ATTESTATION_FAILED
-    ),
-    McpReadinessCheckId.WEB_CLIENT: (
-        McpOperatorEvidenceFailureCode.WEB_CLIENT_UNAVAILABLE
-    ),
+    McpReadinessCheckId.TOOL_SNAPSHOT: (McpOperatorEvidenceFailureCode.TOOL_SNAPSHOT_NOT_REVIEWED),
+    McpReadinessCheckId.TRANSPORT: (McpOperatorEvidenceFailureCode.TRANSPORT_ATTESTATION_FAILED),
+    McpReadinessCheckId.WEB_CLIENT: (McpOperatorEvidenceFailureCode.WEB_CLIENT_UNAVAILABLE),
     McpReadinessCheckId.WORKSPACE_ACCESS: (
         McpOperatorEvidenceFailureCode.WORKSPACE_ACCESS_NOT_GRANTED
     ),
@@ -488,9 +446,7 @@ class McpOperatorEvidenceBundle(StrictModel):
         check_ids = tuple(record.check_id for record in self.records)
         _validate_sorted_unique_enum_tuple(check_ids, field_name="operator evidence check ids")
         if set(check_ids) != set(McpReadinessCheckId):
-            missing = sorted(
-                item.value for item in set(McpReadinessCheckId) - set(check_ids)
-            )
+            missing = sorted(item.value for item in set(McpReadinessCheckId) - set(check_ids))
             extra = sorted(item.value for item in set(check_ids) - set(McpReadinessCheckId))
             raise ValueError(
                 "operator evidence bundle must contain every check exactly once; "
