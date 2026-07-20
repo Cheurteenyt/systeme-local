@@ -218,25 +218,94 @@ jobs:
       - name: Exercise operator-evidence custodian protocol
         shell: powershell
         run: |
-          $request = Get-Content `
-            -LiteralPath "tests/fixtures/operator_evidence_custodian/valid_request.ndjson" `
-            -Raw
+          $ErrorActionPreference = "Stop"
+
+          $requestPath = (
+              Resolve-Path `
+                  "tests/fixtures/operator_evidence_custodian/valid_request.ndjson"
+          ).Path
+          $responsePath = (
+              Resolve-Path `
+                  "tests/fixtures/operator_evidence_custodian/valid_response.ndjson"
+          ).Path
+
+          $request = [System.IO.File]::ReadAllText(
+              $requestPath,
+              [System.Text.Encoding]::UTF8
+          )
           $expected = (
-            Get-Content `
-              -LiteralPath "tests/fixtures/operator_evidence_custodian/valid_response.ndjson" `
-              -Raw
-          ).TrimEnd([char[]]"`r`n")
-          $actual = $request |
-            cargo run `
+              [System.IO.File]::ReadAllText(
+                  $responsePath,
+                  [System.Text.Encoding]::UTF8
+              )
+          ).Replace("`r`n", "`n")
+
+          & cargo build `
               --quiet `
               --locked `
               --package systeme-local-operator-evidence-custodian
+
           if ($LASTEXITCODE -ne 0) {
-            throw "Custodian protocol command failed"
+              throw "Custodian protocol build failed"
           }
-          $actualText = ([string]::Join("`n", @($actual))).TrimEnd([char[]]"`r`n")
-          if ($actualText -cne $expected) {
-            throw "Custodian protocol response mismatch"
+
+          $binary = (
+              Resolve-Path `
+                  "target/debug/systeme-local-operator-evidence-custodian.exe"
+          ).Path
+
+          $startInfo = New-Object System.Diagnostics.ProcessStartInfo
+          $startInfo.FileName = $binary
+          $startInfo.WorkingDirectory = (Get-Location).Path
+          $startInfo.UseShellExecute = $false
+          $startInfo.CreateNoWindow = $true
+          $startInfo.RedirectStandardInput = $true
+          $startInfo.RedirectStandardOutput = $true
+          $startInfo.RedirectStandardError = $true
+
+          if (
+              $startInfo.PSObject.Properties.Name -contains
+              "StandardOutputEncoding"
+          ) {
+              $startInfo.StandardOutputEncoding = [System.Text.Encoding]::UTF8
+              $startInfo.StandardErrorEncoding = [System.Text.Encoding]::UTF8
+          }
+
+          $process = New-Object System.Diagnostics.Process
+          $process.StartInfo = $startInfo
+
+          try {
+              if (-not $process.Start()) {
+                  throw "Custodian protocol process did not start"
+              }
+
+              $process.StandardInput.Write($request)
+              $process.StandardInput.Close()
+
+              $actual = (
+                  $process.StandardOutput.ReadToEnd()
+              ).Replace("`r`n", "`n")
+              $stderr = $process.StandardError.ReadToEnd()
+
+              $process.WaitForExit()
+
+              if ($process.ExitCode -ne 0) {
+                  throw (
+                      "Custodian protocol command failed with exit " +
+                      "$($process.ExitCode): $stderr"
+                  )
+              }
+
+              if ($stderr.Length -ne 0) {
+                  throw "Custodian protocol emitted unexpected stderr"
+              }
+
+              if ($actual -cne $expected) {
+                  throw "Custodian protocol response mismatch"
+              }
+          }
+          finally {
+              $process.Dispose()
           }
 
       - name: Test
