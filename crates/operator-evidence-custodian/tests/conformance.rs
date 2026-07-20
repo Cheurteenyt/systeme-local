@@ -30,10 +30,21 @@ fn fixture(name: &str) -> Result<String, Box<dyn Error>> {
     Ok(content)
 }
 
+fn assert_canonical_ndjson_fixture(name: &str, content: &str) {
+    assert!(content.ends_with('\n'), "{name} must end with LF");
+    assert!(
+        !content.contains('\r'),
+        "{name} must use LF-only line endings"
+    );
+}
+
 #[test]
 fn valid_fixture_produces_the_exact_response() -> Result<(), Box<dyn Error>> {
     let request_text = fixture("valid_request.ndjson")?;
     let expected_response = fixture("valid_response.ndjson")?;
+
+    assert_canonical_ndjson_fixture("valid_request.ndjson", &request_text);
+    assert_canonical_ndjson_fixture("valid_response.ndjson", &expected_response);
 
     let request: ContractRequest = parse_request_text(&request_text)?;
     assert_eq!(request.protocol_version, 1);
