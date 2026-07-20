@@ -161,8 +161,9 @@ The implemented and planned channels remain independent:
 | ChatGPT MCP deployment eligibility | implemented | expiring official-evidence profile |
 | ChatGPT MCP readiness | implemented | conflict-aware staged decision |
 | sealed operator-evidence bundle | implemented | no live evidence collection |
-| operator-evidence session lifecycle | implemented | in-memory Rust state machine; no filesystem access |
-| real operator-evidence collection | planned | must follow custody path and streaming gates |
+| operator-evidence session lifecycle | implemented | in-memory Rust state machine |
+| operator-evidence bounded staging | implemented | capability-rooted synthetic reads; no wire operation |
+| real operator-evidence collection | planned | must follow controlled staging, sanitizer and disposition gates |
 | Secure MCP Tunnel installation | planned | separate operator-approved lot |
 | OAuth/OIDC client and token lifecycle | planned | separate secret-management lot |
 | configured ChatGPT app | planned | no current app or connection |
@@ -218,7 +219,15 @@ B1.1 adds the exact `created -> collecting -> sealed -> disposed` lifecycle plus
 `aborted`, `expired` and `retained` paths. Illegal transitions and revision overflow fail without
 mutation. Transition receipts are deterministic, path-free and secret-free.
 
+B1.2 adds an internal capability-rooted reader for synthetic staged files. It accepts only opaque
+direct-child names, disables following the final link, rejects non-regular and multiply-linked
+objects, compares metadata around a bounded streaming read and keeps bytes inside a redacted,
+non-serializable Rust object. The reader is callable only for a `collecting` session.
+
+The B0 binary still exposes only `describe_contract`; Python cannot provide a path or invoke B1.2.
+
 The accepted ownership decision is recorded in ADR 0005. The normative wire contract is
-[`operator-evidence-custodian-protocol.md`](operator-evidence-custodian-protocol.md), and the
-in-memory lifecycle authority is
-[`operator-evidence-session-lifecycle.md`](operator-evidence-session-lifecycle.md).
+[`operator-evidence-custodian-protocol.md`](operator-evidence-custodian-protocol.md), the lifecycle
+authority is [`operator-evidence-session-lifecycle.md`](operator-evidence-session-lifecycle.md),
+and the staging authority is
+[`operator-evidence-staging.md`](operator-evidence-staging.md).

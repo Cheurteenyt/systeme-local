@@ -1,6 +1,7 @@
 mod error;
 mod protocol;
 mod session;
+mod source;
 
 pub use error::{Code as ProtocolErrorCode, Error as ProtocolError};
 pub use protocol::{
@@ -13,4 +14,9 @@ pub use protocol::{
 pub use session::{
     CustodySession, SessionAction, SessionId, SessionIdError, SessionState,
     SessionTransitionReceipt, TransitionError, compute_transition_sha256,
+};
+pub use source::{
+    GuardedSource, MAX_SYNTHETIC_SOURCE_BYTES, SOURCE_READ_CHUNK_BYTES, SourceName,
+    SourceNameError, SourceReadError, SourceReadLimit, SourceReadLimitError, StagingRoot,
+    read_synthetic_source,
 };

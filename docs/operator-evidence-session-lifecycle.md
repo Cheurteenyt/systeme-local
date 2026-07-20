@@ -1,6 +1,6 @@
 # Operator-evidence session lifecycle
 
-Status: normative private Rust lifecycle contract, B1.1
+Status: normative private Rust lifecycle contract through B1.2
 
 ## Purpose
 
@@ -153,6 +153,16 @@ action
 The Rust error type distinguishes an illegal edge from revision overflow without including the
 session identifier or any operator-controlled value.
 
+## B1.2 staging relationship
+
+B1.2 permits an internal synthetic staging read only while the session state is `collecting`.
+
+A read does not mutate the state or revision. Sealing, aborting or expiring remains an explicit
+B1.1 transition.
+
+The staged bytes remain in a `GuardedSource` owned by Rust and are not included in a transition
+receipt.
+
 ## B1.1 non-goals
 
 B1.1 implements no:
@@ -175,6 +185,6 @@ B1.1 implements no:
 
 ## Next gate
 
-B1.2 may add canonical path and file-type validation plus bounded streaming against synthetic
-temporary files. It must preserve this lifecycle contract and remain path-free and secret-free at
-the Python boundary.
+B1.3 may add Rust-controlled staging creation, permission hardening, source commitments and the
+first sanitizer profiles. It must preserve this lifecycle contract, keep raw bytes inside Rust and
+remain path-free and secret-free at the Python boundary.
