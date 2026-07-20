@@ -1,0 +1,18 @@
+[package]
+name = "systeme-local-operator-evidence-custodian"
+version = "0.1.0"
+description = "Synthetic-only Python-Rust operator-evidence custody contract scaffold"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+publish.workspace = true
+
+[dependencies]
+serde.workspace = true
+serde_json.workspace = true
+sha2.workspace = true
+
+[lints]
+workspace = true

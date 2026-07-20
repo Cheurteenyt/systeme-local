@@ -141,6 +141,9 @@ jobs:
       - name: Select Rust toolchain
         run: rustup override set 1.97.1
 
+      - name: Check
+        run: cargo check --workspace --all-targets --all-features --locked
+
       - name: Check formatting
         run: cargo fmt --all -- --check
 
@@ -155,7 +158,10 @@ jobs:
           -D warnings
 
       - name: Test
-        run: cargo test --workspace --all-features --locked
+        run: cargo test --workspace --all-features --locked --no-fail-fast
+
+      - name: Check doctests
+        run: cargo test --doc --workspace --all-features --locked
 
       - name: Check documentation
         env:
@@ -163,6 +169,7 @@ jobs:
         run: >-
           cargo doc
           --workspace
+          --all-features
           --no-deps
           --document-private-items
           --locked
@@ -208,5 +215,29 @@ jobs:
             exit 1
           }
 
+      - name: Exercise operator-evidence custodian protocol
+        shell: powershell
+        run: |
+          $request = Get-Content `
+            -LiteralPath "tests/fixtures/operator_evidence_custodian/valid_request.ndjson" `
+            -Raw
+          $expected = (
+            Get-Content `
+              -LiteralPath "tests/fixtures/operator_evidence_custodian/valid_response.ndjson" `
+              -Raw
+          ).TrimEnd([char[]]"`r`n")
+          $actual = $request |
+            cargo run `
+              --quiet `
+              --locked `
+              --package systeme-local-operator-evidence-custodian
+          if ($LASTEXITCODE -ne 0) {
+            throw "Custodian protocol command failed"
+          }
+          $actualText = ([string]::Join("`n", @($actual))).TrimEnd([char[]]"`r`n")
+          if ($actualText -cne $expected) {
+            throw "Custodian protocol response mismatch"
+          }
+
       - name: Test
-        run: cargo test --workspace --all-features --locked
+        run: cargo test --workspace --all-features --locked --no-fail-fast

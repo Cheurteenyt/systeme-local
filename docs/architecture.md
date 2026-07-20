@@ -200,3 +200,18 @@ The next safe order is:
 3. implement bounded local operator-evidence collection;
 4. only then consider separate tunnel, OAuth/OIDC and app-configuration lots using freshly
    revalidated official evidence.
+
+## Operator-evidence custody contract scaffold
+
+Status: partial
+
+The repository contains a private, synthetic-only Python/Rust contract for the next bounded
+operator-evidence phase. Python remains the policy, public-model and existing-digest authority. A
+separate Rust crate describes the future byte-custody boundary through a one-shot NDJSON protocol.
+
+The implemented B0 surface accepts only a synthetic `describe_contract` request. It performs no
+filesystem evidence ingestion, sanitizer execution, session creation, network access, tunnel
+installation, OAuth/OIDC registration, app configuration or provider call.
+
+The accepted ownership decision is recorded in the corresponding ADR. The normative wire contract
+is [`operator-evidence-custodian-protocol.md`](operator-evidence-custodian-protocol.md).

@@ -1,5 +1,8 @@
 [workspace]
-members = ["crates/audit-watchdog"]
+members = [
+    "crates/audit-watchdog",
+    "crates/operator-evidence-custodian",
+]
 resolver = "3"
 
 [workspace.package]
