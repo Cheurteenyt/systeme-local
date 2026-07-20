@@ -34,6 +34,7 @@ def test_document_authority_is_explicit() -> None:
         "docs/architecture.md",
         "docs/connectivity-model.md",
         "docs/operator-evidence-session-lifecycle.md",
+        "docs/operator-evidence-staging.md",
         "docs/roadmap.md",
         "docs/adr/*.md",
     ):
@@ -248,7 +249,7 @@ def test_operator_evidence_session_lifecycle_is_reconciled() -> None:
     threat_model = text("docs/threat-model.md")
 
     for marker in (
-        "Status: normative private Rust lifecycle contract, B1.1",
+        "Status: normative private Rust lifecycle contract through B1.2",
         "disposed -> <none>",
         "revision + 1",
         r"systeme-local:operator-evidence-session-transition:v1\x00",
@@ -260,7 +261,35 @@ def test_operator_evidence_session_lifecycle_is_reconciled() -> None:
     assert "does not add a protocol operation" in protocol
     assert "operator-evidence session lifecycle | implemented" in architecture
     assert "Controls implemented in B1.1" in threat_model
-    assert "no filesystem, path, I/O or network capability" in threat_model
+    assert "Controls implemented in B1.2" in threat_model
+
+
+def test_operator_evidence_staging_is_reconciled() -> None:
+    staging = text("docs/operator-evidence-staging.md")
+    protocol = text("docs/operator-evidence-custodian-protocol.md")
+    architecture = text("docs/architecture.md")
+    lifecycle = text("docs/operator-evidence-session-lifecycle.md")
+    governance = text("docs/documentation-governance.md")
+
+    for marker in (
+        "Status: normative private Rust staging contract, B1.2",
+        "src_[0-9a-f]{32}.raw",
+        "cap-std = 4.0.2",
+        "cap-fs-ext = 4.0.2",
+        "session.state == collecting",
+        "1 ..= 8 MiB",
+        "16 KiB",
+        "The public Rust surface exposes only",
+        "not a disposition receipt",
+        "No real evidence may be handled",
+    ):
+        assert marker in staging
+
+    assert "B1.2 internal staging reader" in protocol
+    assert "not reachable through protocol v1" in protocol
+    assert "operator-evidence bounded staging | implemented" in architecture
+    assert "B1.2 staging relationship" in lifecycle
+    assert "docs/operator-evidence-staging.md" in governance
 
 
 def test_governance_files_cover_sensitive_surfaces() -> None:

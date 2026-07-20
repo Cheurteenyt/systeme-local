@@ -105,8 +105,10 @@ Costs:
 
 - B1.1 implements the Rust in-memory custody-session state machine and private transition
   commitments without file or protocol capability.
-- Later B1 lots add bounded ingestion, sanitizer profiles, source/sanitized commitments and
-  disposition receipts.
+- B1.2 implements capability-rooted, no-follow, bounded reads of synthetic staged files while
+  keeping that capability unreachable from protocol v1.
+- Later B1 lots add controlled staging creation, sanitizer profiles, source/sanitized commitments
+  and disposition receipts.
 - B2 implements Python orchestration of the eleven observations, subprocess verification, bundle
   compilation and local reporting.
 - B3 adds the operator command, end-to-end non-disclosure tests and governance.
@@ -122,3 +124,20 @@ domain `systeme-local:operator-evidence-session-transition:v1\x00`.
 
 B1.1 does not change protocol version 1 or add a wire operation. It performs no filesystem access,
 raw-byte ingestion, sanitizer execution, retention, disposition or deletion.
+
+## B1.2 implementation boundary
+
+B1.2 adds an internal Rust staging reader based on an open directory capability. It accepts only an
+opaque direct-child source name, disables following the final link, requires a regular single-link
+file, reads by fixed-size chunks under a strict limit and preserves bytes only in a non-serializable
+`GuardedSource`.
+
+The read is permitted only while the B1.1 session state is `collecting`. Pre-open, opened-handle and
+post-read fingerprints must match.
+
+Protocol version 1 and its fixtures remain unchanged. `filesystem_access=false` continues to mean
+that no filesystem capability is reachable through the sole `describe_contract` operation. Python
+provides no path and receives no raw bytes.
+
+B1.2 uses only synthetic temporary files. It does not establish operator-source provenance,
+sanitization, retention, disposition or deletion.

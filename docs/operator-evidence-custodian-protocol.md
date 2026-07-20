@@ -193,6 +193,26 @@ This internal Rust API:
 The B0 wire descriptor therefore remains synthetic-only with filesystem access, evidence ingestion
 and sanitizer execution set to `false`.
 
+## B1.2 internal staging reader
+
+B1.2 adds an internal Rust library capability governed by
+[`operator-evidence-staging.md`](operator-evidence-staging.md).
+
+The reader:
+
+- opens a Rust-local staging root as a directory capability;
+- accepts only an opaque direct-child name;
+- disables following the final symbolic-link component;
+- rejects non-regular, reparse and multiply-linked objects;
+- reads synthetic bytes under a strict streaming limit;
+- returns a redacted, non-serializable Rust object.
+
+This capability is not reachable through protocol v1. `protocol.rs` and `main.rs` do not reference
+the staging API. No path, source name or byte field is added to a request or response.
+
+Therefore the checked-in B0 response remains byte-for-byte unchanged and continues to report
+`filesystem_access=false`: no filesystem action is reachable through `describe_contract`.
+
 ## Evolution
 
 Any protocol change requires:

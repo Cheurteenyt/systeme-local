@@ -181,9 +181,26 @@ contract description and does not open evidence files.
 - transition receipts contain no path, endpoint, secret, token, timestamp or raw evidence;
 - the session module imports no filesystem, path, I/O or network capability.
 
+### Controls implemented in B1.2
+
+- exact opaque `src_` names with no path components;
+- an open capability directory as the staging boundary;
+- no-follow handling for the final source component;
+- staging-root symlink and Windows reparse rejection;
+- regular-file-only and single-hard-link requirements;
+- reads authorized only in the `collecting` session state;
+- fixed 16 KiB chunks and an 8 MiB absolute ceiling;
+- checked arithmetic and rejection before appending beyond the selected limit;
+- pre-open, handle and post-read identity/size/link/timestamp comparison;
+- path-free typed errors;
+- redacted `Debug`, no serialization and no public bytes getter;
+- no staging reference from the B0 protocol or binary entrypoint;
+- exact `cap-std` and `cap-fs-ext` dependency pins with lock and audit gates.
+
 ### Residual risks and deferred controls
 
-B1.2 and later B1 lots must define canonical path handling, file-type restrictions, bounded
-streaming, temporary permissions, sanitizer allowlists, source/sanitized commitments and real
-disposition receipts. Logical deletion must not be described as physical erasure. B2 and B3 must
-add orchestration and operator-facing non-disclosure tests before any real evidence is handled.
+B1.2 uses only controlled synthetic staging roots. It does not yet prove root ownership or hardened
+ACL/mode settings, operator-source provenance, resistance to every hostile same-file mutation,
+sanitizer correctness, source/sanitized commitments, retention or disposition. Logical deletion
+must not be described as physical erasure. B2 and B3 must add orchestration and operator-facing
+non-disclosure tests before any real evidence is handled.
