@@ -140,3 +140,38 @@ Règles :
 - scraping de sidebar, DOM privé ou endpoints non documentés ;
 - traitement d’une session MCP comme identité de conversation ;
 - collecte réelle de preuves tant que son cycle de vie n’est pas implémenté et audité.
+
+## Operator-evidence custodian subprocess boundary
+
+Status: partial control scaffold
+
+### Assets at risk
+
+Future raw operator evidence may contain paths, endpoint values, authentication metadata, tool
+definitions, workspace facts or secret material.
+
+### Boundary
+
+Python sends one versioned NDJSON request through stdin to a local Rust process. Rust emits one
+secret-free and path-free response on stdout. B0 permits only a synthetic contract description and
+does not open evidence files.
+
+### Controls implemented in B0
+
+- exact protocol version and field allowlist;
+- bounded input;
+- one-request/one-response cardinality;
+- strict identifier and lowercase SHA-256 syntax;
+- no shell invocation or request data in CLI arguments;
+- empty stderr required on success;
+- typed fail-closed errors;
+- Python recomputation of the private contract commitment;
+- shared Python/Rust conformance fixtures;
+- no filesystem, sanitizer or network capability in the synthetic descriptor.
+
+### Residual risks and deferred controls
+
+B1 must define canonical path handling, file-type restrictions, bounded streaming, temporary
+permissions, sanitizer allowlists, session transitions and disposition receipts. Logical deletion
+must not be described as physical erasure. B2 and B3 must add orchestration and operator-facing
+non-disclosure tests before any real evidence is handled.

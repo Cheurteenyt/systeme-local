@@ -1,0 +1,38 @@
+[
+  {
+    "name": "unknown_field_does_not_echo_path",
+    "input": "{\"protocol_version\":1,\"request_id\":\"contract_probe_001\",\"operation\":\"describe_contract\",\"challenge_sha256\":\"3e5318cc2a895a2db4d7cb083f095ae9d33c929cfe5aefd3d0d9798fd25e4f39\",\"source_path\":\"C:\\\\operator\\\\secret.txt\"}\n",
+    "error_code": "unknown_field",
+    "forbidden_echo": "C:\\operator\\secret.txt"
+  },
+  {
+    "name": "wrong_version",
+    "input": "{\"protocol_version\":2,\"request_id\":\"contract_probe_001\",\"operation\":\"describe_contract\",\"challenge_sha256\":\"3e5318cc2a895a2db4d7cb083f095ae9d33c929cfe5aefd3d0d9798fd25e4f39\"}\n",
+    "error_code": "unsupported_protocol_version"
+  },
+  {
+    "name": "invalid_request_id",
+    "input": "{\"protocol_version\":1,\"request_id\":\"Bad-Request\",\"operation\":\"describe_contract\",\"challenge_sha256\":\"3e5318cc2a895a2db4d7cb083f095ae9d33c929cfe5aefd3d0d9798fd25e4f39\"}\n",
+    "error_code": "invalid_request_id"
+  },
+  {
+    "name": "unsupported_operation",
+    "input": "{\"protocol_version\":1,\"request_id\":\"contract_probe_001\",\"operation\":\"ingest_evidence\",\"challenge_sha256\":\"3e5318cc2a895a2db4d7cb083f095ae9d33c929cfe5aefd3d0d9798fd25e4f39\"}\n",
+    "error_code": "unsupported_operation"
+  },
+  {
+    "name": "invalid_digest",
+    "input": "{\"protocol_version\":1,\"request_id\":\"contract_probe_001\",\"operation\":\"describe_contract\",\"challenge_sha256\":\"GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG\"}\n",
+    "error_code": "invalid_digest"
+  },
+  {
+    "name": "multiple_messages",
+    "input": "{\"protocol_version\":1,\"request_id\":\"contract_probe_001\",\"operation\":\"describe_contract\",\"challenge_sha256\":\"3e5318cc2a895a2db4d7cb083f095ae9d33c929cfe5aefd3d0d9798fd25e4f39\"}\n{\"protocol_version\":1,\"request_id\":\"contract_probe_001\",\"operation\":\"describe_contract\",\"challenge_sha256\":\"3e5318cc2a895a2db4d7cb083f095ae9d33c929cfe5aefd3d0d9798fd25e4f39\"}\n",
+    "error_code": "multiple_messages"
+  },
+  {
+    "name": "malformed_json",
+    "input": "{\"protocol_version\":1\n",
+    "error_code": "invalid_json"
+  }
+]

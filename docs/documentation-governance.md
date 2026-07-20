@@ -20,6 +20,7 @@ of another document.
 | `docs/provider-attachments.md` | provider-neutral attachment metadata and batching |
 | `docs/providers/chatgpt.md` | ChatGPT surface characterization and implementation status |
 | `docs/providers/chatgpt-mcp-*.md` | expiring ChatGPT MCP evidence and operator contracts |
+| `docs/operator-evidence-custodian-protocol.md` | private Python/Rust custody subprocess contract |
 | `docs/threat-model.md` | current threats, controls and residual risks |
 | `docs/roadmap.md` | ordered delivery status and gates |
 | `docs/adr/*.md` | accepted decisions and consequences |

@@ -141,6 +141,9 @@ jobs:
       - name: Select Rust toolchain
         run: rustup override set 1.97.1
 
+      - name: Check
+        run: cargo check --workspace --all-targets --all-features --locked
+
       - name: Check formatting
         run: cargo fmt --all -- --check
 
@@ -155,7 +158,10 @@ jobs:
           -D warnings
 
       - name: Test
-        run: cargo test --workspace --all-features --locked
+        run: cargo test --workspace --all-features --locked --no-fail-fast
+
+      - name: Check doctests
+        run: cargo test --doc --workspace --all-features --locked
 
       - name: Check documentation
         env:
@@ -163,6 +169,7 @@ jobs:
         run: >-
           cargo doc
           --workspace
+          --all-features
           --no-deps
           --document-private-items
           --locked
@@ -208,5 +215,128 @@ jobs:
             exit 1
           }
 
+      - name: Exercise operator-evidence custodian protocol
+        shell: powershell
+        run: |
+          $ErrorActionPreference = "Stop"
+
+          $requestPath = (
+              Resolve-Path `
+                  "tests/fixtures/operator_evidence_custodian/valid_request.ndjson"
+          ).Path
+          $responsePath = (
+              Resolve-Path `
+                  "tests/fixtures/operator_evidence_custodian/valid_response.ndjson"
+          ).Path
+
+          $strictUtf8 = [System.Text.UTF8Encoding]::new($false, $true)
+          $requestBytes = [System.IO.File]::ReadAllBytes($requestPath)
+
+          if (
+              $requestBytes.Length -ge 3 -and
+              $requestBytes[0] -eq 0xEF -and
+              $requestBytes[1] -eq 0xBB -and
+              $requestBytes[2] -eq 0xBF
+          ) {
+              throw "Custodian request fixture must not contain a UTF-8 BOM"
+          }
+
+          $requestText = $strictUtf8.GetString($requestBytes).Replace("`r`n", "`n")
+          $requestWithoutTerminator = $requestText.TrimEnd([char[]]"`n")
+
+          if (
+              -not $requestText.EndsWith("`n", [StringComparison]::Ordinal) -or
+              $requestWithoutTerminator.Contains("`n") -or
+              $requestWithoutTerminator.Contains("`r") -or
+              [string]::IsNullOrWhiteSpace($requestWithoutTerminator)
+          ) {
+              throw "Custodian request fixture must contain exactly one terminated message"
+          }
+
+          $expected = (
+              [System.IO.File]::ReadAllText(
+                  $responsePath,
+                  $strictUtf8
+              )
+          ).Replace("`r`n", "`n")
+
+          & cargo build `
+              --quiet `
+              --locked `
+              --package systeme-local-operator-evidence-custodian
+
+          if ($LASTEXITCODE -ne 0) {
+              throw "Custodian protocol build failed"
+          }
+
+          $binary = (
+              Resolve-Path `
+                  "target/debug/systeme-local-operator-evidence-custodian.exe"
+          ).Path
+
+          $tempRoot = if (
+              -not [string]::IsNullOrWhiteSpace($env:RUNNER_TEMP)
+          ) {
+              $env:RUNNER_TEMP
+          }
+          else {
+              [System.IO.Path]::GetTempPath()
+          }
+
+          $nonce = [guid]::NewGuid().ToString("N")
+          $stdoutPath = Join-Path $tempRoot "custodian-$nonce.stdout"
+          $stderrPath = Join-Path $tempRoot "custodian-$nonce.stderr"
+
+          try {
+              $process = Start-Process `
+                  -FilePath $binary `
+                  -WorkingDirectory (Get-Location).Path `
+                  -NoNewWindow `
+                  -Wait `
+                  -PassThru `
+                  -RedirectStandardInput $requestPath `
+                  -RedirectStandardOutput $stdoutPath `
+                  -RedirectStandardError $stderrPath
+
+              $actualBytes = [System.IO.File]::ReadAllBytes($stdoutPath)
+              $stderrBytes = [System.IO.File]::ReadAllBytes($stderrPath)
+              $actual = $strictUtf8.GetString($actualBytes).Replace("`r`n", "`n")
+              $stderr = $strictUtf8.GetString($stderrBytes)
+
+              if ($process.ExitCode -ne 0) {
+                  throw (
+                      "Custodian protocol command failed: exit=" +
+                      "$($process.ExitCode); stdout_base64=" +
+                      [Convert]::ToBase64String($actualBytes) +
+                      "; stderr_base64=" +
+                      [Convert]::ToBase64String($stderrBytes)
+                  )
+              }
+
+              if ($stderrBytes.Length -ne 0) {
+                  throw (
+                      "Custodian protocol emitted unexpected stderr_base64=" +
+                      [Convert]::ToBase64String($stderrBytes)
+                  )
+              }
+
+              if ($actual -cne $expected) {
+                  throw (
+                      "Custodian protocol response mismatch: actual_base64=" +
+                      [Convert]::ToBase64String($actualBytes)
+                  )
+              }
+          }
+          finally {
+              Remove-Item `
+                  -LiteralPath $stdoutPath `
+                  -Force `
+                  -ErrorAction SilentlyContinue
+              Remove-Item `
+                  -LiteralPath $stderrPath `
+                  -Force `
+                  -ErrorAction SilentlyContinue
+          }
+
       - name: Test
-        run: cargo test --workspace --all-features --locked
+        run: cargo test --workspace --all-features --locked --no-fail-fast
