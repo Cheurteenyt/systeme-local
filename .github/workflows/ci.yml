@@ -229,14 +229,34 @@ jobs:
                   "tests/fixtures/operator_evidence_custodian/valid_response.ndjson"
           ).Path
 
-          $request = [System.IO.File]::ReadAllText(
-              $requestPath,
-              [System.Text.Encoding]::UTF8
-          )
+          $strictUtf8 = [System.Text.UTF8Encoding]::new($false, $true)
+          $requestBytes = [System.IO.File]::ReadAllBytes($requestPath)
+
+          if (
+              $requestBytes.Length -ge 3 -and
+              $requestBytes[0] -eq 0xEF -and
+              $requestBytes[1] -eq 0xBB -and
+              $requestBytes[2] -eq 0xBF
+          ) {
+              throw "Custodian request fixture must not contain a UTF-8 BOM"
+          }
+
+          $requestText = $strictUtf8.GetString($requestBytes).Replace("`r`n", "`n")
+          $requestWithoutTerminator = $requestText.TrimEnd([char[]]"`n")
+
+          if (
+              -not $requestText.EndsWith("`n", [StringComparison]::Ordinal) -or
+              $requestWithoutTerminator.Contains("`n") -or
+              $requestWithoutTerminator.Contains("`r") -or
+              [string]::IsNullOrWhiteSpace($requestWithoutTerminator)
+          ) {
+              throw "Custodian request fixture must contain exactly one terminated message"
+          }
+
           $expected = (
               [System.IO.File]::ReadAllText(
                   $responsePath,
-                  [System.Text.Encoding]::UTF8
+                  $strictUtf8
               )
           ).Replace("`r`n", "`n")
 
@@ -254,58 +274,68 @@ jobs:
                   "target/debug/systeme-local-operator-evidence-custodian.exe"
           ).Path
 
-          $startInfo = New-Object System.Diagnostics.ProcessStartInfo
-          $startInfo.FileName = $binary
-          $startInfo.WorkingDirectory = (Get-Location).Path
-          $startInfo.UseShellExecute = $false
-          $startInfo.CreateNoWindow = $true
-          $startInfo.RedirectStandardInput = $true
-          $startInfo.RedirectStandardOutput = $true
-          $startInfo.RedirectStandardError = $true
-
-          if (
-              $startInfo.PSObject.Properties.Name -contains
-              "StandardOutputEncoding"
+          $tempRoot = if (
+              -not [string]::IsNullOrWhiteSpace($env:RUNNER_TEMP)
           ) {
-              $startInfo.StandardOutputEncoding = [System.Text.Encoding]::UTF8
-              $startInfo.StandardErrorEncoding = [System.Text.Encoding]::UTF8
+              $env:RUNNER_TEMP
+          }
+          else {
+              [System.IO.Path]::GetTempPath()
           }
 
-          $process = New-Object System.Diagnostics.Process
-          $process.StartInfo = $startInfo
+          $nonce = [guid]::NewGuid().ToString("N")
+          $stdoutPath = Join-Path $tempRoot "custodian-$nonce.stdout"
+          $stderrPath = Join-Path $tempRoot "custodian-$nonce.stderr"
 
           try {
-              if (-not $process.Start()) {
-                  throw "Custodian protocol process did not start"
-              }
+              $process = Start-Process `
+                  -FilePath $binary `
+                  -WorkingDirectory (Get-Location).Path `
+                  -NoNewWindow `
+                  -Wait `
+                  -PassThru `
+                  -RedirectStandardInput $requestPath `
+                  -RedirectStandardOutput $stdoutPath `
+                  -RedirectStandardError $stderrPath
 
-              $process.StandardInput.Write($request)
-              $process.StandardInput.Close()
-
-              $actual = (
-                  $process.StandardOutput.ReadToEnd()
-              ).Replace("`r`n", "`n")
-              $stderr = $process.StandardError.ReadToEnd()
-
-              $process.WaitForExit()
+              $actualBytes = [System.IO.File]::ReadAllBytes($stdoutPath)
+              $stderrBytes = [System.IO.File]::ReadAllBytes($stderrPath)
+              $actual = $strictUtf8.GetString($actualBytes).Replace("`r`n", "`n")
+              $stderr = $strictUtf8.GetString($stderrBytes)
 
               if ($process.ExitCode -ne 0) {
                   throw (
-                      "Custodian protocol command failed with exit " +
-                      "$($process.ExitCode): $stderr"
+                      "Custodian protocol command failed: exit=" +
+                      "$($process.ExitCode); stdout_base64=" +
+                      [Convert]::ToBase64String($actualBytes) +
+                      "; stderr_base64=" +
+                      [Convert]::ToBase64String($stderrBytes)
                   )
               }
 
-              if ($stderr.Length -ne 0) {
-                  throw "Custodian protocol emitted unexpected stderr"
+              if ($stderrBytes.Length -ne 0) {
+                  throw (
+                      "Custodian protocol emitted unexpected stderr_base64=" +
+                      [Convert]::ToBase64String($stderrBytes)
+                  )
               }
 
               if ($actual -cne $expected) {
-                  throw "Custodian protocol response mismatch"
+                  throw (
+                      "Custodian protocol response mismatch: actual_base64=" +
+                      [Convert]::ToBase64String($actualBytes)
+                  )
               }
           }
           finally {
-              $process.Dispose()
+              Remove-Item `
+                  -LiteralPath $stdoutPath `
+                  -Force `
+                  -ErrorAction SilentlyContinue
+              Remove-Item `
+                  -LiteralPath $stderrPath `
+                  -Force `
+                  -ErrorAction SilentlyContinue
           }
 
       - name: Test
