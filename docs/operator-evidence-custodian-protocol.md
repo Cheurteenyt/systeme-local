@@ -177,6 +177,22 @@ Success and error responses cannot contain:
 
 Checked-in fixtures are synthetic and contain no operator evidence.
 
+## B1.1 internal session lifecycle
+
+B1.1 adds an in-memory Rust session state machine governed by
+[`operator-evidence-session-lifecycle.md`](operator-evidence-session-lifecycle.md).
+
+This internal Rust API:
+
+- does not add a protocol operation;
+- does not change protocol version `1`;
+- does not alter the checked-in B0 request or response fixture;
+- performs no filesystem or network I/O;
+- emits no session receipt through stdout.
+
+The B0 wire descriptor therefore remains synthetic-only with filesystem access, evidence ingestion
+and sanitizer execution set to `false`.
+
 ## Evolution
 
 Any protocol change requires:

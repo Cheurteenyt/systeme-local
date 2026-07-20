@@ -1,6 +1,6 @@
 # Modèle de menace
 
-Status: current through the deterministic ChatGPT MCP operator-evidence foundation
+Status: current through the B1.1 operator-evidence session lifecycle
 
 ## Actifs à protéger
 
@@ -141,20 +141,20 @@ Règles :
 - traitement d’une session MCP comme identité de conversation ;
 - collecte réelle de preuves tant que son cycle de vie n’est pas implémenté et audité.
 
-## Operator-evidence custodian subprocess boundary
+## Operator-evidence custodian boundary
 
-Status: partial control scaffold
+Status: partial
 
 ### Assets at risk
 
 Future raw operator evidence may contain paths, endpoint values, authentication metadata, tool
 definitions, workspace facts or secret material.
 
-### Boundary
+### Process boundary
 
 Python sends one versioned NDJSON request through stdin to a local Rust process. Rust emits one
-secret-free and path-free response on stdout. B0 permits only a synthetic contract description and
-does not open evidence files.
+secret-free and path-free response on stdout. The B0 wire protocol still permits only a synthetic
+contract description and does not open evidence files.
 
 ### Controls implemented in B0
 
@@ -169,9 +169,21 @@ does not open evidence files.
 - shared Python/Rust conformance fixtures;
 - no filesystem, sanitizer or network capability in the synthetic descriptor.
 
+### Controls implemented in B1.1
+
+- opaque `ses_` identifiers with exactly 32 lowercase hexadecimal characters;
+- one authoritative state/action transition graph;
+- `disposed` terminal state;
+- monotonic checked transition revisions;
+- illegal edges and overflow preserve the prior session;
+- deterministic private transition commitment with a separate digest domain;
+- transition errors contain only the prior state and requested action;
+- transition receipts contain no path, endpoint, secret, token, timestamp or raw evidence;
+- the session module imports no filesystem, path, I/O or network capability.
+
 ### Residual risks and deferred controls
 
-B1 must define canonical path handling, file-type restrictions, bounded streaming, temporary
-permissions, sanitizer allowlists, session transitions and disposition receipts. Logical deletion
-must not be described as physical erasure. B2 and B3 must add orchestration and operator-facing
-non-disclosure tests before any real evidence is handled.
+B1.2 and later B1 lots must define canonical path handling, file-type restrictions, bounded
+streaming, temporary permissions, sanitizer allowlists, source/sanitized commitments and real
+disposition receipts. Logical deletion must not be described as physical erasure. B2 and B3 must
+add orchestration and operator-facing non-disclosure tests before any real evidence is handled.
