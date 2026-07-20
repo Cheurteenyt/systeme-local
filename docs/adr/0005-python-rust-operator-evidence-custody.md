@@ -103,11 +103,22 @@ Costs:
 
 ## Follow-up lots
 
-- B1 implements Rust custody sessions, bounded ingestion, sanitizer profiles, private commitments
-  and disposition receipts.
+- B1.1 implements the Rust in-memory custody-session state machine and private transition
+  commitments without file or protocol capability.
+- Later B1 lots add bounded ingestion, sanitizer profiles, source/sanitized commitments and
+  disposition receipts.
 - B2 implements Python orchestration of the eleven observations, subprocess verification, bundle
   compilation and local reporting.
 - B3 adds the operator command, end-to-end non-disclosure tests and governance.
 
 Tunnel installation, OAuth/OIDC registration, ChatGPT app configuration, provider calls and browser
 automation remain outside these lots until separately approved.
+
+## B1.1 implementation boundary
+
+B1.1 adds an in-memory Rust session model with exact states, typed actions, monotonic revisions,
+fail-closed transition errors and path-free transition receipts. It introduces the private digest
+domain `systeme-local:operator-evidence-session-transition:v1\x00`.
+
+B1.1 does not change protocol version 1 or add a wire operation. It performs no filesystem access,
+raw-byte ingestion, sanitizer execution, retention, disposition or deletion.

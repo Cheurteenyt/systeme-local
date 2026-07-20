@@ -1,6 +1,6 @@
 # Architecture actuellement implémentée
 
-Status: implemented architecture through pull request #38
+Status: implemented architecture through B1.1 operator-evidence session lifecycle
 
 This document describes the code that exists on `main`. It is not the target product
 architecture; that role belongs to [`blueprint-v2.md`](blueprint-v2.md).
@@ -161,7 +161,8 @@ The implemented and planned channels remain independent:
 | ChatGPT MCP deployment eligibility | implemented | expiring official-evidence profile |
 | ChatGPT MCP readiness | implemented | conflict-aware staged decision |
 | sealed operator-evidence bundle | implemented | no live evidence collection |
-| real operator-evidence collection | planned | must follow provider-package refactor |
+| operator-evidence session lifecycle | implemented | in-memory Rust state machine; no filesystem access |
+| real operator-evidence collection | planned | must follow custody path and streaming gates |
 | Secure MCP Tunnel installation | planned | separate operator-approved lot |
 | OAuth/OIDC client and token lifecycle | planned | separate secret-management lot |
 | configured ChatGPT app | planned | no current app or connection |
@@ -201,17 +202,23 @@ The next safe order is:
 4. only then consider separate tunnel, OAuth/OIDC and app-configuration lots using freshly
    revalidated official evidence.
 
-## Operator-evidence custody contract scaffold
+## Operator-evidence custody foundation
 
 Status: partial
 
-The repository contains a private, synthetic-only Python/Rust contract for the next bounded
-operator-evidence phase. Python remains the policy, public-model and existing-digest authority. A
-separate Rust crate describes the future byte-custody boundary through a one-shot NDJSON protocol.
+The repository contains a private Python/Rust foundation for bounded operator evidence. Python
+remains the policy, public-model and existing-digest authority. Rust owns future raw-byte custody
+and now implements an in-memory session lifecycle.
 
-The implemented B0 surface accepts only a synthetic `describe_contract` request. It performs no
-filesystem evidence ingestion, sanitizer execution, session creation, network access, tunnel
-installation, OAuth/OIDC registration, app configuration or provider call.
+The B0 wire surface still accepts only `describe_contract`. It performs no filesystem evidence
+ingestion, sanitizer execution, network access, tunnel installation, OAuth/OIDC registration, app
+configuration or provider call.
 
-The accepted ownership decision is recorded in the corresponding ADR. The normative wire contract
-is [`operator-evidence-custodian-protocol.md`](operator-evidence-custodian-protocol.md).
+B1.1 adds the exact `created -> collecting -> sealed -> disposed` lifecycle plus the authorized
+`aborted`, `expired` and `retained` paths. Illegal transitions and revision overflow fail without
+mutation. Transition receipts are deterministic, path-free and secret-free.
+
+The accepted ownership decision is recorded in ADR 0005. The normative wire contract is
+[`operator-evidence-custodian-protocol.md`](operator-evidence-custodian-protocol.md), and the
+in-memory lifecycle authority is
+[`operator-evidence-session-lifecycle.md`](operator-evidence-session-lifecycle.md).

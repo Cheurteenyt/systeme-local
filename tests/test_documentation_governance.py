@@ -33,6 +33,7 @@ def test_document_authority_is_explicit() -> None:
         "docs/blueprint-v2.md",
         "docs/architecture.md",
         "docs/connectivity-model.md",
+        "docs/operator-evidence-session-lifecycle.md",
         "docs/roadmap.md",
         "docs/adr/*.md",
     ):
@@ -238,6 +239,28 @@ def test_threat_model_covers_provider_evidence_boundary() -> None:
         "Dérive des outils",
     ):
         assert marker in content
+
+
+def test_operator_evidence_session_lifecycle_is_reconciled() -> None:
+    lifecycle = text("docs/operator-evidence-session-lifecycle.md")
+    protocol = text("docs/operator-evidence-custodian-protocol.md")
+    architecture = text("docs/architecture.md")
+    threat_model = text("docs/threat-model.md")
+
+    for marker in (
+        "Status: normative private Rust lifecycle contract, B1.1",
+        "disposed -> <none>",
+        "revision + 1",
+        r"systeme-local:operator-evidence-session-transition:v1\x00",
+        "The receipt is not a disposition receipt",
+        "filesystem or network I/O;",
+    ):
+        assert marker in lifecycle
+
+    assert "does not add a protocol operation" in protocol
+    assert "operator-evidence session lifecycle | implemented" in architecture
+    assert "Controls implemented in B1.1" in threat_model
+    assert "no filesystem, path, I/O or network capability" in threat_model
 
 
 def test_governance_files_cover_sensitive_surfaces() -> None:
