@@ -231,3 +231,19 @@ The accepted ownership decision is recorded in ADR 0005. The normative wire cont
 authority is [`operator-evidence-session-lifecycle.md`](operator-evidence-session-lifecycle.md),
 and the staging authority is
 [`operator-evidence-staging.md`](operator-evidence-staging.md).
+
+## B1.3 controlled synthetic staging
+
+| Capability | Status |
+|---|---|
+| operator-evidence controlled staging | implemented |
+| Rust-created `stg_` root | implemented |
+| verified Unix modes | implemented |
+| verified protected Windows DACL | implemented |
+| exclusive session lease | implemented |
+| source commitment | planned |
+| sanitizer profile | planned |
+| real evidence ingestion | not implemented |
+
+The controlled API is private to the Rust library and remains unreachable from the B0 NDJSON
+binary. Python still receives no path, lock identifier or raw byte content.

@@ -2,6 +2,7 @@ mod error;
 mod protocol;
 mod session;
 mod source;
+mod staging;
 
 pub use error::{Code as ProtocolErrorCode, Error as ProtocolError};
 pub use protocol::{
@@ -19,4 +20,9 @@ pub use source::{
     GuardedSource, MAX_SYNTHETIC_SOURCE_BYTES, SOURCE_READ_CHUNK_BYTES, SourceName,
     SourceNameError, SourceReadError, SourceReadLimit, SourceReadLimitError, StagingRoot,
     read_synthetic_source,
+};
+
+pub use staging::{
+    ControlledReadError, ControlledStagingRoot, SessionLease, StagingError, StagingParent,
+    read_controlled_synthetic_source,
 };

@@ -249,7 +249,7 @@ def test_operator_evidence_session_lifecycle_is_reconciled() -> None:
     threat_model = text("docs/threat-model.md")
 
     for marker in (
-        "Status: normative private Rust lifecycle contract through B1.2",
+        "Status: normative private Rust lifecycle contract through B1.3",
         "disposed -> <none>",
         "revision + 1",
         r"systeme-local:operator-evidence-session-transition:v1\x00",
@@ -272,7 +272,7 @@ def test_operator_evidence_staging_is_reconciled() -> None:
     governance = text("docs/documentation-governance.md")
 
     for marker in (
-        "Status: normative private Rust staging contract, B1.2",
+        "Status: normative private Rust staging contract through B1.3",
         "src_[0-9a-f]{32}.raw",
         "cap-std = 4.0.2",
         "cap-fs-ext = 4.0.2",
@@ -464,3 +464,30 @@ def test_pytest_security_floor_is_locked_without_audit_ignore() -> None:
 
     assert "PYSEC-2026-1845" in governance
     assert "--ignore-vuln" not in audit
+
+
+def test_operator_evidence_controlled_staging_is_reconciled() -> None:
+    staging = text("docs/operator-evidence-staging.md")
+    lifecycle = text("docs/operator-evidence-session-lifecycle.md")
+    protocol = text("docs/operator-evidence-custodian-protocol.md")
+    architecture = text("docs/architecture.md")
+    threat_model = text("docs/threat-model.md")
+    adr = text("docs/adr/0005-python-rust-operator-evidence-custody.md")
+
+    for marker in (
+        "stg_[0-9a-f]{32}",
+        "0700",
+        "0600",
+        "protected DACL",
+        "create_new",
+        "same live lease identity",
+    ):
+        assert marker in staging
+
+    assert "B1.3 controlled staging relationship" in lifecycle
+    assert "B1.3 controlled staging boundary" in protocol
+    assert "operator-evidence controlled staging | implemented" in architecture
+    assert "Controls implemented in B1.3" in threat_model
+    assert "B1.3 implementation record" in adr
+    assert "source commitment | planned" in architecture
+    assert "real evidence ingestion | not implemented" in architecture
