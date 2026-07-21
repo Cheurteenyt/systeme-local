@@ -1,6 +1,6 @@
 # Operator-evidence synthetic staging
 
-Status: normative private Rust staging contract, B1.2
+Status: normative private Rust staging contract through B1.3
 
 ## Purpose
 
@@ -36,6 +36,7 @@ B1.2 uses exactly:
 ```text
 cap-std = 4.0.2
 cap-fs-ext = 4.0.2
+windows-permissions = 0.2.4 (Windows target only)
 ```
 
 The staging root is represented by an open directory capability. Source lookup is relative to that
@@ -65,8 +66,42 @@ StagingRoot([redacted])
 
 There is no public path getter.
 
-B1.2 assumes the root was created by a controlled synthetic procedure. Controlled creation and
-cross-platform permission hardening belong to a later B1 lot.
+B1.3 adds a controlled creator above this low-level reader. Future custody code must use the
+controlled root and lease API; direct `StagingRoot::open` remains a synthetic B1.2 primitive used by
+tests and internal composition.
+
+## Controlled root and session lease
+
+`StagingParent::open` holds one approved existing parent as a directory capability. It rejects an
+absent, linked, reparse or non-directory parent and exposes no path getter.
+
+`ControlledStagingRoot::create` is authorized only while the session state is `created`. It derives
+one direct child with the exact syntax:
+
+```text
+stg_[0-9a-f]{32}
+```
+
+Creation is exclusive and never silently reuses an existing child. Unix creates the root with mode
+`0700`. Windows applies and re-reads a protected DACL containing exactly one owner full-control ACE
+with object/container inheritance. The owner, DACL protection, ACE count and absence of broad
+Everyone, Authenticated Users and Builtin Users ACEs are verified after creation.
+
+The creator immediately acquires `.custody.lock` with `create_new` semantics. Unix uses mode `0600`.
+Windows verifies one protected owner-only file ACE. A second live acquisition fails closed. Dropping
+the lease closes and removes the control file but does not remove the staging root or claim evidence
+disposition.
+
+A controlled read requires:
+
+```text
+same session identifier
+same root identity
+same live lease identity
+session.state == collecting
+```
+
+Filesystem operations never advance the session state or revision.
 
 ## Source name
 
@@ -221,9 +256,6 @@ B1.2 does not establish operator-source provenance.
 
 It does not yet provide:
 
-- Rust-controlled staging creation;
-- verified owner-only ACL or mode enforcement;
-- a lock or persistent session directory;
 - a source commitment;
 - sanitizer allowlists;
 - a sanitized commitment;

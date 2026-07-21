@@ -1,12 +1,12 @@
 # Operator-evidence session lifecycle
 
-Status: normative private Rust lifecycle contract through B1.2
+Status: normative private Rust lifecycle contract through B1.3
 
 ## Purpose
 
-This document defines the in-memory lifecycle invariants for future operator-evidence custody
-sessions. It does not authorize filesystem access, raw evidence ingestion, sanitizer execution,
-retention or deletion.
+This document defines lifecycle invariants for future operator-evidence custody sessions.
+B1.3 permits private synthetic staging creation and leasing inside Rust, but it does not authorize
+real evidence ingestion, sanitizer execution, retention or deletion.
 
 The B0 wire protocol remains unchanged and still exposes only `describe_contract`.
 
@@ -163,6 +163,18 @@ B1.1 transition.
 The staged bytes remain in a `GuardedSource` owned by Rust and are not included in a transition
 receipt.
 
+## B1.3 controlled staging relationship
+
+A controlled staging root may be created only while the matching session is `created`. Root
+creation and lease acquisition do not mutate state or revision.
+
+The same lease may remain active when an explicit `begin_collection` transition moves the session
+to `collecting`. Controlled source reads require the matching root, session and active lease, then
+reuse the B1.2 `collecting` gate.
+
+A lease for another identifier, a changed root, a changed lock file or a disposed session fails
+closed. Dropping a lease releases only the control file and makes no deletion or erasure claim.
+
 ## B1.1 non-goals
 
 B1.1 implements no:
@@ -185,6 +197,6 @@ B1.1 implements no:
 
 ## Next gate
 
-B1.3 may add Rust-controlled staging creation, permission hardening, source commitments and the
-first sanitizer profiles. It must preserve this lifecycle contract, keep raw bytes inside Rust and
-remain path-free and secret-free at the Python boundary.
+B1.4 may add the first source commitment and sanitizer-profile contract. It must preserve the
+controlled-root and lease boundary, keep raw bytes inside Rust and remain path-free and secret-free
+at the Python boundary.

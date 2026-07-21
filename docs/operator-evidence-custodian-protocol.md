@@ -223,3 +223,20 @@ Any protocol change requires:
 - new conformance fixtures;
 - compatibility and non-disclosure tests;
 - explicit review before real evidence custody is enabled.
+
+## B1.3 controlled staging boundary
+
+B1.3 adds `StagingParent`, `ControlledStagingRoot` and `SessionLease` inside the Rust library. It
+does not add a protocol operation, request field, response field or path input. `protocol.rs` and
+`main.rs` do not reference the controlled staging API.
+
+Protocol v1 therefore still reports:
+
+```text
+filesystem_access = false
+real_evidence_ingestion = false
+sanitizer_execution = false
+```
+
+These values continue to describe wire-reachable capabilities. The internal Rust filesystem
+capability is not reachable through protocol v1.

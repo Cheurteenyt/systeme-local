@@ -141,3 +141,16 @@ provides no path and receives no raw bytes.
 
 B1.2 uses only synthetic temporary files. It does not establish operator-source provenance,
 sanitization, retention, disposition or deletion.
+
+## B1.3 implementation record
+
+B1.3 implements Rust-controlled synthetic staging creation and one exclusive session lease. The
+root name is derived from the validated session identifier, creation is relative to an approved
+parent capability, and platform access restrictions are verified after creation.
+
+On Unix, root and lease modes are `0700` and `0600`. On Windows, the implementation uses the audited
+safe `SetSecurityInfo` wrapper with `SE_FILE_OBJECT`, `READ_CONTROL | WRITE_DAC`, and
+`Dacl | ProtectedDacl`; the generic upstream `set_multiple` path is intentionally not used.
+
+This implementation does not authorize real evidence, source commitments, sanitization, retention,
+disposition or a new wire operation.

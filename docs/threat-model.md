@@ -1,6 +1,6 @@
 # Modèle de menace
 
-Status: current through the B1.1 operator-evidence session lifecycle
+Status: current through the B1.3 controlled synthetic staging boundary
 
 ## Actifs à protéger
 
@@ -197,10 +197,22 @@ contract description and does not open evidence files.
 - no staging reference from the B0 protocol or binary entrypoint;
 - exact `cap-std` and `cap-fs-ext` dependency pins with lock and audit gates.
 
+### Controls implemented in B1.3
+
+- Rust creates one direct `stg_` child relative to an approved parent capability;
+- creation is exclusive and rejects an existing child;
+- Unix root and control-file modes are verified as `0700` and `0600`;
+- Windows root and control-file DACLs are protected and owner-only;
+- one `.custody.lock` file is acquired with create-new semantics;
+- the lease binds the exact session, root identity and lock-file identity;
+- controlled reads require the same live lease and the `collecting` state;
+- dropping a lease removes only the control file and makes no disposition claim;
+- protocol v1 and the binary entrypoint cannot invoke the controlled staging API.
+
 ### Residual risks and deferred controls
 
-B1.2 uses only controlled synthetic staging roots. It does not yet prove root ownership or hardened
-ACL/mode settings, operator-source provenance, resistance to every hostile same-file mutation,
-sanitizer correctness, source/sanitized commitments, retention or disposition. Logical deletion
+B1.3 proves controlled synthetic root creation, local access policy and exclusive lease
+ownership. It does not yet prove operator-source provenance, resistance to every hostile same-file
+mutation, sanitizer correctness, source/sanitized commitments, retention or disposition. Logical deletion
 must not be described as physical erasure. B2 and B3 must add orchestration and operator-facing
 non-disclosure tests before any real evidence is handled.
