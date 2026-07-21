@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import json
+import posixpath
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -41,6 +43,33 @@ def test_document_authority_is_explicit() -> None:
     ):
         assert marker in governance
     assert "sole normative cross-provider connectivity contract" in governance
+
+
+def test_documentation_index_is_complete_and_non_normative() -> None:
+    readme = text("README.md")
+    index = text("docs/index.md")
+    governance = text("docs/documentation-governance.md")
+
+    assert "[`index documentaire`](docs/index.md)" in readme
+    assert "[`docs/index.md`](index.md)" in governance
+    assert "descriptive navigation only" in index
+    assert "does not own normative facts" in index
+    assert "linked document remains authoritative" in index
+
+    tracked = subprocess.run(
+        ["git", "ls-files", "--", "*.md"],
+        cwd=ROOT,
+        check=True,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+    ).stdout.splitlines()
+    expected_targets = {
+        posixpath.relpath(path, "docs") for path in tracked if path != "docs/index.md"
+    }
+    observed_targets = set(re.findall(r"\]\(([^)#]+)(?:#[^)]+)?\)", index))
+
+    assert expected_targets <= observed_targets
 
 
 def test_readme_has_no_obsolete_provider_router_language() -> None:

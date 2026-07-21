@@ -13,6 +13,7 @@ of another document.
 | Path | Authority |
 |---|---|
 | `README.md` | concise overview, safe operator entry points and links |
+| [`docs/index.md`](index.md) | descriptive documentation navigation and authority map; no normative ownership |
 | `docs/blueprint-v2.md` | target product architecture |
 | `docs/architecture.md` | architecture implemented on `main` |
 | `docs/connectivity-model.md` | sole normative cross-provider connectivity contract |
@@ -54,7 +55,7 @@ A change must update every affected authority:
 - new capability or trust boundary updates the threat model;
 - public schema or digest changes require an explicit compatibility decision;
 - roadmap status changes only after merge evidence exists;
-- README remains concise and links to normative details instead of duplicating them.
+- README and `docs/index.md` remain concise and link to normative details instead of duplicating them.
 
 ## Automated checks
 
