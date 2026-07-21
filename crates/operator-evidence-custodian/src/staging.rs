@@ -435,13 +435,13 @@ fn create_child_directory(parent: &Dir, name: &str) -> Result<(), StagingError> 
         let mut builder = DirBuilder::new();
         builder.mode(0o700);
 
-        return match parent.create_dir_with(name, &builder) {
+        match parent.create_dir_with(name, &builder) {
             Ok(()) => Ok(()),
             Err(error) if error.kind() == std::io::ErrorKind::AlreadyExists => {
                 Err(StagingError::StagingAlreadyExists)
             }
             Err(_) => Err(StagingError::StagingCreationFailed),
-        };
+        }
     }
 
     #[cfg(not(unix))]
@@ -536,9 +536,13 @@ fn verify_unix_mode(path: &Path, expected: u32) -> Result<(), ()> {
 
 #[cfg(windows)]
 fn apply_and_verify_windows_policy(path: &Path, directory: bool) -> Result<(), ()> {
-    use windows_permissions::constants::{SeObjectType::SE_FILE_OBJECT, SecurityInformation};
-    use windows_permissions::utilities::current_process_sid;
-    use windows_permissions::wrappers::{ConvertSidToStringSid, GetSecurityInfo, SetSecurityInfo};
+    use windows_permissions::constants::{
+        AccessRights, AceFlags, AceType, SeObjectType::SE_FILE_OBJECT, SecurityInformation,
+    };
+    use windows_permissions::wrappers::{
+        ConvertSecurityDescriptorToStringSecurityDescriptor, ConvertSidToStringSid,
+        GetSecurityInfo, SetSecurityInfo,
+    };
     use windows_permissions::{LocalBox, SecurityDescriptor};
 
     let mut options = std_fs::OpenOptions::new();
@@ -549,15 +553,21 @@ fn apply_and_verify_windows_policy(path: &Path, directory: bool) -> Result<(), (
     }
 
     let mut handle = options.open(path).map_err(|_| ())?;
-    let current_sid = current_process_sid().map_err(|_| ())?;
-    let sid_text = ConvertSidToStringSid(&current_sid)
+
+    // Windows assigns a new object's owner from TokenOwner, which is not
+    // necessarily TokenUser for an elevated administrator token. Capture the
+    // owner from the opened object and bind the sole ACE to that exact SID.
+    let initial =
+        GetSecurityInfo(&handle, SE_FILE_OBJECT, SecurityInformation::Owner).map_err(|_| ())?;
+    let owner = initial.owner().ok_or(())?;
+    let owner_text = ConvertSidToStringSid(owner)
         .map_err(|_| ())?
         .to_string_lossy()
         .into_owned();
     let expected_ace = if directory {
-        format!("(A;OICI;FA;;;{sid_text})")
+        format!("(A;OICI;FA;;;{owner_text})")
     } else {
-        format!("(A;;FA;;;{sid_text})")
+        format!("(A;;FA;;;{owner_text})")
     };
     let requested: LocalBox<SecurityDescriptor> =
         format!("D:P{expected_ace}").parse().map_err(|_| ())?;
@@ -580,20 +590,27 @@ fn apply_and_verify_windows_policy(path: &Path, directory: bool) -> Result<(), (
         SecurityInformation::Owner | SecurityInformation::Dacl,
     )
     .map_err(|_| ())?;
-    let observed_sddl = observed
-        .as_sddl()
-        .map_err(|_| ())?
-        .to_string_lossy()
-        .into_owned();
+    let observed_owner = observed.owner().ok_or(())?;
     let observed_dacl = observed.dacl().ok_or(())?;
+    let observed_ace = observed_dacl.get_ace(0).ok_or(())?;
+    let observed_dacl_sddl =
+        ConvertSecurityDescriptorToStringSecurityDescriptor(&observed, SecurityInformation::Dacl)
+            .map_err(|_| ())?
+            .to_string_lossy()
+            .into_owned();
+    let expected_flags = if directory {
+        AceFlags::ObjectInherit | AceFlags::ContainerInherit
+    } else {
+        AceFlags::empty()
+    };
 
-    if !observed_sddl.contains(&format!("O:{sid_text}"))
-        || !observed_sddl.contains("D:P")
+    if observed_owner != owner
+        || !observed_dacl_sddl.starts_with("D:P")
         || observed_dacl.len() != 1
-        || !observed_sddl.contains(&expected_ace)
-        || observed_sddl.contains(";;;WD)")
-        || observed_sddl.contains(";;;AU)")
-        || observed_sddl.contains(";;;BU)")
+        || observed_ace.ace_type() != AceType::ACCESS_ALLOWED_ACE_TYPE
+        || observed_ace.flags() != expected_flags
+        || observed_ace.mask() != AccessRights::FileAllAccess
+        || observed_ace.sid() != Some(owner)
     {
         return Err(());
     }
