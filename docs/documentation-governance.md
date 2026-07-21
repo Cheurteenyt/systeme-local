@@ -26,7 +26,7 @@ of another document.
 | `docs/threat-model.md` | current threats, controls and residual risks |
 | `docs/roadmap.md` | ordered delivery status and gates |
 | `docs/adr/*.md` | accepted decisions and consequences |
-| `docs/github-governance.md` | bounded snapshot of repository settings and unknowns |
+| [`docs/github-governance.md`](github-governance.md) | bounded snapshot of repository settings and unknowns |
 
 Provider-specific facts never become cross-provider defaults. Target architecture never implies
 implementation. A roadmap entry never authorizes a capability.

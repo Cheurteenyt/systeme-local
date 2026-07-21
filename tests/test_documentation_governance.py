@@ -37,6 +37,7 @@ def test_document_authority_is_explicit() -> None:
         "docs/operator-evidence-staging.md",
         "docs/roadmap.md",
         "docs/adr/*.md",
+        "[`docs/github-governance.md`](github-governance.md)",
     ):
         assert marker in governance
     assert "sole normative cross-provider connectivity contract" in governance
