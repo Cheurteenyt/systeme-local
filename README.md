@@ -305,7 +305,8 @@ Le MCP local couvre aujourd’hui le premier canal. Le lifecycle, le contexte, l
 les contrats ChatGPT MCP sont déterministes et hors ligne. Aucun transport OpenAI réel, tunnel,
 OAuth client, app ChatGPT ou automatisation du site privé n’est implémenté.
 
-Les autorités documentaires sont :
+La carte descriptive des documents est disponible dans l’[`index documentaire`](docs/index.md).
+Les autorités documentaires restent :
 
 - [`docs/blueprint-v2.md`](docs/blueprint-v2.md) pour l’architecture cible ;
 - [`docs/architecture.md`](docs/architecture.md) pour l’architecture actuellement implémentée ;
