@@ -264,3 +264,23 @@ It does not yet provide:
 - logical deletion.
 
 No real evidence may be handled until those controls and the B2/B3 non-disclosure path are merged.
+
+<!-- systeme-local:b1-4-source-commitment -->
+## Lease-bound commitment gate
+
+B1.4 adds one controlled operation after the stable read:
+
+```text
+collecting session
+    + matching controlled root
+    + active matching lease
+    + stable bounded source read
+    -> private source commitment receipt
+```
+
+The receipt exposes only byte length and a lowercase SHA-256 commitment. The source buffer is still
+owned by `GuardedSource` and receives the existing best-effort overwrite on drop. No path, source
+name, session identifier or raw byte is returned.
+
+The sanitizer-profile registry added by B1.4 is descriptive only. Sanitizer execution, sanitized
+output, real evidence import, retention and disposition remain unavailable.

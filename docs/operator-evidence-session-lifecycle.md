@@ -200,3 +200,14 @@ B1.1 implements no:
 B1.4 may add the first source commitment and sanitizer-profile contract. It must preserve the
 controlled-root and lease boundary, keep raw bytes inside Rust and remain path-free and secret-free
 at the Python boundary.
+
+<!-- systeme-local:b1-4-source-commitment -->
+## Collecting-state source commitment
+
+A source commitment may be created only while the custody session remains `collecting`. The
+commitment binds the canonical session identifier, the exact observed byte length and the exact
+stable bytes. It does not change the session state or revision and is not a transition receipt.
+
+The receipt is not evidence of provenance, authenticity, sanitization, retention or disposition.
+Later lifecycle gates remain responsible for sanitized-output commitment, sealing and destruction
+claims.

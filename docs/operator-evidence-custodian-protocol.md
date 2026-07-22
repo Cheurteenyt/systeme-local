@@ -240,3 +240,14 @@ sanitizer_execution = false
 
 These values continue to describe wire-reachable capabilities. The internal Rust filesystem
 capability is not reachable through protocol v1.
+
+<!-- systeme-local:b1-4-source-commitment -->
+## B1.4 remains outside protocol v1
+
+Source commitments and sanitizer profiles are private library contracts. They are not request
+operations, response fields or serialized protocol objects. `protocol.rs`, `main.rs` and the
+checked-in protocol-v1 fixtures remain unchanged.
+
+The advertised protocol descriptor therefore continues to require literal false values for
+`filesystem_access`, `real_evidence_ingestion`, `network_access`, `sanitizer_execution` and
+`public_provider_model_authority`.

@@ -216,3 +216,16 @@ ownership. It does not yet prove operator-source provenance, resistance to every
 mutation, sanitizer correctness, source/sanitized commitments, retention or disposition. Logical deletion
 must not be described as physical erasure. B2 and B3 must add orchestration and operator-facing
 non-disclosure tests before any real evidence is handled.
+
+<!-- systeme-local:b1-4-source-commitment -->
+## B1.4 source-commitment and profile threats
+
+B1.4 addresses substitution and ambiguity between a controlled read and later sanitization. The
+source commitment is domain-separated and binds session, byte length and every source byte. A
+mismatched session, inactive or changed lease/root, unstable source, oversized source or
+non-collecting state fails before a receipt is created.
+
+The receipt is deliberately not a provenance or sanitization claim. The profile identifier space is
+closed, limits are bounded by the 8 MiB custody ceiling, output is required to be deterministic and
+network or secret-bearing environment input is forbidden. The profile registry does not authorize
+provider access, readiness, retention or deletion.
