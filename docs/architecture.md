@@ -247,3 +247,15 @@ and the staging authority is
 
 The controlled API is private to the Rust library and remains unreachable from the B0 NDJSON
 binary. Python still receives no path, lock identifier or raw byte content.
+
+<!-- systeme-local:b1-4-source-commitment -->
+## Private source commitment and sanitizer-profile boundary
+
+The Rust custodian can now turn one stable lease-bound `GuardedSource` into a private commitment
+receipt. The only public commitment entry point reuses the controlled staging checks, so an ambient
+path, mismatched session, inactive lease or changed root cannot bypass custody.
+
+The sanitizer-profile registry is closed and versioned. It records evidence class, deterministic
+output class, input/output ceilings and explicit network/environment prohibitions. It provides no
+transformation engine, no public evidence assertion and no protocol operation. Python remains
+authoritative for mapping later sanitized evidence to the eleven readiness checks.

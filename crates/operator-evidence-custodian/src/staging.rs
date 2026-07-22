@@ -1,3 +1,4 @@
+use crate::commitment::{SourceCommitmentError, SourceCommitmentReceipt, commit_guarded_source};
 use crate::session::{CustodySession, SessionId, SessionState};
 use crate::source::{
     GuardedSource, SourceName, SourceReadError, SourceReadLimit, StagingRoot, read_synthetic_source,
@@ -429,6 +430,45 @@ pub fn read_controlled_synthetic_source(
         .map_err(ControlledReadError::Source)
 }
 
+/// Failure from a lease-bound controlled source commitment.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum ControlledCommitmentError {
+    Read(ControlledReadError),
+    Commitment(SourceCommitmentError),
+}
+
+impl fmt::Display for ControlledCommitmentError {
+    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let message = match self {
+            Self::Read(_) => "controlled synthetic source commitment read failed",
+            Self::Commitment(_) => "controlled synthetic source commitment failed",
+        };
+
+        formatter.write_str(message)
+    }
+}
+
+impl std::error::Error for ControlledCommitmentError {}
+
+/// Reads and commits one synthetic source through a matching active lease.
+///
+/// # Errors
+///
+/// Returns a path-free error when the controlled read fails or the private
+/// commitment cannot be constructed.
+pub fn commit_controlled_synthetic_source(
+    session: &CustodySession,
+    root: &ControlledStagingRoot,
+    lease: &SessionLease,
+    source_name: &SourceName,
+    limit: SourceReadLimit,
+) -> Result<SourceCommitmentReceipt, ControlledCommitmentError> {
+    let source = read_controlled_synthetic_source(session, root, lease, source_name, limit)
+        .map_err(ControlledCommitmentError::Read)?;
+
+    commit_guarded_source(session, &source).map_err(ControlledCommitmentError::Commitment)
+}
+
 fn create_child_directory(parent: &Dir, name: &str) -> Result<(), StagingError> {
     #[cfg(unix)]
     {
@@ -834,6 +874,78 @@ mod tests {
             SourceReadLimit::new(64)?,
         )?;
         assert_eq!(guarded.byte_len(), 20);
+        Ok(())
+    }
+
+    #[test]
+    fn controlled_commitment_fails_before_hashing_changed_or_inactive_custody()
+    -> Result<(), Box<dyn Error>> {
+        let temp = TempParent::new()?;
+        let parent = StagingParent::open(&temp.path)?;
+        let mut session = created_session(SESSION)?;
+        let (mut root, mut lease) = ControlledStagingRoot::create(&parent, &session)?;
+        std_fs::write(root.canonical_path.join(SOURCE), b"synthetic-controlled")?;
+        session.apply(SessionAction::BeginCollection)?;
+
+        let original_root_identity = root.identity.clone();
+        let original_lease_root_identity = lease.root_identity.clone();
+        let replaced_root_identity = ObjectIdentity {
+            device: u64::MAX,
+            inode: u64::MAX,
+        };
+        root.identity = replaced_root_identity.clone();
+        lease.root_identity = replaced_root_identity;
+        let changed_root = commit_controlled_synthetic_source(
+            &session,
+            &root,
+            &lease,
+            &SourceName::from_str(SOURCE)?,
+            SourceReadLimit::new(64)?,
+        );
+        assert!(matches!(
+            changed_root,
+            Err(ControlledCommitmentError::Read(
+                ControlledReadError::RootChanged
+            ))
+        ));
+        root.identity = original_root_identity;
+        lease.root_identity = original_lease_root_identity;
+
+        let original_lease_identity = lease.lease_identity.clone();
+        lease.lease_identity = ObjectIdentity {
+            device: u64::MAX,
+            inode: u64::MAX,
+        };
+        let changed_lease = commit_controlled_synthetic_source(
+            &session,
+            &root,
+            &lease,
+            &SourceName::from_str(SOURCE)?,
+            SourceReadLimit::new(64)?,
+        );
+        assert!(matches!(
+            changed_lease,
+            Err(ControlledCommitmentError::Read(
+                ControlledReadError::LeaseChanged
+            ))
+        ));
+        lease.lease_identity = original_lease_identity;
+
+        let open_file = lease.file.take();
+        drop(open_file);
+        let inactive = commit_controlled_synthetic_source(
+            &session,
+            &root,
+            &lease,
+            &SourceName::from_str(SOURCE)?,
+            SourceReadLimit::new(64)?,
+        );
+        assert!(matches!(
+            inactive,
+            Err(ControlledCommitmentError::Read(
+                ControlledReadError::LeaseInactive
+            ))
+        ));
         Ok(())
     }
 

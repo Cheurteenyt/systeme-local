@@ -154,3 +154,19 @@ safe `SetSecurityInfo` wrapper with `SE_FILE_OBJECT`, `READ_CONTROL | WRITE_DAC`
 
 This implementation does not authorize real evidence, source commitments, sanitization, retention,
 disposition or a new wire operation.
+
+<!-- systeme-local:b1-4-source-commitment -->
+## B1.4 implementation record
+
+B1.4 adds a private, versioned source commitment after the existing lease-bound stable read. The
+framing binds the custody-session identifier, the exact byte length and the exact Rust-owned bytes
+under the dedicated domain `systeme-local:operator-evidence-source-commitment:v1`.
+
+The public receipt exposes only the bounded byte length and a lowercase SHA-256 commitment. Raw
+bytes, paths, source names and the session identifier remain private. The same lot defines a closed
+five-profile sanitizer registry for UI exports, metadata documents, tool scans, action reviews and
+local-policy snapshots. The registry describes deterministic limits and output classes only; it
+does not execute a sanitizer or make a provider-readiness decision.
+
+The commitment and profile contracts remain library-only. Protocol v1, its fixtures and the binary
+entry point are unchanged.

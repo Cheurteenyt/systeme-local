@@ -171,6 +171,10 @@ impl GuardedSource {
     pub fn is_empty(&self) -> bool {
         self.bytes.is_empty()
     }
+
+    pub(crate) fn commitment_bytes(&self) -> &[u8] {
+        &self.bytes
+    }
 }
 
 impl fmt::Debug for GuardedSource {
