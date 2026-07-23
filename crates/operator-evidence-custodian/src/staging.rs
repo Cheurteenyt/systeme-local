@@ -1,4 +1,6 @@
 use crate::commitment::{SourceCommitmentError, SourceCommitmentReceipt, commit_guarded_source};
+use crate::sanitizer::{SanitizationError, SanitizationResult, sanitize_guarded_source};
+use crate::sanitizer_profile::{SanitizerProfileId, sanitizer_profile};
 use crate::session::{CustodySession, SessionId, SessionState};
 use crate::source::{
     GuardedSource, SourceName, SourceReadError, SourceReadLimit, StagingRoot, read_synthetic_source,
@@ -467,6 +469,51 @@ pub fn commit_controlled_synthetic_source(
         .map_err(ControlledCommitmentError::Read)?;
 
     commit_guarded_source(session, &source).map_err(ControlledCommitmentError::Commitment)
+}
+
+/// Failure from lease-bound deterministic sanitization.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum ControlledSanitizationError {
+    Read(ControlledReadError),
+    Sanitization(SanitizationError),
+}
+
+impl fmt::Display for ControlledSanitizationError {
+    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let message = match self {
+            Self::Read(_) => "controlled synthetic source read failed before sanitization",
+            Self::Sanitization(_) => "controlled deterministic sanitization failed",
+        };
+
+        formatter.write_str(message)
+    }
+}
+
+impl std::error::Error for ControlledSanitizationError {}
+
+/// Reads, verifies and sanitizes one synthetic source through a matching active lease.
+///
+/// # Errors
+///
+/// Returns a path-free error when controlled custody fails, the selected closed profile is
+/// invalid, the source commitment does not match the exact stable bytes, or sanitization fails.
+pub fn sanitize_controlled_synthetic_source(
+    session: &CustodySession,
+    root: &ControlledStagingRoot,
+    lease: &SessionLease,
+    source_name: &SourceName,
+    source_commitment: &SourceCommitmentReceipt,
+    profile_id: SanitizerProfileId,
+) -> Result<SanitizationResult, ControlledSanitizationError> {
+    let descriptor = sanitizer_profile(profile_id);
+    let limit = SourceReadLimit::new(descriptor.max_input_bytes()).map_err(|_| {
+        ControlledSanitizationError::Sanitization(SanitizationError::InvalidProfile)
+    })?;
+    let source = read_controlled_synthetic_source(session, root, lease, source_name, limit)
+        .map_err(ControlledSanitizationError::Read)?;
+
+    sanitize_guarded_source(session, &source, source_commitment, profile_id)
+        .map_err(ControlledSanitizationError::Sanitization)
 }
 
 fn create_child_directory(parent: &Dir, name: &str) -> Result<(), StagingError> {

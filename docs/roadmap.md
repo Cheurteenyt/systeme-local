@@ -170,3 +170,15 @@ No capability becomes more powerful without:
 - evidence freshness where provider facts are involved;
 - public-schema and digest compatibility review;
 - CI and repository-governance checks appropriate to the changed boundary.
+
+<!-- systeme-local:b1-5-deterministic-sanitization -->
+## B1.5 deterministic sanitization foundation
+
+Status: `implemented foundation` once this lot is merged; bounded operator-evidence collection itself
+remains `planned`.
+
+This B1 sub-lot adds five closed deterministic sanitizers and a private sanitized-output commitment
+without changing protocol v1 or collecting real evidence. B1.6 must still add explicit
+retention/disposition behavior and verifiable logical-disposition receipts. B2 may begin only after
+those custody foundations are merged, and remains responsible for Python orchestration of the eleven
+observations, response verification, bundle compilation and local reporting.

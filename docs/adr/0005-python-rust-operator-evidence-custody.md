@@ -170,3 +170,20 @@ does not execute a sanitizer or make a provider-readiness decision.
 
 The commitment and profile contracts remain library-only. Protocol v1, its fixtures and the binary
 entry point are unchanged.
+
+<!-- systeme-local:b1-5-deterministic-sanitization -->
+## B1.5 deterministic sanitization record
+
+B1.5 adds five deterministic, fail-closed sanitizer implementations behind the existing controlled
+root, active lease, collecting-session and source-commitment boundary. The implementations accept
+only the closed B1.4 profile identifiers and produce canonical UTF-8 text or canonical JSON under the
+profile-specific input and output ceilings.
+
+Sanitized bytes remain inside a non-serializable Rust-owned `SanitizedArtifact`. The public receipt
+contains only the private source commitment, profile identifier and version, output class, bounded
+byte length and the private sanitized-output commitment. The commitment uses the dedicated domain
+`systeme-local:operator-evidence-sanitized-output:v1\x00` and length-prefixes every variable field.
+
+This remains a library-only synthetic capability. Protocol version 1, its fixtures, `protocol.rs`,
+`main.rs`, public provider contracts and existing public digest domains are unchanged. B1.5 does not
+collect real evidence, decide readiness, retain evidence or issue a disposition receipt.

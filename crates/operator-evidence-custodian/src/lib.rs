@@ -1,6 +1,7 @@
 mod commitment;
 mod error;
 mod protocol;
+mod sanitizer;
 mod sanitizer_profile;
 mod session;
 mod source;
@@ -14,6 +15,9 @@ pub use protocol::{
     Status as ContractStatus, Success as ContractSuccessResponse,
     build_success as build_contract_success_response, compute_contract_sha256, parse_request_text,
     process_input_bytes,
+};
+pub use sanitizer::{
+    SanitizationError, SanitizationResult, SanitizedArtifact, SanitizedOutputReceipt,
 };
 pub use sanitizer_profile::{
     SanitizedOutputClass, SanitizerEvidenceClass, SanitizerProfileDescriptor,
@@ -31,7 +35,8 @@ pub use source::{
 };
 
 pub use staging::{
-    ControlledCommitmentError, ControlledReadError, ControlledStagingRoot, SessionLease,
-    StagingError, StagingParent, commit_controlled_synthetic_source,
-    read_controlled_synthetic_source,
+    ControlledCommitmentError, ControlledReadError, ControlledSanitizationError,
+    ControlledStagingRoot, SessionLease, StagingError, StagingParent,
+    commit_controlled_synthetic_source, read_controlled_synthetic_source,
+    sanitize_controlled_synthetic_source,
 };

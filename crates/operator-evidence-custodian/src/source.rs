@@ -175,6 +175,17 @@ impl GuardedSource {
     pub(crate) fn commitment_bytes(&self) -> &[u8] {
         &self.bytes
     }
+
+    pub(crate) fn sanitizer_bytes(&self) -> &[u8] {
+        &self.bytes
+    }
+
+    #[cfg(test)]
+    pub(crate) fn from_test_bytes(bytes: &[u8]) -> Self {
+        Self {
+            bytes: bytes.to_vec(),
+        }
+    }
 }
 
 impl fmt::Debug for GuardedSource {

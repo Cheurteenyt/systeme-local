@@ -251,3 +251,157 @@ checked-in protocol-v1 fixtures remain unchanged.
 The advertised protocol descriptor therefore continues to require literal false values for
 `filesystem_access`, `real_evidence_ingestion`, `network_access`, `sanitizer_execution` and
 `public_provider_model_authority`.
+
+<!-- systeme-local:b1-5-deterministic-sanitization -->
+## B1.5 remains outside protocol v1
+
+Deterministic sanitizer execution and sanitized-output commitments are private Rust library
+contracts. They add no request operation, response field or serialized artifact. `protocol.rs`,
+`main.rs` and the checked-in B0 fixtures remain byte-for-byte unchanged.
+
+The protocol-v1 descriptor therefore continues to report literal false values for filesystem access,
+real-evidence ingestion, network access and sanitizer execution. B1.5 does not authorize Python or a
+remote caller to submit a path, raw evidence, sanitizer profile or source commitment over the wire.
+
+<!-- systeme-local:b1-5-sanitizer-contract-repair -->
+## B1.5 normative deterministic sanitizer contract
+
+This section is the normative B1.5 sanitizer contract. The five profiles are closed, version `1`,
+pure, local and deterministic. Input order may vary only for the two line-oriented profiles; every
+successful output uses the stable ordering defined below. Duplicate, unknown and missing fields fail
+closed. No profile accepts a path, endpoint, arbitrary prose, credential, cookie, token, account or
+workspace label.
+
+### Shared custody and error precedence
+
+The public Rust entry point first proves, in order:
+
+1. the same custody session, controlled root and active lease;
+2. a stable bounded source read while the session is `collecting`;
+3. the closed profile registry;
+4. recomputation and exact equality of the source commitment;
+5. the profile input-byte ceiling;
+6. the profile-specific input grammar;
+7. the profile output-byte ceiling;
+8. the sanitized-output commitment.
+
+A failure returns no `SanitizedArtifact` and no `SanitizedOutputReceipt`.
+
+For line-oriented profiles, parser error precedence is:
+
+1. invalid UTF-8;
+2. missing final LF, empty input, blank line or forbidden control/bidi character;
+3. malformed `key=value` line;
+4. unknown key;
+5. unsupported value or duplicate key;
+6. missing required key;
+7. output-capacity failure.
+
+For JSON profiles, parser error precedence is:
+
+1. UTF-8 BOM, CR or trailing LF as non-canonical transport encoding;
+2. invalid UTF-8;
+3. JSON maximum nesting greater than `MAX_JSON_DEPTH = 1`;
+4. JSON syntax, top-level shape, duplicate, unknown or missing field;
+5. mismatch from the exact compact canonical JSON field order;
+6. classified-count validation where applicable;
+7. lowercase SHA-256 syntax;
+8. output serialization or capacity failure.
+
+The maximum JSON nesting is exactly one container: one top-level object containing scalar booleans,
+unsigned counts, closed enums and lowercase SHA-256 strings. Nested objects and arrays are rejected
+before deserialization.
+
+### `ui_export_v1`
+
+- accepted input grammar: strict UTF-8 `key=value\n`, exactly one line for every key;
+- maximum input: `8388608` bytes;
+- maximum output: `262144` bytes;
+- output grammar: canonical UTF-8 text with LF endings;
+- stable output order and closed values:
+  1. `access_control=public|restricted|unknown`;
+  2. `action_review=approved|blocked|unknown`;
+  3. `app_state=draft|published|unknown`;
+  4. `authentication=available|unavailable|unknown`;
+  5. `tool_scan=blocked|passed|unknown`;
+  6. `transport=available|unavailable|unknown`.
+
+### `metadata_document_v1`
+
+- accepted input grammar: one compact canonical JSON object, `MAX_JSON_DEPTH = 1`;
+- maximum input: `2097152` bytes;
+- maximum output: `262144` bytes;
+- output grammar and stable field order:
+  1. `authorization_code`: boolean;
+  2. `document_sha256`: 64 lowercase hexadecimal characters;
+  3. `pkce`: boolean;
+  4. `refresh_token`: boolean;
+  5. `token_auth_method`: `client_secret_post`, `private_key_jwt` or `none`.
+
+### `tool_scan_snapshot_v1`
+
+- accepted input grammar: one compact canonical JSON object, `MAX_JSON_DEPTH = 1`;
+- maximum input: `4194304` bytes;
+- maximum output: `524288` bytes;
+- output grammar and stable field order:
+  1. `capability_count`: unsigned integer in `0..=4096`;
+  2. `destructive_count`: unsigned integer;
+  3. `read_only_count`: unsigned integer;
+  4. `snapshot_sha256`: 64 lowercase hexadecimal characters;
+  5. `unknown_count`: unsigned integer;
+- `destructive_count + read_only_count + unknown_count` must equal `capability_count` with checked
+  arithmetic.
+
+### `action_review_snapshot_v1`
+
+- accepted input grammar: one compact canonical JSON object, `MAX_JSON_DEPTH = 1`;
+- maximum input: `1048576` bytes;
+- maximum output: `131072` bytes;
+- output grammar and stable field order:
+  1. `action_count`: unsigned integer in `0..=4096`;
+  2. `approved_count`: unsigned integer;
+  3. `blocked_count`: unsigned integer;
+  4. `snapshot_sha256`: 64 lowercase hexadecimal characters;
+  5. `unknown_count`: unsigned integer;
+- `approved_count + blocked_count + unknown_count` must equal `action_count` with checked
+  arithmetic.
+
+### `local_policy_snapshot_v1`
+
+- accepted input grammar: strict UTF-8 `key=value\n`, exactly one line for every key;
+- maximum input: `1048576` bytes;
+- maximum output: `262144` bytes;
+- output grammar: canonical UTF-8 text with LF endings;
+- stable output order and closed values:
+  1. `approval=not_required|required`;
+  2. `network=disabled|enabled`;
+  3. `retention=ephemeral|retained`;
+  4. `secrets=absent|present`;
+  5. `workspace=isolated|shared`.
+
+### Sanitized-output commitment and receipt
+
+The exact commitment field order is:
+
+```text
+domain
+len64(custody session identifier) || custody session identifier
+len64(source commitment)          || source commitment
+len64(profile identifier)         || profile identifier
+len64(profile version)            || profile version
+len64(output class)               || output class
+u64be(output length)
+sanitized bytes
+```
+
+The domain remains:
+
+```text
+systeme-local:operator-evidence-sanitized-output:v1\x00
+```
+
+Every `len64` and the output length are unsigned 64-bit big-endian values obtained with checked
+conversion. The receipt exposes only the source commitment, profile identifier, profile version,
+output class, sanitized byte length and sanitized commitment. The artifact exposes no public byte
+getter and its initialized buffer uses best-effort overwrite on drop. These controls prove neither
+provenance, truth, retention, logical disposition nor physical erasure.

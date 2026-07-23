@@ -284,3 +284,28 @@ name, session identifier or raw byte is returned.
 
 The sanitizer-profile registry added by B1.4 is descriptive only. Sanitizer execution, sanitized
 output, real evidence import, retention and disposition remain unavailable.
+
+<!-- systeme-local:b1-5-deterministic-sanitization -->
+## B1.5 lease-bound deterministic sanitizer gate
+
+B1.5 adds one controlled operation after the B1.4 stable read and source commitment:
+
+```text
+collecting session
+    + matching controlled root
+    + active matching lease
+    + stable bounded source
+    + exact source commitment
+    + closed sanitizer profile
+    -> Rust-owned sanitized artifact
+    -> bounded sanitized-output receipt
+```
+
+Each profile rejects malformed, unknown, duplicate, non-canonical or over-limit input. Text profiles
+use closed key/value vocabularies and stable LF output. JSON profiles use closed typed fields,
+duplicate rejection and canonical compact JSON. The implementation performs no network access,
+subprocess execution, environment lookup, archive extraction, OCR or provider call.
+
+Raw and sanitized buffers remain private and receive best-effort overwrite on drop. This does not
+prove provenance, retention, logical deletion or physical erasure. Real evidence remains forbidden
+until later disposition and Python non-disclosure gates are merged.
