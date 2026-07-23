@@ -229,3 +229,20 @@ The receipt is deliberately not a provenance or sanitization claim. The profile 
 closed, limits are bounded by the 8 MiB custody ceiling, output is required to be deterministic and
 network or secret-bearing environment input is forbidden. The profile registry does not authorize
 provider access, readiness, retention or deletion.
+
+<!-- systeme-local:b1-5-deterministic-sanitization -->
+## B1.5 deterministic-sanitization threats and controls
+
+B1.5 addresses parser ambiguity, profile confusion, source substitution and accidental disclosure of
+sanitized bytes. The controlled entry point revalidates the live lease and exact source commitment
+before transformation. Profile identifiers are closed, inputs and outputs are bounded, text
+vocabularies are allowlisted, JSON fields are typed and duplicate/unknown fields fail closed.
+
+The sanitized-output commitment binds the custody session, source commitment, profile identifier and
+version, output class, output length and every sanitized byte under a dedicated private domain.
+Receipts, errors and debug output omit paths, session identifiers, source names, endpoints, arbitrary
+operator text and secret-bearing values.
+
+Residual risks remain explicit: best-effort memory overwrite is not physical erasure; the receipt is
+not proof of provenance or truth; retention and disposition are deferred to B1.6; and no real evidence
+may enter this path before the B2/B3 orchestration and end-to-end non-disclosure gates.

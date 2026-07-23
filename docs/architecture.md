@@ -259,3 +259,20 @@ The sanitizer-profile registry is closed and versioned. It records evidence clas
 output class, input/output ceilings and explicit network/environment prohibitions. It provides no
 transformation engine, no public evidence assertion and no protocol operation. Python remains
 authoritative for mapping later sanitized evidence to the eleven readiness checks.
+
+<!-- systeme-local:b1-5-deterministic-sanitization -->
+## B1.5 private deterministic sanitization
+
+The Rust custodian now implements the five closed B1.4 sanitizer profiles as deterministic private
+library operations. A call must pass through the matching controlled root and active lease while the
+custody session remains `collecting`; the exact source commitment is reverified before parsing.
+
+Canonical sanitized bytes remain in Rust-owned guarded memory and receive best-effort overwrite on
+drop. Only bounded metadata and private source/output commitments are exposed. No source path, source
+name, session identifier, endpoint, provider document, tool definition, action text or secret-bearing
+value is returned.
+
+The B0 binary and NDJSON contract remain unchanged and still advertise
+`sanitizer_execution=false`, because this internal capability is not wire-reachable. Real
+operator-evidence collection, retention, disposition, Python orchestration, tunnel installation and
+provider connectivity remain unimplemented.

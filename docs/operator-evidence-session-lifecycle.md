@@ -211,3 +211,14 @@ stable bytes. It does not change the session state or revision and is not a tran
 The receipt is not evidence of provenance, authenticity, sanitization, retention or disposition.
 Later lifecycle gates remain responsible for sanitized-output commitment, sealing and destruction
 claims.
+
+<!-- systeme-local:b1-5-deterministic-sanitization -->
+## B1.5 collecting-state sanitization gate
+
+Sanitization is permitted only while the session remains `collecting`. It does not advance the
+session state or revision. The controlled root, active lease, stable source and exact source
+commitment are revalidated before any profile parser runs.
+
+A sanitized-output receipt is not a lifecycle transition receipt, provenance statement, retention
+record or disposition proof. Sealing, retention, abort, expiry and disposition remain explicit later
+lifecycle actions.
