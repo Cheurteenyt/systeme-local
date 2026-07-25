@@ -207,6 +207,7 @@ impl Drop for GuardedSource {
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum SourceReadError {
     SessionNotCollecting,
+    SessionNotDispositionReady,
     InvalidStagingRoot,
     SourceUnavailable,
     SourceLinkRejected,
@@ -223,6 +224,7 @@ impl fmt::Display for SourceReadError {
     fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
         let message = match self {
             Self::SessionNotCollecting => "custody session is not collecting",
+            Self::SessionNotDispositionReady => "custody session is not ready for disposition",
             Self::InvalidStagingRoot => "invalid synthetic staging root",
             Self::SourceUnavailable => "synthetic source unavailable",
             Self::SourceLinkRejected => "linked synthetic source rejected",
@@ -281,6 +283,30 @@ pub fn read_synthetic_source(
         return Err(SourceReadError::SessionNotCollecting);
     }
 
+    read_synthetic_source_unchecked(staging, source_name, limit)
+}
+
+pub(crate) fn read_synthetic_source_for_disposition(
+    session: &CustodySession,
+    staging: &StagingRoot,
+    source_name: &SourceName,
+    limit: SourceReadLimit,
+) -> Result<GuardedSource, SourceReadError> {
+    if !matches!(
+        session.state(),
+        SessionState::Sealed | SessionState::Aborted | SessionState::Expired
+    ) {
+        return Err(SourceReadError::SessionNotDispositionReady);
+    }
+
+    read_synthetic_source_unchecked(staging, source_name, limit)
+}
+
+fn read_synthetic_source_unchecked(
+    staging: &StagingRoot,
+    source_name: &SourceName,
+    limit: SourceReadLimit,
+) -> Result<GuardedSource, SourceReadError> {
     let candidate_path = staging.canonical_path.join(source_name.as_str());
     let standard_metadata =
         std_fs::symlink_metadata(candidate_path).map_err(|_| SourceReadError::SourceUnavailable)?;
@@ -370,7 +396,6 @@ pub fn read_synthetic_source(
 
     Ok(GuardedSource { bytes })
 }
-
 fn validate_source_metadata(
     metadata: &Metadata,
     limit: SourceReadLimit,

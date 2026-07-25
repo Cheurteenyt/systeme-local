@@ -1,6 +1,6 @@
 # Operator-evidence synthetic staging
 
-Status: normative private Rust staging contract through B1.3
+Status: normative private Rust staging contract through B1.6
 
 ## Purpose
 
@@ -309,3 +309,27 @@ subprocess execution, environment lookup, archive extraction, OCR or provider ca
 Raw and sanitized buffers remain private and receive best-effort overwrite on drop. This does not
 prove provenance, retention, logical deletion or physical erasure. Real evidence remains forbidden
 until later disposition and Python non-disclosure gates are merged.
+
+<!-- systeme-local:b1-6-logical-disposition -->
+## B1.6 capability-relative logical cleanup
+
+B1.6 adds a crate-private disposition-only path for `sealed`, `aborted` and `expired` sessions. The
+existing public source-read and commitment entry points remain collecting-only.
+
+A prepared cleanup revalidates the same session, parent, root, lease, opaque source and exact source
+commitment. The root must contain only the expected source and `.custody.lock`.
+
+Cleanup is monotonic and retryable:
+
+```text
+source absent
+lease absent
+root absent
+```
+
+Removal remains relative to open directory capabilities. The lease handle is closed before the lock
+file is removed; root handles are closed before the exact empty `stg_` child is removed. Each absence
+is verified. Unexpected children, changed identities, links, reparse objects and multiply-linked
+sources fail closed.
+
+These controls prove logical namespace absence only, not physical erasure.

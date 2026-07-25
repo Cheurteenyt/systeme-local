@@ -100,6 +100,11 @@ impl SanitizedArtifact {
         self.bytes.fill(0);
     }
 
+    pub(crate) fn overwrite_for_disposition(&mut self) -> bool {
+        self.overwrite_bytes();
+        self.bytes.iter().all(|byte| *byte == 0)
+    }
+
     #[cfg(test)]
     fn zeroize_for_test(&mut self) -> &[u8] {
         self.overwrite_bytes();
@@ -138,6 +143,10 @@ impl SanitizationResult {
     #[must_use]
     pub const fn receipt(&self) -> &SanitizedOutputReceipt {
         &self.receipt
+    }
+
+    pub(crate) fn into_disposition_parts(self) -> (SanitizedArtifact, SanitizedOutputReceipt) {
+        (self.artifact, self.receipt)
     }
 }
 

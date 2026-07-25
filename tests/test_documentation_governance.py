@@ -279,7 +279,7 @@ def test_operator_evidence_session_lifecycle_is_reconciled() -> None:
     threat_model = text("docs/threat-model.md")
 
     for marker in (
-        "Status: normative private Rust lifecycle contract through B1.3",
+        "Status: normative private Rust lifecycle contract through B1.6",
         "disposed -> <none>",
         "revision + 1",
         r"systeme-local:operator-evidence-session-transition:v1\x00",
@@ -302,7 +302,7 @@ def test_operator_evidence_staging_is_reconciled() -> None:
     governance = text("docs/documentation-governance.md")
 
     for marker in (
-        "Status: normative private Rust staging contract through B1.3",
+        "Status: normative private Rust staging contract through B1.6",
         "src_[0-9a-f]{32}.raw",
         "cap-std = 4.0.2",
         "cap-fs-ext = 4.0.2",
@@ -521,3 +521,37 @@ def test_operator_evidence_controlled_staging_is_reconciled() -> None:
     assert "B1.3 implementation record" in adr
     assert "source commitment | planned" in architecture
     assert "real evidence ingestion | not implemented" in architecture
+
+
+def test_operator_evidence_retention_disposition_is_reconciled() -> None:
+    contract = text("docs/operator-evidence-retention-disposition.md")
+    lifecycle = text("docs/operator-evidence-session-lifecycle.md")
+    staging = text("docs/operator-evidence-staging.md")
+    protocol = text("docs/operator-evidence-custodian-protocol.md")
+    architecture = text("docs/architecture.md")
+    roadmap = text("docs/roadmap.md")
+    threat_model = text("docs/threat-model.md")
+    governance = text("docs/documentation-governance.md")
+    index = text("docs/index.md")
+    adr = text("docs/adr/0005-python-rust-operator-evidence-custody.md")
+
+    for marker in (
+        "dispose_immediately",
+        "retain_until",
+        "1 <= dispose_by_unix_seconds - decided_at_unix_seconds <= 900",
+        r"systeme-local:operator-evidence-retention-decision:v1\x00",
+        r"systeme-local:operator-evidence-logical-disposition:v1\x00",
+        "logical namespace disposition",
+        "not a physical-erasure",
+    ):
+        assert marker in contract
+
+    assert "B1.6 retention and disposition behavior" in lifecycle
+    assert "B1.6 capability-relative logical cleanup" in staging
+    assert "B1.6 remains outside protocol v1" in protocol
+    assert "B1.6 private retention and logical disposition" in architecture
+    assert "B1.6 bounded retention and logical disposition foundation" in roadmap
+    assert "B1.6 retention and logical-disposition threats and controls" in threat_model
+    assert "docs/operator-evidence-retention-disposition.md" in governance
+    assert "operator-evidence-retention-disposition.md" in index
+    assert "B1.6 retention and logical-disposition record" in adr

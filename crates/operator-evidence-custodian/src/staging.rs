@@ -1,15 +1,20 @@
-use crate::commitment::{SourceCommitmentError, SourceCommitmentReceipt, commit_guarded_source};
+use crate::commitment::{
+    SourceCommitmentError, SourceCommitmentReceipt, commit_guarded_source,
+    compute_source_commitment,
+};
 use crate::sanitizer::{SanitizationError, SanitizationResult, sanitize_guarded_source};
 use crate::sanitizer_profile::{SanitizerProfileId, sanitizer_profile};
 use crate::session::{CustodySession, SessionId, SessionState};
 use crate::source::{
-    GuardedSource, SourceName, SourceReadError, SourceReadLimit, StagingRoot, read_synthetic_source,
+    GuardedSource, SourceName, SourceReadError, SourceReadLimit, StagingRoot,
+    read_synthetic_source, read_synthetic_source_for_disposition,
 };
 use cap_fs_ext::MetadataExt;
 use cap_std::ambient_authority;
 use cap_std::fs::{Dir, File, Metadata, OpenOptions};
 #[cfg(unix)]
 use cap_std::fs::{DirBuilder, DirBuilderExt as _, OpenOptionsExt as _};
+use std::ffi::OsStr;
 use std::fmt;
 use std::fs as std_fs;
 use std::io::Write;
@@ -35,7 +40,7 @@ const READ_CONTROL: u32 = 0x0002_0000;
 #[cfg(windows)]
 const WRITE_DAC: u32 = 0x0004_0000;
 
-#[derive(Clone, Eq, PartialEq)]
+#[derive(Clone, Copy, Eq, PartialEq)]
 struct ObjectIdentity {
     device: u64,
     inode: u64,
@@ -50,6 +55,7 @@ impl ObjectIdentity {
     }
 }
 
+#[derive(Clone, Eq, PartialEq)]
 struct StagingName(String);
 
 impl StagingName {
@@ -85,6 +91,7 @@ fn is_valid_staging_name(value: &str) -> bool {
 /// An approved existing parent directory held as an open capability.
 pub struct StagingParent {
     canonical_path: PathBuf,
+    identity: ObjectIdentity,
     directory: Dir,
 }
 
@@ -123,6 +130,7 @@ impl StagingParent {
 
         Ok(Self {
             canonical_path,
+            identity: ObjectIdentity::capture(&handle),
             directory,
         })
     }
@@ -137,6 +145,7 @@ impl fmt::Debug for StagingParent {
 /// A Rust-created staging root bound to one custody-session identifier.
 pub struct ControlledStagingRoot {
     session_id: SessionId,
+    name: StagingName,
     canonical_path: PathBuf,
     identity: ObjectIdentity,
     directory: Dir,
@@ -183,6 +192,7 @@ impl ControlledStagingRoot {
 
         let root = Self {
             session_id: session.session_id().clone(),
+            name,
             canonical_path,
             identity,
             directory,
@@ -260,7 +270,7 @@ impl ControlledStagingRoot {
 
         Ok(SessionLease {
             session_id: session.session_id().clone(),
-            root_identity: self.identity.clone(),
+            root_identity: self.identity,
             lease_identity: ObjectIdentity::capture(&handle_metadata),
             directory,
             file: Some(file),
@@ -288,6 +298,22 @@ impl SessionLease {
     #[must_use]
     pub const fn is_active(&self) -> bool {
         self.file.is_some()
+    }
+
+    pub(crate) fn release_for_disposition(&mut self) -> Result<(), DispositionStagingError> {
+        let file = self.file.take();
+        drop(file);
+
+        match self.directory.remove_file(LEASE_FILE_NAME) {
+            Ok(()) => {}
+            Err(error) if error.kind() == std::io::ErrorKind::NotFound => {}
+            Err(_) => return Err(DispositionStagingError::LeaseRelease),
+        }
+
+        match self.directory.symlink_metadata(LEASE_FILE_NAME) {
+            Err(error) if error.kind() == std::io::ErrorKind::NotFound => Ok(()),
+            _ => Err(DispositionStagingError::LeaseRelease),
+        }
     }
 }
 
@@ -375,20 +401,11 @@ impl fmt::Display for ControlledReadError {
 
 impl std::error::Error for ControlledReadError {}
 
-/// Reads one synthetic source only through a matching active lease.
-///
-/// # Errors
-///
-/// Returns a path-free error when the session, root or lease do not match,
-/// when the root or lease identity changed, or when the bounded source read
-/// fails.
-pub fn read_controlled_synthetic_source(
+fn validate_controlled_custody(
     session: &CustodySession,
     root: &ControlledStagingRoot,
     lease: &SessionLease,
-    source_name: &SourceName,
-    limit: SourceReadLimit,
-) -> Result<GuardedSource, ControlledReadError> {
+) -> Result<(), ControlledReadError> {
     if session.session_id() != &root.session_id
         || session.session_id() != &lease.session_id
         || root.identity != lease.root_identity
@@ -428,10 +445,27 @@ pub fn read_controlled_synthetic_source(
         return Err(ControlledReadError::LeaseChanged);
     }
 
+    Ok(())
+}
+
+/// Reads one synthetic source only through a matching active lease.
+///
+/// # Errors
+///
+/// Returns a path-free error when the session, root or lease do not match,
+/// when the root or lease identity changed, or when the bounded source read
+/// fails.
+pub fn read_controlled_synthetic_source(
+    session: &CustodySession,
+    root: &ControlledStagingRoot,
+    lease: &SessionLease,
+    source_name: &SourceName,
+    limit: SourceReadLimit,
+) -> Result<GuardedSource, ControlledReadError> {
+    validate_controlled_custody(session, root, lease)?;
     read_synthetic_source(session, &root.staging, source_name, limit)
         .map_err(ControlledReadError::Source)
 }
-
 /// Failure from a lease-bound controlled source commitment.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum ControlledCommitmentError {
@@ -514,6 +548,326 @@ pub fn sanitize_controlled_synthetic_source(
 
     sanitize_guarded_source(session, &source, source_commitment, profile_id)
         .map_err(ControlledSanitizationError::Sanitization)
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub(crate) enum DispositionStagingError {
+    InvalidState,
+    SessionMismatch,
+    SourceVerification,
+    UnexpectedEntry,
+    SourceRemoval,
+    LeaseRelease,
+    RootRemoval,
+}
+
+pub(crate) struct DispositionStaging {
+    parent_directory: Dir,
+    parent_path: PathBuf,
+    parent_identity: ObjectIdentity,
+    root_name: StagingName,
+    root_identity: ObjectIdentity,
+    root: Option<ControlledStagingRoot>,
+    lease: Option<SessionLease>,
+    source_name: Option<SourceName>,
+    source_commitment: Option<SourceCommitmentReceipt>,
+    source_removal_attempted: bool,
+    root_removal_attempted: bool,
+}
+
+impl DispositionStaging {
+    pub(crate) fn remove_source(
+        &mut self,
+        session: &CustodySession,
+    ) -> Result<(), DispositionStagingError> {
+        let Some(source_name) = self.source_name.as_ref() else {
+            return Ok(());
+        };
+        let root = self
+            .root
+            .as_ref()
+            .ok_or(DispositionStagingError::SourceRemoval)?;
+        let expected_commitment = self
+            .source_commitment
+            .as_ref()
+            .ok_or(DispositionStagingError::SourceVerification)?;
+
+        match root.directory.symlink_metadata(source_name.as_str()) {
+            Ok(_) => {
+                verify_disposition_source(session, root, source_name, expected_commitment)?;
+            }
+            Err(error)
+                if error.kind() == std::io::ErrorKind::NotFound
+                    && self.source_removal_attempted =>
+            {
+                self.source_name = None;
+                self.source_commitment = None;
+                return Ok(());
+            }
+            Err(_) => return Err(DispositionStagingError::SourceVerification),
+        }
+
+        self.source_removal_attempted = true;
+        root.directory
+            .remove_file(source_name.as_str())
+            .map_err(|_| DispositionStagingError::SourceRemoval)?;
+
+        match root.directory.symlink_metadata(source_name.as_str()) {
+            Err(error) if error.kind() == std::io::ErrorKind::NotFound => {
+                self.source_name = None;
+                self.source_commitment = None;
+                Ok(())
+            }
+            _ => Err(DispositionStagingError::SourceRemoval),
+        }
+    }
+
+    pub(crate) fn release_lease(&mut self) -> Result<(), DispositionStagingError> {
+        if let Some(lease) = self.lease.as_mut() {
+            lease.release_for_disposition()?;
+            self.lease = None;
+        }
+
+        let root = self
+            .root
+            .as_ref()
+            .ok_or(DispositionStagingError::LeaseRelease)?;
+        match root.directory.symlink_metadata(LEASE_FILE_NAME) {
+            Err(error) if error.kind() == std::io::ErrorKind::NotFound => Ok(()),
+            _ => Err(DispositionStagingError::LeaseRelease),
+        }
+    }
+
+    pub(crate) fn remove_root(&mut self) -> Result<(), DispositionStagingError> {
+        if let Some(root) = self.root.as_ref() {
+            validate_parent_and_root(
+                &self.parent_directory,
+                &self.parent_path,
+                &self.parent_identity,
+                &self.root_name,
+                &self.root_identity,
+                root,
+            )?;
+            if root
+                .directory
+                .entries()
+                .map_err(|_| DispositionStagingError::RootRemoval)?
+                .next()
+                .is_some()
+            {
+                return Err(DispositionStagingError::UnexpectedEntry);
+            }
+        } else {
+            validate_detached_root_entry(
+                &self.parent_directory,
+                &self.parent_path,
+                &self.root_name,
+                &self.root_identity,
+                self.root_removal_attempted,
+            )?;
+        }
+
+        let root = self.root.take();
+        drop(root);
+        self.root_removal_attempted = true;
+
+        match self.parent_directory.remove_dir(self.root_name.as_str()) {
+            Ok(()) => {}
+            Err(error) if error.kind() == std::io::ErrorKind::NotFound => {}
+            Err(_) => return Err(DispositionStagingError::RootRemoval),
+        }
+
+        verify_root_absent(&self.parent_directory, &self.parent_path, &self.root_name)
+    }
+}
+
+pub(crate) fn prepare_disposition_staging(
+    parent: &StagingParent,
+    session: &CustodySession,
+    root: ControlledStagingRoot,
+    lease: SessionLease,
+    source: Option<(SourceName, SourceCommitmentReceipt)>,
+) -> Result<DispositionStaging, DispositionStagingError> {
+    if !matches!(
+        session.state(),
+        SessionState::Sealed | SessionState::Aborted | SessionState::Expired
+    ) {
+        return Err(DispositionStagingError::InvalidState);
+    }
+
+    validate_controlled_custody(session, &root, &lease)
+        .map_err(|_| DispositionStagingError::SessionMismatch)?;
+    validate_parent_and_root(
+        &parent.directory,
+        &parent.canonical_path,
+        &parent.identity,
+        &root.name,
+        &root.identity,
+        &root,
+    )?;
+
+    if let Some((source_name, expected_commitment)) = source.as_ref() {
+        verify_disposition_source(session, &root, source_name, expected_commitment)?;
+    }
+
+    validate_exact_disposition_entries(&root, source.as_ref().map(|(name, _)| name))?;
+
+    Ok(DispositionStaging {
+        parent_directory: parent
+            .directory
+            .try_clone()
+            .map_err(|_| DispositionStagingError::RootRemoval)?,
+        parent_path: parent.canonical_path.clone(),
+        parent_identity: parent.identity,
+        root_name: root.name.clone(),
+        root_identity: root.identity,
+        root: Some(root),
+        lease: Some(lease),
+        source_name: source.as_ref().map(|(name, _)| name.clone()),
+        source_commitment: source.map(|(_, receipt)| receipt),
+        source_removal_attempted: false,
+        root_removal_attempted: false,
+    })
+}
+
+fn verify_disposition_source(
+    session: &CustodySession,
+    root: &ControlledStagingRoot,
+    source_name: &SourceName,
+    expected_commitment: &SourceCommitmentReceipt,
+) -> Result<(), DispositionStagingError> {
+    let limit = SourceReadLimit::new(expected_commitment.byte_len().max(1))
+        .map_err(|_| DispositionStagingError::SourceVerification)?;
+    let source = read_synthetic_source_for_disposition(session, &root.staging, source_name, limit)
+        .map_err(|_| DispositionStagingError::SourceVerification)?;
+    let actual = compute_source_commitment(session.session_id(), &source)
+        .map_err(|_| DispositionStagingError::SourceVerification)?;
+
+    if &actual == expected_commitment {
+        Ok(())
+    } else {
+        Err(DispositionStagingError::SourceVerification)
+    }
+}
+
+fn validate_exact_disposition_entries(
+    root: &ControlledStagingRoot,
+    source_name: Option<&SourceName>,
+) -> Result<(), DispositionStagingError> {
+    let mut saw_lease = false;
+    let mut saw_source = source_name.is_none();
+    let entries = root
+        .directory
+        .entries()
+        .map_err(|_| DispositionStagingError::UnexpectedEntry)?;
+
+    for entry in entries {
+        let entry = entry.map_err(|_| DispositionStagingError::UnexpectedEntry)?;
+        let name = entry.file_name();
+
+        if name.as_os_str() == OsStr::new(LEASE_FILE_NAME) && !saw_lease {
+            saw_lease = true;
+        } else if source_name.is_some_and(|source| name.as_os_str() == OsStr::new(source.as_str()))
+            && !saw_source
+        {
+            saw_source = true;
+        } else {
+            return Err(DispositionStagingError::UnexpectedEntry);
+        }
+    }
+
+    if saw_lease && saw_source {
+        Ok(())
+    } else {
+        Err(DispositionStagingError::UnexpectedEntry)
+    }
+}
+
+fn validate_parent_and_root(
+    parent_directory: &Dir,
+    parent_path: &Path,
+    expected_parent_identity: &ObjectIdentity,
+    root_name: &StagingName,
+    expected_root_identity: &ObjectIdentity,
+    root: &ControlledStagingRoot,
+) -> Result<(), DispositionStagingError> {
+    let parent_metadata = parent_directory
+        .dir_metadata()
+        .map_err(|_| DispositionStagingError::RootRemoval)?;
+    if ObjectIdentity::capture(&parent_metadata) != *expected_parent_identity {
+        return Err(DispositionStagingError::RootRemoval);
+    }
+
+    let standard = std_fs::symlink_metadata(parent_path.join(root_name.as_str()))
+        .map_err(|_| DispositionStagingError::RootRemoval)?;
+    let path_metadata = parent_directory
+        .symlink_metadata(root_name.as_str())
+        .map_err(|_| DispositionStagingError::RootRemoval)?;
+    let handle_metadata = root
+        .directory
+        .dir_metadata()
+        .map_err(|_| DispositionStagingError::RootRemoval)?;
+
+    if !standard.is_dir()
+        || standard_metadata_is_link_or_reparse(&standard)
+        || !path_metadata.is_dir()
+        || path_metadata.is_symlink()
+        || !handle_metadata.is_dir()
+        || handle_metadata.is_symlink()
+        || ObjectIdentity::capture(&path_metadata) != *expected_root_identity
+        || ObjectIdentity::capture(&handle_metadata) != *expected_root_identity
+    {
+        return Err(DispositionStagingError::RootRemoval);
+    }
+
+    Ok(())
+}
+
+fn validate_detached_root_entry(
+    parent_directory: &Dir,
+    parent_path: &Path,
+    root_name: &StagingName,
+    expected_root_identity: &ObjectIdentity,
+    removal_attempted: bool,
+) -> Result<(), DispositionStagingError> {
+    match parent_directory.symlink_metadata(root_name.as_str()) {
+        Ok(metadata) => {
+            let standard = std_fs::symlink_metadata(parent_path.join(root_name.as_str()))
+                .map_err(|_| DispositionStagingError::RootRemoval)?;
+            if !metadata.is_dir()
+                || metadata.is_symlink()
+                || !standard.is_dir()
+                || standard_metadata_is_link_or_reparse(&standard)
+                || ObjectIdentity::capture(&metadata) != *expected_root_identity
+            {
+                return Err(DispositionStagingError::RootRemoval);
+            }
+            Ok(())
+        }
+        Err(error) if error.kind() == std::io::ErrorKind::NotFound && removal_attempted => Ok(()),
+        Err(_) => Err(DispositionStagingError::RootRemoval),
+    }
+}
+
+fn verify_root_absent(
+    parent_directory: &Dir,
+    parent_path: &Path,
+    root_name: &StagingName,
+) -> Result<(), DispositionStagingError> {
+    let capability_absent = matches!(
+        parent_directory.symlink_metadata(root_name.as_str()),
+        Err(error) if error.kind() == std::io::ErrorKind::NotFound
+    );
+    let namespace_absent = matches!(
+        std_fs::symlink_metadata(parent_path.join(root_name.as_str())),
+        Err(error) if error.kind() == std::io::ErrorKind::NotFound
+    );
+
+    if capability_absent && namespace_absent {
+        Ok(())
+    } else {
+        Err(DispositionStagingError::RootRemoval)
+    }
 }
 
 fn create_child_directory(parent: &Dir, name: &str) -> Result<(), StagingError> {
@@ -934,13 +1288,13 @@ mod tests {
         std_fs::write(root.canonical_path.join(SOURCE), b"synthetic-controlled")?;
         session.apply(SessionAction::BeginCollection)?;
 
-        let original_root_identity = root.identity.clone();
-        let original_lease_root_identity = lease.root_identity.clone();
+        let original_root_identity = root.identity;
+        let original_lease_root_identity = lease.root_identity;
         let replaced_root_identity = ObjectIdentity {
             device: u64::MAX,
             inode: u64::MAX,
         };
-        root.identity = replaced_root_identity.clone();
+        root.identity = replaced_root_identity;
         lease.root_identity = replaced_root_identity;
         let changed_root = commit_controlled_synthetic_source(
             &session,
@@ -958,7 +1312,7 @@ mod tests {
         root.identity = original_root_identity;
         lease.root_identity = original_lease_root_identity;
 
-        let original_lease_identity = lease.lease_identity.clone();
+        let original_lease_identity = lease.lease_identity;
         lease.lease_identity = ObjectIdentity {
             device: u64::MAX,
             inode: u64::MAX,

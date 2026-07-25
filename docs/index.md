@@ -86,5 +86,6 @@ here conflicts with a linked document, the linked document remains authoritative
 | [Blueprint v2 — Système Local](blueprint-v2.md) | Contributor or component guidance. |
 | [Operator-evidence session lifecycle](operator-evidence-session-lifecycle.md) | Contributor or component guidance. |
 | [Operator-evidence synthetic staging](operator-evidence-staging.md) | Contributor or component guidance. |
+| [Operator-evidence retention and logical disposition](operator-evidence-retention-disposition.md) | Private Rust retention and logical-disposition contract. |
 | [Rust audit watchdog](rust-audit-watchdog.md) | Historical measurement or audit record. |
 | [Windows audit witness contract](windows-audit-witness.md) | Historical measurement or audit record. |

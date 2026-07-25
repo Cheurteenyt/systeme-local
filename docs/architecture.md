@@ -1,6 +1,6 @@
 # Architecture actuellement implémentée
 
-Status: implemented architecture through B1.1 operator-evidence session lifecycle
+Status: implemented architecture through B1.6 operator-evidence logical disposition
 
 This document describes the code that exists on `main`. It is not the target product
 architecture; that role belongs to [`blueprint-v2.md`](blueprint-v2.md).
@@ -163,6 +163,7 @@ The implemented and planned channels remain independent:
 | sealed operator-evidence bundle | implemented | no live evidence collection |
 | operator-evidence session lifecycle | implemented | in-memory Rust state machine |
 | operator-evidence bounded staging | implemented | capability-rooted synthetic reads; no wire operation |
+| operator-evidence logical disposition | implemented | bounded sanitized retention and logical namespace cleanup |
 | real operator-evidence collection | planned | must follow controlled staging, sanitizer and disposition gates |
 | Secure MCP Tunnel installation | planned | separate operator-approved lot |
 | OAuth/OIDC client and token lifecycle | planned | separate secret-management lot |
@@ -276,3 +277,18 @@ The B0 binary and NDJSON contract remain unchanged and still advertise
 `sanitizer_execution=false`, because this internal capability is not wire-reachable. Real
 operator-evidence collection, retention, disposition, Python orchestration, tunnel installation and
 provider connectivity remain unimplemented.
+
+<!-- systeme-local:b1-6-logical-disposition -->
+## B1.6 private retention and logical disposition
+
+The private Rust custodian now supports closed immediate disposition and bounded in-memory retention
+of canonical sanitized artifacts. Raw staged sources, the lease control file and the exact controlled
+staging root are removed and verified absent before an artifact can remain retained.
+
+A retryable in-memory operation records monotonic cleanup progress. Immediate, retained, aborted and
+expired paths end in the existing terminal `disposed` state and produce only a secret-free logical
+disposition receipt. Retained artifacts are bounded to a caller-supplied window of at most 900
+seconds; Rust reads no clock and late cleanup remains mandatory with `deadline_met=false`.
+
+This is logical namespace disposition, not physical erasure. Protocol v1, the binary entrypoint,
+Cargo dependencies, public provider models and real-evidence collection remain unchanged.

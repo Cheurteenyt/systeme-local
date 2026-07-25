@@ -182,3 +182,17 @@ without changing protocol v1 or collecting real evidence. B1.6 must still add ex
 retention/disposition behavior and verifiable logical-disposition receipts. B2 may begin only after
 those custody foundations are merged, and remains responsible for Python orchestration of the eleven
 observations, response verification, bundle compilation and local reporting.
+
+<!-- systeme-local:b1-6-logical-disposition -->
+## B1.6 bounded retention and logical disposition foundation
+
+Status: `implemented foundation` once this lot is merged; real operator-evidence collection remains
+`planned`.
+
+This B1 sub-lot adds closed retention decisions, a maximum 900-second sanitized-artifact retention
+window, retryable capability-relative cleanup and secret-free logical-disposition receipts. Raw
+staged sources cannot remain retained after sealing.
+
+B2 may begin only after B1.6 is merged and independently reviewed. B2 remains responsible for
+timestamp acquisition, Python subprocess orchestration, the eleven observations, response
+verification, bundle compilation and local reporting.
