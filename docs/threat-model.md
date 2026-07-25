@@ -1,6 +1,6 @@
 # Modèle de menace
 
-Status: current through the B1.3 controlled synthetic staging boundary
+Status: current through the B1.6 logical-disposition boundary
 
 ## Actifs à protéger
 
@@ -246,3 +246,27 @@ operator text and secret-bearing values.
 Residual risks remain explicit: best-effort memory overwrite is not physical erasure; the receipt is
 not proof of provenance or truth; retention and disposition are deferred to B1.6; and no real evidence
 may enter this path before the B2/B3 orchestration and end-to-end non-disclosure gates.
+
+<!-- systeme-local:b1-6-logical-disposition -->
+## B1.6 retention and logical-disposition threats and controls
+
+B1.6 addresses indefinite raw-source availability, artifact-retention ambiguity, partial cleanup and
+false physical-erasure claims.
+
+Controls include:
+
+- raw staged sources are never retained after sealing;
+- retention applies only to canonical sanitized artifacts;
+- retention is closed to `local_operator` and at most 900 seconds;
+- Rust reads no clock, environment, locale or network input;
+- source, lease and root identities are revalidated before cleanup;
+- unexpected children and linked or substituted objects fail closed;
+- source, lease and root absence is verified in a monotonic retryable operation;
+- sanitized bytes are explicitly overwritten before terminal disposition;
+- late disposition remains mandatory and records `deadline_met=false`;
+- receipts and errors omit paths, source names, session identifiers, timestamps, arbitrary text and
+  secrets.
+
+Residual risk remains explicit: memory overwrite and namespace absence do not erase SSD remanence,
+filesystem journals, snapshots, swap, caches or backups. The receipt is a logical-disposition proof,
+not a physical-erasure guarantee.

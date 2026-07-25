@@ -1,6 +1,6 @@
 # Operator-evidence session lifecycle
 
-Status: normative private Rust lifecycle contract through B1.3
+Status: normative private Rust lifecycle contract through B1.6
 
 ## Purpose
 
@@ -222,3 +222,25 @@ commitment are revalidated before any profile parser runs.
 A sanitized-output receipt is not a lifecycle transition receipt, provenance statement, retention
 record or disposition proof. Sealing, retention, abort, expiry and disposition remain explicit later
 lifecycle actions.
+
+<!-- systeme-local:b1-6-logical-disposition -->
+## B1.6 retention and disposition behavior
+
+B1.6 reuses the existing transition graph byte-for-byte:
+
+```text
+sealed -> retained -> disposed
+sealed -> disposed
+aborted -> disposed
+expired -> disposed
+```
+
+Raw source, lease and controlled-root logical absence is verified before `sealed -> retained` or any
+terminal `dispose` transition. Retained artifacts remain only in a redacted, non-serializable Rust
+wrapper.
+
+The caller supplies reviewed integer UTC seconds. Rust reads no clock. A late retained-artifact
+disposition still proceeds and records `deadline_met=false`.
+
+The logical-disposition receipt binds the terminal transition commitment and verified absence
+conditions. It is not a physical-erasure receipt.

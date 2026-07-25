@@ -405,3 +405,14 @@ conversion. The receipt exposes only the source commitment, profile identifier, 
 output class, sanitized byte length and sanitized commitment. The artifact exposes no public byte
 getter and its initialized buffer uses best-effort overwrite on drop. These controls prove neither
 provenance, truth, retention, logical disposition nor physical erasure.
+
+<!-- systeme-local:b1-6-logical-disposition -->
+## B1.6 remains outside protocol v1
+
+Retention decisions, retained sanitized artifacts, retryable cleanup operations and logical
+disposition receipts are private Rust library contracts. They add no request operation, response
+field or serialized protocol artifact.
+
+`protocol.rs`, `main.rs` and the checked-in B0 fixtures remain byte-for-byte unchanged. Protocol v1
+continues to expose only `describe_contract` and continues to report literal false values for
+filesystem access, real-evidence ingestion, network access and sanitizer execution.

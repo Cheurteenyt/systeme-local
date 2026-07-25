@@ -1,4 +1,4 @@
-use crate::session::{CustodySession, SessionState};
+use crate::session::{CustodySession, SessionId, SessionState};
 use crate::source::GuardedSource;
 use sha2::{Digest, Sha256};
 use std::fmt;
@@ -60,11 +60,18 @@ pub(crate) fn commit_guarded_source(
         return Err(SourceCommitmentError::SessionNotCollecting);
     }
 
+    compute_source_commitment(session.session_id(), source)
+}
+
+pub(crate) fn compute_source_commitment(
+    session_id: &SessionId,
+    source: &GuardedSource,
+) -> Result<SourceCommitmentReceipt, SourceCommitmentError> {
     let byte_len =
         u64::try_from(source.byte_len()).map_err(|_| SourceCommitmentError::CapacityOverflow)?;
     let mut digest = Sha256::new();
     digest.update(SOURCE_COMMITMENT_DOMAIN);
-    update_field(&mut digest, session.session_id().as_str().as_bytes())?;
+    update_field(&mut digest, session_id.as_str().as_bytes())?;
     digest.update(byte_len.to_be_bytes());
     digest.update(source.commitment_bytes());
 
@@ -73,7 +80,6 @@ pub(crate) fn commit_guarded_source(
         commitment_sha256: encode_lower_hex(digest.finalize().as_ref()),
     })
 }
-
 fn update_field(digest: &mut Sha256, value: &[u8]) -> Result<(), SourceCommitmentError> {
     let length = u64::try_from(value.len()).map_err(|_| SourceCommitmentError::CapacityOverflow)?;
     digest.update(length.to_be_bytes());

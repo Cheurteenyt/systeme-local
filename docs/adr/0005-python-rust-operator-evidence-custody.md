@@ -187,3 +187,18 @@ byte length and the private sanitized-output commitment. The commitment uses the
 This remains a library-only synthetic capability. Protocol version 1, its fixtures, `protocol.rs`,
 `main.rs`, public provider contracts and existing public digest domains are unchanged. B1.5 does not
 collect real evidence, decide readiness, retain evidence or issue a disposition receipt.
+
+<!-- systeme-local:b1-6-logical-disposition -->
+## B1.6 retention and logical-disposition record
+
+B1.6 adds closed immediate/retain-until decisions, a maximum sanitized-artifact retention window of
+900 seconds, capability-relative raw-source cleanup and retryable logical-disposition receipts.
+
+Raw staged bytes are never retained after sealing. The implementation verifies and removes the exact
+source, releases the exact lease, removes the empty controlled root, explicitly overwrites sanitized
+bytes before terminal disposition and reuses the existing lifecycle graph without modifying
+`session.rs`.
+
+The receipt proves verified logical namespace absence inside the custodian boundary. It does not
+claim physical erasure from storage media, filesystem journals, snapshots, swap, caches or backups.
+The implementation remains synthetic-only, library-only and unreachable from protocol v1.

@@ -1,4 +1,5 @@
 mod commitment;
+mod disposition;
 mod error;
 mod protocol;
 mod sanitizer;
@@ -8,6 +9,11 @@ mod source;
 mod staging;
 
 pub use commitment::{SourceCommitmentError, SourceCommitmentReceipt};
+pub use disposition::{
+    DispositionError, DispositionProgress, DispositionReason, LogicalDispositionReceipt,
+    PreparedDisposition, RetainedSanitization, RetentionDecision, RetentionDecisionError,
+    RetentionMode, RetentionOwner, prepare_sanitized_disposition, prepare_terminal_disposition,
+};
 pub use error::{Code as ProtocolErrorCode, Error as ProtocolError};
 pub use protocol::{
     Descriptor as ContractDescriptor, Failure as ContractErrorResponse, MAX_INPUT_BYTES,

@@ -24,6 +24,7 @@ of another document.
 | `docs/operator-evidence-custodian-protocol.md` | private Python/Rust custody subprocess contract |
 | `docs/operator-evidence-session-lifecycle.md` | private Rust custody-session state and transition contract |
 | `docs/operator-evidence-staging.md` | private Rust capability-rooted synthetic staging contract |
+| `docs/operator-evidence-retention-disposition.md` | private Rust retention and logical-disposition contract |
 | `docs/threat-model.md` | current threats, controls and residual risks |
 | `docs/roadmap.md` | ordered delivery status and gates |
 | `docs/adr/*.md` | accepted decisions and consequences |
