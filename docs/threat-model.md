@@ -270,3 +270,42 @@ Controls include:
 Residual risk remains explicit: memory overwrite and namespace absence do not erase SSD remanence,
 filesystem journals, snapshots, swap, caches or backups. The receipt is a logical-disposition proof,
 not a physical-erasure guarantee.
+
+
+<!-- systeme-local:b2-0-orchestration-threats -->
+## B2.0 protocol and orchestration design threats
+
+B2.0 addresses path-authority expansion, Python raw-byte exposure, handle inheritance leakage,
+process interruption, profile-to-check confusion and false promotion of incomplete evidence.
+
+The selected controls are:
+
+- an exact inherited-handle allowlist and no path in NDJSON, arguments or environment;
+- one read-only regular source handle and one owner-only staging-parent handle;
+- one-shot process transactions with hard Python timeouts;
+- a bounded sibling recovery journal created before raw staging;
+- `recover_evidence` cleanup that always emits `success_evidence_emitted=false`;
+- wire-reachable `dispose_immediately` only;
+- an exact eleven-check compatibility matrix;
+- explicit gaps for UI readiness, OAuth summaries, transport attestations and high-risk tool counts;
+- no reinterpretation of `destructive_count` as `high_risk_tool_count`;
+- no reinterpretation of `app_state` or `access_control` as public request booleans;
+- terminal disposition before a successful response;
+- protocol-v1 and public-provider compatibility gates.
+
+Residual risk remains: the future platform handle adapters and recovery journal are not implemented
+in B2.0. Real evidence remains prohibited until B2.1, gap-profile review, B2.2 orchestration and B3
+end-to-end non-disclosure gates are merged.
+
+
+<!-- systeme-local:b2-0-contract-repair-v2 -->
+## B2.0 independent-review closures
+
+Revision 2 closes parser drift, projection substitution, unverifiable sanitized
+commitments, journal rollback, over-broad inherited handles and stale evidence.
+
+Controls include committed synthetic fixtures, exact reconstruction of all five
+B1 outputs, per-check attestation domains, a hash-chained owner-only journal,
+minimum-rights handle duplication, before/after identity verification, hard
+timeouts and checked record/bundle expiry. None is described as implemented
+runtime behavior.

@@ -22,6 +22,8 @@ of another document.
 | `docs/providers/chatgpt.md` | ChatGPT surface characterization and implementation status |
 | `docs/providers/chatgpt-mcp-*.md` | expiring ChatGPT MCP evidence and operator contracts |
 | `docs/operator-evidence-custodian-protocol.md` | private Python/Rust custody subprocess contract |
+| `docs/operator-evidence-orchestration.md` | protocol-v2, inherited-handle, recovery and eleven-check orchestration contract |
+| `docs/operator-evidence-protocol-v2-design.json` | machine-readable B2.0 protocol and compatibility manifest |
 | `docs/operator-evidence-session-lifecycle.md` | private Rust custody-session state and transition contract |
 | `docs/operator-evidence-staging.md` | private Rust capability-rooted synthetic staging contract |
 | `docs/operator-evidence-retention-disposition.md` | private Rust retention and logical-disposition contract |

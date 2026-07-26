@@ -555,3 +555,272 @@ def test_operator_evidence_retention_disposition_is_reconciled() -> None:
     assert "docs/operator-evidence-retention-disposition.md" in governance
     assert "operator-evidence-retention-disposition.md" in index
     assert "B1.6 retention and logical-disposition record" in adr
+
+
+def test_b2_0_operator_evidence_orchestration_contract_is_closed() -> None:
+    contract = text("docs/operator-evidence-orchestration.md")
+    manifest = json.loads(text("docs/operator-evidence-protocol-v2-design.json"))
+    protocol = text("docs/operator-evidence-custodian-protocol.md")
+    architecture = text("docs/architecture.md")
+    roadmap = text("docs/roadmap.md")
+    threat_model = text("docs/threat-model.md")
+    governance = text("docs/documentation-governance.md")
+    index = text("docs/index.md")
+    adr_5 = text("docs/adr/0005-python-rust-operator-evidence-custody.md")
+    adr_6 = text("docs/adr/0006-inherited-handles-for-operator-evidence.md")
+    chatgpt = text("docs/providers/chatgpt.md")
+
+    for marker in (
+        "no protocol-v2 runtime capability is implemented",
+        "process_evidence",
+        "recover_evidence",
+        "dispose_immediately",
+        "retain_until",
+        "readiness_ui_snapshot_v1",
+        "authentication_summary_v1",
+        "tool_review_snapshot_v1",
+        "transport_attestation_summary_v1",
+        "success_evidence_emitted = false",
+        "Python does not read raw evidence bytes",
+    ):
+        assert marker in contract
+
+    assert manifest["schema"] == "systeme-local.operator-evidence-protocol-v2-design.v1"
+    assert manifest["status"] == "contract_only"
+    assert manifest["runtime_reachable"] is False
+    assert manifest["real_evidence_collection_enabled"] is False
+    assert manifest["protocol_v1"] == {
+        "version": 1,
+        "operations": ["describe_contract"],
+        "fixtures_byte_for_byte_unchanged": True,
+    }
+
+    protocol_v2 = manifest["protocol_v2"]
+    assert protocol_v2["operations"] == [
+        "describe_contract",
+        "process_evidence",
+        "recover_evidence",
+    ]
+    assert protocol_v2["wire_retention_modes"] == ["dispose_immediately"]
+    assert protocol_v2["library_only_retention_modes"] == ["retain_until"]
+    assert protocol_v2["path_in_request"] is False
+    assert protocol_v2["raw_bytes_in_python"] is False
+    assert protocol_v2["network_access"] is False
+    assert protocol_v2["shell_invocation"] is False
+    assert protocol_v2["limits"] == {
+        "absolute_source_bytes": 8_388_608,
+        "projection_bytes": 8_192,
+        "recovery_journal_bytes": 4_096,
+        "stderr_bytes": 8_192,
+        "stdin_bytes": 16_384,
+        "stdout_bytes": 65_536,
+    }
+
+    expected_check_order = [
+        "plan_role_observation",
+        "web_client",
+        "transport",
+        "authentication_metadata",
+        "refresh_token",
+        "developer_mode",
+        "app_configuration",
+        "workspace_access",
+        "tool_snapshot",
+        "action_review",
+        "local_policy",
+    ]
+    expected_validity = [
+        86_400,
+        14_400,
+        900,
+        3_600,
+        3_600,
+        3_600,
+        3_600,
+        3_600,
+        1_800,
+        1_800,
+        86_400,
+    ]
+    assert [entry["check_id"] for entry in manifest["checks"]] == expected_check_order
+    assert [entry["max_validity_seconds"] for entry in manifest["checks"]] == expected_validity
+    assert [entry["order"] for entry in manifest["checks"]] == list(range(1, 12))
+
+    by_check = {entry["check_id"]: entry for entry in manifest["checks"]}
+    assert by_check["local_policy"]["exact_b1_profile"] == "local_policy_snapshot_v1"
+    assert by_check["local_policy"]["mapping_status"] == "exact"
+    assert by_check["action_review"]["exact_b1_profile"] == "action_review_snapshot_v1"
+    assert by_check["action_review"]["mapping_status"] == "partial"
+    assert by_check["transport"]["mapping_status"] == "external_dependency"
+    assert by_check["tool_snapshot"]["gap_id"] == "tool_review_snapshot_v1"
+    assert by_check["authentication_metadata"]["gap_id"] == "authentication_summary_v1"
+    assert by_check["refresh_token"]["source_reuse"] == (
+        "authentication_metadata_same_summary_only"
+    )
+
+    assert "B2.0 protocol-v2 design remains non-reachable" in protocol
+    assert "B2.0 contract-only orchestration design" in architecture
+    assert "B2.0 operator-evidence protocol and orchestration contract" in roadmap
+    assert "B2.0 protocol and orchestration design threats" in threat_model
+    assert "docs/operator-evidence-orchestration.md" in governance
+    assert "operator-evidence-orchestration.md" in index
+    assert "0006-inherited-handles-for-operator-evidence.md" in index
+    assert "B2.0 successor decision" in adr_5
+    assert "Use inherited read-only handles" in adr_6
+    assert "B2.0 contract boundary" in chatgpt
+
+    fixtures = sorted((ROOT / "tests/fixtures/operator_evidence_v2").glob("*.ndjson"))
+    assert [path.name for path in fixtures] == [
+        "error.response.ndjson",
+        "process_evidence.request.ndjson",
+        "process_evidence.response.ndjson",
+        "recover_evidence.request.ndjson",
+        "recover_evidence.response.ndjson",
+    ]
+    for fixture in fixtures:
+        raw = fixture.read_bytes()
+        assert raw.endswith(b"\n")
+        assert b"\r" not in raw
+        parsed = json.loads(raw)
+        assert parsed["protocol_version"] == 2
+        rendered = raw.decode("utf-8")
+        for forbidden in (
+            "C:\\\\",
+            "/home/",
+            "https://",
+            "gho_",
+            "Bearer ",
+            "client_secret",
+            "refresh_token_value",
+            '"path"',
+        ):
+            assert forbidden not in rendered
+
+    process_request = json.loads(
+        text("tests/fixtures/operator_evidence_v2/process_evidence.request.ndjson")
+    )
+    assert process_request["operation"] == "process_evidence"
+    assert process_request["retention_mode"] == "dispose_immediately"
+    assert set(process_request) == set(protocol_v2["request_fields"]["process_evidence"])
+
+    recover_response = json.loads(
+        text("tests/fixtures/operator_evidence_v2/recover_evidence.response.ndjson")
+    )
+    assert recover_response["operation"] == "recover_evidence"
+    assert recover_response["success_evidence_emitted"] is False
+
+
+def test_b2_0_independent_review_findings_are_closed() -> None:
+    from hashlib import sha256
+
+    design = json.loads(text("docs/operator-evidence-protocol-v2-design.json"))
+    protocol = design["protocol_v2"]
+
+    assert design["contract_revision"] == 2
+    assert sorted(design["review_finding_closures"]) == [
+        "B20-REV-001",
+        "B20-REV-002",
+        "B20-REV-003",
+        "B20-REV-004",
+        "B20-REV-005",
+    ]
+    for key in (
+        "request_schemas",
+        "response_schemas",
+        "error_response_schemas",
+        "field_schemas",
+        "canonical_field_order",
+        "commitment_domains",
+        "commitment_framing",
+        "projection_schemas",
+        "projection_verification",
+        "recovery_journal_schema",
+        "recovery_progress_states",
+        "recovery_journal_permissions",
+        "recovery_journal_integrity",
+        "recovery_atomic_replace_contract",
+        "recovery_validation_precedence",
+    ):
+        assert key in protocol
+
+    assert sorted(protocol["synthetic_error_examples"]) == sorted(protocol["error_codes"])
+    assert len(protocol["validation_precedence_edges"]) == (
+        len(protocol["validation_precedence"]) - 1
+    )
+    assert sorted(design["attestation_digest_domains"]) == [
+        "app_configuration",
+        "developer_mode",
+        "plan_role_observation",
+        "web_client",
+        "workspace_access",
+    ]
+    assert design["attestation_schemas"]["workspace_access"]["fields"]["authority"]["enum"] == [
+        "workspace_admin"
+    ]
+
+    handles = protocol["inherited_handles"]
+    assert handles["identifier_contract"]["bit_width"] == 63
+    assert handles["identifier_contract"]["supported_process_pointer_width_bits"] == [64]
+    assert handles["windows"]["spawn"]["close_fds"] is True
+    assert handles["unix"]["spawn"]["close_fds"] is True
+
+    journal = protocol["recovery_journal_schema"]
+    assert journal["field_order"][-1] == "journal_sha256"
+    assert protocol["recovery_progress_states"][0] == "prepared"
+    assert protocol["recovery_progress_states"][-1] == "complete"
+    assert len(protocol["recovery_progress_states"]) == 13
+
+    time_contract = design["timestamp_ownership"]
+    assert time_contract["maximum_future_skew_seconds"] == 0
+    assert time_contract["maximum_process_duration_seconds"] == 60
+    assert time_contract["maximum_recovery_duration_seconds"] == 30
+
+    def domain_bytes(value: str) -> bytes:
+        assert value.endswith("\\x00")
+        return value[:-4].encode() + b"\x00"
+
+    def canonical(value: dict[str, object]) -> bytes:
+        return json.dumps(
+            value,
+            ensure_ascii=False,
+            separators=(",", ":"),
+        ).encode()
+
+    def committed(domain: str, value: dict[str, object]) -> str:
+        payload = canonical(value)
+        return sha256(domain_bytes(domain) + len(payload).to_bytes(8, "big") + payload).hexdigest()
+
+    domains = protocol["commitment_domains"]
+    request = json.loads(
+        text("tests/fixtures/operator_evidence_v2/process_evidence.request.ndjson")
+    )
+    request_order = protocol["request_schemas"]["process_evidence"]["field_order"]
+    assert list(request) == request_order
+    request_payload = {key: request[key] for key in request_order if key != "request_sha256"}
+    assert request["request_sha256"] == committed(
+        domains["request"],
+        request_payload,
+    )
+
+    response = json.loads(
+        text("tests/fixtures/operator_evidence_v2/process_evidence.response.ndjson")
+    )
+    response_order = protocol["response_schemas"]["process_evidence"]["field_order"]
+    assert list(response) == response_order
+    response_payload = {key: response[key] for key in response_order if key != "response_sha256"}
+    assert response["response_sha256"] == committed(
+        domains["success_response"],
+        response_payload,
+    )
+
+    error = json.loads(text("tests/fixtures/operator_evidence_v2/error.response.ndjson"))
+    error_order = protocol["error_response_schemas"]["typed_error"]["field_order"]
+    assert list(error) == error_order
+    error_payload = {key: error[key] for key in error_order if key != "error_sha256"}
+    assert error["error_sha256"] == committed(
+        domains["error_response"],
+        error_payload,
+    )
+
+    assert design["runtime_reachable"] is False
+    assert design["real_evidence_collection_enabled"] is False

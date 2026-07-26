@@ -1,0 +1,3518 @@
+{
+  "attestation_digest_domains": {
+    "app_configuration": "systeme-local:chatgpt-mcp-app-configuration-attestation:v1\\x00",
+    "developer_mode": "systeme-local:chatgpt-mcp-developer-mode-attestation:v1\\x00",
+    "plan_role_observation": "systeme-local:chatgpt-mcp-plan-role-attestation:v1\\x00",
+    "web_client": "systeme-local:chatgpt-mcp-web-client-attestation:v1\\x00",
+    "workspace_access": "systeme-local:chatgpt-mcp-workspace-access-attestation:v1\\x00"
+  },
+  "attestation_schemas": {
+    "app_configuration": {
+      "additional_properties": false,
+      "commitment": "SHA256(domain || u64be(canonical_payload_len) || canonical_payload), excluding attestation_sha256",
+      "cross_field_constraints": [
+        "valid_until_unix_seconds > observed_at_unix_seconds",
+        "valid_until_unix_seconds - observed_at_unix_seconds <= 3600"
+      ],
+      "domain": "systeme-local:chatgpt-mcp-app-configuration-attestation:v1\\x00",
+      "duplicate_keys": "reject",
+      "field_order": [
+        "version",
+        "attestation_id",
+        "check_id",
+        "collector_id",
+        "authority",
+        "scope_sha256",
+        "app_configured",
+        "observed_at_unix_seconds",
+        "valid_until_unix_seconds",
+        "raw_evidence_stored",
+        "secret_material_stored",
+        "attestation_sha256"
+      ],
+      "fields": {
+        "app_configured": {
+          "type": "boolean"
+        },
+        "attestation_id": {
+          "max_length": 128,
+          "min_length": 3,
+          "pattern": "^[a-z][a-z0-9_]{2,127}$",
+          "type": "string"
+        },
+        "attestation_sha256": {
+          "length": 64,
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "authority": {
+          "enum": [
+            "local_operator",
+            "workspace_admin"
+          ],
+          "type": "string"
+        },
+        "check_id": {
+          "const": "app_configuration",
+          "type": "string"
+        },
+        "collector_id": {
+          "max_length": 128,
+          "min_length": 3,
+          "pattern": "^[a-z][a-z0-9_]{2,127}$",
+          "type": "string"
+        },
+        "observed_at_unix_seconds": {
+          "maximum": 253402300799,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "raw_evidence_stored": {
+          "const": false,
+          "type": "boolean"
+        },
+        "scope_sha256": {
+          "length": 64,
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "secret_material_stored": {
+          "const": false,
+          "type": "boolean"
+        },
+        "valid_until_unix_seconds": {
+          "maximum": 253402300799,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "version": {
+          "const": "1",
+          "type": "string"
+        }
+      },
+      "raw_ui_or_prose_fields": "forbidden",
+      "required_fields": [
+        "version",
+        "attestation_id",
+        "check_id",
+        "collector_id",
+        "authority",
+        "scope_sha256",
+        "app_configured",
+        "observed_at_unix_seconds",
+        "valid_until_unix_seconds",
+        "raw_evidence_stored",
+        "secret_material_stored",
+        "attestation_sha256"
+      ]
+    },
+    "developer_mode": {
+      "additional_properties": false,
+      "commitment": "SHA256(domain || u64be(canonical_payload_len) || canonical_payload), excluding attestation_sha256",
+      "cross_field_constraints": [
+        "valid_until_unix_seconds > observed_at_unix_seconds",
+        "valid_until_unix_seconds - observed_at_unix_seconds <= 3600"
+      ],
+      "domain": "systeme-local:chatgpt-mcp-developer-mode-attestation:v1\\x00",
+      "duplicate_keys": "reject",
+      "field_order": [
+        "version",
+        "attestation_id",
+        "check_id",
+        "collector_id",
+        "authority",
+        "scope_sha256",
+        "developer_mode_enabled",
+        "observed_at_unix_seconds",
+        "valid_until_unix_seconds",
+        "raw_evidence_stored",
+        "secret_material_stored",
+        "attestation_sha256"
+      ],
+      "fields": {
+        "attestation_id": {
+          "max_length": 128,
+          "min_length": 3,
+          "pattern": "^[a-z][a-z0-9_]{2,127}$",
+          "type": "string"
+        },
+        "attestation_sha256": {
+          "length": 64,
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "authority": {
+          "enum": [
+            "local_operator",
+            "workspace_admin"
+          ],
+          "type": "string"
+        },
+        "check_id": {
+          "const": "developer_mode",
+          "type": "string"
+        },
+        "collector_id": {
+          "max_length": 128,
+          "min_length": 3,
+          "pattern": "^[a-z][a-z0-9_]{2,127}$",
+          "type": "string"
+        },
+        "developer_mode_enabled": {
+          "type": "boolean"
+        },
+        "observed_at_unix_seconds": {
+          "maximum": 253402300799,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "raw_evidence_stored": {
+          "const": false,
+          "type": "boolean"
+        },
+        "scope_sha256": {
+          "length": 64,
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "secret_material_stored": {
+          "const": false,
+          "type": "boolean"
+        },
+        "valid_until_unix_seconds": {
+          "maximum": 253402300799,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "version": {
+          "const": "1",
+          "type": "string"
+        }
+      },
+      "raw_ui_or_prose_fields": "forbidden",
+      "required_fields": [
+        "version",
+        "attestation_id",
+        "check_id",
+        "collector_id",
+        "authority",
+        "scope_sha256",
+        "developer_mode_enabled",
+        "observed_at_unix_seconds",
+        "valid_until_unix_seconds",
+        "raw_evidence_stored",
+        "secret_material_stored",
+        "attestation_sha256"
+      ]
+    },
+    "plan_role_observation": {
+      "additional_properties": false,
+      "commitment": "SHA256(domain || u64be(canonical_payload_len) || canonical_payload), excluding attestation_sha256",
+      "cross_field_constraints": [
+        "valid_until_unix_seconds > observed_at_unix_seconds",
+        "valid_until_unix_seconds - observed_at_unix_seconds <= 86400",
+        "plan != unknown and role != unknown are required for verified"
+      ],
+      "domain": "systeme-local:chatgpt-mcp-plan-role-attestation:v1\\x00",
+      "duplicate_keys": "reject",
+      "field_order": [
+        "version",
+        "attestation_id",
+        "check_id",
+        "collector_id",
+        "authority",
+        "scope_sha256",
+        "plan",
+        "role",
+        "observed_at_unix_seconds",
+        "valid_until_unix_seconds",
+        "raw_evidence_stored",
+        "secret_material_stored",
+        "attestation_sha256"
+      ],
+      "fields": {
+        "attestation_id": {
+          "max_length": 128,
+          "min_length": 3,
+          "pattern": "^[a-z][a-z0-9_]{2,127}$",
+          "type": "string"
+        },
+        "attestation_sha256": {
+          "length": 64,
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "authority": {
+          "enum": [
+            "local_operator",
+            "workspace_admin"
+          ],
+          "type": "string"
+        },
+        "check_id": {
+          "const": "plan_role_observation",
+          "type": "string"
+        },
+        "collector_id": {
+          "max_length": 128,
+          "min_length": 3,
+          "pattern": "^[a-z][a-z0-9_]{2,127}$",
+          "type": "string"
+        },
+        "observed_at_unix_seconds": {
+          "maximum": 253402300799,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "plan": {
+          "enum": [
+            "free",
+            "go",
+            "plus",
+            "pro",
+            "business",
+            "enterprise",
+            "edu",
+            "unknown"
+          ],
+          "type": "string"
+        },
+        "raw_evidence_stored": {
+          "const": false,
+          "type": "boolean"
+        },
+        "role": {
+          "enum": [
+            "member",
+            "authorized_developer",
+            "admin",
+            "owner",
+            "unknown"
+          ],
+          "type": "string"
+        },
+        "scope_sha256": {
+          "length": 64,
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "secret_material_stored": {
+          "const": false,
+          "type": "boolean"
+        },
+        "valid_until_unix_seconds": {
+          "maximum": 253402300799,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "version": {
+          "const": "1",
+          "type": "string"
+        }
+      },
+      "raw_ui_or_prose_fields": "forbidden",
+      "required_fields": [
+        "version",
+        "attestation_id",
+        "check_id",
+        "collector_id",
+        "authority",
+        "scope_sha256",
+        "plan",
+        "role",
+        "observed_at_unix_seconds",
+        "valid_until_unix_seconds",
+        "raw_evidence_stored",
+        "secret_material_stored",
+        "attestation_sha256"
+      ]
+    },
+    "web_client": {
+      "additional_properties": false,
+      "commitment": "SHA256(domain || u64be(canonical_payload_len) || canonical_payload), excluding attestation_sha256",
+      "cross_field_constraints": [
+        "valid_until_unix_seconds > observed_at_unix_seconds",
+        "valid_until_unix_seconds - observed_at_unix_seconds <= 14400"
+      ],
+      "domain": "systeme-local:chatgpt-mcp-web-client-attestation:v1\\x00",
+      "duplicate_keys": "reject",
+      "field_order": [
+        "version",
+        "attestation_id",
+        "check_id",
+        "collector_id",
+        "authority",
+        "scope_sha256",
+        "client",
+        "observed_at_unix_seconds",
+        "valid_until_unix_seconds",
+        "raw_evidence_stored",
+        "secret_material_stored",
+        "attestation_sha256"
+      ],
+      "fields": {
+        "attestation_id": {
+          "max_length": 128,
+          "min_length": 3,
+          "pattern": "^[a-z][a-z0-9_]{2,127}$",
+          "type": "string"
+        },
+        "attestation_sha256": {
+          "length": 64,
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "authority": {
+          "enum": [
+            "local_operator"
+          ],
+          "type": "string"
+        },
+        "check_id": {
+          "const": "web_client",
+          "type": "string"
+        },
+        "client": {
+          "const": "web",
+          "type": "string"
+        },
+        "collector_id": {
+          "max_length": 128,
+          "min_length": 3,
+          "pattern": "^[a-z][a-z0-9_]{2,127}$",
+          "type": "string"
+        },
+        "observed_at_unix_seconds": {
+          "maximum": 253402300799,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "raw_evidence_stored": {
+          "const": false,
+          "type": "boolean"
+        },
+        "scope_sha256": {
+          "length": 64,
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "secret_material_stored": {
+          "const": false,
+          "type": "boolean"
+        },
+        "valid_until_unix_seconds": {
+          "maximum": 253402300799,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "version": {
+          "const": "1",
+          "type": "string"
+        }
+      },
+      "raw_ui_or_prose_fields": "forbidden",
+      "required_fields": [
+        "version",
+        "attestation_id",
+        "check_id",
+        "collector_id",
+        "authority",
+        "scope_sha256",
+        "client",
+        "observed_at_unix_seconds",
+        "valid_until_unix_seconds",
+        "raw_evidence_stored",
+        "secret_material_stored",
+        "attestation_sha256"
+      ]
+    },
+    "workspace_access": {
+      "additional_properties": false,
+      "commitment": "SHA256(domain || u64be(canonical_payload_len) || canonical_payload), excluding attestation_sha256",
+      "cross_field_constraints": [
+        "valid_until_unix_seconds > observed_at_unix_seconds",
+        "valid_until_unix_seconds - observed_at_unix_seconds <= 3600"
+      ],
+      "domain": "systeme-local:chatgpt-mcp-workspace-access-attestation:v1\\x00",
+      "duplicate_keys": "reject",
+      "field_order": [
+        "version",
+        "attestation_id",
+        "check_id",
+        "collector_id",
+        "authority",
+        "scope_sha256",
+        "workspace_app_access_granted",
+        "observed_at_unix_seconds",
+        "valid_until_unix_seconds",
+        "raw_evidence_stored",
+        "secret_material_stored",
+        "attestation_sha256"
+      ],
+      "fields": {
+        "attestation_id": {
+          "max_length": 128,
+          "min_length": 3,
+          "pattern": "^[a-z][a-z0-9_]{2,127}$",
+          "type": "string"
+        },
+        "attestation_sha256": {
+          "length": 64,
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "authority": {
+          "enum": [
+            "workspace_admin"
+          ],
+          "type": "string"
+        },
+        "check_id": {
+          "const": "workspace_access",
+          "type": "string"
+        },
+        "collector_id": {
+          "max_length": 128,
+          "min_length": 3,
+          "pattern": "^[a-z][a-z0-9_]{2,127}$",
+          "type": "string"
+        },
+        "observed_at_unix_seconds": {
+          "maximum": 253402300799,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "raw_evidence_stored": {
+          "const": false,
+          "type": "boolean"
+        },
+        "scope_sha256": {
+          "length": 64,
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "secret_material_stored": {
+          "const": false,
+          "type": "boolean"
+        },
+        "valid_until_unix_seconds": {
+          "maximum": 253402300799,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "version": {
+          "const": "1",
+          "type": "string"
+        },
+        "workspace_app_access_granted": {
+          "type": "boolean"
+        }
+      },
+      "raw_ui_or_prose_fields": "forbidden",
+      "required_fields": [
+        "version",
+        "attestation_id",
+        "check_id",
+        "collector_id",
+        "authority",
+        "scope_sha256",
+        "workspace_app_access_granted",
+        "observed_at_unix_seconds",
+        "valid_until_unix_seconds",
+        "raw_evidence_stored",
+        "secret_material_stored",
+        "attestation_sha256"
+      ]
+    }
+  },
+  "base_commit": "1600b8279e5fa4acb67b22d95622da1624a9bd1c",
+  "base_tree": "5cdd87857410212cc8393cb10d381360a20a5f63",
+  "checks": [
+    {
+      "allowed_sources": [
+        "operator_attestation",
+        "sanitized_ui_export_digest",
+        "workspace_admin_attestation"
+      ],
+      "check_id": "plan_role_observation",
+      "decision": "The existing ui_export_v1 profile contains neither plan nor workspace role. A verified sanitized-UI path is prohibited until readiness_ui_snapshot_v1 is reviewed. An explicit typed local operator or workspace-admin attestation remains Python-owned.",
+      "exact_b1_profile": null,
+      "gap_id": "readiness_ui_snapshot_v1",
+      "mapping_status": "gap",
+      "max_validity_seconds": 86400,
+      "order": 1,
+      "source_reuse": "no",
+      "typed_local_attestation_allowed": true
+    },
+    {
+      "allowed_sources": [
+        "operator_attestation",
+        "sanitized_ui_export_digest"
+      ],
+      "check_id": "web_client",
+      "decision": "ui_export_v1 does not bind ChatGptClientSurface.WEB. No UI field may be relabeled as client identity.",
+      "exact_b1_profile": null,
+      "gap_id": "readiness_ui_snapshot_v1",
+      "mapping_status": "gap",
+      "max_validity_seconds": 14400,
+      "order": 2,
+      "source_reuse": "no",
+      "typed_local_attestation_allowed": true
+    },
+    {
+      "allowed_sources": [
+        "public_endpoint_attestation",
+        "secure_tunnel_attestation"
+      ],
+      "check_id": "transport",
+      "decision": "A verified transport requires server_location, selected_transport, endpoint-origin and TLS-profile digests plus exactly one tunnel or public-endpoint receipt. No B1 sanitizer provides that contract. B2 must emit unknown until a separately approved transport lot supplies the typed summary.",
+      "exact_b1_profile": null,
+      "gap_id": "transport_attestation_summary_v1",
+      "mapping_status": "external_dependency",
+      "max_validity_seconds": 900,
+      "order": 3,
+      "source_reuse": "no",
+      "typed_local_attestation_allowed": false
+    },
+    {
+      "allowed_sources": [
+        "sanitized_metadata_digest"
+      ],
+      "check_id": "authentication_metadata",
+      "decision": "metadata_document_v1 does not provide issuer, discovery, authorization-endpoint, token-endpoint and scope digests required by McpAuthenticationEvidenceSummary.",
+      "exact_b1_profile": null,
+      "gap_id": "authentication_summary_v1",
+      "mapping_status": "gap",
+      "max_validity_seconds": 3600,
+      "order": 4,
+      "source_reuse": "with_refresh_token_only",
+      "typed_local_attestation_allowed": false
+    },
+    {
+      "allowed_sources": [
+        "sanitized_metadata_digest"
+      ],
+      "check_id": "refresh_token",
+      "decision": "When persistent connectivity applies, this record must bind the exact same authentication summary as authentication_metadata and requires both advertised refresh capability and observed issuance.",
+      "exact_b1_profile": null,
+      "gap_id": "authentication_summary_v1",
+      "mapping_status": "gap",
+      "max_validity_seconds": 3600,
+      "order": 5,
+      "source_reuse": "authentication_metadata_same_summary_only",
+      "typed_local_attestation_allowed": false
+    },
+    {
+      "allowed_sources": [
+        "operator_attestation",
+        "sanitized_ui_export_digest",
+        "workspace_admin_attestation"
+      ],
+      "check_id": "developer_mode",
+      "decision": "ui_export_v1 has no developer-mode field.",
+      "exact_b1_profile": null,
+      "gap_id": "readiness_ui_snapshot_v1",
+      "mapping_status": "gap",
+      "max_validity_seconds": 3600,
+      "order": 6,
+      "source_reuse": "no",
+      "typed_local_attestation_allowed": true
+    },
+    {
+      "allowed_sources": [
+        "operator_attestation",
+        "sanitized_ui_export_digest",
+        "workspace_admin_attestation"
+      ],
+      "check_id": "app_configuration",
+      "decision": "ui_export_v1 app_state=draft|published|unknown is not the exact app_configured boolean and cannot prove the failed state.",
+      "exact_b1_profile": null,
+      "gap_id": "readiness_ui_snapshot_v1",
+      "mapping_status": "gap",
+      "max_validity_seconds": 3600,
+      "order": 7,
+      "source_reuse": "no",
+      "typed_local_attestation_allowed": true
+    },
+    {
+      "allowed_sources": [
+        "sanitized_ui_export_digest",
+        "workspace_admin_attestation"
+      ],
+      "check_id": "workspace_access",
+      "decision": "ui_export_v1 access_control=public|restricted|unknown is not equivalent to workspace_app_access_granted and must not be reinterpreted.",
+      "exact_b1_profile": null,
+      "gap_id": "readiness_ui_snapshot_v1",
+      "mapping_status": "gap",
+      "max_validity_seconds": 3600,
+      "order": 8,
+      "source_reuse": "no",
+      "typed_local_attestation_allowed": true
+    },
+    {
+      "allowed_sources": [
+        "tool_scan_snapshot"
+      ],
+      "check_id": "tool_snapshot",
+      "decision": "tool_scan_snapshot_v1 uses capability/destructive/read-only/unknown counts up to 4096. The public summary requires tool_count, write_tool_count and high_risk_tool_count bounded to 1024. Destructive is not silently equivalent to high risk.",
+      "exact_b1_profile": null,
+      "gap_id": "tool_review_snapshot_v1",
+      "mapping_status": "gap",
+      "max_validity_seconds": 1800,
+      "order": 9,
+      "source_reuse": "with_action_review_summary_only",
+      "typed_local_attestation_allowed": false
+    },
+    {
+      "allowed_sources": [
+        "action_review_snapshot"
+      ],
+      "check_id": "action_review",
+      "decision": "action_review_snapshot_v1 can supply the exact action-review digest. A verified record still requires the combined McpToolReviewEvidenceSummary, which cannot exist until the tool-review gap is closed.",
+      "exact_b1_profile": "action_review_snapshot_v1",
+      "gap_id": "tool_review_snapshot_v1",
+      "mapping_status": "partial",
+      "max_validity_seconds": 1800,
+      "order": 10,
+      "source_reuse": "tool_review_summary_only",
+      "typed_local_attestation_allowed": false
+    },
+    {
+      "allowed_sources": [
+        "local_policy_snapshot"
+      ],
+      "check_id": "local_policy",
+      "decision": "The canonical local-policy projection and its sanitized commitment can bind both the record digest and bundle local_policy_sha256.",
+      "exact_b1_profile": "local_policy_snapshot_v1",
+      "gap_id": null,
+      "mapping_status": "exact",
+      "max_validity_seconds": 86400,
+      "order": 11,
+      "source_reuse": "no",
+      "typed_local_attestation_allowed": false
+    }
+  ],
+  "contract_revision": 2,
+  "issue_number": 62,
+  "non_goals": [
+    "real_operator_evidence",
+    "wire_reachable_runtime",
+    "secure_mcp_tunnel",
+    "oauth_client_registration",
+    "chatgpt_app_configuration",
+    "provider_call",
+    "browser_automation",
+    "public_provider_contract_change",
+    "physical_erasure_claim"
+  ],
+  "protocol_v1": {
+    "fixtures_byte_for_byte_unchanged": true,
+    "operations": [
+      "describe_contract"
+    ],
+    "version": 1
+  },
+  "protocol_v2": {
+    "accepted_profiles": [
+      "ui_export_v1",
+      "metadata_document_v1",
+      "tool_scan_snapshot_v1",
+      "action_review_snapshot_v1",
+      "local_policy_snapshot_v1"
+    ],
+    "canonical_field_order": {
+      "attestations": {
+        "app_configuration": [
+          "version",
+          "attestation_id",
+          "check_id",
+          "collector_id",
+          "authority",
+          "scope_sha256",
+          "app_configured",
+          "observed_at_unix_seconds",
+          "valid_until_unix_seconds",
+          "raw_evidence_stored",
+          "secret_material_stored",
+          "attestation_sha256"
+        ],
+        "developer_mode": [
+          "version",
+          "attestation_id",
+          "check_id",
+          "collector_id",
+          "authority",
+          "scope_sha256",
+          "developer_mode_enabled",
+          "observed_at_unix_seconds",
+          "valid_until_unix_seconds",
+          "raw_evidence_stored",
+          "secret_material_stored",
+          "attestation_sha256"
+        ],
+        "plan_role_observation": [
+          "version",
+          "attestation_id",
+          "check_id",
+          "collector_id",
+          "authority",
+          "scope_sha256",
+          "plan",
+          "role",
+          "observed_at_unix_seconds",
+          "valid_until_unix_seconds",
+          "raw_evidence_stored",
+          "secret_material_stored",
+          "attestation_sha256"
+        ],
+        "web_client": [
+          "version",
+          "attestation_id",
+          "check_id",
+          "collector_id",
+          "authority",
+          "scope_sha256",
+          "client",
+          "observed_at_unix_seconds",
+          "valid_until_unix_seconds",
+          "raw_evidence_stored",
+          "secret_material_stored",
+          "attestation_sha256"
+        ],
+        "workspace_access": [
+          "version",
+          "attestation_id",
+          "check_id",
+          "collector_id",
+          "authority",
+          "scope_sha256",
+          "workspace_app_access_granted",
+          "observed_at_unix_seconds",
+          "valid_until_unix_seconds",
+          "raw_evidence_stored",
+          "secret_material_stored",
+          "attestation_sha256"
+        ]
+      },
+      "error_responses": {
+        "typed_error": [
+          "protocol_version",
+          "request_id",
+          "status",
+          "operation",
+          "error_code",
+          "request_sha256",
+          "error_sha256"
+        ]
+      },
+      "projections": {
+        "action_review_snapshot_v1": [
+          "action_count",
+          "approved_count",
+          "blocked_count",
+          "snapshot_sha256",
+          "unknown_count"
+        ],
+        "local_policy_snapshot_v1": [
+          "approval",
+          "network",
+          "retention",
+          "secrets",
+          "workspace"
+        ],
+        "metadata_document_v1": [
+          "authorization_code",
+          "document_sha256",
+          "pkce",
+          "refresh_token",
+          "token_auth_method"
+        ],
+        "tool_scan_snapshot_v1": [
+          "capability_count",
+          "destructive_count",
+          "read_only_count",
+          "snapshot_sha256",
+          "unknown_count"
+        ],
+        "ui_export_v1": [
+          "access_control",
+          "action_review",
+          "app_state",
+          "authentication",
+          "tool_scan",
+          "transport"
+        ]
+      },
+      "recovery_journal": [
+        "version",
+        "transaction_id",
+        "plan_entry_sha256",
+        "scope_sha256",
+        "evidence_class",
+        "profile_id",
+        "progress",
+        "journal_revision",
+        "source_commitment_sha256",
+        "sanitized_commitment_sha256",
+        "retention_decision_sha256",
+        "logical_disposition_sha256",
+        "prior_journal_sha256",
+        "journal_sha256"
+      ],
+      "requests": {
+        "describe_contract": [
+          "protocol_version",
+          "request_id",
+          "operation",
+          "challenge_sha256",
+          "request_sha256"
+        ],
+        "process_evidence": [
+          "protocol_version",
+          "request_id",
+          "operation",
+          "challenge_sha256",
+          "transaction_id",
+          "plan_entry_sha256",
+          "scope_sha256",
+          "evidence_class",
+          "profile_id",
+          "source_handle_id",
+          "staging_parent_handle_id",
+          "source_collected_at_unix_seconds",
+          "retention_mode",
+          "retention_justification_sha256",
+          "retention_decided_at_unix_seconds",
+          "request_sha256"
+        ],
+        "recover_evidence": [
+          "protocol_version",
+          "request_id",
+          "operation",
+          "challenge_sha256",
+          "transaction_id",
+          "plan_entry_sha256",
+          "scope_sha256",
+          "staging_parent_handle_id",
+          "request_sha256"
+        ]
+      },
+      "success_responses": {
+        "process_evidence": [
+          "protocol_version",
+          "request_id",
+          "status",
+          "operation",
+          "challenge_sha256",
+          "request_sha256",
+          "transaction_id",
+          "plan_entry_sha256",
+          "scope_sha256",
+          "evidence_class",
+          "profile_id",
+          "projection",
+          "projection_sha256",
+          "source_byte_len",
+          "sanitized_byte_len",
+          "source_commitment_sha256",
+          "sanitized_commitment_sha256",
+          "transition_sha256",
+          "retention_decision_sha256",
+          "logical_disposition_sha256",
+          "resulting_state",
+          "raw_source_absent",
+          "lease_absent",
+          "staging_root_absent",
+          "sanitized_artifact_overwrite_attempted",
+          "retention_mode",
+          "response_sha256"
+        ],
+        "recover_evidence": [
+          "protocol_version",
+          "request_id",
+          "status",
+          "operation",
+          "challenge_sha256",
+          "request_sha256",
+          "transaction_id",
+          "plan_entry_sha256",
+          "scope_sha256",
+          "recovery_result",
+          "raw_source_absent",
+          "lease_absent",
+          "staging_root_absent",
+          "journal_absent",
+          "success_evidence_emitted",
+          "response_sha256"
+        ]
+      }
+    },
+    "canonical_json": {
+      "array_order": "preserved",
+      "bom": false,
+      "duplicate_keys": "reject_before_value_validation",
+      "encoding": "utf-8",
+      "ensure_ascii": false,
+      "floating_point": "forbidden",
+      "integer_encoding": "base10_no_leading_zero",
+      "negative_zero": "reject",
+      "object_key_order": "schema_field_order",
+      "terminal_lf": false,
+      "whitespace": "none"
+    },
+    "canonical_ndjson": {
+      "blank_lines": "forbidden",
+      "leading_or_trailing_whitespace": "forbidden",
+      "line_ending": "LF",
+      "message_encoding": "canonical_json",
+      "messages_per_stdin": 1,
+      "messages_per_stdout": 1,
+      "terminal_lf": true
+    },
+    "commitment_domains": {
+      "b1_sanitized_output": "systeme-local:operator-evidence-sanitized-output:v1\\x00",
+      "error_response": "systeme-local:operator-evidence-v2-error-response:v1\\x00",
+      "projection": "systeme-local:operator-evidence-v2-projection:v1\\x00",
+      "recovery_journal": "systeme-local:operator-evidence-recovery-journal:v1\\x00",
+      "request": "systeme-local:operator-evidence-v2-request:v1\\x00",
+      "session_derivation": "systeme-local:operator-evidence-session-from-transaction:v1\\x00",
+      "success_response": "systeme-local:operator-evidence-v2-success-response:v1\\x00"
+    },
+    "commitment_framing": {
+      "b1_sanitized_output": "SHA256(domain || len64(session_id) || session_id || len64(source_commitment_sha256) || source_commitment_sha256 || len64(profile_id) || profile_id || len64(profile_version_ascii) || profile_version_ascii || len64(output_class) || output_class || u64be(sanitized_byte_len) || sanitized_bytes)",
+      "error_response": "SHA256(domain || u64be(canonical_payload_len) || canonical_payload)",
+      "hash_field_exclusion": {
+        "error_response": "error_sha256",
+        "recovery_journal": "journal_sha256",
+        "request": "request_sha256",
+        "success_response": "response_sha256"
+      },
+      "projection": "SHA256(domain || len64(profile_id) || profile_id || u64be(projection_len) || projection_bytes)",
+      "recovery_journal": "SHA256(domain || u64be(canonical_payload_len) || canonical_payload)",
+      "request": "SHA256(domain || u64be(canonical_payload_len) || canonical_payload)",
+      "session_derivation": "SHA256(domain || len64(transaction_id) || transaction_id)",
+      "success_response": "SHA256(domain || u64be(canonical_payload_len) || canonical_payload)"
+    },
+    "error_codes": [
+      "input_too_large",
+      "multiple_messages",
+      "invalid_json",
+      "invalid_shape",
+      "unknown_field",
+      "missing_field",
+      "unsupported_protocol_version",
+      "invalid_request_id",
+      "unsupported_operation",
+      "invalid_identifier",
+      "invalid_digest",
+      "invalid_field_combination",
+      "invalid_handle_id",
+      "handle_not_inherited",
+      "source_handle_not_read_only",
+      "source_not_regular",
+      "source_link_or_reparse_rejected",
+      "source_multiple_links_rejected",
+      "staging_parent_invalid",
+      "staging_policy_invalid",
+      "transaction_already_exists",
+      "transaction_journal_corrupt",
+      "recovery_required",
+      "source_too_large",
+      "source_changed",
+      "unsupported_evidence_class",
+      "unsupported_profile",
+      "profile_class_mismatch",
+      "sanitization_failed",
+      "retention_rejected",
+      "logical_disposition_failed",
+      "recovery_cleanup_failed",
+      "serialization_failure",
+      "timestamp_out_of_range",
+      "invalid_timestamp_order",
+      "future_timestamp",
+      "process_timeout",
+      "recovery_timeout",
+      "stale_evidence",
+      "journal_permission_invalid",
+      "journal_link_or_reparse_rejected",
+      "journal_chain_mismatch",
+      "journal_replace_failed",
+      "handle_alias_rejected",
+      "sanitized_commitment_mismatch",
+      "projection_mismatch",
+      "request_commitment_mismatch",
+      "response_commitment_mismatch"
+    ],
+    "error_response_fields": [
+      "protocol_version",
+      "request_id",
+      "status",
+      "operation",
+      "error_code",
+      "request_sha256",
+      "error_sha256"
+    ],
+    "error_response_schemas": {
+      "typed_error": {
+        "additional_properties": false,
+        "cross_field_constraints": [
+          "status == error",
+          "request_id is null until request identifier validation succeeds",
+          "operation is null until the closed operation validation succeeds",
+          "request_sha256 is null until syntax and recomputation succeed",
+          "error_sha256 equals the error-response commitment over all preceding fields"
+        ],
+        "duplicate_keys": "reject",
+        "field_bindings": {
+          "error_code": "error_code",
+          "error_sha256": "sha256",
+          "operation": "nullable_operation",
+          "protocol_version": "protocol_version",
+          "request_id": "nullable_request_id",
+          "request_sha256": "nullable_sha256",
+          "status": "status_error"
+        },
+        "field_order": [
+          "protocol_version",
+          "request_id",
+          "status",
+          "operation",
+          "error_code",
+          "request_sha256",
+          "error_sha256"
+        ],
+        "required_fields": [
+          "protocol_version",
+          "request_id",
+          "status",
+          "operation",
+          "error_code",
+          "request_sha256",
+          "error_sha256"
+        ]
+      }
+    },
+    "evidence_classes": [
+      "ui_export",
+      "metadata_document",
+      "tool_scan_snapshot",
+      "action_review_snapshot",
+      "local_policy_snapshot"
+    ],
+    "exit_codes": {
+      "local_failure_without_complete_response": 3,
+      "success": 0,
+      "typed_rejection": 2
+    },
+    "field_schemas": {
+      "error_code": {
+        "enum": [
+          "input_too_large",
+          "multiple_messages",
+          "invalid_json",
+          "invalid_shape",
+          "unknown_field",
+          "missing_field",
+          "unsupported_protocol_version",
+          "invalid_request_id",
+          "unsupported_operation",
+          "invalid_identifier",
+          "invalid_digest",
+          "invalid_field_combination",
+          "invalid_handle_id",
+          "handle_not_inherited",
+          "source_handle_not_read_only",
+          "source_not_regular",
+          "source_link_or_reparse_rejected",
+          "source_multiple_links_rejected",
+          "staging_parent_invalid",
+          "staging_policy_invalid",
+          "transaction_already_exists",
+          "transaction_journal_corrupt",
+          "recovery_required",
+          "source_too_large",
+          "source_changed",
+          "unsupported_evidence_class",
+          "unsupported_profile",
+          "profile_class_mismatch",
+          "sanitization_failed",
+          "retention_rejected",
+          "logical_disposition_failed",
+          "recovery_cleanup_failed",
+          "serialization_failure",
+          "timestamp_out_of_range",
+          "invalid_timestamp_order",
+          "future_timestamp",
+          "process_timeout",
+          "recovery_timeout",
+          "stale_evidence",
+          "journal_permission_invalid",
+          "journal_link_or_reparse_rejected",
+          "journal_chain_mismatch",
+          "journal_replace_failed",
+          "handle_alias_rejected",
+          "sanitized_commitment_mismatch",
+          "projection_mismatch",
+          "request_commitment_mismatch",
+          "response_commitment_mismatch"
+        ],
+        "type": "string"
+      },
+      "evidence_class": {
+        "enum": [
+          "ui_export",
+          "metadata_document",
+          "tool_scan_snapshot",
+          "action_review_snapshot",
+          "local_policy_snapshot"
+        ],
+        "type": "string"
+      },
+      "handle_id": {
+        "numeric_maximum": 9223372036854775807,
+        "numeric_minimum": 1,
+        "pattern": "^[1-9][0-9]{0,18}$",
+        "type": "string"
+      },
+      "literal_false": {
+        "const": false,
+        "type": "boolean"
+      },
+      "literal_true": {
+        "const": true,
+        "type": "boolean"
+      },
+      "nullable_operation": {
+        "enum": [
+          "describe_contract",
+          "process_evidence",
+          "recover_evidence"
+        ],
+        "type": "string_or_null"
+      },
+      "nullable_request_id": {
+        "max_length": 128,
+        "min_length": 3,
+        "pattern": "^[a-z][a-z0-9_]{2,127}$",
+        "type": "string_or_null"
+      },
+      "nullable_sha256": {
+        "length": 64,
+        "pattern": "^[0-9a-f]{64}$",
+        "type": "string_or_null"
+      },
+      "operation": {
+        "enum": [
+          "describe_contract",
+          "process_evidence",
+          "recover_evidence"
+        ],
+        "type": "string"
+      },
+      "profile_id": {
+        "enum": [
+          "ui_export_v1",
+          "metadata_document_v1",
+          "tool_scan_snapshot_v1",
+          "action_review_snapshot_v1",
+          "local_policy_snapshot_v1"
+        ],
+        "type": "string"
+      },
+      "projection": {
+        "schema_selected_by": "profile_id",
+        "type": "object"
+      },
+      "protocol_version": {
+        "const": 2,
+        "type": "integer"
+      },
+      "recovery_result": {
+        "enum": [
+          "cleaned",
+          "already_absent"
+        ],
+        "type": "string"
+      },
+      "request_id": {
+        "max_length": 128,
+        "min_length": 3,
+        "pattern": "^[a-z][a-z0-9_]{2,127}$",
+        "type": "string"
+      },
+      "resulting_state": {
+        "const": "disposed",
+        "type": "string"
+      },
+      "retention_mode": {
+        "const": "dispose_immediately",
+        "type": "string"
+      },
+      "sanitized_byte_len": {
+        "maximum": 524288,
+        "minimum": 0,
+        "type": "integer"
+      },
+      "sha256": {
+        "length": 64,
+        "pattern": "^[0-9a-f]{64}$",
+        "type": "string"
+      },
+      "source_byte_len": {
+        "maximum": 8388608,
+        "minimum": 0,
+        "type": "integer"
+      },
+      "status_error": {
+        "const": "error",
+        "type": "string"
+      },
+      "status_ok": {
+        "const": "ok",
+        "type": "string"
+      },
+      "transaction_id": {
+        "length": 36,
+        "pattern": "^txn_[0-9a-f]{32}$",
+        "type": "string"
+      },
+      "unix_seconds": {
+        "maximum": 253402300799,
+        "minimum": 0,
+        "type": "integer"
+      }
+    },
+    "inherited_handles": {
+      "close_contract": {
+        "error_before_response": "child closes duplicates and emits no OS path or error text",
+        "normal": "child duplicates close after terminal response bytes are flushed",
+        "spawn_failure": "Python clears inheritance and closes both parent handles",
+        "timeout": "Python terminates and reaps the child, closes both parent handles, then opens a fresh staging-parent handle only for recover_evidence"
+      },
+      "distinctness": {
+        "numeric_identifiers_differ": true,
+        "resolved_file_identities_differ": true,
+        "source_must_not_name_staging_parent": true
+      },
+      "identifier_contract": {
+        "bit_width": 63,
+        "json_type": "string",
+        "leading_zero": "forbidden",
+        "numeric_maximum": 9223372036854775807,
+        "numeric_minimum": 1,
+        "supported_process_pointer_width_bits": [
+          64
+        ],
+        "syntax": "^[1-9][0-9]{0,18}$"
+      },
+      "identifier_encoding": "unsigned_decimal_string",
+      "identity_revalidation_sequence": [
+        "parse and range-check both handle identifiers",
+        "reject numeric aliasing",
+        "duplicate both inherited handles to minimum-rights child-owned handles",
+        "close inherited originals",
+        "validate source and staging-parent type, rights, links, reparse/symlink policy and owner policy",
+        "capture source and staging-parent identities",
+        "create recovery journal and controlled staging root",
+        "copy the source in 16 KiB chunks under the profile-specific input ceiling",
+        "revalidate source identity, size and exact copied byte count",
+        "create the B1 source commitment and continue sanitization"
+      ],
+      "source": "read_only_regular_file",
+      "staging_parent": "owner_only_directory_capability",
+      "unix": {
+        "child_duplication": {
+          "api": "fcntl(F_DUPFD_CLOEXEC)",
+          "close_inherited_originals_before_filesystem_use": true
+        },
+        "identity": {
+          "capture": "after duplication and before first staging write",
+          "fields": [
+            "st_dev",
+            "st_ino",
+            "st_mode",
+            "st_nlink",
+            "st_size",
+            "st_mtime_ns",
+            "st_ctime_ns"
+          ],
+          "mismatch_error": "source_changed",
+          "revalidate": "after bounded source copy and before source commitment"
+        },
+        "source_open_flags": [
+          "O_RDONLY",
+          "O_CLOEXEC",
+          "O_NOFOLLOW"
+        ],
+        "source_validation": [
+          "fcntl(F_GETFL) access mode == O_RDONLY",
+          "fstat mode is S_IFREG",
+          "st_nlink == 1",
+          "st_size <= selected profile max_input_bytes"
+        ],
+        "spawn": {
+          "all_other_fds_inherited": false,
+          "close_fds": true,
+          "pass_fds": [
+            "source_fd",
+            "staging_parent_fd"
+          ]
+        },
+        "staging_parent_open_flags": [
+          "O_RDONLY",
+          "O_DIRECTORY",
+          "O_CLOEXEC",
+          "O_NOFOLLOW"
+        ],
+        "staging_parent_validation": [
+          "fstat mode is S_IFDIR",
+          "st_uid == effective uid",
+          "st_mode & 0o777 == 0o700"
+        ]
+      },
+      "windows": {
+        "child_duplication": {
+          "api": "DuplicateHandle",
+          "close_inherited_originals_before_filesystem_use": true,
+          "inherit": false,
+          "options": "minimum_rights_only"
+        },
+        "identity": {
+          "capture": "after duplication and before first staging write",
+          "fields": [
+            "VolumeSerialNumber",
+            "FileId128",
+            "file_type",
+            "reparse_tag",
+            "number_of_links",
+            "end_of_file",
+            "last_write_time"
+          ],
+          "mismatch_error": "source_changed",
+          "revalidate": "after bounded source copy and before source commitment"
+        },
+        "source_open": {
+          "creation_disposition": "OPEN_EXISTING",
+          "desired_access": [
+            "GENERIC_READ",
+            "FILE_READ_ATTRIBUTES",
+            "READ_CONTROL",
+            "SYNCHRONIZE"
+          ],
+          "flags": [
+            "FILE_FLAG_OPEN_REPARSE_POINT",
+            "FILE_FLAG_SEQUENTIAL_SCAN"
+          ],
+          "share_mode": [
+            "FILE_SHARE_READ"
+          ]
+        },
+        "source_validation": [
+          "GetFileType == FILE_TYPE_DISK",
+          "FileAttributeTagInfo reports no FILE_ATTRIBUTE_REPARSE_POINT and ReparseTag == 0",
+          "FileStandardInfo.Directory == false",
+          "FileStandardInfo.NumberOfLinks == 1",
+          "FileStandardInfo.EndOfFile <= selected profile max_input_bytes",
+          "granted access contains no write, append, delete or write-DAC/write-owner right"
+        ],
+        "spawn": {
+          "all_other_handles_inheritable": false,
+          "close_fds": true,
+          "startupinfoex_handle_list": [
+            "source_handle",
+            "staging_parent_handle"
+          ]
+        },
+        "staging_parent_open": {
+          "creation_disposition": "OPEN_EXISTING",
+          "desired_access": [
+            "FILE_LIST_DIRECTORY",
+            "FILE_ADD_FILE",
+            "FILE_ADD_SUBDIRECTORY",
+            "FILE_DELETE_CHILD",
+            "FILE_READ_ATTRIBUTES",
+            "READ_CONTROL",
+            "SYNCHRONIZE"
+          ],
+          "flags": [
+            "FILE_FLAG_BACKUP_SEMANTICS",
+            "FILE_FLAG_OPEN_REPARSE_POINT"
+          ],
+          "share_mode": [
+            "FILE_SHARE_READ",
+            "FILE_SHARE_WRITE",
+            "FILE_SHARE_DELETE"
+          ]
+        },
+        "staging_parent_validation": [
+          "GetFileType == FILE_TYPE_DISK",
+          "FileAttributeTagInfo reports a directory and no reparse point",
+          "owner SID equals the current process owner SID",
+          "DACL is protected and owner-only with no inherited, broad or deny ambiguity"
+        ]
+      }
+    },
+    "library_only_retention_modes": [
+      "retain_until"
+    ],
+    "limits": {
+      "absolute_source_bytes": 8388608,
+      "projection_bytes": 8192,
+      "recovery_journal_bytes": 4096,
+      "stderr_bytes": 8192,
+      "stdin_bytes": 16384,
+      "stdout_bytes": 65536
+    },
+    "network_access": false,
+    "operations": [
+      "describe_contract",
+      "process_evidence",
+      "recover_evidence"
+    ],
+    "path_in_request": false,
+    "process_model": "one_shot_per_transaction",
+    "profile_by_evidence_class": {
+      "action_review_snapshot": "action_review_snapshot_v1",
+      "local_policy_snapshot": "local_policy_snapshot_v1",
+      "metadata_document": "metadata_document_v1",
+      "tool_scan_snapshot": "tool_scan_snapshot_v1",
+      "ui_export": "ui_export_v1"
+    },
+    "projection_schemas": {
+      "action_review_snapshot_v1": {
+        "additional_properties": false,
+        "cross_field_constraints": [
+          "approved_count + blocked_count + unknown_count == action_count using checked u32 arithmetic"
+        ],
+        "evidence_class": "action_review_snapshot",
+        "field_order": [
+          "action_count",
+          "approved_count",
+          "blocked_count",
+          "snapshot_sha256",
+          "unknown_count"
+        ],
+        "fields": {
+          "action_count": {
+            "maximum": 4096,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "approved_count": {
+            "maximum": 4096,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "blocked_count": {
+            "maximum": 4096,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "snapshot_sha256": {
+            "length": 64,
+            "pattern": "^[0-9a-f]{64}$",
+            "type": "string"
+          },
+          "unknown_count": {
+            "maximum": 4096,
+            "minimum": 0,
+            "type": "integer"
+          }
+        },
+        "max_input_bytes": 1048576,
+        "max_output_bytes": 131072,
+        "output_class": "canonical_json",
+        "profile_version": 1,
+        "required_fields": [
+          "action_count",
+          "approved_count",
+          "blocked_count",
+          "snapshot_sha256",
+          "unknown_count"
+        ],
+        "sanitized_byte_reconstruction": {
+          "compact_serde_json": "serialize the typed object in field_order using compact UTF-8 JSON with no BOM, CR, whitespace or terminal LF",
+          "encoding": "compact_serde_json",
+          "ordered_key_value_lf": "for each field in field_order append UTF8(key) || '=' || UTF8(value) || LF"
+        }
+      },
+      "local_policy_snapshot_v1": {
+        "additional_properties": false,
+        "cross_field_constraints": [],
+        "evidence_class": "local_policy_snapshot",
+        "field_order": [
+          "approval",
+          "network",
+          "retention",
+          "secrets",
+          "workspace"
+        ],
+        "fields": {
+          "approval": {
+            "enum": [
+              "not_required",
+              "required"
+            ],
+            "type": "string"
+          },
+          "network": {
+            "enum": [
+              "disabled",
+              "enabled"
+            ],
+            "type": "string"
+          },
+          "retention": {
+            "enum": [
+              "ephemeral",
+              "retained"
+            ],
+            "type": "string"
+          },
+          "secrets": {
+            "enum": [
+              "absent",
+              "present"
+            ],
+            "type": "string"
+          },
+          "workspace": {
+            "enum": [
+              "isolated",
+              "shared"
+            ],
+            "type": "string"
+          }
+        },
+        "max_input_bytes": 1048576,
+        "max_output_bytes": 262144,
+        "output_class": "canonical_utf8_text",
+        "profile_version": 1,
+        "required_fields": [
+          "approval",
+          "network",
+          "retention",
+          "secrets",
+          "workspace"
+        ],
+        "sanitized_byte_reconstruction": {
+          "compact_serde_json": "serialize the typed object in field_order using compact UTF-8 JSON with no BOM, CR, whitespace or terminal LF",
+          "encoding": "ordered_key_value_lf",
+          "ordered_key_value_lf": "for each field in field_order append UTF8(key) || '=' || UTF8(value) || LF"
+        }
+      },
+      "metadata_document_v1": {
+        "additional_properties": false,
+        "cross_field_constraints": [],
+        "evidence_class": "metadata_document",
+        "field_order": [
+          "authorization_code",
+          "document_sha256",
+          "pkce",
+          "refresh_token",
+          "token_auth_method"
+        ],
+        "fields": {
+          "authorization_code": {
+            "type": "boolean"
+          },
+          "document_sha256": {
+            "length": 64,
+            "pattern": "^[0-9a-f]{64}$",
+            "type": "string"
+          },
+          "pkce": {
+            "type": "boolean"
+          },
+          "refresh_token": {
+            "type": "boolean"
+          },
+          "token_auth_method": {
+            "enum": [
+              "client_secret_post",
+              "private_key_jwt",
+              "none"
+            ],
+            "type": "string"
+          }
+        },
+        "max_input_bytes": 2097152,
+        "max_output_bytes": 262144,
+        "output_class": "canonical_json",
+        "profile_version": 1,
+        "required_fields": [
+          "authorization_code",
+          "document_sha256",
+          "pkce",
+          "refresh_token",
+          "token_auth_method"
+        ],
+        "sanitized_byte_reconstruction": {
+          "compact_serde_json": "serialize the typed object in field_order using compact UTF-8 JSON with no BOM, CR, whitespace or terminal LF",
+          "encoding": "compact_serde_json",
+          "ordered_key_value_lf": "for each field in field_order append UTF8(key) || '=' || UTF8(value) || LF"
+        }
+      },
+      "tool_scan_snapshot_v1": {
+        "additional_properties": false,
+        "cross_field_constraints": [
+          "destructive_count + read_only_count + unknown_count == capability_count using checked u32 arithmetic"
+        ],
+        "evidence_class": "tool_scan_snapshot",
+        "field_order": [
+          "capability_count",
+          "destructive_count",
+          "read_only_count",
+          "snapshot_sha256",
+          "unknown_count"
+        ],
+        "fields": {
+          "capability_count": {
+            "maximum": 4096,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "destructive_count": {
+            "maximum": 4096,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "read_only_count": {
+            "maximum": 4096,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "snapshot_sha256": {
+            "length": 64,
+            "pattern": "^[0-9a-f]{64}$",
+            "type": "string"
+          },
+          "unknown_count": {
+            "maximum": 4096,
+            "minimum": 0,
+            "type": "integer"
+          }
+        },
+        "max_input_bytes": 4194304,
+        "max_output_bytes": 524288,
+        "output_class": "canonical_json",
+        "profile_version": 1,
+        "required_fields": [
+          "capability_count",
+          "destructive_count",
+          "read_only_count",
+          "snapshot_sha256",
+          "unknown_count"
+        ],
+        "sanitized_byte_reconstruction": {
+          "compact_serde_json": "serialize the typed object in field_order using compact UTF-8 JSON with no BOM, CR, whitespace or terminal LF",
+          "encoding": "compact_serde_json",
+          "ordered_key_value_lf": "for each field in field_order append UTF8(key) || '=' || UTF8(value) || LF"
+        }
+      },
+      "ui_export_v1": {
+        "additional_properties": false,
+        "cross_field_constraints": [],
+        "evidence_class": "ui_export",
+        "field_order": [
+          "access_control",
+          "action_review",
+          "app_state",
+          "authentication",
+          "tool_scan",
+          "transport"
+        ],
+        "fields": {
+          "access_control": {
+            "enum": [
+              "public",
+              "restricted",
+              "unknown"
+            ],
+            "type": "string"
+          },
+          "action_review": {
+            "enum": [
+              "approved",
+              "blocked",
+              "unknown"
+            ],
+            "type": "string"
+          },
+          "app_state": {
+            "enum": [
+              "draft",
+              "published",
+              "unknown"
+            ],
+            "type": "string"
+          },
+          "authentication": {
+            "enum": [
+              "available",
+              "unavailable",
+              "unknown"
+            ],
+            "type": "string"
+          },
+          "tool_scan": {
+            "enum": [
+              "blocked",
+              "passed",
+              "unknown"
+            ],
+            "type": "string"
+          },
+          "transport": {
+            "enum": [
+              "available",
+              "unavailable",
+              "unknown"
+            ],
+            "type": "string"
+          }
+        },
+        "max_input_bytes": 8388608,
+        "max_output_bytes": 262144,
+        "output_class": "canonical_utf8_text",
+        "profile_version": 1,
+        "required_fields": [
+          "access_control",
+          "action_review",
+          "app_state",
+          "authentication",
+          "tool_scan",
+          "transport"
+        ],
+        "sanitized_byte_reconstruction": {
+          "compact_serde_json": "serialize the typed object in field_order using compact UTF-8 JSON with no BOM, CR, whitespace or terminal LF",
+          "encoding": "ordered_key_value_lf",
+          "ordered_key_value_lf": "for each field in field_order append UTF8(key) || '=' || UTF8(value) || LF"
+        }
+      }
+    },
+    "projection_verification": {
+      "b1_sanitized_commitment": {
+        "domain": "systeme-local:operator-evidence-sanitized-output:v1\\x00",
+        "framing": "SHA256(domain || len64(session_id) || session_id || len64(source_commitment_sha256) || source_commitment_sha256 || len64(profile_id) || profile_id || len64(profile_version_ascii) || profile_version_ascii || len64(output_class) || output_class || u64be(sanitized_byte_len) || sanitized_bytes)",
+        "output_class_by_profile": {
+          "action_review_snapshot_v1": "canonical_json",
+          "local_policy_snapshot_v1": "canonical_utf8_text",
+          "metadata_document_v1": "canonical_json",
+          "tool_scan_snapshot_v1": "canonical_json",
+          "ui_export_v1": "canonical_utf8_text"
+        },
+        "profile_version_ascii": "1",
+        "python_recomputable_without_raw_source_bytes": true,
+        "source_commitment_input": "the lowercase source_commitment_sha256 string from the response"
+      },
+      "order": [
+        "validate profile_id and evidence_class against profile_by_evidence_class",
+        "reject unknown, duplicate and missing projection fields",
+        "validate field types, enums, ranges and cross-field constraints",
+        "reconstruct exact B1 sanitized bytes",
+        "require sanitized_byte_len to equal the reconstructed byte length",
+        "recompute projection_sha256",
+        "derive the B1 custody session identifier from transaction_id",
+        "recompute sanitized_commitment_sha256 using the exact B1 framing",
+        "recompute response_sha256"
+      ],
+      "projection_commitment": {
+        "domain": "systeme-local:operator-evidence-v2-projection:v1\\x00",
+        "framing": "domain || len64(profile_id) || profile_id || u64be(projection_len) || projection_bytes",
+        "projection_bytes": "canonical JSON projection object in the profile field_order"
+      },
+      "session_derivation": {
+        "domain": "systeme-local:operator-evidence-session-from-transaction:v1\\x00",
+        "framing": "domain || len64(transaction_id) || transaction_id",
+        "input": "transaction_id UTF-8 bytes",
+        "result": "ses_ || first_32_lower_hex_characters(SHA256(framing))"
+      },
+      "source_commitment": {
+        "python_treatment": "opaque 64-character lowercase hex commitment",
+        "raw_source_recomputation": false,
+        "reason": "Python does not receive raw source bytes"
+      }
+    },
+    "raw_bytes_in_python": false,
+    "recovery_atomic_replace_contract": {
+      "failure": "remove only the verified .next file and preserve the prior journal",
+      "next_creation": "create-new with the same owner-only permissions and link/reparse checks",
+      "next_name": "rcv_<token>.next",
+      "unix": "renameat .next over .json then fsync the staging-parent directory descriptor",
+      "windows": "FlushFileBuffers then MoveFileExW(REPLACE_EXISTING|WRITE_THROUGH)",
+      "write": "write complete canonical JSON, reject short writes, flush file contents and metadata"
+    },
+    "recovery_cleanup_contract": {
+      "corruption": "recovery_cleanup_failed",
+      "idempotent_absence": "already_absent",
+      "operator_source_untouched": true,
+      "success_evidence_emitted": false,
+      "terminal_success": "all managed objects and journal absent"
+    },
+    "recovery_journal_integrity": {
+      "domain": "systeme-local:operator-evidence-recovery-journal:v1\\x00",
+      "framing": "SHA256(domain || u64be(canonical_payload_len) || canonical_payload)",
+      "namespace_authority": false,
+      "prior_hash_chain": true,
+      "rollback_detection": "revision or prior hash regression is transaction_journal_corrupt",
+      "rule": "actual managed-object identity and absence checks always override journal claims"
+    },
+    "recovery_journal_permissions": {
+      "maximum_bytes": 4096,
+      "unix": {
+        "creation": "openat(staging_parent_fd, name, O_CREAT|O_EXCL|O_WRONLY|O_CLOEXEC|O_NOFOLLOW, 0o600)",
+        "file_type": "regular",
+        "link_count": 1,
+        "mode": "0o600",
+        "owner": "effective uid"
+      },
+      "windows": {
+        "creation": "CreateFileW CREATE_NEW with FILE_FLAG_OPEN_REPARSE_POINT",
+        "dacl": "protected owner-only",
+        "file_type": "disk regular file",
+        "link_count": 1,
+        "reparse": false
+      }
+    },
+    "recovery_journal_schema": {
+      "additional_properties": false,
+      "cross_field_constraints": [
+        "journal_revision equals the zero-based index of progress",
+        "prior_journal_sha256 is null only at revision 0",
+        "profile_id equals profile_by_evidence_class[evidence_class]",
+        "journal_sha256 verifies under the recovery-journal domain",
+        "nullable commitments are present exactly as required by state_required_commitments"
+      ],
+      "duplicate_keys": "reject",
+      "field_order": [
+        "version",
+        "transaction_id",
+        "plan_entry_sha256",
+        "scope_sha256",
+        "evidence_class",
+        "profile_id",
+        "progress",
+        "journal_revision",
+        "source_commitment_sha256",
+        "sanitized_commitment_sha256",
+        "retention_decision_sha256",
+        "logical_disposition_sha256",
+        "prior_journal_sha256",
+        "journal_sha256"
+      ],
+      "fields": {
+        "evidence_class": {
+          "enum": [
+            "ui_export",
+            "metadata_document",
+            "tool_scan_snapshot",
+            "action_review_snapshot",
+            "local_policy_snapshot"
+          ],
+          "type": "string"
+        },
+        "journal_revision": {
+          "maximum": 12,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "journal_sha256": {
+          "length": 64,
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "logical_disposition_sha256": {
+          "length": 64,
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string_or_null"
+        },
+        "plan_entry_sha256": {
+          "length": 64,
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "prior_journal_sha256": {
+          "length": 64,
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string_or_null"
+        },
+        "profile_id": {
+          "enum": [
+            "ui_export_v1",
+            "metadata_document_v1",
+            "tool_scan_snapshot_v1",
+            "action_review_snapshot_v1",
+            "local_policy_snapshot_v1"
+          ],
+          "type": "string"
+        },
+        "progress": {
+          "enum": [
+            "prepared",
+            "root_created",
+            "lease_acquired",
+            "source_staged",
+            "source_committed",
+            "sanitized",
+            "sealed",
+            "source_absent",
+            "lease_absent",
+            "root_absent",
+            "artifact_overwritten",
+            "session_disposed",
+            "complete"
+          ],
+          "type": "string"
+        },
+        "retention_decision_sha256": {
+          "length": 64,
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string_or_null"
+        },
+        "sanitized_commitment_sha256": {
+          "length": 64,
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string_or_null"
+        },
+        "scope_sha256": {
+          "length": 64,
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "source_commitment_sha256": {
+          "length": 64,
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string_or_null"
+        },
+        "transaction_id": {
+          "length": 36,
+          "pattern": "^txn_[0-9a-f]{32}$",
+          "type": "string"
+        },
+        "version": {
+          "const": 1,
+          "type": "integer"
+        }
+      },
+      "required_fields": [
+        "version",
+        "transaction_id",
+        "plan_entry_sha256",
+        "scope_sha256",
+        "evidence_class",
+        "profile_id",
+        "progress",
+        "journal_revision",
+        "source_commitment_sha256",
+        "sanitized_commitment_sha256",
+        "retention_decision_sha256",
+        "logical_disposition_sha256",
+        "prior_journal_sha256",
+        "journal_sha256"
+      ],
+      "state_required_commitments": {
+        "artifact_overwritten": [
+          "source_commitment_sha256",
+          "sanitized_commitment_sha256",
+          "retention_decision_sha256"
+        ],
+        "complete": [
+          "source_commitment_sha256",
+          "sanitized_commitment_sha256",
+          "retention_decision_sha256",
+          "logical_disposition_sha256"
+        ],
+        "lease_absent": [
+          "source_commitment_sha256",
+          "sanitized_commitment_sha256",
+          "retention_decision_sha256"
+        ],
+        "lease_acquired": [],
+        "prepared": [],
+        "root_absent": [
+          "source_commitment_sha256",
+          "sanitized_commitment_sha256",
+          "retention_decision_sha256"
+        ],
+        "root_created": [],
+        "sanitized": [
+          "source_commitment_sha256",
+          "sanitized_commitment_sha256"
+        ],
+        "sealed": [
+          "source_commitment_sha256",
+          "sanitized_commitment_sha256",
+          "retention_decision_sha256"
+        ],
+        "session_disposed": [
+          "source_commitment_sha256",
+          "sanitized_commitment_sha256",
+          "retention_decision_sha256",
+          "logical_disposition_sha256"
+        ],
+        "source_absent": [
+          "source_commitment_sha256",
+          "sanitized_commitment_sha256",
+          "retention_decision_sha256"
+        ],
+        "source_committed": [
+          "source_commitment_sha256"
+        ],
+        "source_staged": []
+      },
+      "version": 1
+    },
+    "recovery_progress_states": [
+      "prepared",
+      "root_created",
+      "lease_acquired",
+      "source_staged",
+      "source_committed",
+      "sanitized",
+      "sealed",
+      "source_absent",
+      "lease_absent",
+      "root_absent",
+      "artifact_overwritten",
+      "session_disposed",
+      "complete"
+    ],
+    "recovery_validation_precedence": [
+      "journal file identity, type, link/reparse and permissions",
+      "journal size ceiling",
+      "UTF-8 and canonical JSON syntax",
+      "duplicate, unknown and missing fields",
+      "transaction, plan and scope binding",
+      "profile/evidence-class binding",
+      "progress and revision monotonicity",
+      "journal commitment and prior-hash chain",
+      "actual source, lease, root and artifact reconciliation",
+      "monotonic cleanup",
+      "journal removal only after every managed object is absent"
+    ],
+    "request_fields": {
+      "describe_contract": [
+        "protocol_version",
+        "request_id",
+        "operation",
+        "challenge_sha256",
+        "request_sha256"
+      ],
+      "process_evidence": [
+        "protocol_version",
+        "request_id",
+        "operation",
+        "challenge_sha256",
+        "transaction_id",
+        "plan_entry_sha256",
+        "scope_sha256",
+        "evidence_class",
+        "profile_id",
+        "source_handle_id",
+        "staging_parent_handle_id",
+        "source_collected_at_unix_seconds",
+        "retention_mode",
+        "retention_justification_sha256",
+        "retention_decided_at_unix_seconds",
+        "request_sha256"
+      ],
+      "recover_evidence": [
+        "protocol_version",
+        "request_id",
+        "operation",
+        "challenge_sha256",
+        "transaction_id",
+        "plan_entry_sha256",
+        "scope_sha256",
+        "staging_parent_handle_id",
+        "request_sha256"
+      ]
+    },
+    "request_schemas": {
+      "describe_contract": {
+        "additional_properties": false,
+        "cross_field_constraints": [
+          "operation == describe_contract",
+          "request_sha256 equals the request commitment over all preceding fields"
+        ],
+        "duplicate_keys": "reject",
+        "field_bindings": {
+          "challenge_sha256": "sha256",
+          "operation": "operation",
+          "protocol_version": "protocol_version",
+          "request_id": "request_id",
+          "request_sha256": "sha256"
+        },
+        "field_order": [
+          "protocol_version",
+          "request_id",
+          "operation",
+          "challenge_sha256",
+          "request_sha256"
+        ],
+        "required_fields": [
+          "protocol_version",
+          "request_id",
+          "operation",
+          "challenge_sha256",
+          "request_sha256"
+        ]
+      },
+      "process_evidence": {
+        "additional_properties": false,
+        "cross_field_constraints": [
+          "operation == process_evidence",
+          "source_handle_id and staging_parent_handle_id differ numerically",
+          "the two handles resolve to distinct file identities",
+          "profile_id equals profile_by_evidence_class[evidence_class]",
+          "source_collected_at_unix_seconds <= retention_decided_at_unix_seconds",
+          "retention_mode == dispose_immediately",
+          "request_sha256 equals the request commitment over all preceding fields"
+        ],
+        "duplicate_keys": "reject",
+        "field_bindings": {
+          "challenge_sha256": "sha256",
+          "evidence_class": "evidence_class",
+          "operation": "operation",
+          "plan_entry_sha256": "sha256",
+          "profile_id": "profile_id",
+          "protocol_version": "protocol_version",
+          "request_id": "request_id",
+          "request_sha256": "sha256",
+          "retention_decided_at_unix_seconds": "unix_seconds",
+          "retention_justification_sha256": "sha256",
+          "retention_mode": "retention_mode",
+          "scope_sha256": "sha256",
+          "source_collected_at_unix_seconds": "unix_seconds",
+          "source_handle_id": "handle_id",
+          "staging_parent_handle_id": "handle_id",
+          "transaction_id": "transaction_id"
+        },
+        "field_order": [
+          "protocol_version",
+          "request_id",
+          "operation",
+          "challenge_sha256",
+          "transaction_id",
+          "plan_entry_sha256",
+          "scope_sha256",
+          "evidence_class",
+          "profile_id",
+          "source_handle_id",
+          "staging_parent_handle_id",
+          "source_collected_at_unix_seconds",
+          "retention_mode",
+          "retention_justification_sha256",
+          "retention_decided_at_unix_seconds",
+          "request_sha256"
+        ],
+        "required_fields": [
+          "protocol_version",
+          "request_id",
+          "operation",
+          "challenge_sha256",
+          "transaction_id",
+          "plan_entry_sha256",
+          "scope_sha256",
+          "evidence_class",
+          "profile_id",
+          "source_handle_id",
+          "staging_parent_handle_id",
+          "source_collected_at_unix_seconds",
+          "retention_mode",
+          "retention_justification_sha256",
+          "retention_decided_at_unix_seconds",
+          "request_sha256"
+        ]
+      },
+      "recover_evidence": {
+        "additional_properties": false,
+        "cross_field_constraints": [
+          "operation == recover_evidence",
+          "source_handle_id, evidence_class and profile_id are forbidden",
+          "request_sha256 equals the request commitment over all preceding fields"
+        ],
+        "duplicate_keys": "reject",
+        "field_bindings": {
+          "challenge_sha256": "sha256",
+          "operation": "operation",
+          "plan_entry_sha256": "sha256",
+          "protocol_version": "protocol_version",
+          "request_id": "request_id",
+          "request_sha256": "sha256",
+          "scope_sha256": "sha256",
+          "staging_parent_handle_id": "handle_id",
+          "transaction_id": "transaction_id"
+        },
+        "field_order": [
+          "protocol_version",
+          "request_id",
+          "operation",
+          "challenge_sha256",
+          "transaction_id",
+          "plan_entry_sha256",
+          "scope_sha256",
+          "staging_parent_handle_id",
+          "request_sha256"
+        ],
+        "required_fields": [
+          "protocol_version",
+          "request_id",
+          "operation",
+          "challenge_sha256",
+          "transaction_id",
+          "plan_entry_sha256",
+          "scope_sha256",
+          "staging_parent_handle_id",
+          "request_sha256"
+        ]
+      }
+    },
+    "reserved_gap_profiles_not_authorized": [
+      "readiness_ui_snapshot_v1",
+      "authentication_summary_v1",
+      "tool_review_snapshot_v1",
+      "transport_attestation_summary_v1"
+    ],
+    "response_schemas": {
+      "process_evidence": {
+        "additional_properties": false,
+        "cross_field_constraints": [
+          "status == ok and operation == process_evidence",
+          "all request identity and commitment fields exactly echo the verified request",
+          "projection validates against projection_schemas[profile_id]",
+          "projection_sha256 verifies before sanitized_commitment_sha256",
+          "source_byte_len <= projection_schemas[profile_id].max_input_bytes",
+          "sanitized_byte_len equals the reconstructed sanitized byte length",
+          "sanitized_commitment_sha256 recomputes from the derived session id, source commitment, profile descriptor and reconstructed sanitized bytes",
+          "resulting_state == disposed and all absence/overwrite booleans are true",
+          "response_sha256 equals the success-response commitment over all preceding fields"
+        ],
+        "duplicate_keys": "reject",
+        "field_bindings": {
+          "challenge_sha256": "sha256",
+          "evidence_class": "evidence_class",
+          "lease_absent": "literal_true",
+          "logical_disposition_sha256": "sha256",
+          "operation": "operation",
+          "plan_entry_sha256": "sha256",
+          "profile_id": "profile_id",
+          "projection": "projection",
+          "projection_sha256": "sha256",
+          "protocol_version": "protocol_version",
+          "raw_source_absent": "literal_true",
+          "request_id": "request_id",
+          "request_sha256": "sha256",
+          "response_sha256": "sha256",
+          "resulting_state": "resulting_state",
+          "retention_decision_sha256": "sha256",
+          "retention_mode": "retention_mode",
+          "sanitized_artifact_overwrite_attempted": "literal_true",
+          "sanitized_byte_len": "sanitized_byte_len",
+          "sanitized_commitment_sha256": "sha256",
+          "scope_sha256": "sha256",
+          "source_byte_len": "source_byte_len",
+          "source_commitment_sha256": "sha256",
+          "staging_root_absent": "literal_true",
+          "status": "status_ok",
+          "transaction_id": "transaction_id",
+          "transition_sha256": "sha256"
+        },
+        "field_order": [
+          "protocol_version",
+          "request_id",
+          "status",
+          "operation",
+          "challenge_sha256",
+          "request_sha256",
+          "transaction_id",
+          "plan_entry_sha256",
+          "scope_sha256",
+          "evidence_class",
+          "profile_id",
+          "projection",
+          "projection_sha256",
+          "source_byte_len",
+          "sanitized_byte_len",
+          "source_commitment_sha256",
+          "sanitized_commitment_sha256",
+          "transition_sha256",
+          "retention_decision_sha256",
+          "logical_disposition_sha256",
+          "resulting_state",
+          "raw_source_absent",
+          "lease_absent",
+          "staging_root_absent",
+          "sanitized_artifact_overwrite_attempted",
+          "retention_mode",
+          "response_sha256"
+        ],
+        "required_fields": [
+          "protocol_version",
+          "request_id",
+          "status",
+          "operation",
+          "challenge_sha256",
+          "request_sha256",
+          "transaction_id",
+          "plan_entry_sha256",
+          "scope_sha256",
+          "evidence_class",
+          "profile_id",
+          "projection",
+          "projection_sha256",
+          "source_byte_len",
+          "sanitized_byte_len",
+          "source_commitment_sha256",
+          "sanitized_commitment_sha256",
+          "transition_sha256",
+          "retention_decision_sha256",
+          "logical_disposition_sha256",
+          "resulting_state",
+          "raw_source_absent",
+          "lease_absent",
+          "staging_root_absent",
+          "sanitized_artifact_overwrite_attempted",
+          "retention_mode",
+          "response_sha256"
+        ]
+      },
+      "recover_evidence": {
+        "additional_properties": false,
+        "cross_field_constraints": [
+          "status == ok and operation == recover_evidence",
+          "request identity and commitments exactly echo the request",
+          "all managed namespace objects and the journal are absent",
+          "success_evidence_emitted == false",
+          "response_sha256 equals the success-response commitment over all preceding fields"
+        ],
+        "duplicate_keys": "reject",
+        "field_bindings": {
+          "challenge_sha256": "sha256",
+          "journal_absent": "literal_true",
+          "lease_absent": "literal_true",
+          "operation": "operation",
+          "plan_entry_sha256": "sha256",
+          "protocol_version": "protocol_version",
+          "raw_source_absent": "literal_true",
+          "recovery_result": "recovery_result",
+          "request_id": "request_id",
+          "request_sha256": "sha256",
+          "response_sha256": "sha256",
+          "scope_sha256": "sha256",
+          "staging_root_absent": "literal_true",
+          "status": "status_ok",
+          "success_evidence_emitted": "literal_false",
+          "transaction_id": "transaction_id"
+        },
+        "field_order": [
+          "protocol_version",
+          "request_id",
+          "status",
+          "operation",
+          "challenge_sha256",
+          "request_sha256",
+          "transaction_id",
+          "plan_entry_sha256",
+          "scope_sha256",
+          "recovery_result",
+          "raw_source_absent",
+          "lease_absent",
+          "staging_root_absent",
+          "journal_absent",
+          "success_evidence_emitted",
+          "response_sha256"
+        ],
+        "required_fields": [
+          "protocol_version",
+          "request_id",
+          "status",
+          "operation",
+          "challenge_sha256",
+          "request_sha256",
+          "transaction_id",
+          "plan_entry_sha256",
+          "scope_sha256",
+          "recovery_result",
+          "raw_source_absent",
+          "lease_absent",
+          "staging_root_absent",
+          "journal_absent",
+          "success_evidence_emitted",
+          "response_sha256"
+        ]
+      }
+    },
+    "retry_and_idempotency": {
+      "describe_contract": {
+        "idempotent": true
+      },
+      "process_evidence": {
+        "existing_journal": "recovery_required",
+        "existing_terminal_transaction": "transaction_already_exists",
+        "first_attempt_only": true,
+        "retry_after_timeout": "recover_evidence_before_any_new_transaction",
+        "success_replay": false,
+        "transaction_key": [
+          "scope_sha256",
+          "plan_entry_sha256",
+          "transaction_id"
+        ]
+      },
+      "recover_evidence": {
+        "already_absent_result": "already_absent",
+        "idempotent": true,
+        "success_evidence_emitted": false
+      }
+    },
+    "shell_invocation": false,
+    "success_response_fields": {
+      "process_evidence": [
+        "protocol_version",
+        "request_id",
+        "status",
+        "operation",
+        "challenge_sha256",
+        "request_sha256",
+        "transaction_id",
+        "plan_entry_sha256",
+        "scope_sha256",
+        "evidence_class",
+        "profile_id",
+        "projection",
+        "projection_sha256",
+        "source_byte_len",
+        "sanitized_byte_len",
+        "source_commitment_sha256",
+        "sanitized_commitment_sha256",
+        "transition_sha256",
+        "retention_decision_sha256",
+        "logical_disposition_sha256",
+        "resulting_state",
+        "raw_source_absent",
+        "lease_absent",
+        "staging_root_absent",
+        "sanitized_artifact_overwrite_attempted",
+        "retention_mode",
+        "response_sha256"
+      ],
+      "recover_evidence": [
+        "protocol_version",
+        "request_id",
+        "status",
+        "operation",
+        "challenge_sha256",
+        "request_sha256",
+        "transaction_id",
+        "plan_entry_sha256",
+        "scope_sha256",
+        "recovery_result",
+        "raw_source_absent",
+        "lease_absent",
+        "staging_root_absent",
+        "journal_absent",
+        "success_evidence_emitted",
+        "response_sha256"
+      ]
+    },
+    "synthetic_error_examples": {
+      "future_timestamp": {
+        "contains_operator_evidence": false,
+        "example_id": "err_36_future_timestamp",
+        "exit_code": 2,
+        "response": {
+          "error_code": "future_timestamp",
+          "error_sha256": "11bd73b5d4d8fb2fd38070f14a44b3e3e81de9be476356bcccfe6c6d0131b3f9",
+          "operation": "process_evidence",
+          "protocol_version": 2,
+          "request_id": "b2_error_fixture",
+          "request_sha256": null,
+          "status": "error"
+        }
+      },
+      "handle_alias_rejected": {
+        "contains_operator_evidence": false,
+        "example_id": "err_44_handle_alias_rejected",
+        "exit_code": 2,
+        "response": {
+          "error_code": "handle_alias_rejected",
+          "error_sha256": "7e69a06f0d29f227db20afb9d767db11f24613387adb4452dac20773fdf59dfe",
+          "operation": "process_evidence",
+          "protocol_version": 2,
+          "request_id": "b2_error_fixture",
+          "request_sha256": null,
+          "status": "error"
+        }
+      },
+      "handle_not_inherited": {
+        "contains_operator_evidence": false,
+        "example_id": "err_14_handle_not_inherited",
+        "exit_code": 2,
+        "response": {
+          "error_code": "handle_not_inherited",
+          "error_sha256": "541a8e4fda0c163d0e08e11f760478e1c7b298fde2cf2db5cdae9bb1c192a612",
+          "operation": "process_evidence",
+          "protocol_version": 2,
+          "request_id": "b2_error_fixture",
+          "request_sha256": null,
+          "status": "error"
+        }
+      },
+      "input_too_large": {
+        "contains_operator_evidence": false,
+        "example_id": "err_01_input_too_large",
+        "exit_code": 2,
+        "response": {
+          "error_code": "input_too_large",
+          "error_sha256": "4a5a05f26164d8aad29818ca7150c0fd10d486e2dbc53246e53c9d90956d9612",
+          "operation": null,
+          "protocol_version": 2,
+          "request_id": null,
+          "request_sha256": null,
+          "status": "error"
+        }
+      },
+      "invalid_digest": {
+        "contains_operator_evidence": false,
+        "example_id": "err_11_invalid_digest",
+        "exit_code": 2,
+        "response": {
+          "error_code": "invalid_digest",
+          "error_sha256": "12d9d5b0c92753dd150d62f6f42a9bdb6230cf6a1623b0221b8f6aaa61e692a5",
+          "operation": "process_evidence",
+          "protocol_version": 2,
+          "request_id": "b2_error_fixture",
+          "request_sha256": null,
+          "status": "error"
+        }
+      },
+      "invalid_field_combination": {
+        "contains_operator_evidence": false,
+        "example_id": "err_12_invalid_field_combination",
+        "exit_code": 2,
+        "response": {
+          "error_code": "invalid_field_combination",
+          "error_sha256": "8476684b56859a3bf3fe58ef939695aaef2d9dc4bdb14e0b6ce1b77b85a20bae",
+          "operation": "process_evidence",
+          "protocol_version": 2,
+          "request_id": "b2_error_fixture",
+          "request_sha256": null,
+          "status": "error"
+        }
+      },
+      "invalid_handle_id": {
+        "contains_operator_evidence": false,
+        "example_id": "err_13_invalid_handle_id",
+        "exit_code": 2,
+        "response": {
+          "error_code": "invalid_handle_id",
+          "error_sha256": "154d5f8780ee2b5298d120c74adda0e15701c4e086f59ecc9b1dbd0461f642d5",
+          "operation": "process_evidence",
+          "protocol_version": 2,
+          "request_id": "b2_error_fixture",
+          "request_sha256": null,
+          "status": "error"
+        }
+      },
+      "invalid_identifier": {
+        "contains_operator_evidence": false,
+        "example_id": "err_10_invalid_identifier",
+        "exit_code": 2,
+        "response": {
+          "error_code": "invalid_identifier",
+          "error_sha256": "8d11ad57b58aac95266a762bd22cca2167345774143a6730f2a817949270d79c",
+          "operation": "process_evidence",
+          "protocol_version": 2,
+          "request_id": "b2_error_fixture",
+          "request_sha256": null,
+          "status": "error"
+        }
+      },
+      "invalid_json": {
+        "contains_operator_evidence": false,
+        "example_id": "err_03_invalid_json",
+        "exit_code": 2,
+        "response": {
+          "error_code": "invalid_json",
+          "error_sha256": "28793ad8f23eda7852ebab55f6ad4054261d548115575ea1394ae04f175421a2",
+          "operation": null,
+          "protocol_version": 2,
+          "request_id": null,
+          "request_sha256": null,
+          "status": "error"
+        }
+      },
+      "invalid_request_id": {
+        "contains_operator_evidence": false,
+        "example_id": "err_08_invalid_request_id",
+        "exit_code": 2,
+        "response": {
+          "error_code": "invalid_request_id",
+          "error_sha256": "bdeb20e5f59a8d1c78660f5e60e5d3c0a24b4189c695c4bc41084c8080e4d086",
+          "operation": null,
+          "protocol_version": 2,
+          "request_id": null,
+          "request_sha256": null,
+          "status": "error"
+        }
+      },
+      "invalid_shape": {
+        "contains_operator_evidence": false,
+        "example_id": "err_04_invalid_shape",
+        "exit_code": 2,
+        "response": {
+          "error_code": "invalid_shape",
+          "error_sha256": "b6542740c99bb6d8f3596d40711b481464662de5a5991a9592fcde23760be294",
+          "operation": null,
+          "protocol_version": 2,
+          "request_id": null,
+          "request_sha256": null,
+          "status": "error"
+        }
+      },
+      "invalid_timestamp_order": {
+        "contains_operator_evidence": false,
+        "example_id": "err_35_invalid_timestamp_order",
+        "exit_code": 2,
+        "response": {
+          "error_code": "invalid_timestamp_order",
+          "error_sha256": "f217355aa1863cc70791df6918b4c43c79d3d08e20e740cf32c84fe441c5120d",
+          "operation": "process_evidence",
+          "protocol_version": 2,
+          "request_id": "b2_error_fixture",
+          "request_sha256": null,
+          "status": "error"
+        }
+      },
+      "journal_chain_mismatch": {
+        "contains_operator_evidence": false,
+        "example_id": "err_42_journal_chain_mismatch",
+        "exit_code": 2,
+        "response": {
+          "error_code": "journal_chain_mismatch",
+          "error_sha256": "ce73fac14491a028c04f24a49a3049236becce369fec1d3000b1677c7ecb111b",
+          "operation": "recover_evidence",
+          "protocol_version": 2,
+          "request_id": "b2_error_fixture",
+          "request_sha256": null,
+          "status": "error"
+        }
+      },
+      "journal_link_or_reparse_rejected": {
+        "contains_operator_evidence": false,
+        "example_id": "err_41_journal_link_or_reparse_rejected",
+        "exit_code": 2,
+        "response": {
+          "error_code": "journal_link_or_reparse_rejected",
+          "error_sha256": "306732f7786fbe72c923c7a574b22e1b7847ebfe919859e05a5054b41e4dea13",
+          "operation": "recover_evidence",
+          "protocol_version": 2,
+          "request_id": "b2_error_fixture",
+          "request_sha256": null,
+          "status": "error"
+        }
+      },
+      "journal_permission_invalid": {
+        "contains_operator_evidence": false,
+        "example_id": "err_40_journal_permission_invalid",
+        "exit_code": 2,
+        "response": {
+          "error_code": "journal_permission_invalid",
+          "error_sha256": "c6508aaaba28facd768e79bcf62a290a5ea6c85591445217b7470a431d2c89ed",
+          "operation": "recover_evidence",
+          "protocol_version": 2,
+          "request_id": "b2_error_fixture",
+          "request_sha256": null,
+          "status": "error"
+        }
+      },
+      "journal_replace_failed": {
+        "contains_operator_evidence": false,
+        "example_id": "err_43_journal_replace_failed",
+        "exit_code": 2,
+        "response": {
+          "error_code": "journal_replace_failed",
+          "error_sha256": "fd3c365f80acc7dbf6b7ee40133e34baf2a22fd38b9772039ecea74a93d2a54d",
+          "operation": "recover_evidence",
+          "protocol_version": 2,
+          "request_id": "b2_error_fixture",
+          "request_sha256": null,
+          "status": "error"
+        }
+      },
+      "logical_disposition_failed": {
+        "contains_operator_evidence": false,
+        "example_id": "err_31_logical_disposition_failed",
+        "exit_code": 2,
+        "response": {
+          "error_code": "logical_disposition_failed",
+          "error_sha256": "98525b90876bd7fbc717e20452962775e1f116f80088e9285ee1e71cd5a0b3ac",
+          "operation": "process_evidence",
+          "protocol_version": 2,
+          "request_id": "b2_error_fixture",
+          "request_sha256": null,
+          "status": "error"
+        }
+      },
+      "missing_field": {
+        "contains_operator_evidence": false,
+        "example_id": "err_06_missing_field",
+        "exit_code": 2,
+        "response": {
+          "error_code": "missing_field",
+          "error_sha256": "09746ff35cdda1c239e382acb20861e46f79ec1abac34c4a238790282eacf605",
+          "operation": null,
+          "protocol_version": 2,
+          "request_id": "b2_error_fixture",
+          "request_sha256": null,
+          "status": "error"
+        }
+      },
+      "multiple_messages": {
+        "contains_operator_evidence": false,
+        "example_id": "err_02_multiple_messages",
+        "exit_code": 2,
+        "response": {
+          "error_code": "multiple_messages",
+          "error_sha256": "56c298e689525998adc786871499feede46fa507fd1141ade1d42fddae900936",
+          "operation": null,
+          "protocol_version": 2,
+          "request_id": null,
+          "request_sha256": null,
+          "status": "error"
+        }
+      },
+      "process_timeout": {
+        "contains_operator_evidence": false,
+        "example_id": "err_37_process_timeout",
+        "exit_code": 2,
+        "response": {
+          "error_code": "process_timeout",
+          "error_sha256": "1886f501d53df2606e1cd705d35966665b8b477c55b0acb88b288964f9e21680",
+          "operation": "process_evidence",
+          "protocol_version": 2,
+          "request_id": "b2_error_fixture",
+          "request_sha256": null,
+          "status": "error"
+        }
+      },
+      "profile_class_mismatch": {
+        "contains_operator_evidence": false,
+        "example_id": "err_28_profile_class_mismatch",
+        "exit_code": 2,
+        "response": {
+          "error_code": "profile_class_mismatch",
+          "error_sha256": "fa52b1c86afa5107195e2f260483039b800263ec76e7b5d6943cdb175578583e",
+          "operation": "process_evidence",
+          "protocol_version": 2,
+          "request_id": "b2_error_fixture",
+          "request_sha256": null,
+          "status": "error"
+        }
+      },
+      "projection_mismatch": {
+        "contains_operator_evidence": false,
+        "example_id": "err_46_projection_mismatch",
+        "exit_code": 2,
+        "response": {
+          "error_code": "projection_mismatch",
+          "error_sha256": "06d37c0b4d91c6a3a5f21a12314c215c5582c2b27cbfbb7ed1904b1345922aa3",
+          "operation": "process_evidence",
+          "protocol_version": 2,
+          "request_id": "b2_error_fixture",
+          "request_sha256": null,
+          "status": "error"
+        }
+      },
+      "recovery_cleanup_failed": {
+        "contains_operator_evidence": false,
+        "example_id": "err_32_recovery_cleanup_failed",
+        "exit_code": 2,
+        "response": {
+          "error_code": "recovery_cleanup_failed",
+          "error_sha256": "19ef95c0062ae455b6d59763eecdd5f9b34c7d6fa97787dd2431a9119264ce81",
+          "operation": "recover_evidence",
+          "protocol_version": 2,
+          "request_id": "b2_error_fixture",
+          "request_sha256": null,
+          "status": "error"
+        }
+      },
+      "recovery_required": {
+        "contains_operator_evidence": false,
+        "example_id": "err_23_recovery_required",
+        "exit_code": 2,
+        "response": {
+          "error_code": "recovery_required",
+          "error_sha256": "3209e80be6ced0dab91b634f9075748455a5e4208b190b15bf1a3e96a2d2da42",
+          "operation": "recover_evidence",
+          "protocol_version": 2,
+          "request_id": "b2_error_fixture",
+          "request_sha256": null,
+          "status": "error"
+        }
+      },
+      "recovery_timeout": {
+        "contains_operator_evidence": false,
+        "example_id": "err_38_recovery_timeout",
+        "exit_code": 2,
+        "response": {
+          "error_code": "recovery_timeout",
+          "error_sha256": "b09fab1063ada9cd0ee0d44ecf9f40092dce2263a85f9daf389d747373316a84",
+          "operation": "recover_evidence",
+          "protocol_version": 2,
+          "request_id": "b2_error_fixture",
+          "request_sha256": null,
+          "status": "error"
+        }
+      },
+      "request_commitment_mismatch": {
+        "contains_operator_evidence": false,
+        "example_id": "err_47_request_commitment_mismatch",
+        "exit_code": 2,
+        "response": {
+          "error_code": "request_commitment_mismatch",
+          "error_sha256": "ed8d6db49c499290ce02f207b357589a91655a099355f94c65fdd96b719aba51",
+          "operation": "process_evidence",
+          "protocol_version": 2,
+          "request_id": "b2_error_fixture",
+          "request_sha256": null,
+          "status": "error"
+        }
+      },
+      "response_commitment_mismatch": {
+        "contains_operator_evidence": false,
+        "example_id": "err_48_response_commitment_mismatch",
+        "exit_code": 2,
+        "response": {
+          "error_code": "response_commitment_mismatch",
+          "error_sha256": "358997fc6ee00fb51b6397b7b4836097030bcbfaae82d01793d4c1042ea7d838",
+          "operation": "process_evidence",
+          "protocol_version": 2,
+          "request_id": "b2_error_fixture",
+          "request_sha256": null,
+          "status": "error"
+        }
+      },
+      "retention_rejected": {
+        "contains_operator_evidence": false,
+        "example_id": "err_30_retention_rejected",
+        "exit_code": 2,
+        "response": {
+          "error_code": "retention_rejected",
+          "error_sha256": "881965b8f74c9a98c81b7979a227056d8b3d572a10c9c9db295e06f0c7cb7d40",
+          "operation": "process_evidence",
+          "protocol_version": 2,
+          "request_id": "b2_error_fixture",
+          "request_sha256": null,
+          "status": "error"
+        }
+      },
+      "sanitization_failed": {
+        "contains_operator_evidence": false,
+        "example_id": "err_29_sanitization_failed",
+        "exit_code": 2,
+        "response": {
+          "error_code": "sanitization_failed",
+          "error_sha256": "6faf4e034fb0660977507afa4691621b8014b01f21c4dd4e9b6b1fa4885591f6",
+          "operation": "process_evidence",
+          "protocol_version": 2,
+          "request_id": "b2_error_fixture",
+          "request_sha256": null,
+          "status": "error"
+        }
+      },
+      "sanitized_commitment_mismatch": {
+        "contains_operator_evidence": false,
+        "example_id": "err_45_sanitized_commitment_mismatch",
+        "exit_code": 2,
+        "response": {
+          "error_code": "sanitized_commitment_mismatch",
+          "error_sha256": "bc7d9923a233ae25dcfe238e42eb9cb8e400c3b21cfb73abcd70088c3b595c09",
+          "operation": "process_evidence",
+          "protocol_version": 2,
+          "request_id": "b2_error_fixture",
+          "request_sha256": null,
+          "status": "error"
+        }
+      },
+      "serialization_failure": {
+        "contains_operator_evidence": false,
+        "example_id": "err_33_serialization_failure",
+        "exit_code": 2,
+        "response": {
+          "error_code": "serialization_failure",
+          "error_sha256": "5cd90ac0282b1d165601b29b424599384a6ae3ea2be326628b3b910c68b818fd",
+          "operation": "process_evidence",
+          "protocol_version": 2,
+          "request_id": "b2_error_fixture",
+          "request_sha256": null,
+          "status": "error"
+        }
+      },
+      "source_changed": {
+        "contains_operator_evidence": false,
+        "example_id": "err_25_source_changed",
+        "exit_code": 2,
+        "response": {
+          "error_code": "source_changed",
+          "error_sha256": "246eb5e440b2402fcd7c4ab65b9ea037c9c99f86507aaae1990eaaebf5e84a24",
+          "operation": "process_evidence",
+          "protocol_version": 2,
+          "request_id": "b2_error_fixture",
+          "request_sha256": null,
+          "status": "error"
+        }
+      },
+      "source_handle_not_read_only": {
+        "contains_operator_evidence": false,
+        "example_id": "err_15_source_handle_not_read_only",
+        "exit_code": 2,
+        "response": {
+          "error_code": "source_handle_not_read_only",
+          "error_sha256": "ad115363d042ca504876b6bc75438bc369616b5966bf635fc136321641a25cc3",
+          "operation": "process_evidence",
+          "protocol_version": 2,
+          "request_id": "b2_error_fixture",
+          "request_sha256": null,
+          "status": "error"
+        }
+      },
+      "source_link_or_reparse_rejected": {
+        "contains_operator_evidence": false,
+        "example_id": "err_17_source_link_or_reparse_rejected",
+        "exit_code": 2,
+        "response": {
+          "error_code": "source_link_or_reparse_rejected",
+          "error_sha256": "8795345cfde6b6e32039014a4c1307f5153edbe5cbe4833671548d632d80740d",
+          "operation": "process_evidence",
+          "protocol_version": 2,
+          "request_id": "b2_error_fixture",
+          "request_sha256": null,
+          "status": "error"
+        }
+      },
+      "source_multiple_links_rejected": {
+        "contains_operator_evidence": false,
+        "example_id": "err_18_source_multiple_links_rejected",
+        "exit_code": 2,
+        "response": {
+          "error_code": "source_multiple_links_rejected",
+          "error_sha256": "c6bb168cb9d9b2de6fc3aeed93d1df55bc398034eccaf52badc7e7027b9e5e0f",
+          "operation": "process_evidence",
+          "protocol_version": 2,
+          "request_id": "b2_error_fixture",
+          "request_sha256": null,
+          "status": "error"
+        }
+      },
+      "source_not_regular": {
+        "contains_operator_evidence": false,
+        "example_id": "err_16_source_not_regular",
+        "exit_code": 2,
+        "response": {
+          "error_code": "source_not_regular",
+          "error_sha256": "31c7278f4226ac2f52d7f6f22eb80c907b5dcb9fde3e003272843039c730fbff",
+          "operation": "process_evidence",
+          "protocol_version": 2,
+          "request_id": "b2_error_fixture",
+          "request_sha256": null,
+          "status": "error"
+        }
+      },
+      "source_too_large": {
+        "contains_operator_evidence": false,
+        "example_id": "err_24_source_too_large",
+        "exit_code": 2,
+        "response": {
+          "error_code": "source_too_large",
+          "error_sha256": "17ebab9f1a43b3f8b175481322553342e9534163c28719c145d176274299dfd3",
+          "operation": "process_evidence",
+          "protocol_version": 2,
+          "request_id": "b2_error_fixture",
+          "request_sha256": null,
+          "status": "error"
+        }
+      },
+      "staging_parent_invalid": {
+        "contains_operator_evidence": false,
+        "example_id": "err_19_staging_parent_invalid",
+        "exit_code": 2,
+        "response": {
+          "error_code": "staging_parent_invalid",
+          "error_sha256": "70ad58a23c39c77141f4833efa9213ece047fcffb76fd89aa121a809ecf52e26",
+          "operation": "process_evidence",
+          "protocol_version": 2,
+          "request_id": "b2_error_fixture",
+          "request_sha256": null,
+          "status": "error"
+        }
+      },
+      "staging_policy_invalid": {
+        "contains_operator_evidence": false,
+        "example_id": "err_20_staging_policy_invalid",
+        "exit_code": 2,
+        "response": {
+          "error_code": "staging_policy_invalid",
+          "error_sha256": "48d005343502f1c8228037354fcef28610dee211057d612cd198aa7016fe99cf",
+          "operation": "process_evidence",
+          "protocol_version": 2,
+          "request_id": "b2_error_fixture",
+          "request_sha256": null,
+          "status": "error"
+        }
+      },
+      "stale_evidence": {
+        "contains_operator_evidence": false,
+        "example_id": "err_39_stale_evidence",
+        "exit_code": 2,
+        "response": {
+          "error_code": "stale_evidence",
+          "error_sha256": "e58407b729d660561ac1fbb2888992de743d9095ac4994a8fc958984d744992a",
+          "operation": "process_evidence",
+          "protocol_version": 2,
+          "request_id": "b2_error_fixture",
+          "request_sha256": null,
+          "status": "error"
+        }
+      },
+      "timestamp_out_of_range": {
+        "contains_operator_evidence": false,
+        "example_id": "err_34_timestamp_out_of_range",
+        "exit_code": 2,
+        "response": {
+          "error_code": "timestamp_out_of_range",
+          "error_sha256": "1890c7f28ed2bb26154a03ca7485946605cd5072d72b3afbd1ad0caf1e29a85b",
+          "operation": "process_evidence",
+          "protocol_version": 2,
+          "request_id": "b2_error_fixture",
+          "request_sha256": null,
+          "status": "error"
+        }
+      },
+      "transaction_already_exists": {
+        "contains_operator_evidence": false,
+        "example_id": "err_21_transaction_already_exists",
+        "exit_code": 2,
+        "response": {
+          "error_code": "transaction_already_exists",
+          "error_sha256": "2ae537d93f9874d4a071d837ec5b13377daa254d83c1bec782dbdb10b28060b1",
+          "operation": "process_evidence",
+          "protocol_version": 2,
+          "request_id": "b2_error_fixture",
+          "request_sha256": null,
+          "status": "error"
+        }
+      },
+      "transaction_journal_corrupt": {
+        "contains_operator_evidence": false,
+        "example_id": "err_22_transaction_journal_corrupt",
+        "exit_code": 2,
+        "response": {
+          "error_code": "transaction_journal_corrupt",
+          "error_sha256": "05d98ee5df1b22148b5518e5c18e92ed6c73bda475d217929f06d768c00d99f3",
+          "operation": "process_evidence",
+          "protocol_version": 2,
+          "request_id": "b2_error_fixture",
+          "request_sha256": null,
+          "status": "error"
+        }
+      },
+      "unknown_field": {
+        "contains_operator_evidence": false,
+        "example_id": "err_05_unknown_field",
+        "exit_code": 2,
+        "response": {
+          "error_code": "unknown_field",
+          "error_sha256": "f33fc669b0e1593702a2757d4da806525f169a538c81b4ec475330550658ef10",
+          "operation": null,
+          "protocol_version": 2,
+          "request_id": "b2_error_fixture",
+          "request_sha256": null,
+          "status": "error"
+        }
+      },
+      "unsupported_evidence_class": {
+        "contains_operator_evidence": false,
+        "example_id": "err_26_unsupported_evidence_class",
+        "exit_code": 2,
+        "response": {
+          "error_code": "unsupported_evidence_class",
+          "error_sha256": "4bb837cae36687f24f9d658edfd38046e6a891e3f5f04c8ec028b98046013c5f",
+          "operation": "process_evidence",
+          "protocol_version": 2,
+          "request_id": "b2_error_fixture",
+          "request_sha256": null,
+          "status": "error"
+        }
+      },
+      "unsupported_operation": {
+        "contains_operator_evidence": false,
+        "example_id": "err_09_unsupported_operation",
+        "exit_code": 2,
+        "response": {
+          "error_code": "unsupported_operation",
+          "error_sha256": "e3d058fa87cf0fe09bdf80e1c9328b1c81b74656079fd573e009a07556574c17",
+          "operation": null,
+          "protocol_version": 2,
+          "request_id": "b2_error_fixture",
+          "request_sha256": null,
+          "status": "error"
+        }
+      },
+      "unsupported_profile": {
+        "contains_operator_evidence": false,
+        "example_id": "err_27_unsupported_profile",
+        "exit_code": 2,
+        "response": {
+          "error_code": "unsupported_profile",
+          "error_sha256": "cd074dc37011d483d360b4a5bc89bb998e3d93a11928af9ac5806b6b97378f2c",
+          "operation": "process_evidence",
+          "protocol_version": 2,
+          "request_id": "b2_error_fixture",
+          "request_sha256": null,
+          "status": "error"
+        }
+      },
+      "unsupported_protocol_version": {
+        "contains_operator_evidence": false,
+        "example_id": "err_07_unsupported_protocol_version",
+        "exit_code": 2,
+        "response": {
+          "error_code": "unsupported_protocol_version",
+          "error_sha256": "d234a51c7e53ab37308f0c632aeb875a79a472f63b04125da2b34df88f647fef",
+          "operation": null,
+          "protocol_version": 2,
+          "request_id": null,
+          "request_sha256": null,
+          "status": "error"
+        }
+      }
+    },
+    "transaction": {
+      "derivation": {
+        "digest": "lowercase SHA-256",
+        "domain": "systeme-local:operator-evidence-session-from-transaction:v1\\x00",
+        "framing": "domain || len64(transaction_id) || transaction_id",
+        "recovery_journal_name": "rcv_<token>.json",
+        "recovery_next_name": "rcv_<token>.next",
+        "session_id": "ses_<token>",
+        "source_name": "src_<token>.raw",
+        "staging_root_name": "stg_<token>",
+        "token": "first 32 hexadecimal characters"
+      },
+      "recovery_journal_location": "sibling_under_inherited_staging_parent",
+      "recovery_journal_name": "rcv_<derived_32_lower_hex>.json",
+      "session_derivation_domain": "systeme-local:operator-evidence-session-from-transaction:v1\\x00",
+      "source_name": "src_<derived_32_lower_hex>.raw",
+      "staging_root_name": "stg_<derived_32_lower_hex>",
+      "success_response_after_terminal_cleanup_only": true,
+      "transaction_id_pattern": "^txn_[0-9a-f]{32}$"
+    },
+    "transport": "one_request_one_response_utf8_ndjson",
+    "validation_precedence": [
+      "input_size",
+      "message_cardinality",
+      "json_syntax",
+      "top_level_object_shape",
+      "unknown_fields",
+      "missing_fields",
+      "protocol_version",
+      "request_identifier",
+      "operation",
+      "identifier_and_digest_syntax",
+      "field_cross_consistency",
+      "handle_identifier_syntax",
+      "inherited_handle_presence",
+      "staging_parent_policy",
+      "transaction_and_recovery_state",
+      "source_type_and_identity",
+      "source_copy_limits",
+      "profile_and_evidence_class",
+      "sanitizer_execution",
+      "retention_decision",
+      "logical_disposition",
+      "response_serialization"
+    ],
+    "validation_precedence_edges": [
+      {
+        "after": "message_cardinality",
+        "before": "input_size",
+        "synthetic_example_id": "precedence_01_input_size_before_message_cardinality"
+      },
+      {
+        "after": "json_syntax",
+        "before": "message_cardinality",
+        "synthetic_example_id": "precedence_02_message_cardinality_before_json_syntax"
+      },
+      {
+        "after": "top_level_object_shape",
+        "before": "json_syntax",
+        "synthetic_example_id": "precedence_03_json_syntax_before_top_level_object_shape"
+      },
+      {
+        "after": "unknown_fields",
+        "before": "top_level_object_shape",
+        "synthetic_example_id": "precedence_04_top_level_object_shape_before_unknown_fields"
+      },
+      {
+        "after": "missing_fields",
+        "before": "unknown_fields",
+        "synthetic_example_id": "precedence_05_unknown_fields_before_missing_fields"
+      },
+      {
+        "after": "protocol_version",
+        "before": "missing_fields",
+        "synthetic_example_id": "precedence_06_missing_fields_before_protocol_version"
+      },
+      {
+        "after": "request_identifier",
+        "before": "protocol_version",
+        "synthetic_example_id": "precedence_07_protocol_version_before_request_identifier"
+      },
+      {
+        "after": "operation",
+        "before": "request_identifier",
+        "synthetic_example_id": "precedence_08_request_identifier_before_operation"
+      },
+      {
+        "after": "identifier_and_digest_syntax",
+        "before": "operation",
+        "synthetic_example_id": "precedence_09_operation_before_identifier_and_digest_syntax"
+      },
+      {
+        "after": "field_cross_consistency",
+        "before": "identifier_and_digest_syntax",
+        "synthetic_example_id": "precedence_10_identifier_and_digest_syntax_before_field_cross_consistency"
+      },
+      {
+        "after": "handle_identifier_syntax",
+        "before": "field_cross_consistency",
+        "synthetic_example_id": "precedence_11_field_cross_consistency_before_handle_identifier_syntax"
+      },
+      {
+        "after": "inherited_handle_presence",
+        "before": "handle_identifier_syntax",
+        "synthetic_example_id": "precedence_12_handle_identifier_syntax_before_inherited_handle_presence"
+      },
+      {
+        "after": "staging_parent_policy",
+        "before": "inherited_handle_presence",
+        "synthetic_example_id": "precedence_13_inherited_handle_presence_before_staging_parent_policy"
+      },
+      {
+        "after": "transaction_and_recovery_state",
+        "before": "staging_parent_policy",
+        "synthetic_example_id": "precedence_14_staging_parent_policy_before_transaction_and_recovery_state"
+      },
+      {
+        "after": "source_type_and_identity",
+        "before": "transaction_and_recovery_state",
+        "synthetic_example_id": "precedence_15_transaction_and_recovery_state_before_source_type_and_identity"
+      },
+      {
+        "after": "source_copy_limits",
+        "before": "source_type_and_identity",
+        "synthetic_example_id": "precedence_16_source_type_and_identity_before_source_copy_limits"
+      },
+      {
+        "after": "profile_and_evidence_class",
+        "before": "source_copy_limits",
+        "synthetic_example_id": "precedence_17_source_copy_limits_before_profile_and_evidence_class"
+      },
+      {
+        "after": "sanitizer_execution",
+        "before": "profile_and_evidence_class",
+        "synthetic_example_id": "precedence_18_profile_and_evidence_class_before_sanitizer_execution"
+      },
+      {
+        "after": "retention_decision",
+        "before": "sanitizer_execution",
+        "synthetic_example_id": "precedence_19_sanitizer_execution_before_retention_decision"
+      },
+      {
+        "after": "logical_disposition",
+        "before": "retention_decision",
+        "synthetic_example_id": "precedence_20_retention_decision_before_logical_disposition"
+      },
+      {
+        "after": "response_serialization",
+        "before": "logical_disposition",
+        "synthetic_example_id": "precedence_21_logical_disposition_before_response_serialization"
+      }
+    ],
+    "version": 2,
+    "version_negotiation": {
+      "no_implicit_downgrade": true,
+      "request_version_field": "protocol_version",
+      "supported_versions": [
+        1,
+        2
+      ],
+      "unsupported_version_behavior": {
+        "error_code": "unsupported_protocol_version",
+        "exit_code": 2,
+        "operation": null,
+        "request_id": null,
+        "request_sha256": null
+      },
+      "version_1_fixture_compatibility": "byte_for_byte_unchanged",
+      "version_1_operations": [
+        "describe_contract"
+      ],
+      "version_2_operations": [
+        "describe_contract",
+        "process_evidence",
+        "recover_evidence"
+      ]
+    },
+    "wire_retention_modes": [
+      "dispose_immediately"
+    ]
+  },
+  "python_orchestration_states": [
+    "planned",
+    "source_selected",
+    "handles_opened",
+    "custodian_running",
+    "response_verifying",
+    "record_completed",
+    "record_blocked",
+    "bundle_compiling",
+    "reporting",
+    "complete"
+  ],
+  "real_evidence_collection_enabled": false,
+  "review_finding_closures": {
+    "B20-REV-001": [
+      "/protocol_v2/version_negotiation",
+      "/protocol_v2/exit_codes",
+      "/protocol_v2/retry_and_idempotency",
+      "/protocol_v2/field_schemas",
+      "/protocol_v2/request_schemas",
+      "/protocol_v2/response_schemas",
+      "/protocol_v2/error_response_schemas",
+      "/protocol_v2/canonical_json",
+      "/protocol_v2/canonical_ndjson",
+      "/protocol_v2/commitment_domains",
+      "/protocol_v2/commitment_framing",
+      "/protocol_v2/synthetic_error_examples"
+    ],
+    "B20-REV-002": [
+      "/protocol_v2/projection_schemas",
+      "/protocol_v2/projection_verification",
+      "/attestation_schemas",
+      "/attestation_digest_domains"
+    ],
+    "B20-REV-003": [
+      "/protocol_v2/recovery_journal_schema",
+      "/protocol_v2/recovery_progress_states",
+      "/protocol_v2/recovery_journal_permissions",
+      "/protocol_v2/recovery_journal_integrity",
+      "/protocol_v2/recovery_atomic_replace_contract",
+      "/protocol_v2/recovery_validation_precedence"
+    ],
+    "B20-REV-004": [
+      "/protocol_v2/inherited_handles/identifier_contract",
+      "/protocol_v2/inherited_handles/distinctness",
+      "/protocol_v2/inherited_handles/windows",
+      "/protocol_v2/inherited_handles/unix",
+      "/protocol_v2/inherited_handles/identity_revalidation_sequence",
+      "/protocol_v2/inherited_handles/close_contract"
+    ],
+    "B20-REV-005": [
+      "/timestamp_ownership/unix_seconds_integer_range",
+      "/timestamp_ownership/ordering_constraints",
+      "/timestamp_ownership/maximum_future_skew_seconds",
+      "/timestamp_ownership/maximum_process_duration_seconds",
+      "/timestamp_ownership/maximum_recovery_duration_seconds",
+      "/timestamp_ownership/record_validity_derivation",
+      "/timestamp_ownership/bundle_validity_derivation",
+      "/timestamp_ownership/timestamp_error_precedence"
+    ]
+  },
+  "runtime_reachable": false,
+  "schema": "systeme-local.operator-evidence-protocol-v2-design.v1",
+  "status": "contract_only",
+  "synthetic_fixture_commitments": {
+    "derived_session_id": "ses_055efea6fd7423d90f8708d41f7aba06",
+    "error_sha256": "d62ebb5cbee81679ce0c4f2b355a26192255cb65e94801a357430a0972e68bbb",
+    "process_projection_sha256": "acba44886ed83bd9ac87f0453800ca709de321fa60751a3e05e56de903ac4fad",
+    "process_request_sha256": "ee91b05e1f8ce6101629ca8d2d0a73a203fd9e11d286f793cb623ed8ff47ddc5",
+    "process_response_sha256": "ee57046d2a248b665ed28d8b48d8043e8258efbdac39018a0eaaecd0832f7eb2",
+    "process_sanitized_commitment_sha256": "aafef370602e0a65f256fc6000ad87a1120e06a0d81e7d2bf8ca219c94eb51b4",
+    "recover_request_sha256": "e677c0d163d546f324e311d591c8186d41afb97fa255655a706c4616c81a3369",
+    "recover_response_sha256": "3c08cb7a9ef7ecbb6cafe8e1f0299a2b0874aca0ebc4b69cc2ceeb9563350209"
+  },
+  "timestamp_ownership": {
+    "bundle_validity_derivation": {
+      "collected_at": "one Python UTC sample after all eleven records exist",
+      "expires_at": "min(collected_at + 900, every record valid_until, every attached summary valid_until)",
+      "non_positive_window": "bundle compilation fails closed"
+    },
+    "maximum_future_skew_seconds": 0,
+    "maximum_process_duration_seconds": 60,
+    "maximum_recovery_duration_seconds": 30,
+    "ordering_constraints": [
+      "plan_created_at <= source_collected_at",
+      "source_collected_at <= retention_decided_at <= custody_started_at",
+      "custody_started_at <= sanitized_at <= disposed_at",
+      "record observed_at == source_collected_at for custodian evidence or typed attestation",
+      "bundle_collected_at >= every record disposed_at or attestation observed_at",
+      "bundle_expires_at > bundle_collected_at"
+    ],
+    "python_only": [
+      "plan_created_at",
+      "custody_started_at",
+      "sanitized_at",
+      "disposed_at",
+      "record_expires_at",
+      "bundle_collected_at",
+      "bundle_expires_at"
+    ],
+    "record_validity_derivation": {
+      "already_expired": "stale_evidence",
+      "maximum_validity_seconds": {
+        "action_review": 1800,
+        "app_configuration": 3600,
+        "authentication_metadata": 3600,
+        "developer_mode": 3600,
+        "local_policy": 86400,
+        "plan_role_observation": 86400,
+        "refresh_token": 3600,
+        "tool_snapshot": 1800,
+        "transport": 900,
+        "web_client": 14400,
+        "workspace_access": 3600
+      },
+      "observed_at": "source_collected_at or attestation observed_at",
+      "overflow": "timestamp_out_of_range",
+      "valid_until": "observed_at + check maximum validity using checked arithmetic"
+    },
+    "request_fields": [
+      "source_collected_at_unix_seconds",
+      "retention_decided_at_unix_seconds"
+    ],
+    "rust_reads_clock": false,
+    "timestamp_error_precedence": [
+      "JSON type and integer range",
+      "source_collected_at <= retention_decided_at",
+      "Python plan/source/start ordering",
+      "future timestamp rejection",
+      "process or recovery hard timeout",
+      "record validity derivation",
+      "bundle validity derivation"
+    ],
+    "timestamp_sampling": {
+      "custody_started_at": "Python UTC sample immediately before spawn",
+      "disposed_at": "same conservative terminal response sample",
+      "sanitized_at": "conservative terminal response sample because no intermediate wire event exists"
+    },
+    "unix_seconds_integer_range": {
+      "encoding": "unsigned base-10 JSON integer",
+      "maximum": 253402300799,
+      "minimum": 0
+    }
+  }
+}
