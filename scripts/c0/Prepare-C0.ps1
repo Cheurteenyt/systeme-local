@@ -11,6 +11,39 @@ $root = Get-C0RepositoryRoot
 $state = Initialize-C0StateDirectory
 $manifestPath = Join-Path $root "governance\c0-tunnel-client.json"
 $manifest = Get-Content -LiteralPath $manifestPath -Raw | ConvertFrom-Json
+$secretNames = @(
+    "SLG_SHARED_SECRET",
+    "SLG_AUDIT_KEY",
+    "SLG_MCP_TOKEN"
+)
+$initializedSecretNames = @()
+
+foreach ($name in $secretNames) {
+    $existing = [Environment]::GetEnvironmentVariable($name, "Process")
+    if (-not [string]::IsNullOrWhiteSpace($existing)) {
+        if ($existing.Length -lt 32) {
+            throw "$name is already set but does not satisfy the C0 minimum length."
+        }
+        continue
+    }
+
+    $bytes = New-Object byte[] 32
+    $rng = [System.Security.Cryptography.RandomNumberGenerator]::Create()
+    try {
+        $rng.GetBytes($bytes)
+    }
+    finally {
+        $rng.Dispose()
+    }
+    [Environment]::SetEnvironmentVariable(
+        $name,
+        [Convert]::ToBase64String($bytes),
+        "Process"
+    )
+    $initializedSecretNames += $name
+}
+
+Assert-C0SecretEnvironment
 
 if (
     $manifest.project -ne "openai/tunnel-client" -or
@@ -68,4 +101,5 @@ if (
     archive_sha256 = $actualArchiveHash
     binary_sha256 = $actualBinaryHash
     binary = $destination
+    process_secrets_initialized = $initializedSecretNames
 } | ConvertTo-Json

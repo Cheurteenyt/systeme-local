@@ -131,6 +131,20 @@ def test_manual_web_checklist_uses_current_official_chatgpt_labels() -> None:
     assert "Advanced Settings" not in checklist
 
 
+def test_prepare_initializes_missing_process_secrets_without_printing_values() -> None:
+    prepare = (ROOT / "scripts/c0/Prepare-C0.ps1").read_text(encoding="utf-8")
+
+    for name in ("SLG_SHARED_SECRET", "SLG_AUDIT_KEY", "SLG_MCP_TOKEN"):
+        assert name in prepare
+    assert "RandomNumberGenerator" in prepare
+    assert "New-Object byte[] 32" in prepare
+    assert "[Convert]::ToBase64String($bytes)" in prepare
+    assert '"Process"' in prepare
+    assert "Assert-C0SecretEnvironment" in prepare
+    assert "process_secrets_initialized" in prepare
+    assert "process_secret_values" not in prepare
+
+
 def test_revocation_script_requires_each_manual_fact_explicitly() -> None:
     text = (ROOT / "scripts/c0/Confirm-C0Revocation.ps1").read_text(encoding="utf-8")
 

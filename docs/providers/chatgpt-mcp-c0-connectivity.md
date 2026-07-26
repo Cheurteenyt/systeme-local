@@ -130,6 +130,11 @@ loopback MCP origin.
 Run the scripts from a clean
 `interop/chatgpt-web-mcp-connectivity-c0` worktree:
 
+`Prepare-C0.ps1` initializes missing `SLG_SHARED_SECRET`, `SLG_AUDIT_KEY`,
+and `SLG_MCP_TOKEN` values with three independent 256-bit random values in the
+current PowerShell process. It never prints their values. A pre-existing value
+that is too short or duplicates another C0 secret fails closed.
+
 ```powershell
 .\scripts\c0\Prepare-C0.ps1
 .\scripts\c0\Test-C0Prerequisites.ps1 -RequireSecrets
