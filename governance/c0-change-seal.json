@@ -4,10 +4,10 @@
   "base_commit": "32515ac9cbb9d658b2ddcb2723ab3c0a71f2b418",
   "branch": "interop/chatgpt-web-mcp-connectivity-c0",
   "issue": "https://github.com/Cheurteenyt/systeme-local/issues/64",
-  "generated_at": "2026-07-26T15:25:44.3952616Z",
+  "generated_at": "2026-07-26T15:27:52.9294626Z",
   "diff": {
     "algorithm": "sha256",
-    "sha256": "1953e1d82f749e1bc2127ea09de2ac783d44df95ad7ab0fa7b1c934e6f609d81",
+    "sha256": "4268d3928a6dbc141878dab61d65dccb845ae4142c309f19aa0c915af79dad07",
     "command": "git diff --binary --full-index --no-ext-diff 32515ac9cbb9d658b2ddcb2723ab3c0a71f2b418 -- . \":(exclude)governance/c0-change-seal.json\"",
     "scope": "the complete C0 patch relative to the recorded base commit, excluding only this self-referential seal file",
     "excluded_paths": [

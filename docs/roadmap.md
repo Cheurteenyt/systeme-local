@@ -224,4 +224,4 @@ Plugin, enable writes, add provider-outbound transport, or automate ChatGPT
 Web. The next gate is the exact manual procedure in
 [`providers/chatgpt-mcp-c0-connectivity.md`](providers/chatgpt-mcp-c0-connectivity.md).
 Formatting only the Python files touched by C0 reduces the current Ruff debt
-from 54 to 43 files.
+from 54 to 42 files.

@@ -461,5 +461,5 @@ No live claim exists until the separate attestation proves the call, audit
 correlation, and revocation failure.
 
 C0 formats only its touched Python surface, reducing the current Ruff formatting
-baseline from 54 to 43 files while leaving the historical phase-8 measurement
+baseline from 54 to 42 files while leaving the historical phase-8 measurement
 unchanged.
