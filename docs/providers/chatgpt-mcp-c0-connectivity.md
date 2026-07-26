@@ -104,6 +104,10 @@ The C0 facade is explicitly capped at a 4 KiB request, 30 requests per minute,
 and one concurrent request. The tunnel client uses the required `main` channel,
 one in-flight MCP request, a five-minute connection TTL, and one buffered
 control-plane command.
+The authenticated C0 MCP endpoint rejects the optional standalone SSE `GET`
+with `405`; C0 is stateless JSON request/response and emits no unsolicited
+server messages. This lets the official Go client complete initialization
+without leaving an unbounded stream open.
 The facade starts from the ignored C0 state directory rather than the
 repository root, so repository-local `.env` values cannot silently widen or
 re-anchor the probe. Explicit process-level audit-anchor configuration is

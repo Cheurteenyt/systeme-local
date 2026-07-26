@@ -221,6 +221,13 @@ async def test_authentication_origin_and_loopback_guards(
             )
             assert wrong.status_code == 401
 
+            standalone_sse = await client.get(
+                "/mcp",
+                headers={"Authorization": f"Bearer {'t' * 48}"},
+            )
+            assert standalone_sse.status_code == 405
+            assert standalone_sse.headers["allow"] == "POST, DELETE"
+
             hostile_origin = await client.post(
                 "/mcp",
                 json={},

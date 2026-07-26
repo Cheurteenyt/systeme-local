@@ -313,6 +313,13 @@ class McpRuntime:
                 headers={"WWW-Authenticate": "Bearer"},
             )
 
+        if request.method == "GET":
+            return _plain_response(
+                405,
+                "Method Not Allowed",
+                headers={"Allow": "POST, DELETE"},
+            )
+
         if not self._rate_limiter.allow():
             return _plain_response(
                 429,
