@@ -225,3 +225,20 @@ Web. The next gate is the exact manual procedure in
 [`providers/chatgpt-mcp-c0-connectivity.md`](providers/chatgpt-mcp-c0-connectivity.md).
 Formatting only the Python files touched by C0 reduces the current Ruff debt
 from 54 to 42 files.
+
+## C1 bounded Chat-surface observability
+
+Status: `partial` until fresh browser authorization, two real sterile Chat
+calls, both audit correlations, all bounded negative checks, and post-test
+revocation are observed.
+
+C1 is stacked on the unmerged C0 branch and tracked by issue
+[#66](https://github.com/Cheurteenyt/systeme-local/issues/66). It adds strict
+runtime/default/Web-label attribution, a Chat-versus-Work fail-closed guard,
+two-chat correlation receipts, negative-test and revocation receipts, a
+short-lived final attestation, and a raw-evidence cleanup. It never tests Work,
+enumerates existing chats, stores conversation IDs, infers hidden routing,
+enables writes, or changes the exact C0 probe snapshot.
+
+The live gate and rollback are specified in
+[`providers/chatgpt-mcp-c1-observability.md`](providers/chatgpt-mcp-c1-observability.md).

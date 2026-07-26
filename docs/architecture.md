@@ -324,3 +324,18 @@ tool. The facade and tunnel health surface bind to explicit loopback addresses;
 public endpoint construction is outside the implementation. The full contract
 and rollback are in
 [`providers/chatgpt-mcp-c0-connectivity.md`](providers/chatgpt-mcp-c0-connectivity.md).
+
+## Optional C1 Chat-surface observation boundary
+
+ADR 0008 layers typed observation and correlation over the unchanged C0 probe.
+It does not add a provider-conversation transport or a browser-history reader.
+Two locally labeled, newly created Chat pages each receive one distinct
+positive challenge. A pre-prompt visible-surface observation must be `chat`;
+`work`, `codex`, and `unknown` fail closed before prompting.
+
+Codex turn metadata, Codex configured defaults, and ChatGPT-visible labels are
+stored in separate fields and evidence domains. Two response/audit pairs,
+bounded negative results, explicit Plugin/key revocation, and a failed
+post-revocation call are required for the short-lived final attestation. The
+full contract is in
+[`providers/chatgpt-mcp-c1-observability.md`](providers/chatgpt-mcp-c1-observability.md).

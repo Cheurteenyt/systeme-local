@@ -331,3 +331,24 @@ Residual risk is limited to the manually observed ChatGPT Web configuration and
 the OpenAI control plane. C0 records only bounded states and digests; it cannot
 cryptographically prove UI truth without the operator. The attestation expires
 within 24 hours and never authorizes regular or write-capable use.
+
+## C1 Chat-surface and attribution boundary
+
+C1 adds threats from surface confusion, existing-chat overreach, hidden-model
+inference, localized-label misattribution, cross-chat challenge replay, edited
+manual receipts, and incomplete post-test revocation.
+
+Controls are a pre-prompt enum-only surface observation, immutable
+`work_tested=false`, two local test labels without provider conversation IDs,
+separate runtime/default/Web-label models, domain-separated HMAC receipts,
+strict extra-field rejection, one-tool policy/snapshot binding, distinct
+challenge/response/audit requirements, bounded expiry, and a mandatory failed
+post-revocation Chat call. Browser control requires fresh explicit operator
+authorization and excludes sidebar/history access, private requests, cookies,
+storage, unrelated tabs, developer tools, personal content, and API-key pages.
+
+No official Plugin interface reviewed by C1 exposes account chat history or
+conversation identifiers. The absence of that contract is a blocker, not
+permission to scrape. Residual risk remains in manual truthfulness and visible
+UI changes; signed receipts authenticate the recorded claims but do not turn
+unsupported UI state into provider-issued evidence.

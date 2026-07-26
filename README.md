@@ -325,6 +325,12 @@ documente l’unique exception de connectivité entrante : app en brouillon,
 Secure MCP Tunnel officiel, façade loopback et un outil synthétique. Il
 n’autorise ni automatisation web, ni preuve B2 réelle, ni outil d’écriture.
 
+Le lot
+[`C1 — ChatGPT Web Chat-surface observability`](docs/providers/chatgpt-mcp-c1-observability.md)
+ajoute une garde Chat/Work, deux conversations de test stériles, l’attribution
+distincte du runtime Codex et des libellés Web, la corrélation d’audit et la
+révocation. Il n’ouvre, ne lit et n’énumère aucun chat existant.
+
 ## Architecture
 
 Commencez par le [`blueprint v2`](docs/blueprint-v2.md), puis consultez le [`connectivity model`](docs/connectivity-model.md), [`docs/architecture.md`](docs/architecture.md), [`docs/threat-model.md`](docs/threat-model.md) et [`docs/roadmap.md`](docs/roadmap.md).
