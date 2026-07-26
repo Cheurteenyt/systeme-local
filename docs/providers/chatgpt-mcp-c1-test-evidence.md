@@ -1,7 +1,7 @@
 # C1 test and evidence ledger
 
-Status at `2026-07-26T18:43:51Z`:
-`READY_BUT_MANUAL_WEB_GATE_PENDING`
+Status at `2026-07-26T19:07:37Z`:
+`ENCODING_FIX_UNDER_VALIDATION`
 
 This ledger records what was actually executed for C1. It is an evidence
 index, not a substitute for the signed C1 receipts. A row is successful only
@@ -28,7 +28,7 @@ API-key pages, and unrelated tabs are outside the evidence boundary.
 | Repository | `Cheurteenyt/systeme-local` |
 | C1 issue | `#66` |
 | C1 branch | `interop/chatgpt-web-chat-observability-c1` |
-| Tested C1 commit | `692e75de7b5f9b4ba9d52faf46b368dd6e969f58` |
+| Current committed C1 baseline | `1a2cdc5727566305236a6bc04e772674fb7f54c1` |
 | C0 dependency | `912d0d33e119469ff957965104cf20af5e491923` |
 | Policy SHA-256 | `17a53ee929232bae5901037c26c23ad1379dbdb09998c698b1ed85c60a75700e` |
 | Tool snapshot SHA-256 | `6d9a8e0f6dadb9f3a615abcca8c882cb37fb257944922151e97c65a8575da14b` |
@@ -83,9 +83,13 @@ than suppressed; it does not prove or disprove the live C1 claim.
 
 ## Live Chat tests not yet executed
 
-At this ledger cutoff, no browser authorization had been supplied and no
-ChatGPT Web prompt had been sent. Therefore all of the following remain
-`not-run`:
+The operator subsequently supplied bounded browser authorization. Visible-only
+inspection of a new Chat page classified the surface as `Chat`, directly
+observed the reasoning label `Très élevée`, found no visible model label or
+internal model ID, and did not open or test Work. The Plugin marketplace was
+also inspected without selecting or creating a Plugin. Developer mode still
+requires a separate action-time authorization, and no ChatGPT Web prompt has
+been sent. Therefore all of the following remain `not-run`:
 
 - positive Chat A and Chat B calls;
 - visible Chat/model/reasoning observations;
@@ -99,6 +103,21 @@ ChatGPT Web prompt had been sent. Therefore all of the following remain
 The final documentation update must replace this section with exact result
 rows and hashes only after the signed receipts exist. It must not rewrite
 `not-run` as `PASS` from memory, screenshots, or local-only evidence.
+
+## Live encoding defect discovered after authorization
+
+At `2026-07-26T19:06:43Z`, the first authorized visible-label observation
+exposed a Windows console code-page defect: the intended French label
+`Très élevée` reached the evidence file as `TrÞs ÚlevÚe`, and the file was not
+valid UTF-8. The observation was rejected, the tunnel/facade were stopped,
+ports `8765/8766` were verified closed, and the entire preflight state was
+irrecoverably removed before any Chat prompt or tool call.
+
+The regression fix requires non-ASCII visible labels as canonical UTF-8
+Base64, decodes them with strict UTF-8, rejects ambiguous raw non-ASCII input,
+and makes all C1 Python CLI JSON output ASCII-safe with `\u` escapes. A new
+clean live session and a new signed visible-label observation are required;
+the rejected observation is not C1 evidence.
 
 ## Final validation still required
 

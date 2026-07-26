@@ -179,7 +179,7 @@ def main(argv: list[str] | None = None) -> int:
         print(
             json.dumps(
                 {"status": "error", "error": str(exc)},
-                ensure_ascii=False,
+                ensure_ascii=True,
                 sort_keys=True,
             ),
             file=sys.stderr,
@@ -189,7 +189,7 @@ def main(argv: list[str] | None = None) -> int:
     print(
         json.dumps(
             bundle.model_dump(mode="json"),
-            ensure_ascii=False,
+            ensure_ascii=True,
             indent=2,
             sort_keys=True,
         )

@@ -132,6 +132,27 @@ def test_c1_surface_script_has_chat_work_codex_unknown_guard() -> None:
     assert "refuses prompts and Plugin selection outside Chat" in source
 
 
+def test_c1_visible_label_script_requires_base64_for_non_ascii_labels() -> None:
+    text = (C1_SCRIPTS / "New-C1VisibleModelObservation.ps1").read_text(encoding="utf-8")
+    common = (C1_SCRIPTS / "C1.Common.psm1").read_text(encoding="utf-8")
+
+    for marker in (
+        "$VisibleModelLabelUtf8Base64",
+        "$VisibleReasoningLabelUtf8Base64",
+        "Non-ASCII model labels must use VisibleModelLabelUtf8Base64.",
+        "Non-ASCII reasoning labels must use ",
+        "VisibleReasoningLabelUtf8Base64.",
+        "not both",
+    ):
+        assert marker in text
+    for marker in (
+        "ConvertFrom-C1Utf8Base64",
+        "UTF8Encoding($false, $true)",
+        "valid canonical UTF-8 Base64",
+    ):
+        assert marker in common
+
+
 def test_c1_final_script_requires_every_live_receipt_and_noncomplete_c0_status() -> None:
     text = (C1_SCRIPTS / "Commit-C1FinalAttestation.ps1").read_text(encoding="utf-8")
 
@@ -261,13 +282,15 @@ def test_c1_evidence_ledger_separates_executed_and_pending_tests() -> None:
 
     assert "C1 test and evidence ledger" in runbook
     for marker in (
-        "READY_BUT_MANUAL_WEB_GATE_PENDING",
+        "ENCODING_FIX_UNDER_VALIDATION",
         "858 passed, 5 skipped, 86.11% coverage",
         "72 C1 tests",
         "live-setup",
         "This proves transport readiness only",
         "Live Chat tests not yet executed",
-        "no browser authorization had been supplied",
+        "operator subsequently supplied bounded browser authorization",
+        "Developer mode still",
+        "requires a separate action-time authorization",
         "same-chat and cross-chat replay checks",
         "post-revocation failure",
         "Final validation still required",

@@ -291,8 +291,21 @@ Record visible labels separately. Omit a label that is not visibly exposed:
 ```powershell
 .\scripts\c1\New-C1VisibleModelObservation.ps1 `
   -VisibleModelLabel "<exact visible label>" `
-  -VisibleReasoningLabel "<exact visible label>"
+  -VisibleReasoningLabel "<exact ASCII visible label>"
 ```
+
+Non-ASCII labels must use canonical UTF-8 Base64 so Windows console code pages
+cannot alter signed evidence. For the directly observed French label
+`Très élevée`, use:
+
+```powershell
+.\scripts\c1\New-C1VisibleModelObservation.ps1 `
+  -VisibleReasoningLabelUtf8Base64 "VHLDqHMgw6lsZXbDqWU="
+```
+
+The C1 Python CLIs render non-ASCII JSON characters as `\u` escapes. The typed
+value remains exact after JSON parsing while every byte crossing the
+PowerShell/native-process boundary remains ASCII.
 
 Do not supply `-ExactInternalModelId` unless that exact ID is visibly exposed.
 Do not supply `-CanonicalReasoning` without a current mapping-summary digest.

@@ -10,6 +10,7 @@ from pydantic import ValidationError
 from systeme_local_gateway.audit import AuditLog
 from systeme_local_gateway.c0_proof_check import canonical_c0_audit_record_sha256
 from systeme_local_gateway.c1_attest import main as c1_attest_main
+from systeme_local_gateway.c1_evidence import main as c1_evidence_main
 from systeme_local_gateway.c1_observability import (
     C1_CONFIGURATION_PRECEDENCE,
     C1C0DependencyStatus,
@@ -597,6 +598,28 @@ def test_models_forbid_unknown_fields() -> None:
         C1TestChatObservation,
     ):
         assert model.model_json_schema()["additionalProperties"] is False
+
+
+def test_visible_model_cli_emits_ascii_safe_json_for_localized_labels(
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    monkeypatch.setenv("SLG_AUDIT_KEY", AUDIT_KEY)
+
+    result = c1_evidence_main(
+        [
+            "visible-model",
+            "--visible-reasoning-label",
+            "Très élevée",
+        ]
+    )
+    output = capsys.readouterr().out
+
+    assert result == 0
+    assert output.isascii()
+    assert "\\u00e8" in output
+    assert "\\u00e9" in output
+    assert json.loads(output)["visible_reasoning_label"] == "Très élevée"
 
 
 def test_final_attestation_cli_revalidates_git_policy_and_real_audit_chain(

@@ -233,6 +233,37 @@ function Assert-C1StateFile {
     return $resolved
 }
 
+function ConvertFrom-C1Utf8Base64 {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$Value,
+        [Parameter(Mandatory = $true)]
+        [string]$FieldName
+    )
+
+    if ([string]::IsNullOrWhiteSpace($Value)) {
+        throw "$FieldName UTF-8 Base64 value must not be empty."
+    }
+    try {
+        $bytes = [Convert]::FromBase64String($Value)
+    } catch {
+        throw "$FieldName must use valid canonical UTF-8 Base64."
+    }
+    if ([Convert]::ToBase64String($bytes) -cne $Value) {
+        throw "$FieldName must use valid canonical UTF-8 Base64."
+    }
+    $strictUtf8 = New-Object System.Text.UTF8Encoding($false, $true)
+    try {
+        $decoded = $strictUtf8.GetString($bytes)
+    } catch {
+        throw "$FieldName Base64 payload must contain valid UTF-8."
+    }
+    if ([string]::IsNullOrWhiteSpace($decoded)) {
+        throw "$FieldName decoded value must not be empty."
+    }
+    return $decoded
+}
+
 Export-ModuleMember -Function @(
     "Assert-C1GitState",
     "Assert-C1AuditKeyEnvironment",
@@ -241,6 +272,7 @@ Export-ModuleMember -Function @(
     "Assert-C1StateFile",
     "Assert-C1TunnelBinary",
     "Assert-C1TunnelEnvironment",
+    "ConvertFrom-C1Utf8Base64",
     "Get-C1BuildCommit",
     "Get-C1RepositoryRoot",
     "Get-C1StateDirectory",
