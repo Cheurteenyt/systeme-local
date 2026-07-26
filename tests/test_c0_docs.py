@@ -158,3 +158,14 @@ def test_facade_starts_outside_repo_env_and_rejects_inherited_anchor() -> None:
     assert "-WorkingDirectory $root" not in text
     assert '"SLG_AUDIT_ANCHOR_LOG"' in text
     assert '"SLG_AUDIT_ANCHOR_KEY"' in text
+
+
+def test_facade_tracks_windows_launcher_and_socket_owner_separately() -> None:
+    start = (ROOT / "scripts/c0/Start-C0Facade.ps1").read_text(encoding="utf-8")
+    stop = (ROOT / "scripts/c0/Stop-C0.ps1").read_text(encoding="utf-8")
+
+    assert '"facade-launcher.pid"' in start
+    assert "Get-CimInstance Win32_Process" in start
+    assert "$runtimeMetadata.ParentProcessId -ne $process.Id" in start
+    assert "Assert-C0LoopbackListener -ProcessId $runtimePid -Port 8765" in start
+    assert 'Stop-C0Process -Name "facade-launcher"' in stop

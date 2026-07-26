@@ -9,7 +9,11 @@ $ErrorActionPreference = "Stop"
 Import-Module (Join-Path $PSScriptRoot "C0.Common.psm1") -Force
 
 Assert-C0GitState
-if ($null -ne (Read-C0Pid -Name "facade") -or $null -ne (Read-C0Pid -Name "tunnel")) {
+if (
+    $null -ne (Read-C0Pid -Name "facade") -or
+    $null -ne (Read-C0Pid -Name "facade-launcher") -or
+    $null -ne (Read-C0Pid -Name "tunnel")
+) {
     throw "Stop C0 processes before cleanup."
 }
 $state = Get-C0StateDirectory

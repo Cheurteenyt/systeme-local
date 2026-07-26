@@ -15,6 +15,7 @@ if ($Emergency) {
 }
 Stop-C0Process -Name "tunnel" -AllowedExecutableNames @("tunnel-client.exe")
 Stop-C0Process -Name "facade" -AllowedExecutableNames @("python.exe")
+Stop-C0Process -Name "facade-launcher" -AllowedExecutableNames @("python.exe")
 
 $remaining = @(
     Get-NetTCPConnection -State Listen -ErrorAction SilentlyContinue |

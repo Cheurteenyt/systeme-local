@@ -15,7 +15,11 @@ Import-Module (Join-Path $PSScriptRoot "C0.Common.psm1") -Force
 
 Assert-C0GitState
 $state = Get-C0StateDirectory
-if ($null -ne (Read-C0Pid -Name "facade") -or $null -ne (Read-C0Pid -Name "tunnel")) {
+if (
+    $null -ne (Read-C0Pid -Name "facade") -or
+    $null -ne (Read-C0Pid -Name "facade-launcher") -or
+    $null -ne (Read-C0Pid -Name "tunnel")
+) {
     throw "Local C0 processes must be stopped before recording revocation."
 }
 $pending = Join-Path $state "live-proof-pending-revocation.json"

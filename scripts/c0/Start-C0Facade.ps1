@@ -10,7 +10,10 @@ Assert-C0GitState
 Assert-C0SecretEnvironment
 $root = Get-C0RepositoryRoot
 $state = Initialize-C0StateDirectory
-if ($null -ne (Read-C0Pid -Name "facade")) {
+if (
+    $null -ne (Read-C0Pid -Name "facade") -or
+    $null -ne (Read-C0Pid -Name "facade-launcher")
+) {
     throw "C0 facade PID file already exists."
 }
 foreach ($name in @("SLG_AUDIT_ANCHOR_LOG", "SLG_AUDIT_ANCHOR_KEY")) {
@@ -53,14 +56,13 @@ $process = Start-Process -FilePath $python `
     -RedirectStandardOutput $stdout `
     -RedirectStandardError $stderr `
     -PassThru
-$process.Id | Set-Content -LiteralPath (Join-Path $state "facade.pid") -NoNewline
+$process.Id | Set-Content -LiteralPath (
+    Join-Path $state "facade-launcher.pid"
+) -NoNewline
 
 try {
     $healthy = $false
     foreach ($attempt in 1..15) {
-        if ($process.HasExited) {
-            throw "C0 facade exited during startup."
-        }
         try {
             $health = Invoke-RestMethod -Uri "http://127.0.0.1:8765/health" `
                 -TimeoutSec 2
@@ -75,15 +77,50 @@ try {
     if (-not $healthy) {
         throw "C0 facade health check timed out."
     }
-    Assert-C0LoopbackListener -ProcessId $process.Id -Port 8765
+    $listeners = @(
+        Get-NetTCPConnection -State Listen -LocalPort 8765 `
+            -ErrorAction SilentlyContinue
+    )
+    if (
+        $listeners.Count -ne 1 -or
+        $listeners[0].LocalAddress -ne "127.0.0.1"
+    ) {
+        throw "C0 facade did not create exactly one IPv4 loopback listener."
+    }
+    $runtimePid = $listeners[0].OwningProcess
+    $runtimeProcess = Get-Process -Id $runtimePid -ErrorAction Stop
+    if (
+        [System.IO.Path]::GetFileName($runtimeProcess.Path) -ne "python.exe"
+    ) {
+        throw "C0 facade listener is not owned by python.exe."
+    }
+    $runtimeMetadata = Get-CimInstance Win32_Process -Filter (
+        "ProcessId = $runtimePid"
+    )
+    if (
+        $runtimePid -ne $process.Id -and
+        $runtimeMetadata.ParentProcessId -ne $process.Id
+    ) {
+        throw "C0 facade listener is unrelated to the launched Python process."
+    }
+    $runtimePid | Set-Content -LiteralPath (
+        Join-Path $state "facade.pid"
+    ) -NoNewline
+    if ($runtimePid -eq $process.Id) {
+        Remove-Item -LiteralPath (
+            Join-Path $state "facade-launcher.pid"
+        ) -Force
+    }
+    Assert-C0LoopbackListener -ProcessId $runtimePid -Port 8765
 } catch {
     Stop-C0Process -Name "facade" -AllowedExecutableNames @("python.exe")
+    Stop-C0Process -Name "facade-launcher" -AllowedExecutableNames @("python.exe")
     throw
 }
 
 [pscustomobject]@{
     status = "started"
-    pid = $process.Id
+    pid = $runtimePid
     endpoint = "http://127.0.0.1:8765/mcp"
     build_commit = $env:SLG_C0_SERVER_BUILD_COMMIT
     policy = $env:SLG_POLICY_FILE

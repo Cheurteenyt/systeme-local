@@ -12,7 +12,11 @@ Assert-C0GitState
 Assert-C0SecretEnvironment
 $root = Get-C0RepositoryRoot
 $state = Get-C0StateDirectory
-if ($null -ne (Read-C0Pid -Name "facade") -or $null -ne (Read-C0Pid -Name "tunnel")) {
+if (
+    $null -ne (Read-C0Pid -Name "facade") -or
+    $null -ne (Read-C0Pid -Name "facade-launcher") -or
+    $null -ne (Read-C0Pid -Name "tunnel")
+) {
     throw "C0 processes must be stopped before committing the revocation-bound attestation."
 }
 if ([string]::IsNullOrWhiteSpace($ManualObservationPath)) {

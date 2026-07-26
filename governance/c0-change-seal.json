@@ -7,7 +7,7 @@
   "generated_at": "2026-07-26T14:30:01.4664114Z",
   "diff": {
     "algorithm": "sha256",
-    "sha256": "ec09c830d9734527ab5b98feb93e70217833dd2609ad400a9f5a2be9a22fef01",
+    "sha256": "00d78cd1e2b1ca7778f8008a8b8e8a6bd37cfa1c0c1d7be54962f21d64be04f6",
     "command": "git diff --binary --full-index --no-ext-diff 32515ac9cbb9d658b2ddcb2723ab3c0a71f2b418 -- . \":(exclude)governance/c0-change-seal.json\"",
     "scope": "the complete C0 patch relative to the recorded base commit, excluding only this self-referential seal file",
     "excluded_paths": [
