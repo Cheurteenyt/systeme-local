@@ -7,9 +7,9 @@
   "generated_at": "2026-07-26T14:30:01.4664114Z",
   "diff": {
     "algorithm": "sha256",
-    "sha256": "8b5fe82c3a48c9d4e392b8fcc348ab80013ba39964e4fed69e3b895157186511",
-    "command": "git diff --cached --binary --full-index --no-ext-diff -- . \":(exclude)governance/c0-change-seal.json\"",
-    "scope": "the complete staged C0 patch relative to HEAD, excluding only this self-referential seal file",
+    "sha256": "f4eead95fe6163d8c6bf4df3a2c56a276d71c09ec256aae2953a38ef681e9b49",
+    "command": "git diff --binary --full-index --no-ext-diff 32515ac9cbb9d658b2ddcb2723ab3c0a71f2b418 -- . \":(exclude)governance/c0-change-seal.json\"",
+    "scope": "the complete C0 patch relative to the recorded base commit, excluding only this self-referential seal file",
     "excluded_paths": [
       "governance/c0-change-seal.json"
     ]

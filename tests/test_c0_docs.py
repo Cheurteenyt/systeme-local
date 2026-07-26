@@ -128,3 +128,22 @@ def test_revocation_script_requires_each_manual_fact_explicitly() -> None:
     ):
         assert switch in text
     assert text.count("[Parameter(Mandatory = $true)]") == 3
+
+
+def test_stop_script_clears_every_c0_process_secret_and_runtime_setting() -> None:
+    text = (ROOT / "scripts/c0/Stop-C0.ps1").read_text(encoding="utf-8")
+
+    for variable in (
+        "CONTROL_PLANE_API_KEY",
+        "CONTROL_PLANE_TUNNEL_ID",
+        "SLG_SHARED_SECRET",
+        "SLG_AUDIT_KEY",
+        "SLG_MCP_TOKEN",
+        "SLG_POLICY_FILE",
+        "SLG_WORKSPACE",
+        "SLG_AUDIT_LOG",
+        "SLG_REPLAY_DB",
+        "SLG_APPROVAL_DB",
+        "SLG_SANDBOX_ROOT",
+    ):
+        assert f'"{variable}"' in text

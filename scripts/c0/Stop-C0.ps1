@@ -34,10 +34,18 @@ foreach ($name in @(
     "LOG_HTTP_RAW_UNSAFE",
     "OPEN_WEB_UI",
     "ALLOW_REMOTE_UI",
+    "SLG_SHARED_SECRET",
+    "SLG_AUDIT_KEY",
     "SLG_C0_ENABLED",
     "SLG_C0_SERVER_BUILD_COMMIT",
     "SLG_MCP_ENABLED",
-    "SLG_MCP_TOKEN"
+    "SLG_MCP_TOKEN",
+    "SLG_POLICY_FILE",
+    "SLG_WORKSPACE",
+    "SLG_AUDIT_LOG",
+    "SLG_REPLAY_DB",
+    "SLG_APPROVAL_DB",
+    "SLG_SANDBOX_ROOT"
 )) {
     Remove-Item -LiteralPath "Env:$name" -ErrorAction SilentlyContinue
 }
