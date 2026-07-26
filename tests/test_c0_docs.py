@@ -138,6 +138,8 @@ def test_stop_script_clears_every_c0_process_secret_and_runtime_setting() -> Non
         "CONTROL_PLANE_TUNNEL_ID",
         "SLG_SHARED_SECRET",
         "SLG_AUDIT_KEY",
+        "SLG_AUDIT_ANCHOR_LOG",
+        "SLG_AUDIT_ANCHOR_KEY",
         "SLG_MCP_TOKEN",
         "SLG_POLICY_FILE",
         "SLG_WORKSPACE",
@@ -147,3 +149,12 @@ def test_stop_script_clears_every_c0_process_secret_and_runtime_setting() -> Non
         "SLG_SANDBOX_ROOT",
     ):
         assert f'"{variable}"' in text
+
+
+def test_facade_starts_outside_repo_env_and_rejects_inherited_anchor() -> None:
+    text = (ROOT / "scripts/c0/Start-C0Facade.ps1").read_text(encoding="utf-8")
+
+    assert "-WorkingDirectory $state" in text
+    assert "-WorkingDirectory $root" not in text
+    assert '"SLG_AUDIT_ANCHOR_LOG"' in text
+    assert '"SLG_AUDIT_ANCHOR_KEY"' in text

@@ -100,6 +100,10 @@ singleton `Host`/`Origin`/`Authorization`, bearer, size, rate, and concurrency
 controls remain enabled. The official tunnel client health surface binds to
 `127.0.0.1:8766`. No firewall rule, DNS name, TLS private key, public reverse
 proxy, port forward, wildcard bind, or third-party tunnel is created.
+The facade starts from the ignored C0 state directory rather than the
+repository root, so repository-local `.env` values cannot silently widen or
+re-anchor the probe. Explicit process-level audit-anchor configuration is
+rejected before startup.
 
 The pinned tunnel client receives credentials only through process
 environment. Static local MCP headers use

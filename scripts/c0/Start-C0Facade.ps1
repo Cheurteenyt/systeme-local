@@ -13,6 +13,11 @@ $state = Initialize-C0StateDirectory
 if ($null -ne (Read-C0Pid -Name "facade")) {
     throw "C0 facade PID file already exists."
 }
+foreach ($name in @("SLG_AUDIT_ANCHOR_LOG", "SLG_AUDIT_ANCHOR_KEY")) {
+    if ($null -ne [Environment]::GetEnvironmentVariable($name, "Process")) {
+        throw "C0 refuses inherited audit-anchor configuration: $name."
+    }
+}
 
 $existing = @(Get-NetTCPConnection -State Listen -LocalPort 8765 -ErrorAction SilentlyContinue)
 if ($existing.Count -gt 0) {
@@ -43,7 +48,7 @@ $process = Start-Process -FilePath $python `
         "8765",
         "--no-access-log"
     ) `
-    -WorkingDirectory $root `
+    -WorkingDirectory $state `
     -WindowStyle Hidden `
     -RedirectStandardOutput $stdout `
     -RedirectStandardError $stderr `
