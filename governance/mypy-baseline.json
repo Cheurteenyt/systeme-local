@@ -6,6 +6,7 @@
     "src/systeme_local_gateway/c0_probe.py",
     "src/systeme_local_gateway/c0_proof_check.py",
     "src/systeme_local_gateway/c0_smoke.py",
+    "src/systeme_local_gateway/c0_tunnel_smoke.py",
     "src/systeme_local_gateway/providers/_canonicalization.py",
     "src/systeme_local_gateway/providers/_operator_evidence",
     "src/systeme_local_gateway/providers/chatgpt_mcp_live_probe.py",

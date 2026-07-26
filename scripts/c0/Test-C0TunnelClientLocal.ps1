@@ -99,7 +99,10 @@ try {
     $info = Get-Content -LiteralPath $urlFile -Raw | ConvertFrom-Json
     if (
         $info.tunnel_id -ne "tunnel_22222222222222222222222222222222" -or
-        $info.mcp_url -notmatch "^http://127\.0\.0\.1:[0-9]+/mcp$" -or
+        $info.mcp_url -notmatch (
+            "^http://127\.0\.0\.1:[0-9]+/v1/mcp/" +
+            "tunnel_22222222222222222222222222222222$"
+        ) -or
         $info.control_plane_base_url -notmatch "^http://127\.0\.0\.1:[0-9]+$" -or
         $info.backend -ne "go-in-memory"
     ) {
@@ -117,7 +120,7 @@ try {
         Get-Content -LiteralPath $challengePath -Raw
     ).Trim()
     $python = Join-Path $root ".venv\Scripts\python.exe"
-    $result = & $python -m systeme_local_gateway.c0_smoke `
+    $result = & $python -m systeme_local_gateway.c0_tunnel_smoke `
         --url $info.mcp_url
     if ($LASTEXITCODE -ne 0) {
         throw "C0 probe through official tunnel-client local proxy failed."
@@ -125,6 +128,7 @@ try {
     $response = ($result -join "`n") | ConvertFrom-Json
     if (
         $response.status -ne "ok" -or
+        $response.client_authorization_sent -ne $false -or
         @($response.tools).Count -ne 1 -or
         $response.tools[0] -ne "systeme_local_connectivity_probe"
     ) {

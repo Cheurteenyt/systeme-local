@@ -9,7 +9,6 @@ src/systeme_local_gateway/audit_anchor.py
 src/systeme_local_gateway/audit_runtime.py
 src/systeme_local_gateway/auth.py
 src/systeme_local_gateway/brains/router.py
-src/systeme_local_gateway/mcp_smoke.py
 src/systeme_local_gateway/providers/attachment_commit.py
 src/systeme_local_gateway/providers/attachment_models.py
 src/systeme_local_gateway/providers/attachment_policy.py
