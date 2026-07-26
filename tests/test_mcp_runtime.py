@@ -8,6 +8,11 @@ from mcp import ClientSession
 from mcp.client.streamable_http import streamable_http_client
 
 from systeme_local_gateway.auth import compute_task_signature
+from systeme_local_gateway.c0_probe import (
+    C0_TOOL_NAME,
+    C0ConnectivityProbe,
+    C0ProbeContext,
+)
 from systeme_local_gateway.mcp_runtime import McpRuntime
 from systeme_local_gateway.mcp_tools import McpToolRegistry
 from systeme_local_gateway.models import TaskResult
@@ -111,9 +116,7 @@ async def test_official_client_initialize_list_and_call(
                 async with ClientSession(read_stream, write_stream) as session:
                     await session.initialize()
                     listed = await session.list_tools()
-                    assert [tool.name for tool in listed.tools] == [
-                        "workspace.list"
-                    ]
+                    assert [tool.name for tool in listed.tools] == ["workspace.list"]
 
                     result = await session.call_tool(
                         "workspace.list",
@@ -288,3 +291,104 @@ async def test_request_size_and_rate_limits(tmp_path: Path) -> None:
             limited = await client.post("/mcp", json={})
             assert limited.status_code == 429
             assert limited.headers["retry-after"] == "60"
+
+
+@pytest.mark.anyio
+async def test_c0_sdk_snapshot_and_structured_response_are_exact(
+    tmp_path: Path,
+) -> None:
+    policy_path = tmp_path / "policy.c0.yaml"
+    policy_path.write_text(
+        f"""version: 1
+default: deny
+capabilities:
+  {C0_TOOL_NAME}:
+    decision: allow
+""",
+        encoding="utf-8",
+    )
+    policy = PolicyEngine(policy_path)
+    registry = McpToolRegistry(policy, c0_mode=True)
+    shared_secret = "s" * 48
+    audit_id = "12345678-1234-4123-8123-123456789abc"
+    probe = C0ConnectivityProbe(
+        C0ProbeContext(
+            server_build_commit="a" * 40,
+            local_policy_sha256=policy.policy_sha256,
+            tool_snapshot_sha256=registry.tool_snapshot_sha256,
+        )
+    )
+
+    class C0Processor:
+        def process(self, task):
+            assert task.signature == compute_task_signature(
+                task,
+                shared_secret,
+            )
+            return TaskResult(
+                task_id=task.task_id,
+                status="completed",
+                output=probe.execute(task.arguments),
+                audit_id=audit_id,
+            )
+
+    runtime = McpRuntime(
+        token="t" * 48,
+        shared_secret=shared_secret,
+        registry=registry,
+        task_processor=C0Processor(),
+        max_request_bytes=1_048_576,
+        requests_per_minute=120,
+        max_concurrency=2,
+    )
+
+    @asynccontextmanager
+    async def lifespan(_app: FastAPI):
+        async with runtime.run():
+            yield
+
+    app = FastAPI(lifespan=lifespan)
+
+    @app.api_route("/mcp", methods=["GET", "POST", "DELETE"])
+    async def endpoint(request: Request):
+        return await runtime.handle_http_request(request)
+
+    transport = httpx.ASGITransport(
+        app=app,
+        client=("127.0.0.1", 50_007),
+    )
+    challenge = "c0_0123456789abcdef0123456789abcdef"
+    async with app.router.lifespan_context(app):
+        async with httpx.AsyncClient(
+            transport=transport,
+            base_url="http://127.0.0.1",
+            headers={"Authorization": f"Bearer {'t' * 48}"},
+        ) as http_client:
+            async with streamable_http_client(
+                "http://127.0.0.1/mcp",
+                http_client=http_client,
+                terminate_on_close=False,
+            ) as (read_stream, write_stream, _session_id):
+                async with ClientSession(read_stream, write_stream) as session:
+                    await session.initialize()
+                    listed = await session.list_tools()
+                    assert len(listed.tools) == 1
+                    tool = listed.tools[0]
+                    assert tool.name == C0_TOOL_NAME
+                    assert tool.annotations is not None
+                    assert tool.annotations.readOnlyHint is True
+                    assert tool.annotations.destructiveHint is False
+                    assert tool.annotations.idempotentHint is True
+                    assert tool.annotations.openWorldHint is False
+                    assert tool.outputSchema is not None
+
+                    result = await session.call_tool(
+                        C0_TOOL_NAME,
+                        {"challenge": challenge},
+                    )
+                    assert result.isError is False
+                    assert result.structuredContent is not None
+                    assert result.structuredContent["audit_correlation"] == audit_id
+                    assert result.structuredContent["write_actions_enabled"] is False
+                    assert result.structuredContent["real_evidence_access"] is False
+                    assert result.structuredContent["protocol_v2_reachable"] is False

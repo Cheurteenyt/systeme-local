@@ -2,7 +2,7 @@
 
 Passerelle locale sécurisée permettant à un agent IA distant de demander des actions limitées sur un poste de travail, sans lui donner un accès direct au système hôte.
 
-> **État : fondation expérimentale, locale et fail-closed.** Le gateway sécurisé, le MCP loopback, le lifecycle provider, le registre de contexte, les manifests de pièces jointes et les contrats ChatGPT MCP jusqu’au bundle de preuves opérateur sont implémentés de manière déterministe. Aucun transport provider réel, tunnel, client OAuth/OIDC ou app ChatGPT n’est configuré.
+> **État : fondation expérimentale, locale et fail-closed.** Le gateway sécurisé, le MCP loopback, le lifecycle provider, le registre de contexte, les manifests de pièces jointes et les contrats ChatGPT MCP jusqu’au bundle de preuves opérateur sont implémentés de manière déterministe. Un probe C0 optionnel et désactivé par défaut peut tester un unique outil synthétique via Secure MCP Tunnel ; aucun tunnel, client OAuth/OIDC ou app ChatGPT n’est configuré dans le dépôt et aucune connexion live n’est revendiquée.
 
 ## Principes
 
@@ -318,6 +318,12 @@ Les autorités documentaires restent :
 
 Une interface web privée n’est jamais traitée comme une API publique. Les cookies, endpoints
 privés, sidebars et signaux DOM ne sont pas des contrats d’intégration.
+
+Le lot borné
+[`C0 — ChatGPT Web MCP read-only connectivity probe`](docs/providers/chatgpt-mcp-c0-connectivity.md)
+documente l’unique exception de connectivité entrante : app en brouillon,
+Secure MCP Tunnel officiel, façade loopback et un outil synthétique. Il
+n’autorise ni automatisation web, ni preuve B2 réelle, ni outil d’écriture.
 
 ## Architecture
 

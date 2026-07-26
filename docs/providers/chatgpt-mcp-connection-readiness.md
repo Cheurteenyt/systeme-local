@@ -1,10 +1,10 @@
 # ChatGPT MCP connection readiness and evidence reconciliation
 
-Status: deterministic readiness foundation implemented; real connection not implemented
+Status: deterministic readiness foundation implemented; separate C0 live attestation pending manual verification
 
-Reviewed: 2026-07-18T14:00:00Z
+Reviewed: 2026-07-26T00:00:00Z
 
-Revalidate no later than: 2026-08-01T14:00:00Z
+Revalidate no later than: 2026-08-09T00:00:00Z
 
 ## Decision
 
@@ -224,3 +224,15 @@ sidebar or derive identifiers from URLs and model output.
 
 - [Developer mode and MCP apps in ChatGPT](https://help.openai.com/en/articles/12584461)
 - [Apps in ChatGPT](https://help.openai.com/en/articles/11487775-apps-in-chatgpt)
+- [Secure MCP Tunnels](https://developers.openai.com/api/docs/guides/secure-mcp-tunnels)
+
+## Separate C0 live state
+
+Readiness observations continue to record
+`real_connection_requested=false`; they are not rewritten after a live test.
+The narrower
+[`ChatGptMcpLiveProbeAttestation`](chatgpt-mcp-c0-connectivity.md#live-attestation)
+binds the current profiles, all eleven check states, the exact `1/0/0` tool
+snapshot, manual ChatGPT Web response, correlated HMAC audit record, and
+revocation test. A local call or tunnel health check cannot create that
+attestation.

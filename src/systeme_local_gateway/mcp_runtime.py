@@ -23,6 +23,7 @@ from mcp.server.transport_security import TransportSecuritySettings
 from starlette.types import Message
 
 from .auth import compute_task_signature
+from .c0_probe import C0_TOOL_NAME, finalize_c0_response
 from .models import AgentIdentity, TaskEnvelope, TaskResult
 from .task_processor import TaskProcessingError
 
@@ -35,6 +36,12 @@ class McpToolDefinitionProtocol(Protocol):
 
     @property
     def input_schema(self) -> dict[str, Any]: ...
+
+    @property
+    def output_schema(self) -> dict[str, Any] | None: ...
+
+    @property
+    def annotations(self) -> dict[str, bool] | None: ...
 
 
 class McpToolRegistryProtocol(Protocol):
@@ -125,6 +132,21 @@ class McpTaskAdapter:
         }
         if result.status == "completed":
             output = result.model_dump(mode="json")["output"]
+            if name == C0_TOOL_NAME:
+                try:
+                    output = finalize_c0_response(
+                        output,
+                        audit_correlation=result.audit_id,
+                    )
+                except Exception as exc:
+                    logger.error(
+                        "C0 response validation failed with %s",
+                        type(exc).__name__,
+                    )
+                    return _tool_error(
+                        "Tool response validation failed",
+                        metadata=metadata,
+                    )
             text = json.dumps(
                 output,
                 sort_keys=True,
@@ -220,14 +242,23 @@ class McpRuntime:
 
         @server.list_tools()
         async def list_tools() -> list[types.Tool]:
-            return [
-                types.Tool(
-                    name=tool.name,
-                    description=tool.description,
-                    inputSchema=tool.input_schema,
+            tools: list[types.Tool] = []
+            for tool in registry.list_tools():
+                annotations = (
+                    types.ToolAnnotations(**tool.annotations)
+                    if tool.annotations is not None
+                    else None
                 )
-                for tool in registry.list_tools()
-            ]
+                tools.append(
+                    types.Tool(
+                        name=tool.name,
+                        description=tool.description,
+                        inputSchema=tool.input_schema,
+                        outputSchema=tool.output_schema,
+                        annotations=annotations,
+                    )
+                )
+            return tools
 
         @server.call_tool()
         async def call_tool(
@@ -366,7 +397,6 @@ class McpRuntime:
         return response
 
 
-
 class _RequestBodyTooLargeError(RuntimeError):
     pass
 
@@ -383,6 +413,7 @@ async def _read_bounded_body(
             raise _RequestBodyTooLargeError
         chunks.append(chunk)
     return b"".join(chunks)
+
 
 def _tool_error(
     message: str,

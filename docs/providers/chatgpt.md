@@ -1,7 +1,7 @@
 # ChatGPT provider characterization
 
-Status: provider characterization plus deterministic lifecycle, context, attachment and ChatGPT MCP evidence foundations implemented; no live provider transport or connection
-Last reviewed: 2026-07-18
+Status: provider characterization plus deterministic lifecycle, context, attachment and ChatGPT MCP evidence foundations implemented; optional C0 live probe pending its manual ChatGPT Web gate
+Last reviewed: 2026-07-26
 Cross-provider rules: [`../connectivity-model.md`](../connectivity-model.md)
 
 ## Purpose
@@ -125,7 +125,7 @@ The profile must be revised when evidence changes. “Unknown” is an intention
 
 ## Chat, Work, projects and provider context
 
-Last characterized: 2026-07-18.
+Last characterized: 2026-07-26.
 
 Chat is the Système Local default. Automatic selection never upgrades a request to Work. Work requires an explicit user request, proven availability for the active account and a fresh usable `work_agentic` quota observation. The default local freshness window is five minutes. If Work support or quota is stale, unknown, unavailable, reset-pending or exhausted, the local policy falls back to Chat. Système Local never purchases provider credits automatically.
 
@@ -447,3 +447,19 @@ Recheck these official sources before implementation because product availabilit
 - [Apps in ChatGPT](https://help.openai.com/en/articles/11487775-connectors-in)
 - [OpenAI Responses API reference](https://platform.openai.com/docs/api-reference/responses)
 - [OpenAI streaming events](https://platform.openai.com/docs/api-reference/responses-streaming/response/refusal/delta)
+- [Connect from ChatGPT](https://developers.openai.com/plugins/deploy/connect-chatgpt)
+- [Secure MCP Tunnels](https://developers.openai.com/api/docs/guides/secure-mcp-tunnels)
+- [Plugin authentication](https://developers.openai.com/plugins/build/auth)
+
+## C0 connectivity exception
+
+The bounded [C0 connectivity contract](chatgpt-mcp-c0-connectivity.md) permits a
+manual draft ChatGPT Web Plugin to call exactly one synthetic read-only MCP tool
+through Secure MCP Tunnel. It is an inbound connectivity test, not an outbound
+provider transport, chat automation, publication, or B2 evidence collection.
+No live claim exists until the separate attestation proves the call, audit
+correlation, and revocation failure.
+
+C0 formats only its touched Python surface, reducing the current Ruff formatting
+baseline from 54 to 43 files while leaving the historical phase-8 measurement
+unchanged.

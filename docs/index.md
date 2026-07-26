@@ -45,6 +45,7 @@ here conflicts with a linked document, the linked document remains authoritative
 | [ADR 0001: Separate provider channels](adr/0001-provider-channel-separation.md) | Durable architectural decision and consequences. |
 | [ADR 0002: Keep provider context locally canonical](adr/0002-local-canonical-provider-context.md) | Durable architectural decision and consequences. |
 | [ADR 0003: Use evidence-bound staged ChatGPT MCP readiness](adr/0003-evidence-bound-chatgpt-mcp-readiness.md) | Durable architectural decision and consequences. |
+| [ADR 0007: Permit a bounded Secure MCP Tunnel connectivity probe](adr/0007-bounded-secure-mcp-tunnel-probe.md) | Durable architectural decision and consequences. |
 | [ADR 0004: Exclude raw provider evidence from public models](adr/0004-raw-provider-evidence-exclusion.md) | Durable architectural decision and consequences. |
 | [ADR 0005: Split operator-evidence authority between Python and Rust](adr/0005-python-rust-operator-evidence-custody.md) | Durable architectural decision and consequences. |
 | [ADR 0006: Use inherited read-only handles for bounded operator evidence](adr/0006-inherited-handles-for-operator-evidence.md) | Durable architectural decision and consequences. |
@@ -66,6 +67,7 @@ here conflicts with a linked document, the linked document remains authoritative
 | [Provider context registry](provider-context-registry.md) | Provider-specific characterization, evidence, or integration contract. |
 | [Provider package compatibility audit](provider-package-audit.md) | Provider-specific characterization, evidence, or integration contract. |
 | [ChatGPT MCP connection readiness and evidence reconciliation](providers/chatgpt-mcp-connection-readiness.md) | Provider-specific characterization, evidence, or integration contract. |
+| [C0 ChatGPT Web MCP read-only connectivity probe](providers/chatgpt-mcp-c0-connectivity.md) | Provider-specific bounded live-connectivity and rollback contract. |
 | [ChatGPT MCP deployment evidence and operator contract](providers/chatgpt-mcp-deployment.md) | Provider-specific characterization, evidence, or integration contract. |
 | [ChatGPT MCP sealed operator evidence bundle](providers/chatgpt-mcp-operator-evidence.md) | Provider-specific characterization, evidence, or integration contract. |
 | [ChatGPT provider characterization](providers/chatgpt.md) | Provider-specific characterization, evidence, or integration contract. |

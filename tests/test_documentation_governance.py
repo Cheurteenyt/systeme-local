@@ -234,12 +234,12 @@ def test_provider_reconciliation_metrics_match_governance_contracts() -> None:
     ]
 
     assert mypy_baseline["diagnostics"] == []
-    assert len(ruff_entries) == 54
+    assert len(ruff_entries) == 43
 
     for content in (roadmap, chatgpt, provider_audit):
         assert "179" in content
         assert "zero" in content
-        assert "54" in content
+        assert "43" in content
 
     assert "18 affected Pydantic" in roadmap
     assert "18 affected Pydantic" in chatgpt
@@ -381,7 +381,7 @@ def test_evidence_governance_is_deterministic() -> None:
             "--root",
             str(ROOT),
             "--as-of",
-            "2026-07-18T20:00:00Z",
+            "2026-07-26T20:00:00Z",
             "--fail-within-days",
             "0",
         ],
@@ -408,7 +408,7 @@ def test_python_format_governance_uses_a_non_growing_ratchet() -> None:
     provider_audit = text("docs/provider-package-audit.md")
 
     entries = [line for line in baseline.splitlines() if line and not line.startswith("#")]
-    assert len(entries) == 54
+    assert len(entries) == 43
     assert entries == sorted(entries)
     assert len(entries) == len(set(entries))
 
@@ -425,6 +425,7 @@ def test_python_format_governance_uses_a_non_growing_ratchet() -> None:
     assert "ruff format --check ." not in workflow
     assert "formatting ratchet" in contributing
     assert "decreases from 57 to 54 files" in provider_audit
+    assert "decreases from 54 to 43 files" in provider_audit
 
 
 def test_python_typing_governance_uses_a_non_growing_ratchet() -> None:

@@ -16,9 +16,9 @@ DOC = ROOT / "docs/providers/chatgpt-mcp-deployment.md"
 
 def test_deployment_document_records_status_and_revalidation_boundary() -> None:
     text = DOC.read_text(encoding="utf-8")
-    assert "real connection not implemented" in text
-    assert "Reviewed: 2026-07-18" in text
-    assert "Revalidate no later than: 2026-08-17" in text
+    assert "pending manual verification" in text
+    assert "Reviewed: 2026-07-26" in text
+    assert "Revalidate no later than: 2026-08-25" in text
 
 
 def test_deployment_document_explains_current_chat_selection() -> None:
@@ -73,6 +73,9 @@ def test_deployment_document_links_only_committed_official_sources() -> None:
         "https://help.openai.com/en/articles/10169521-projects-in-chatgpt",
         "https://help.openai.com/en/articles/11487775-apps-in-chatgpt",
         "https://help.openai.com/en/articles/12584461",
+        "https://developers.openai.com/api/docs/guides/secure-mcp-tunnels",
+        "https://developers.openai.com/plugins/build/auth",
+        "https://developers.openai.com/plugins/deploy/connect-chatgpt",
     }
     for url in urls:
         assert url in text

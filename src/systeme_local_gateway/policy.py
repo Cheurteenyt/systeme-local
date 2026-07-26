@@ -1,3 +1,4 @@
+import hashlib
 import re
 from dataclasses import dataclass
 from pathlib import Path
@@ -74,8 +75,10 @@ class PolicyDecision:
 
 class PolicyEngine:
     def __init__(self, policy_path: Path):
-        raw = yaml.safe_load(policy_path.read_text(encoding="utf-8")) or {}
+        policy_bytes = policy_path.read_bytes()
+        raw = yaml.safe_load(policy_bytes.decode("utf-8")) or {}
         document = PolicyDocument.model_validate(raw)
+        self.policy_sha256 = hashlib.sha256(policy_bytes).hexdigest()
         self._default: Decision = document.default
         self.limits: dict[str, Any] = document.limits.model_dump(mode="json")
         self._capabilities = document.capabilities

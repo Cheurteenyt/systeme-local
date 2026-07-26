@@ -303,3 +303,24 @@ immediate disposition and a separate recovery operation.
 
 No version-2 operation is implemented or wire-reachable. Real operator-evidence collection remains
 `planned`; the current binary still exposes only protocol-v1 `describe_contract`.
+
+## Optional C0 inbound connectivity boundary
+
+ADR 0007 adds a disabled-by-default operator path:
+
+```text
+manual ChatGPT Web draft Plugin
+    -> OpenAI Secure MCP Tunnel control plane
+    -> official customer-run tunnel client (outbound-only)
+    -> http://127.0.0.1:8765/mcp
+    -> authenticated TaskProcessor
+    -> one synthetic read-only probe
+    -> HMAC-chained local audit
+```
+
+The separate C0 policy prevents inheritance of file, command, task, provider, or
+B2 tools. The runtime aborts unless the registry contains exactly the single C0
+tool. The facade and tunnel health surface bind to explicit loopback addresses;
+public endpoint construction is outside the implementation. The full contract
+and rollback are in
+[`providers/chatgpt-mcp-c0-connectivity.md`](providers/chatgpt-mcp-c0-connectivity.md).

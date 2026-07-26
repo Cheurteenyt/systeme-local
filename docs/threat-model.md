@@ -309,3 +309,25 @@ B1 outputs, per-check attestation domains, a hash-chained owner-only journal,
 minimum-rights handle duplication, before/after identity verification, hard
 timeouts and checked record/bundle expiry. None is described as implemented
 runtime behavior.
+
+## C0 Secure MCP Tunnel boundary
+
+C0 introduces a temporary outbound control-plane connection while keeping the
+MCP origin private on loopback. Threats include accidental public binding,
+stolen runtime or bearer credentials, forwarded-header substitution, tool-scan
+drift, replayed challenges, prompt-driven capability expansion, forged live
+claims, raw-log leakage, and incomplete revocation.
+
+Controls are a pinned official tunnel-client archive and SHA-256, process-local
+secrets, exact loopback URLs, literal Host/Origin allowlists, independent bearer
+authentication, disabled raw HTTP logging, a default-deny one-tool policy,
+strict input/output schemas, process-local replay protection, fixed read-only
+annotations, HMAC audit correlation, no B2 executor, no browser automation, and
+a manual post-revocation failed call. Any unknown plan/role/permission,
+metadata mismatch, non-loopback listener, OAuth requirement, missing audit, or
+revocation failure blocks live attestation.
+
+Residual risk is limited to the manually observed ChatGPT Web configuration and
+the OpenAI control plane. C0 records only bounded states and digests; it cannot
+cryptographically prove UI truth without the operator. The attestation expires
+within 24 hours and never authorizes regular or write-capable use.

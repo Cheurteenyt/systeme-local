@@ -32,14 +32,14 @@ from .mcp_readiness_models import (
     commit_mcp_evidence_finding,
 )
 
-_REVIEWED_AT = datetime(2026, 7, 18, 14, 0, tzinfo=timezone.utc)
+_REVIEWED_AT = datetime(2026, 7, 26, 0, 0, tzinfo=timezone.utc)
 _REVALIDATE_AFTER = _REVIEWED_AT + timedelta(days=14)
 
 
 def _sources() -> tuple[OfficialSourceReference, ...]:
     return (
         commit_official_source_reference(
-            source_id="openai_apps_plan_matrix_20260718",
+            source_id="openai_apps_plan_matrix_20260726",
             title="Apps in ChatGPT",
             url="https://help.openai.com/en/articles/11487775-apps-in-chatgpt",
             section="Apps capabilities by plan",
@@ -50,7 +50,7 @@ def _sources() -> tuple[OfficialSourceReference, ...]:
             reviewed_at=_REVIEWED_AT,
         ),
         commit_official_source_reference(
-            source_id="openai_mcp_developer_scope_20260718",
+            source_id="openai_mcp_developer_scope_20260726",
             title="Developer mode and MCP apps in ChatGPT",
             url="https://help.openai.com/en/articles/12584461",
             section="Availability and Pro FAQ",
@@ -62,7 +62,7 @@ def _sources() -> tuple[OfficialSourceReference, ...]:
             reviewed_at=_REVIEWED_AT,
         ),
         commit_official_source_reference(
-            source_id="openai_mcp_oauth_refresh_20260718",
+            source_id="openai_mcp_oauth_refresh_20260726",
             title="Developer mode and MCP apps in ChatGPT",
             url="https://help.openai.com/en/articles/12584461",
             section="OAuth and OpenID Connect refresh tokens",
@@ -73,7 +73,7 @@ def _sources() -> tuple[OfficialSourceReference, ...]:
             reviewed_at=_REVIEWED_AT,
         ),
         commit_official_source_reference(
-            source_id="openai_mcp_tool_snapshot_20260718",
+            source_id="openai_mcp_tool_snapshot_20260726",
             title="Developer mode and MCP apps in ChatGPT",
             url="https://help.openai.com/en/articles/12584461",
             section="Action controls and tool updates",
@@ -84,18 +84,18 @@ def _sources() -> tuple[OfficialSourceReference, ...]:
             reviewed_at=_REVIEWED_AT,
         ),
         commit_official_source_reference(
-            source_id="openai_mcp_transport_20260718",
-            title="Developer mode and MCP apps in ChatGPT",
-            url="https://help.openai.com/en/articles/12584461",
-            section="Local MCP server FAQ",
+            source_id="openai_mcp_transport_20260726",
+            title="Secure MCP Tunnels",
+            url="https://developers.openai.com/api/docs/guides/secure-mcp-tunnels",
+            section="Private connectivity and ChatGPT connection",
             evidence_statement=(
-                "ChatGPT connects to remote MCP servers; private, on-premises and developer "
-                "machine servers use Secure MCP Tunnel rather than direct loopback access."
+                "The tunnel client creates outbound-only private connectivity from a local MCP "
+                "server to OpenAI and is selected in ChatGPT Plugin settings."
             ),
             reviewed_at=_REVIEWED_AT,
         ),
         commit_official_source_reference(
-            source_id="openai_mcp_write_controls_20260718",
+            source_id="openai_mcp_write_controls_20260726",
             title="Developer mode and MCP apps in ChatGPT",
             url="https://help.openai.com/en/articles/12584461",
             section="Write-action safety controls",
@@ -116,9 +116,7 @@ def _finding(
     ambiguous: bool = False,
 ) -> McpEvidenceFinding:
     status = (
-        McpEvidenceFindingStatus.AMBIGUOUS
-        if ambiguous
-        else McpEvidenceFindingStatus.CONSISTENT
+        McpEvidenceFindingStatus.AMBIGUOUS if ambiguous else McpEvidenceFindingStatus.CONSISTENT
     )
     resolution = (
         McpEvidenceOperationalResolution.FAIL_CLOSED
@@ -139,7 +137,7 @@ def _findings() -> tuple[McpEvidenceFinding, ...]:
     return (
         _finding(
             McpEvidenceFindingId.LOCAL_SERVER_TRANSPORT,
-            source_ids=("openai_mcp_transport_20260718",),
+            source_ids=("openai_mcp_transport_20260726",),
             observations=(
                 "Direct loopback access is not a supported ChatGPT MCP transport.",
                 "Private or local deployments require Secure MCP Tunnel.",
@@ -147,7 +145,7 @@ def _findings() -> tuple[McpEvidenceFinding, ...]:
         ),
         _finding(
             McpEvidenceFindingId.PERSISTENT_OAUTH_REFRESH,
-            source_ids=("openai_mcp_oauth_refresh_20260718",),
+            source_ids=("openai_mcp_oauth_refresh_20260726",),
             observations=(
                 "Persistent authorization requires an issued refresh token.",
                 "OIDC providers commonly advertise refresh capability with offline_access.",
@@ -156,8 +154,8 @@ def _findings() -> tuple[McpEvidenceFinding, ...]:
         _finding(
             McpEvidenceFindingId.PLUS_CUSTOM_MCP_PLAN_SCOPE,
             source_ids=(
-                "openai_apps_plan_matrix_20260718",
-                "openai_mcp_developer_scope_20260718",
+                "openai_apps_plan_matrix_20260726",
+                "openai_mcp_developer_scope_20260726",
             ),
             observations=(
                 "The general Apps plan matrix lists Custom (MCP) for Plus.",
@@ -167,7 +165,7 @@ def _findings() -> tuple[McpEvidenceFinding, ...]:
         ),
         _finding(
             McpEvidenceFindingId.TOOL_SNAPSHOT_DRIFT,
-            source_ids=("openai_mcp_tool_snapshot_20260718",),
+            source_ids=("openai_mcp_tool_snapshot_20260726",),
             observations=(
                 "Changed actions require explicit refresh and review.",
                 "New actions are disabled by default in the documented managed workflow.",
@@ -175,7 +173,7 @@ def _findings() -> tuple[McpEvidenceFinding, ...]:
         ),
         _finding(
             McpEvidenceFindingId.WRITE_ACTION_CONTROL,
-            source_ids=("openai_mcp_write_controls_20260718",),
+            source_ids=("openai_mcp_write_controls_20260726",),
             observations=(
                 "Confirmation depends on permissions, context and impact.",
                 "High-risk actions may be blocked instead of offered for confirmation.",
@@ -184,10 +182,11 @@ def _findings() -> tuple[McpEvidenceFinding, ...]:
     )
 
 
-def build_current_chatgpt_mcp_evidence_reconciliation_profile(
-) -> ChatGptMcpEvidenceReconciliationProfile:
+def build_current_chatgpt_mcp_evidence_reconciliation_profile() -> (
+    ChatGptMcpEvidenceReconciliationProfile
+):
     return commit_chatgpt_mcp_evidence_reconciliation_profile(
-        profile_id="chatgpt_mcp_reconciliation_20260718",
+        profile_id="chatgpt_mcp_reconciliation_20260726",
         reviewed_at=_REVIEWED_AT,
         revalidate_after=_REVALIDATE_AFTER,
         sources=_sources(),
@@ -198,17 +197,13 @@ def build_current_chatgpt_mcp_evidence_reconciliation_profile(
 def verify_chatgpt_mcp_evidence_reconciliation_profile(
     profile: ChatGptMcpEvidenceReconciliationProfile,
 ) -> ChatGptMcpEvidenceReconciliationProfile:
-    return ChatGptMcpEvidenceReconciliationProfile.model_validate(
-        profile.model_dump(mode="python")
-    )
+    return ChatGptMcpEvidenceReconciliationProfile.model_validate(profile.model_dump(mode="python"))
 
 
 def verify_mcp_connection_readiness_observation(
     observation: McpConnectionReadinessObservation,
 ) -> McpConnectionReadinessObservation:
-    return McpConnectionReadinessObservation.model_validate(
-        observation.model_dump(mode="python")
-    )
+    return McpConnectionReadinessObservation.model_validate(observation.model_dump(mode="python"))
 
 
 def _sorted_enum_tuple(values: set) -> tuple:
@@ -239,10 +234,7 @@ def _required_checks(
 
     by_id = {check.check_id: check for check in observation.checks}
     if request.phase is McpDeploymentPhase.TEST:
-        if (
-            by_id[McpReadinessCheckId.APP_CONFIGURATION].state
-            is McpReadinessCheckState.VERIFIED
-        ):
+        if by_id[McpReadinessCheckId.APP_CONFIGURATION].state is McpReadinessCheckState.VERIFIED:
             required.update(
                 {
                     McpReadinessCheckId.ACTION_REVIEW,
@@ -289,10 +281,7 @@ def evaluate_chatgpt_mcp_connection_readiness(
 
     if observation.capability_profile_sha256 != capability_profile.profile_sha256:
         raise ValueError("readiness observation capability profile digest mismatch")
-    if (
-        observation.reconciliation_profile_sha256
-        != reconciliation_profile.profile_sha256
-    ):
+    if observation.reconciliation_profile_sha256 != reconciliation_profile.profile_sha256:
         raise ValueError("readiness observation reconciliation profile digest mismatch")
 
     deployment = evaluate_chatgpt_mcp_deployment(
@@ -347,13 +336,11 @@ def evaluate_chatgpt_mcp_connection_readiness(
     tool_required = McpReadinessCheckId.TOOL_SNAPSHOT in required
     action_review_required = McpReadinessCheckId.ACTION_REVIEW in required
     if tool_required and (
-        by_id[McpReadinessCheckId.TOOL_SNAPSHOT].state
-        is not McpReadinessCheckState.VERIFIED
+        by_id[McpReadinessCheckId.TOOL_SNAPSHOT].state is not McpReadinessCheckState.VERIFIED
     ):
         reasons.add(McpReadinessReason.TOOL_SNAPSHOT_REQUIRED)
     if action_review_required and (
-        by_id[McpReadinessCheckId.ACTION_REVIEW].state
-        is not McpReadinessCheckState.VERIFIED
+        by_id[McpReadinessCheckId.ACTION_REVIEW].state is not McpReadinessCheckState.VERIFIED
     ):
         reasons.add(McpReadinessReason.ACTION_REVIEW_REQUIRED)
     if (
@@ -362,10 +349,7 @@ def evaluate_chatgpt_mcp_connection_readiness(
         and observation.write_tool_count > 0
     ):
         reasons.add(McpReadinessReason.READ_FETCH_SNAPSHOT_CONTAINS_WRITE_TOOLS)
-    if (
-        observation.high_risk_tool_count is not None
-        and observation.high_risk_tool_count > 0
-    ):
+    if observation.high_risk_tool_count is not None and observation.high_risk_tool_count > 0:
         reasons.add(McpReadinessReason.HIGH_RISK_TOOLS_REQUIRE_SEPARATE_REVIEW)
 
     warnings = {
@@ -375,9 +359,7 @@ def evaluate_chatgpt_mcp_connection_readiness(
         McpReadinessWarning.WRITE_CONFIRMATION_NOT_GUARANTEED,
     }
     if observation.request.plan is ChatGptPlan.PLUS:
-        warnings.add(
-            McpReadinessWarning.PLUS_GENERAL_AVAILABILITY_NOT_DEPLOYMENT_AUTHORIZATION
-        )
+        warnings.add(McpReadinessWarning.PLUS_GENERAL_AVAILABILITY_NOT_DEPLOYMENT_AUTHORIZATION)
 
     ready = not reasons
     return McpConnectionReadinessDecision(
@@ -407,9 +389,7 @@ def verify_chatgpt_mcp_connection_readiness_decision(
     observation: McpConnectionReadinessObservation,
     decision: McpConnectionReadinessDecision,
 ) -> McpConnectionReadinessDecision:
-    decision = McpConnectionReadinessDecision.model_validate(
-        decision.model_dump(mode="python")
-    )
+    decision = McpConnectionReadinessDecision.model_validate(decision.model_dump(mode="python"))
     expected = evaluate_chatgpt_mcp_connection_readiness(
         capability_profile=capability_profile,
         reconciliation_profile=reconciliation_profile,

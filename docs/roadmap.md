@@ -210,3 +210,18 @@ wire-reachable operation and no real evidence.
 B2.1 may implement synthetic protocol-v2 transaction mechanics only after independent review.
 Profile gaps, Python orchestration, bundle construction and the operator command remain separate
 gates.
+
+## C0 bounded ChatGPT Web MCP connectivity
+
+Status: `partial` until the manual Web call, correlated audit, and revocation
+test are independently observed.
+
+C0 is the ADR 0007 sequencing exception that tests the inbound MCP path without
+collecting B2 evidence. It adds a disabled-by-default `1/0/0` tool policy,
+synthetic probe, official Secure MCP Tunnel scripts, and a separate expiring
+live-attestation model. It does not make protocol v2 reachable, publish a
+Plugin, enable writes, add provider-outbound transport, or automate ChatGPT
+Web. The next gate is the exact manual procedure in
+[`providers/chatgpt-mcp-c0-connectivity.md`](providers/chatgpt-mcp-c0-connectivity.md).
+Formatting only the Python files touched by C0 reduces the current Ruff debt
+from 54 to 43 files.

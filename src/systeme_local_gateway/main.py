@@ -17,11 +17,39 @@ from .task_processor import (
 )
 
 policy = PolicyEngine(settings.policy_file)
+
+c0_probe = None
+mcp_registry = None
+if settings.mcp_enabled:
+    from .mcp_tools import McpToolRegistry
+
+    mcp_registry = McpToolRegistry(policy, c0_mode=settings.c0_enabled)
+    if settings.c0_enabled:
+        from .c0_probe import (
+            C0_TOOL_NAME,
+            C0ConnectivityProbe,
+            C0ProbeContext,
+        )
+
+        if settings.c0_server_build_commit is None:
+            raise RuntimeError("C0 is enabled without a server build commit")
+        tool_names = tuple(tool.name for tool in mcp_registry.list_tools())
+        if tool_names != (C0_TOOL_NAME,):
+            raise RuntimeError("C0 policy must expose exactly systeme_local_connectivity_probe")
+        c0_probe = C0ConnectivityProbe(
+            C0ProbeContext(
+                server_build_commit=settings.c0_server_build_commit,
+                local_policy_sha256=policy.policy_sha256,
+                tool_snapshot_sha256=mcp_registry.tool_snapshot_sha256,
+            )
+        )
+
 executor = CapabilityExecutor(
     settings.workspace,
     settings.docker_image,
     policy.limits,
     sandbox_root=settings.sandbox_root,
+    c0_probe=c0_probe,
 )
 audit_log = create_configured_audit_log(settings)
 audit_log.verify()
@@ -53,12 +81,11 @@ if settings.mcp_enabled:
         raise RuntimeError("MCP is enabled without a configured token")
 
     from .mcp_runtime import McpRuntime
-    from .mcp_tools import McpToolRegistry
 
     mcp_runtime = McpRuntime(
         token=settings.mcp_token,
         shared_secret=settings.shared_secret,
-        registry=McpToolRegistry(policy),
+        registry=mcp_registry,
         task_processor=task_processor,
         max_request_bytes=settings.mcp_max_request_bytes,
         requests_per_minute=settings.mcp_requests_per_minute,

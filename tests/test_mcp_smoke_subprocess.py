@@ -23,11 +23,7 @@ def _free_loopback_port() -> int:
 
 
 def _environment(tmp_path: Path) -> dict[str, str]:
-    environment = {
-        key: value
-        for key, value in os.environ.items()
-        if not key.startswith("SLG_")
-    }
+    environment = {key: value for key, value in os.environ.items() if not key.startswith("SLG_")}
     environment["PYTHONPATH"] = str(ROOT / "src")
     environment["PYTHONUNBUFFERED"] = "1"
     environment["SLG_SHARED_SECRET"] = SHARED_SECRET
@@ -49,9 +45,7 @@ def _wait_until_healthy(process: subprocess.Popen[str], port: int) -> None:
         if process.poll() is not None:
             stdout, stderr = process.communicate(timeout=2)
             raise AssertionError(
-                "gateway exited before becoming healthy\n"
-                f"stdout:\n{stdout}\n"
-                f"stderr:\n{stderr}"
+                f"gateway exited before becoming healthy\nstdout:\n{stdout}\nstderr:\n{stderr}"
             )
         connection = http.client.HTTPConnection("127.0.0.1", port, timeout=0.5)
         try:
@@ -81,6 +75,27 @@ def _run_client(
             "--url",
             endpoint,
             *arguments,
+        ],
+        cwd=ROOT,
+        env=environment,
+        capture_output=True,
+        text=True,
+        timeout=20,
+        check=False,
+    )
+
+
+def _run_c0_client(
+    environment: dict[str, str],
+    endpoint: str,
+) -> subprocess.CompletedProcess[str]:
+    return subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "systeme_local_gateway.c0_smoke",
+            "--url",
+            endpoint,
         ],
         cwd=ROOT,
         env=environment,
@@ -176,3 +191,86 @@ capabilities:
                 process.kill()
                 process.wait(timeout=5)
         process.communicate(timeout=2)
+
+
+def test_c0_probe_against_real_loopback_server_is_one_tool_and_audited(
+    tmp_path: Path,
+) -> None:
+    (tmp_path / "policy.c0.yaml").write_text(
+        """version: 1
+default: deny
+capabilities:
+  systeme_local_connectivity_probe:
+    decision: allow
+""",
+        encoding="utf-8",
+    )
+    environment = _environment(tmp_path)
+    environment["SLG_POLICY_FILE"] = str(tmp_path / "policy.c0.yaml")
+    environment["SLG_C0_ENABLED"] = "true"
+    environment["SLG_C0_SERVER_BUILD_COMMIT"] = "a" * 40
+    challenge = "c0_0123456789abcdef0123456789abcdef"
+    environment["SLG_C0_CHALLENGE"] = challenge
+    port = _free_loopback_port()
+    endpoint = f"http://127.0.0.1:{port}/mcp"
+    process = subprocess.Popen(
+        [
+            sys.executable,
+            "-m",
+            "uvicorn",
+            "systeme_local_gateway.main:app",
+            "--host",
+            "127.0.0.1",
+            "--port",
+            str(port),
+            "--log-level",
+            "warning",
+        ],
+        cwd=tmp_path,
+        env=environment,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True,
+    )
+    try:
+        _wait_until_healthy(process, port)
+
+        success = _run_c0_client(environment, endpoint)
+        assert success.returncode == 0, success.stderr
+        payload = json.loads(success.stdout)
+        assert payload["tools"] == ["systeme_local_connectivity_probe"]
+        response = payload["response"]
+        assert response["read_only"] is True
+        assert response["write_actions_enabled"] is False
+        assert response["real_evidence_access"] is False
+        assert response["protocol_v2_reachable"] is False
+        assert challenge not in success.stdout
+        assert MCP_TOKEN not in success.stdout
+        assert SHARED_SECRET not in success.stdout
+        assert AUDIT_KEY not in success.stdout
+
+        audit_text = (tmp_path / "audit.jsonl").read_text(encoding="utf-8")
+        audit_record = json.loads(audit_text)
+        assert audit_record["audit_id"] == response["audit_correlation"]
+        assert audit_record["capability"] == "systeme_local_connectivity_probe"
+        assert audit_record["status"] == "completed"
+        assert audit_record["agent"]["provider"] == "mcp"
+        assert challenge not in audit_text
+        assert MCP_TOKEN not in audit_text
+
+        replayed = _run_c0_client(environment, endpoint)
+        assert replayed.returncode == 1
+        assert "C0 MCP smoke check failed" in replayed.stderr
+    finally:
+        if process.poll() is None:
+            process.terminate()
+            try:
+                process.wait(timeout=5)
+            except subprocess.TimeoutExpired:
+                process.kill()
+                process.wait(timeout=5)
+        process.communicate(timeout=2)
+
+    stopped = _run_c0_client(environment, endpoint)
+    assert stopped.returncode == 1
+    assert "C0 MCP smoke check failed" in stopped.stderr

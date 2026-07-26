@@ -27,7 +27,7 @@ uv run --frozen --extra dev python scripts/check_python_format.py --worktree
 uv run --frozen --extra dev python scripts/check_python_typing.py --worktree
 uv run --frozen --extra dev python scripts/check_markdown_links.py
 uv run --frozen --extra dev python scripts/check_evidence_governance.py \
-  --as-of 2026-07-18T20:00:00Z \
+  --as-of 2026-07-26T20:00:00Z \
   --fail-within-days 0
 uv run --frozen --extra dev python scripts/audit_python_dependencies.py
 uv run --frozen --extra dev pytest

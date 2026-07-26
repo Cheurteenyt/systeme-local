@@ -48,7 +48,7 @@ from systeme_local_gateway.providers.mcp_readiness_models import (
     McpReadinessStage,
 )
 
-NOW = datetime(2026, 7, 18, 18, 0, tzinfo=timezone.utc)
+NOW = datetime(2026, 7, 26, 18, 0, tzinfo=timezone.utc)
 DIGESTS = tuple(f"{index:x}" * 64 for index in range(1, 10))
 
 SOURCE_BY_CHECK = {
@@ -59,49 +59,31 @@ SOURCE_BY_CHECK = {
     ),
     McpReadinessCheckId.DEVELOPER_MODE: McpOperatorEvidenceSource.OPERATOR_ATTESTATION,
     McpReadinessCheckId.LOCAL_POLICY: McpOperatorEvidenceSource.LOCAL_POLICY_SNAPSHOT,
-    McpReadinessCheckId.PLAN_ROLE_OBSERVATION: (
-        McpOperatorEvidenceSource.OPERATOR_ATTESTATION
-    ),
-    McpReadinessCheckId.REFRESH_TOKEN: (
-        McpOperatorEvidenceSource.SANITIZED_METADATA_DIGEST
-    ),
+    McpReadinessCheckId.PLAN_ROLE_OBSERVATION: (McpOperatorEvidenceSource.OPERATOR_ATTESTATION),
+    McpReadinessCheckId.REFRESH_TOKEN: (McpOperatorEvidenceSource.SANITIZED_METADATA_DIGEST),
     McpReadinessCheckId.TOOL_SNAPSHOT: McpOperatorEvidenceSource.TOOL_SCAN_SNAPSHOT,
     McpReadinessCheckId.TRANSPORT: McpOperatorEvidenceSource.SECURE_TUNNEL_ATTESTATION,
     McpReadinessCheckId.WEB_CLIENT: McpOperatorEvidenceSource.OPERATOR_ATTESTATION,
-    McpReadinessCheckId.WORKSPACE_ACCESS: (
-        McpOperatorEvidenceSource.WORKSPACE_ADMIN_ATTESTATION
-    ),
+    McpReadinessCheckId.WORKSPACE_ACCESS: (McpOperatorEvidenceSource.WORKSPACE_ADMIN_ATTESTATION),
 }
 
 FAILURE_BY_CHECK = {
-    McpReadinessCheckId.ACTION_REVIEW: (
-        McpOperatorEvidenceFailureCode.ACTION_REVIEW_INCOMPLETE
-    ),
+    McpReadinessCheckId.ACTION_REVIEW: (McpOperatorEvidenceFailureCode.ACTION_REVIEW_INCOMPLETE),
     McpReadinessCheckId.APP_CONFIGURATION: McpOperatorEvidenceFailureCode.APP_NOT_CONFIGURED,
     McpReadinessCheckId.AUTHENTICATION_METADATA: (
         McpOperatorEvidenceFailureCode.AUTHENTICATION_METADATA_INVALID
     ),
-    McpReadinessCheckId.DEVELOPER_MODE: (
-        McpOperatorEvidenceFailureCode.DEVELOPER_MODE_DISABLED
-    ),
-    McpReadinessCheckId.LOCAL_POLICY: (
-        McpOperatorEvidenceFailureCode.LOCAL_POLICY_DIGEST_MISMATCH
-    ),
+    McpReadinessCheckId.DEVELOPER_MODE: (McpOperatorEvidenceFailureCode.DEVELOPER_MODE_DISABLED),
+    McpReadinessCheckId.LOCAL_POLICY: (McpOperatorEvidenceFailureCode.LOCAL_POLICY_DIGEST_MISMATCH),
     McpReadinessCheckId.PLAN_ROLE_OBSERVATION: (
         McpOperatorEvidenceFailureCode.PLAN_ROLE_NOT_CONFIRMED
     ),
     McpReadinessCheckId.REFRESH_TOKEN: (
         McpOperatorEvidenceFailureCode.REFRESH_TOKEN_CAPABILITY_MISSING
     ),
-    McpReadinessCheckId.TOOL_SNAPSHOT: (
-        McpOperatorEvidenceFailureCode.TOOL_SNAPSHOT_NOT_REVIEWED
-    ),
-    McpReadinessCheckId.TRANSPORT: (
-        McpOperatorEvidenceFailureCode.TRANSPORT_ATTESTATION_FAILED
-    ),
-    McpReadinessCheckId.WEB_CLIENT: (
-        McpOperatorEvidenceFailureCode.WEB_CLIENT_UNAVAILABLE
-    ),
+    McpReadinessCheckId.TOOL_SNAPSHOT: (McpOperatorEvidenceFailureCode.TOOL_SNAPSHOT_NOT_REVIEWED),
+    McpReadinessCheckId.TRANSPORT: (McpOperatorEvidenceFailureCode.TRANSPORT_ATTESTATION_FAILED),
+    McpReadinessCheckId.WEB_CLIENT: (McpOperatorEvidenceFailureCode.WEB_CLIENT_UNAVAILABLE),
     McpReadinessCheckId.WORKSPACE_ACCESS: (
         McpOperatorEvidenceFailureCode.WORKSPACE_ACCESS_NOT_GRANTED
     ),
@@ -177,8 +159,7 @@ def summaries(*, deployment_request: McpDeploymentRequest, tools=None):
             scopes_supported_sha256=DIGESTS[4],
             refresh_capability_advertised=True,
             refresh_tokens_issued=(
-                deployment_request.refresh_token_capability
-                is RefreshTokenCapability.ISSUED
+                deployment_request.refresh_token_capability is RefreshTokenCapability.ISSUED
             ),
             observed_at=NOW,
             valid_until=NOW + timedelta(minutes=30),
@@ -205,9 +186,7 @@ def make_bundle(
             tool_snapshot_sha256=DIGESTS[0],
             tool_count=tool_count if tool_count is not None else 4,
             write_tool_count=write_tool_count if write_tool_count is not None else 0,
-            high_risk_tool_count=(
-                high_risk_tool_count if high_risk_tool_count is not None else 0
-            ),
+            high_risk_tool_count=(high_risk_tool_count if high_risk_tool_count is not None else 0),
             action_review_sha256=DIGESTS[1],
             observed_at=NOW,
             valid_until=NOW + timedelta(minutes=20),
@@ -257,9 +236,7 @@ def make_bundle(
                 source=source,
                 evidence_sha256=evidence,
                 failure_code=(
-                    FAILURE_BY_CHECK[check_id]
-                    if state is McpReadinessCheckState.FAILED
-                    else None
+                    FAILURE_BY_CHECK[check_id] if state is McpReadinessCheckState.FAILED else None
                 ),
                 collector_id="operator_primary",
                 collection_session_id="collection_primary",
@@ -277,8 +254,7 @@ def make_bundle(
         records=tuple(records),
         transport_summary=(
             transport
-            if states.get(McpReadinessCheckId.TRANSPORT)
-            is McpReadinessCheckState.VERIFIED
+            if states.get(McpReadinessCheckId.TRANSPORT) is McpReadinessCheckState.VERIFIED
             else None
         ),
         authentication_summary=(
@@ -290,8 +266,7 @@ def make_bundle(
         tool_review_summary=tool_review,
         local_policy_sha256=(
             DIGESTS[5]
-            if states.get(McpReadinessCheckId.LOCAL_POLICY)
-            is McpReadinessCheckState.VERIFIED
+            if states.get(McpReadinessCheckId.LOCAL_POLICY) is McpReadinessCheckState.VERIFIED
             else None
         ),
         collected_at=collected_at,
@@ -391,9 +366,7 @@ def test_compilation_verifier_rejects_tampering() -> None:
     assert (
         verify_chatgpt_mcp_operator_evidence_compilation(
             capability_profile=build_current_chatgpt_mcp_capability_profile(),
-            reconciliation_profile=(
-                build_current_chatgpt_mcp_evidence_reconciliation_profile()
-            ),
+            reconciliation_profile=(build_current_chatgpt_mcp_evidence_reconciliation_profile()),
             bundle=item,
             compilation=compilation,
         )
@@ -403,9 +376,7 @@ def test_compilation_verifier_rejects_tampering() -> None:
     with pytest.raises(ValidationError, match="digest mismatch"):
         verify_chatgpt_mcp_operator_evidence_compilation(
             capability_profile=build_current_chatgpt_mcp_capability_profile(),
-            reconciliation_profile=(
-                build_current_chatgpt_mcp_evidence_reconciliation_profile()
-            ),
+            reconciliation_profile=(build_current_chatgpt_mcp_evidence_reconciliation_profile()),
             bundle=item,
             compilation=tampered,
         )
@@ -495,30 +466,23 @@ def test_failed_or_unknown_required_evidence_blocks(check_id, state, reason) -> 
     states[check_id] = state
     deployment_request = request(
         developer_mode_enabled=False
-        if check_id is McpReadinessCheckId.DEVELOPER_MODE
-        and state is McpReadinessCheckState.FAILED
+        if check_id is McpReadinessCheckId.DEVELOPER_MODE and state is McpReadinessCheckState.FAILED
         else True
     )
-    evaluation = evaluate_bundle(
-        make_bundle(deployment_request=deployment_request, states=states)
-    )
+    evaluation = evaluate_bundle(make_bundle(deployment_request=deployment_request, states=states))
     assert evaluation.decision.ready is False
     assert reason in evaluation.decision.reasons
 
 
 def test_plus_bundle_fails_closed() -> None:
-    evaluation = evaluate_bundle(
-        make_bundle(deployment_request=request(plan=ChatGptPlan.PLUS))
-    )
+    evaluation = evaluate_bundle(make_bundle(deployment_request=request(plan=ChatGptPlan.PLUS)))
     assert evaluation.decision.ready is False
     assert McpReadinessReason.PLUS_PLAN_SCOPE_AMBIGUOUS in evaluation.decision.reasons
 
 
 def test_public_remote_bundle_selects_remote_direct() -> None:
     evaluation = evaluate_bundle(
-        make_bundle(
-            deployment_request=request(server_location=McpServerLocation.PUBLIC_REMOTE)
-        )
+        make_bundle(deployment_request=request(server_location=McpServerLocation.PUBLIC_REMOTE))
     )
     assert evaluation.decision.ready is True
     assert evaluation.decision.selected_transport is McpTransportKind.REMOTE_DIRECT
@@ -580,9 +544,7 @@ def test_enterprise_use_bundle_requires_and_accepts_workspace_access() -> None:
 
 def test_no_auth_bundle_compiles_not_applicable_auth_checks() -> None:
     states = base_states()
-    states[McpReadinessCheckId.AUTHENTICATION_METADATA] = (
-        McpReadinessCheckState.NOT_APPLICABLE
-    )
+    states[McpReadinessCheckId.AUTHENTICATION_METADATA] = McpReadinessCheckState.NOT_APPLICABLE
     states[McpReadinessCheckId.REFRESH_TOKEN] = McpReadinessCheckState.NOT_APPLICABLE
     item = make_bundle(
         deployment_request=request(
@@ -612,9 +574,7 @@ def test_evaluation_verifier_round_trips_and_rejects_tampering() -> None:
     assert (
         verify_chatgpt_mcp_operator_evidence_evaluation(
             capability_profile=build_current_chatgpt_mcp_capability_profile(),
-            reconciliation_profile=(
-                build_current_chatgpt_mcp_evidence_reconciliation_profile()
-            ),
+            reconciliation_profile=(build_current_chatgpt_mcp_evidence_reconciliation_profile()),
             bundle=item,
             evaluation=evaluation,
         )
@@ -624,9 +584,7 @@ def test_evaluation_verifier_round_trips_and_rejects_tampering() -> None:
     with pytest.raises(ValidationError, match="digest mismatch"):
         verify_chatgpt_mcp_operator_evidence_evaluation(
             capability_profile=build_current_chatgpt_mcp_capability_profile(),
-            reconciliation_profile=(
-                build_current_chatgpt_mcp_evidence_reconciliation_profile()
-            ),
+            reconciliation_profile=(build_current_chatgpt_mcp_evidence_reconciliation_profile()),
             bundle=item,
             evaluation=tampered,
         )

@@ -24,8 +24,8 @@ from .mcp_deployment_models import (
 )
 from .models import CapabilityClaim, CapabilityEvidence, CapabilitySupport
 
-_REVIEWED_AT = datetime(2026, 7, 18, 0, 0, tzinfo=timezone.utc)
-_REVALIDATE_AFTER = datetime(2026, 8, 17, 0, 0, tzinfo=timezone.utc)
+_REVIEWED_AT = datetime(2026, 7, 26, 0, 0, tzinfo=timezone.utc)
+_REVALIDATE_AFTER = datetime(2026, 8, 25, 0, 0, tzinfo=timezone.utc)
 _ALL_ROLES = tuple(
     sorted(
         (
@@ -101,13 +101,51 @@ def _source_references() -> tuple[OfficialSourceReference, ...]:
             ),
             reviewed_at=_REVIEWED_AT,
         ),
+        commit_official_source_reference(
+            source_id="openai_plugin_auth",
+            title="Authentication",
+            url="https://developers.openai.com/plugins/build/auth",
+            section="Per-tool authentication schemes",
+            evidence_statement=(
+                "Plugin tools can declare noauth for anonymous calls or OAuth 2.1 schemes; "
+                "authenticated servers must follow the documented MCP authorization flow."
+            ),
+            reviewed_at=_REVIEWED_AT,
+        ),
+        commit_official_source_reference(
+            source_id="openai_plugin_connect",
+            title="Connect from ChatGPT",
+            url="https://developers.openai.com/plugins/deploy/connect-chatgpt",
+            section="Connect, test, and refresh a plugin",
+            evidence_statement=(
+                "Developers add an HTTPS MCP endpoint or Secure MCP Tunnel in ChatGPT, review "
+                "the discovered tool metadata, select the connection in a new chat, and refresh "
+                "the reviewed snapshot after server metadata changes."
+            ),
+            reviewed_at=_REVIEWED_AT,
+        ),
+        commit_official_source_reference(
+            source_id="openai_secure_mcp_tunnel",
+            title="Secure MCP Tunnels",
+            url="https://developers.openai.com/api/docs/guides/secure-mcp-tunnels",
+            section="Private connectivity, permissions, and ChatGPT connection",
+            evidence_statement=(
+                "The customer-run tunnel client makes an outbound-only connection to OpenAI, "
+                "keeps the local MCP server private, requires tunnel and runtime-key permissions, "
+                "and is selected in ChatGPT's Plugin settings."
+            ),
+            reviewed_at=_REVIEWED_AT,
+        ),
     )
 
 
 def _matrix_rows() -> tuple[McpCapabilityMatrixRow, ...]:
     mcp = ("openai_chatgpt_mcp",)
     apps = ("openai_apps_chatgpt",)
+    auth = ("openai_plugin_auth",)
+    connect = ("openai_plugin_connect",)
     projects = ("openai_chatgpt_projects",)
+    tunnel = ("openai_secure_mcp_tunnel",)
     both = tuple(sorted(mcp + apps))
     rows = (
         McpCapabilityMatrixRow(
@@ -128,7 +166,7 @@ def _matrix_rows() -> tuple[McpCapabilityMatrixRow, ...]:
         McpCapabilityMatrixRow(
             capability=McpCapabilityId.CREATE_TEST_READ_FETCH_APP,
             claim=_claim(CapabilitySupport.SUPPORTED),
-            source_ids=mcp,
+            source_ids=tuple(sorted(mcp + connect)),
             constraints=(
                 "Plan and role eligibility is defined by the committed entitlement matrix.",
             ),
@@ -136,7 +174,7 @@ def _matrix_rows() -> tuple[McpCapabilityMatrixRow, ...]:
         McpCapabilityMatrixRow(
             capability=McpCapabilityId.CREATE_TEST_WRITE_MODIFY_APP,
             claim=_claim(CapabilitySupport.SUPPORTED),
-            source_ids=mcp,
+            source_ids=tuple(sorted(mcp + connect)),
             constraints=("Full MCP write/modify support is a beta capability.",),
         ),
         McpCapabilityMatrixRow(
@@ -162,7 +200,7 @@ def _matrix_rows() -> tuple[McpCapabilityMatrixRow, ...]:
         McpCapabilityMatrixRow(
             capability=McpCapabilityId.DIRECT_LOCAL_CONNECTION,
             claim=_claim(CapabilitySupport.UNSUPPORTED),
-            source_ids=mcp,
+            source_ids=tunnel,
             constraints=(
                 "ChatGPT connects to remote MCP servers, not directly to loopback endpoints.",
             ),
@@ -208,7 +246,7 @@ def _matrix_rows() -> tuple[McpCapabilityMatrixRow, ...]:
         McpCapabilityMatrixRow(
             capability=McpCapabilityId.OAUTH_AUTHORIZATION,
             claim=_claim(CapabilitySupport.SUPPORTED),
-            source_ids=mcp,
+            source_ids=auth,
             constraints=(
                 "OAuth/OIDC protects the MCP app; ChatGPT account credentials are not replayed.",
             ),
@@ -216,7 +254,7 @@ def _matrix_rows() -> tuple[McpCapabilityMatrixRow, ...]:
         McpCapabilityMatrixRow(
             capability=McpCapabilityId.OAUTH_REFRESH,
             claim=_claim(CapabilitySupport.SUPPORTED),
-            source_ids=mcp,
+            source_ids=tuple(sorted(mcp + auth)),
             constraints=(
                 "Persistent OAuth connectivity requires refresh-token issuance such as "
                 "offline_access.",
@@ -248,7 +286,7 @@ def _matrix_rows() -> tuple[McpCapabilityMatrixRow, ...]:
         McpCapabilityMatrixRow(
             capability=McpCapabilityId.SECURE_MCP_TUNNEL,
             claim=_claim(CapabilitySupport.SUPPORTED),
-            source_ids=mcp,
+            source_ids=tunnel,
             constraints=(
                 "Private, on-premises and developer-machine servers use Secure MCP Tunnel.",
             ),
@@ -256,7 +294,7 @@ def _matrix_rows() -> tuple[McpCapabilityMatrixRow, ...]:
         McpCapabilityMatrixRow(
             capability=McpCapabilityId.USE_CONFIGURED_CUSTOM_APP,
             claim=_claim(CapabilitySupport.SUPPORTED),
-            source_ids=both,
+            source_ids=tuple(sorted(both + connect)),
             constraints=(
                 "The app must be configured and enabled before the user selects it in chat.",
             ),
@@ -421,7 +459,7 @@ def _entitlements() -> tuple[McpPlanEntitlement, ...]:
 
 def build_current_chatgpt_mcp_capability_profile() -> ChatGptMcpCapabilityProfile:
     return commit_chatgpt_mcp_capability_profile(
-        profile_id="chatgpt_mcp_20260718",
+        profile_id="chatgpt_mcp_20260726",
         reviewed_at=_REVIEWED_AT,
         revalidate_after=_REVALIDATE_AFTER,
         sources=_source_references(),
@@ -526,8 +564,7 @@ def evaluate_chatgpt_mcp_deployment(
         _append_reason(reasons, McpDecisionReason.DEEP_RESEARCH_WRITE_UNSUPPORTED)
 
     requires_developer_mode = (
-        request.phase is not McpDeploymentPhase.USE
-        or request.plan is ChatGptPlan.PRO
+        request.phase is not McpDeploymentPhase.USE or request.plan is ChatGptPlan.PRO
     )
     if requires_developer_mode and not request.developer_mode_enabled:
         _append_reason(reasons, McpDecisionReason.DEVELOPER_MODE_NOT_ENABLED)
@@ -535,7 +572,8 @@ def evaluate_chatgpt_mcp_deployment(
         _append_reason(reasons, McpDecisionReason.APP_NOT_CONFIGURED)
     if (
         request.phase is McpDeploymentPhase.USE
-        and request.plan in (
+        and request.plan
+        in (
             ChatGptPlan.BUSINESS,
             ChatGptPlan.ENTERPRISE,
             ChatGptPlan.EDU,
