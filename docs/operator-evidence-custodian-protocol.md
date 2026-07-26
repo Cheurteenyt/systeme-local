@@ -416,3 +416,28 @@ field or serialized protocol artifact.
 `protocol.rs`, `main.rs` and the checked-in B0 fixtures remain byte-for-byte unchanged. Protocol v1
 continues to expose only `describe_contract` and continues to report literal false values for
 filesystem access, real-evidence ingestion, network access and sanitizer execution.
+
+
+<!-- systeme-local:b2-0-orchestration-contract -->
+## B2.0 protocol-v2 design remains non-reachable
+
+B2.0 defines the future version-2 operations, inherited-handle boundary, immediate-disposition
+transaction, interruption recovery and exact eleven-check compatibility matrix in
+[`operator-evidence-orchestration.md`](operator-evidence-orchestration.md) and the machine-readable
+[`operator-evidence-protocol-v2-design.json`](operator-evidence-protocol-v2-design.json).
+
+This is a contract-only lot. Protocol v1, `protocol.rs`, `main.rs` and all checked-in v1 fixtures
+remain byte-for-byte unchanged. The current binary still exposes only the version-1
+`describe_contract` operation and no filesystem or sanitizer capability is wire-reachable.
+
+
+<!-- systeme-local:b2-0-contract-repair-v2 -->
+## Closed protocol-v2 design revision
+
+The future version-2 protocol now has exact request, success and error schemas;
+canonical field order; commitment domains and framing; profile-specific
+projections; Python attestation schemas; recovery-journal integrity; inherited
+handle semantics; and timestamp equations.
+
+This remains design-only. The current binary still accepts protocol version 1
+`describe_contract` only.

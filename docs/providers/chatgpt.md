@@ -385,6 +385,13 @@ and a local blocked/next-step report for exactly the eleven required observation
 This phase still performs no tunnel installation, OAuth registration, app configuration or provider
 call.
 
+<!-- systeme-local:b2-0-orchestration-contract -->
+#### B2.0 contract boundary
+
+B2.0 freezes the local protocol, inherited-handle, recovery and eleven-check compatibility design.
+It keeps Phase 9 `planned`: no real evidence, tunnel, OAuth registration, app configuration or
+provider call is enabled by the design lot.
+
 ### Phase 10 — one supported real transport
 
 Status: `planned`

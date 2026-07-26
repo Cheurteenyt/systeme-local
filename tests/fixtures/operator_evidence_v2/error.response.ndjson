@@ -1,0 +1,1 @@
+{"protocol_version":2,"request_id":"b2_fixture_process_001","status":"error","operation":"process_evidence","error_code":"handle_not_inherited","request_sha256":"ee91b05e1f8ce6101629ca8d2d0a73a203fd9e11d286f793cb623ed8ff47ddc5","error_sha256":"d62ebb5cbee81679ce0c4f2b355a26192255cb65e94801a357430a0972e68bbb"}

@@ -202,3 +202,12 @@ bytes before terminal disposition and reuses the existing lifecycle graph withou
 The receipt proves verified logical namespace absence inside the custodian boundary. It does not
 claim physical erasure from storage media, filesystem journals, snapshots, swap, caches or backups.
 The implementation remains synthetic-only, library-only and unreachable from protocol v1.
+
+
+<!-- systeme-local:b2-0-adr-successor -->
+## B2.0 successor decision
+
+[ADR 0006](0006-inherited-handles-for-operator-evidence.md) preserves the one-shot subprocess model
+and selects explicit inherited read-only source and staging-parent handles. It also defines a
+separate fail-closed recovery operation. No path or raw byte crosses protocol v2, only immediate
+disposition becomes wire-reachable, and runtime implementation remains deferred to B2.1.

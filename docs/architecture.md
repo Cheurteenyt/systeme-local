@@ -292,3 +292,14 @@ seconds; Rust reads no clock and late cleanup remains mandatory with `deadline_m
 
 This is logical namespace disposition, not physical erasure. Protocol v1, the binary entrypoint,
 Cargo dependencies, public provider models and real-evidence collection remain unchanged.
+
+
+<!-- systeme-local:b2-0-orchestration-contract -->
+## B2.0 contract-only orchestration design
+
+The repository now has an accepted design for a future protocol-v2 operator-evidence transaction.
+The design selects inherited read-only source and staging-parent handles, a one-shot process,
+immediate disposition and a separate recovery operation.
+
+No version-2 operation is implemented or wire-reachable. Real operator-evidence collection remains
+`planned`; the current binary still exposes only protocol-v1 `describe_contract`.

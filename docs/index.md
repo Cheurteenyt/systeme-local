@@ -47,6 +47,7 @@ here conflicts with a linked document, the linked document remains authoritative
 | [ADR 0003: Use evidence-bound staged ChatGPT MCP readiness](adr/0003-evidence-bound-chatgpt-mcp-readiness.md) | Durable architectural decision and consequences. |
 | [ADR 0004: Exclude raw provider evidence from public models](adr/0004-raw-provider-evidence-exclusion.md) | Durable architectural decision and consequences. |
 | [ADR 0005: Split operator-evidence authority between Python and Rust](adr/0005-python-rust-operator-evidence-custody.md) | Durable architectural decision and consequences. |
+| [ADR 0006: Use inherited read-only handles for bounded operator evidence](adr/0006-inherited-handles-for-operator-evidence.md) | Durable architectural decision and consequences. |
 
 ### Security and operator evidence
 
@@ -60,6 +61,7 @@ here conflicts with a linked document, the linked document remains authoritative
 |---|---|
 | [Connectivity model — provider-specific web AI channels](connectivity-model.md) | Provider-specific characterization, evidence, or integration contract. |
 | [Operator-evidence custodian protocol](operator-evidence-custodian-protocol.md) | Protocol, wire, data, or custody contract. |
+| [B2.0 bounded operator-evidence orchestration contract](operator-evidence-orchestration.md) | Protocol-v2, inherited-handle, recovery and compatibility contract. |
 | [Provider attachment manifests and deterministic batching](provider-attachments.md) | Provider-specific characterization, evidence, or integration contract. |
 | [Provider context registry](provider-context-registry.md) | Provider-specific characterization, evidence, or integration contract. |
 | [Provider package compatibility audit](provider-package-audit.md) | Provider-specific characterization, evidence, or integration contract. |

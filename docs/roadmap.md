@@ -196,3 +196,17 @@ staged sources cannot remain retained after sealing.
 B2 may begin only after B1.6 is merged and independently reviewed. B2 remains responsible for
 timestamp acquisition, Python subprocess orchestration, the eleven observations, response
 verification, bundle compilation and local reporting.
+
+
+<!-- systeme-local:b2-0-orchestration-contract -->
+## B2.0 operator-evidence protocol and orchestration contract
+
+Status: `implemented` contract design once this lot is merged; runtime collection remains `planned`.
+
+B2.0 selects inherited read-only handles, one-shot `process_evidence`, fail-closed
+`recover_evidence`, immediate disposition and the exact eleven-check compatibility matrix. It adds no
+wire-reachable operation and no real evidence.
+
+B2.1 may implement synthetic protocol-v2 transaction mechanics only after independent review.
+Profile gaps, Python orchestration, bundle construction and the operator command remain separate
+gates.
