@@ -1,7 +1,7 @@
 # C1 test and evidence ledger
 
-Status at `2026-07-26T19:07:37Z`:
-`ENCODING_FIX_UNDER_VALIDATION`
+Status at `2026-07-26T19:16:01Z`:
+`DEVELOPER_MODE_AUTHORIZATION_AND_PLAN_PENDING`
 
 This ledger records what was actually executed for C1. It is an evidence
 index, not a substitute for the signed C1 receipts. A row is successful only
@@ -13,6 +13,8 @@ of a passed test.
 - `local`: exercised repository code without a ChatGPT Web call;
 - `live-setup`: exercised real local processes and the Secure MCP Tunnel, but
   did not send a ChatGPT Web prompt;
+- `visible-web`: inspected only visible controls on a new sterile Chat page
+  after bounded browser authorization, without sending a prompt;
 - `live-chat`: exercised a newly created sterile Chat page after fresh browser
   authorization;
 - `not-run`: no execution evidence exists.
@@ -28,7 +30,7 @@ API-key pages, and unrelated tabs are outside the evidence boundary.
 | Repository | `Cheurteenyt/systeme-local` |
 | C1 issue | `#66` |
 | C1 branch | `interop/chatgpt-web-chat-observability-c1` |
-| Current committed C1 baseline | `1a2cdc5727566305236a6bc04e772674fb7f54c1` |
+| Current committed C1 baseline | `59a56365c3f847dcef5035ad0d3e47061b002ec7` |
 | C0 dependency | `912d0d33e119469ff957965104cf20af5e491923` |
 | Policy SHA-256 | `17a53ee929232bae5901037c26c23ad1379dbdb09998c698b1ed85c60a75700e` |
 | Tool snapshot SHA-256 | `6d9a8e0f6dadb9f3a615abcca8c882cb37fb257944922151e97c65a8575da14b` |
@@ -42,8 +44,10 @@ API-key pages, and unrelated tabs are outside the evidence boundary.
 | `C1-L01` | `2026-07-26T18:33:10Z`–`18:34:11Z` | local | `.venv\Scripts\python.exe -m pytest --cov=systeme_local_gateway --cov-report=term --cov-fail-under=60` | PASS: 858 passed, 5 skipped, 86.11% coverage, exit 0 | Direct terminal result on the tested commit. The five skips are classified below. |
 | `C1-L02` | Same window as `C1-L01` | local | C1 contract tests inside the full suite | PASS: 72 C1 tests | `tests/test_c1_docs.py`: 14; `tests/test_c1_observability.py`: 51; `tests/test_c1_proof_check.py`: 7. |
 | `C1-L03` | `2026-07-26`, pre-live implementation window | local | Actual facade startup and `Test-C1LocalProbe.ps1` against `127.0.0.1:8765/mcp` | PASS: exactly one tool; `read_only=true`; `write_actions_enabled=false`; `real_evidence_access=false`; `protocol_v2_reachable=false` | Direct prior terminal result on the tested commit. Preflight cleanup intentionally deleted the raw local challenge, response, audit, and database. Exact start/end timestamps were not retained, so this is not final live evidence. |
+| `C1-L04` | `2026-07-26T19:15:00Z`–`19:16:01Z` | local | Windows PowerShell operator-script regression for `New-C1VisibleModelObservation.ps1 -VisibleReasoningLabelUtf8Base64 "VHLDqHMgw6lsZXbDqWU="` on commit `59a56365c3f847dcef5035ad0d3e47061b002ec7` | PASS: ASCII-only evidence file; strict UTF-8 parse; exact `Très élevée` code points; `simulated=false`; cleanup complete | Fresh independent process secrets were generated and never printed. The temporary observation was deliberately removed. No tunnel, Chat prompt, or tool call was used. |
 | `C1-S01` | Observation at `2026-07-26T18:23:29Z` | live-setup | `Prepare-C1.ps1`, prerequisite validation, and `New-C1RuntimeSetupObservation.ps1 -RuntimeModel gpt-5.6-sol -ReasoningEffort xhigh` | PASS: prerequisites ready; direct runtime model/effort recorded; worktree clean | Private typed observation `.systeme-local/c1/runtime-setup.json`; file SHA-256 `93c6330eaf38fc33d28f10467893b935d206dda5eb594bfd9464e3c584869ddc`; 5,947 bytes. The configured default and active runtime remain separate fields. |
 | `C1-S02` | Checks at `2026-07-26T18:25:56Z` and before this ledger | live-setup | `Start-C1Facade.ps1`, `Start-C1Tunnel.ps1`, loopback listener inspection, and `GET http://127.0.0.1:8766/readyz` | PASS: facade on `127.0.0.1:8765`; tunnel health `ready` on `127.0.0.1:8766`; raw logging/UI off; 20-minute TTL | Real processes and real Tunnel client. This proves transport readiness only; it is not a ChatGPT Web call. No credential value is retained. |
+| `C1-W01` | Before `2026-07-26T19:06:43Z` | visible-web | Bounded visible-only inspection of a new Chat page and the Plugin marketplace | PASS with limits: surface visibly `Chat`; reasoning label visibly `Très élevée`; no visible model label or internal ID; Work not opened; no Plugin created or selected | Browser authorization was supplied. The Plugin add/create control was not visible while Developer mode was not enabled. No sidebar, history, existing conversation, private state, API-key page, prompt, or tool result was accessed. |
 
 ## Pre-final quality checks
 

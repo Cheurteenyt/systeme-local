@@ -282,7 +282,7 @@ def test_c1_evidence_ledger_separates_executed_and_pending_tests() -> None:
 
     assert "C1 test and evidence ledger" in runbook
     for marker in (
-        "ENCODING_FIX_UNDER_VALIDATION",
+        "DEVELOPER_MODE_AUTHORIZATION_AND_PLAN_PENDING",
         "858 passed, 5 skipped, 86.11% coverage",
         "72 C1 tests",
         "live-setup",
