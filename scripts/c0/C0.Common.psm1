@@ -189,6 +189,27 @@ function Stop-C0Process {
     Remove-Item -LiteralPath $pidPath -Force -ErrorAction SilentlyContinue
 }
 
+function Stop-C0PythonLauncher {
+    $state = Get-C0StateDirectory
+    $pidPath = Join-Path $state "facade-launcher.pid"
+    $processId = Read-C0Pid -Name "facade-launcher"
+    if ($null -eq $processId) {
+        return
+    }
+    $process = Get-Process -Id $processId -ErrorAction SilentlyContinue
+    if ($null -eq $process) {
+        Remove-Item -LiteralPath $pidPath -Force -ErrorAction SilentlyContinue
+        return
+    }
+    Wait-Process -Id $processId -Timeout 5 -ErrorAction SilentlyContinue
+    if ($null -eq (Get-Process -Id $processId -ErrorAction SilentlyContinue)) {
+        Remove-Item -LiteralPath $pidPath -Force -ErrorAction SilentlyContinue
+        return
+    }
+    Stop-C0Process -Name "facade-launcher" `
+        -AllowedExecutableNames @("python.exe")
+}
+
 Export-ModuleMember -Function @(
     "Assert-C0GitState",
     "Assert-C0LoopbackListener",
@@ -200,5 +221,6 @@ Export-ModuleMember -Function @(
     "Get-C0StateDirectory",
     "Initialize-C0StateDirectory",
     "Read-C0Pid",
-    "Stop-C0Process"
+    "Stop-C0Process",
+    "Stop-C0PythonLauncher"
 )

@@ -16,7 +16,7 @@ if ($Emergency) {
 Stop-C0Process -Name "tunnel" -AllowedExecutableNames @("tunnel-client.exe")
 Stop-C0Process -Name "tunnel-local" -AllowedExecutableNames @("tunnel-client.exe")
 Stop-C0Process -Name "facade" -AllowedExecutableNames @("python.exe")
-Stop-C0Process -Name "facade-launcher" -AllowedExecutableNames @("python.exe")
+Stop-C0PythonLauncher
 
 $remaining = @(
     Get-NetTCPConnection -State Listen -ErrorAction SilentlyContinue |
@@ -47,6 +47,7 @@ foreach ($name in @(
     "SLG_C0_SERVER_BUILD_COMMIT",
     "SLG_MCP_ENABLED",
     "SLG_MCP_TOKEN",
+    "SLG_MCP_AUTHORIZATION",
     "SLG_MCP_MAX_REQUEST_BYTES",
     "SLG_MCP_REQUESTS_PER_MINUTE",
     "SLG_MCP_MAX_CONCURRENCY",

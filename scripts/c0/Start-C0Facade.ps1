@@ -117,7 +117,7 @@ try {
     Assert-C0LoopbackListener -ProcessId $runtimePid -Port 8765
 } catch {
     Stop-C0Process -Name "facade" -AllowedExecutableNames @("python.exe")
-    Stop-C0Process -Name "facade-launcher" -AllowedExecutableNames @("python.exe")
+    Stop-C0PythonLauncher
     throw
 }
 

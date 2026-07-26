@@ -111,9 +111,11 @@ rejected before startup.
 
 The pinned tunnel client receives credentials only through process
 environment. Static local MCP headers use
-`Authorization: env:SLG_MCP_TOKEN`; discovery uses the same exact header
-reference. Raw HTTP logging, remote UI, and automatic browser opening are
-disabled. The bearer is sent only to the configured loopback MCP origin.
+`Authorization: env:SLG_MCP_AUTHORIZATION`; that process-only variable is
+derived from the independent MCP token with the required bearer scheme and is
+cleared during rollback. Discovery uses the same exact reference. Raw HTTP
+logging, remote UI, and automatic browser opening are disabled. The bearer is
+sent only to the configured loopback MCP origin.
 
 ## Operator sequence
 

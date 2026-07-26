@@ -145,6 +145,7 @@ def test_stop_script_clears_every_c0_process_secret_and_runtime_setting() -> Non
         "SLG_AUDIT_ANCHOR_LOG",
         "SLG_AUDIT_ANCHOR_KEY",
         "SLG_MCP_TOKEN",
+        "SLG_MCP_AUTHORIZATION",
         "SLG_MCP_MAX_REQUEST_BYTES",
         "SLG_MCP_REQUESTS_PER_MINUTE",
         "SLG_MCP_MAX_CONCURRENCY",
@@ -170,12 +171,14 @@ def test_facade_starts_outside_repo_env_and_rejects_inherited_anchor() -> None:
 def test_facade_tracks_windows_launcher_and_socket_owner_separately() -> None:
     start = (ROOT / "scripts/c0/Start-C0Facade.ps1").read_text(encoding="utf-8")
     stop = (ROOT / "scripts/c0/Stop-C0.ps1").read_text(encoding="utf-8")
+    common = (ROOT / "scripts/c0/C0.Common.psm1").read_text(encoding="utf-8")
 
     assert '"facade-launcher.pid"' in start
     assert "Get-CimInstance Win32_Process" in start
     assert "$runtimeMetadata.ParentProcessId -ne $process.Id" in start
     assert "Assert-C0LoopbackListener -ProcessId $runtimePid -Port 8765" in start
-    assert 'Stop-C0Process -Name "facade-launcher"' in stop
+    assert "Stop-C0PythonLauncher" in stop
+    assert "Wait-Process -Id $processId -Timeout 5" in common
 
 
 def test_local_tunnel_client_probe_is_bounded_and_never_claims_web() -> None:
@@ -184,6 +187,7 @@ def test_local_tunnel_client_probe_is_bounded_and_never_claims_web() -> None:
     assert '"dev",' in text
     assert '"proxy",' in text
     assert '"channel=main,url=http://127.0.0.1:8765/mcp"' in text
+    assert "Authorization: env:SLG_MCP_AUTHORIZATION" in text
     assert "refuses hosted control-plane credentials" in text
     assert "LOG_HTTP_RAW_UNSAFE" in text
     assert "real_chatgpt_web = $false" in text

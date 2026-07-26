@@ -41,8 +41,11 @@ foreach ($path in @($urlFile, $healthFile, $stdout, $stderr)) {
     Remove-Item -LiteralPath $path -Force -ErrorAction SilentlyContinue
 }
 
-$env:MCP_EXTRA_HEADERS = "Authorization: env:SLG_MCP_TOKEN"
-$env:MCP_DISCOVERY_EXTRA_HEADERS = "Authorization: env:SLG_MCP_TOKEN"
+$mcpToken = [Environment]::GetEnvironmentVariable("SLG_MCP_TOKEN", "Process")
+$env:SLG_MCP_AUTHORIZATION = "Bearer " + $mcpToken
+$mcpToken = $null
+$env:MCP_EXTRA_HEADERS = "Authorization: env:SLG_MCP_AUTHORIZATION"
+$env:MCP_DISCOVERY_EXTRA_HEADERS = "Authorization: env:SLG_MCP_AUTHORIZATION"
 $env:MCP_MAX_CONCURRENT_REQUESTS = "1"
 $env:MCP_CONNECTION_MAX_TTL = "5m"
 $env:LOG_HTTP_RAW_UNSAFE = "false"
@@ -137,6 +140,7 @@ try {
     foreach ($name in @(
         "MCP_EXTRA_HEADERS",
         "MCP_DISCOVERY_EXTRA_HEADERS",
+        "SLG_MCP_AUTHORIZATION",
         "MCP_MAX_CONCURRENT_REQUESTS",
         "MCP_CONNECTION_MAX_TTL",
         "LOG_HTTP_RAW_UNSAFE",
