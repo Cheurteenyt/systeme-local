@@ -1,6 +1,7 @@
 from contextlib import asynccontextmanager
 from pathlib import Path
 
+import anyio
 import httpx
 import pytest
 from fastapi import FastAPI, Request
@@ -244,6 +245,34 @@ async def test_authentication_origin_and_loopback_guards(
         ) as client:
             remote = await client.post("/mcp", json={})
             assert remote.status_code == 403
+
+
+@pytest.mark.anyio
+async def test_invalid_transport_request_does_not_starve_following_requests(
+    tmp_path: Path,
+) -> None:
+    app, _processor = _build_runtime(tmp_path)
+    transport = httpx.ASGITransport(
+        app=app,
+        client=("127.0.0.1", 50_008),
+    )
+    headers = {
+        "Authorization": f"Bearer {'t' * 48}",
+        "Accept": "application/json, text/event-stream",
+    }
+    async with app.router.lifespan_context(app):
+        async with httpx.AsyncClient(
+            transport=transport,
+            base_url="http://127.0.0.1",
+            headers=headers,
+        ) as client:
+            with anyio.fail_after(1):
+                invalid = await client.post("/mcp", content=b"{}")
+            assert invalid.status_code == 400
+
+            with anyio.fail_after(1):
+                following = await client.post("/mcp", json={})
+            assert following.status_code == 400
 
 
 @pytest.mark.anyio

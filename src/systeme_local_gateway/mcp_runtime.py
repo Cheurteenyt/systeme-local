@@ -357,11 +357,7 @@ class McpRuntime:
                     "body": body,
                     "more_body": False,
                 }
-            return {
-                "type": "http.request",
-                "body": b"",
-                "more_body": False,
-            }
+            return await request.receive()
 
         async def send(message: Message) -> None:
             nonlocal response_start
