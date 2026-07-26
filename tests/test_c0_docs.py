@@ -188,6 +188,8 @@ def test_local_tunnel_client_probe_is_bounded_and_never_claims_web() -> None:
     assert '"proxy",' in text
     assert '"channel=main,url=http://127.0.0.1:8765/mcp"' in text
     assert "Authorization: env:SLG_MCP_AUTHORIZATION" in text
+    assert "Content-Type: application/json" in text
+    assert '"msg":"mcp session initialized"' in text
     assert "refuses hosted control-plane credentials" in text
     assert "LOG_HTTP_RAW_UNSAFE" in text
     assert "real_chatgpt_web = $false" in text

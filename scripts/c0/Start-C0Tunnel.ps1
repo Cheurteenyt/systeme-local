@@ -33,7 +33,10 @@ $mcpToken = [Environment]::GetEnvironmentVariable("SLG_MCP_TOKEN", "Process")
 $env:SLG_MCP_AUTHORIZATION = "Bearer " + $mcpToken
 $mcpToken = $null
 $env:MCP_EXTRA_HEADERS = "Authorization: env:SLG_MCP_AUTHORIZATION"
-$env:MCP_DISCOVERY_EXTRA_HEADERS = "Authorization: env:SLG_MCP_AUTHORIZATION"
+$env:MCP_DISCOVERY_EXTRA_HEADERS = (
+    "Authorization: env:SLG_MCP_AUTHORIZATION, " +
+    "Content-Type: application/json"
+)
 $env:MCP_MAX_CONCURRENT_REQUESTS = "1"
 $env:MCP_CONNECTION_MAX_TTL = "5m"
 $env:CONTROL_PLANE_MAX_INFLIGHT_REQUESTS = "1"

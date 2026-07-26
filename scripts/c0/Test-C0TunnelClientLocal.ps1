@@ -45,7 +45,10 @@ $mcpToken = [Environment]::GetEnvironmentVariable("SLG_MCP_TOKEN", "Process")
 $env:SLG_MCP_AUTHORIZATION = "Bearer " + $mcpToken
 $mcpToken = $null
 $env:MCP_EXTRA_HEADERS = "Authorization: env:SLG_MCP_AUTHORIZATION"
-$env:MCP_DISCOVERY_EXTRA_HEADERS = "Authorization: env:SLG_MCP_AUTHORIZATION"
+$env:MCP_DISCOVERY_EXTRA_HEADERS = (
+    "Authorization: env:SLG_MCP_AUTHORIZATION, " +
+    "Content-Type: application/json"
+)
 $env:MCP_MAX_CONCURRENT_REQUESTS = "1"
 $env:MCP_CONNECTION_MAX_TTL = "5m"
 $env:LOG_HTTP_RAW_UNSAFE = "false"
@@ -114,6 +117,36 @@ try {
     if (-not [string]::IsNullOrWhiteSpace($info.health_url)) {
         $healthUri = [Uri]$info.health_url
         Assert-C0LoopbackListener -ProcessId $process.Id -Port $healthUri.Port
+    }
+
+    $probeInitialized = $false
+    foreach ($attempt in 1..20) {
+        if ($process.HasExited) {
+            throw "Official tunnel-client exited before its MCP startup probe completed."
+        }
+        $probeEvents = @(
+            Select-String -LiteralPath $stderr -Pattern (
+                '"msg":"mcp session initialized"|' +
+                '"msg":"failed to connect to mcp"|' +
+                '"msg":"mcp probe timed out"'
+            ) -ErrorAction SilentlyContinue
+        )
+        if (@($probeEvents | Where-Object {
+            $_.Line -match '"msg":"mcp session initialized"'
+        }).Count -eq 1) {
+            $probeInitialized = $true
+            break
+        }
+        if (@($probeEvents | Where-Object {
+            $_.Line -match '"msg":"failed to connect to mcp"|' +
+                '"msg":"mcp probe timed out"'
+        }).Count -gt 0) {
+            throw "Official tunnel-client MCP startup probe failed."
+        }
+        Start-Sleep -Milliseconds 250
+    }
+    if (-not $probeInitialized) {
+        throw "Official tunnel-client MCP startup probe readiness timed out."
     }
 
     $env:SLG_C0_CHALLENGE = (
