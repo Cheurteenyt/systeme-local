@@ -18,8 +18,9 @@ $challenge = (Get-Content -LiteralPath $challengePath -Raw).Trim()
 C0 MANUAL CHATGPT WEB CHECKLIST — no browser automation
 
 1. Confirm the eligible ChatGPT plan, seat, workspace, role, RBAC grant, and web client.
-2. In ChatGPT Web, open Settings > Apps (or Workspace Settings > Apps).
-3. Enable Developer mode through Advanced Settings if the eligible plan/role exposes it.
+2. In ChatGPT Web, open Settings > Plugins.
+3. Open Settings > Security and login, then enable Developer mode if the eligible
+   plan/role and workspace policy expose it.
 4. Add a draft Plugin, choose Tunnel, and select the pre-created Secure MCP Tunnel ID.
 5. Select no authentication for this unpublished synthetic read-only C0 probe.
 6. Scan tools and verify exactly:

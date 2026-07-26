@@ -122,6 +122,15 @@ def test_c0_operator_scripts_have_required_safety_prologue() -> None:
         )
 
 
+def test_manual_web_checklist_uses_current_official_chatgpt_labels() -> None:
+    checklist = (ROOT / "scripts/c0/Show-C0ChatGptSteps.ps1").read_text(encoding="utf-8")
+
+    assert "Settings > Plugins" in checklist
+    assert "Settings > Security and login" in checklist
+    assert "Settings > Apps" not in checklist
+    assert "Advanced Settings" not in checklist
+
+
 def test_revocation_script_requires_each_manual_fact_explicitly() -> None:
     text = (ROOT / "scripts/c0/Confirm-C0Revocation.ps1").read_text(encoding="utf-8")
 
