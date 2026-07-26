@@ -13,6 +13,7 @@ from pathlib import Path
 from pydantic import BaseModel
 from .c1_observability import (
     C1_CONFIGURATION_PRECEDENCE,
+    C1_MANUAL_EVIDENCE_TTL,
     C1CanonicalReasoningEffort,
     C1ConfigurationLayer,
     C1EvidenceSource,
@@ -281,7 +282,7 @@ def _surface(args: argparse.Namespace) -> BaseModel:
         surface=C1Surface(args.surface),
         plugin_selected=args.plugin_selected,
         observed_at=now,
-        expires_at=now + timedelta(minutes=30),
+        expires_at=now + C1_MANUAL_EVIDENCE_TTL,
         audit_key=_audit_key(),
     )
 
@@ -311,7 +312,7 @@ def _visible_model(args: argparse.Namespace) -> BaseModel:
         ),
         reasoning_mapping_source_sha256=args.reasoning_mapping_source_sha256,
         observed_at=now,
-        expires_at=now + timedelta(hours=1),
+        expires_at=now + C1_MANUAL_EVIDENCE_TTL,
         audit_key=_audit_key(),
     )
 
@@ -324,7 +325,7 @@ def _negative(args: argparse.Namespace) -> BaseModel:
     return commit_c1_negative_test_receipt(
         outcomes=outcomes,
         observed_at=now,
-        expires_at=now + timedelta(hours=1),
+        expires_at=now + C1_MANUAL_EVIDENCE_TTL,
         audit_key=_audit_key(),
     )
 
@@ -343,7 +344,7 @@ def _revocation(args: argparse.Namespace) -> BaseModel:
     now = datetime.now(UTC)
     return commit_c1_revocation_receipt(
         verified_at=now,
-        expires_at=now + timedelta(hours=1),
+        expires_at=now + C1_MANUAL_EVIDENCE_TTL,
         audit_key=_audit_key(),
     )
 

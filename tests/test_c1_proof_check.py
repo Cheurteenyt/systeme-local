@@ -38,6 +38,8 @@ def _prepare(
     *,
     surface: C1Surface = C1Surface.CHAT,
     simulated: bool = False,
+    surface_age: timedelta = timedelta(seconds=2),
+    surface_expires_in: timedelta = timedelta(minutes=20),
 ) -> dict[str, Path]:
     paths = _paths(tmp_path)
     now = datetime.now(UTC)
@@ -45,8 +47,8 @@ def _prepare(
         test_chat_label=C1TestChatLabel.CHAT_A,
         surface=surface,
         plugin_selected=surface is C1Surface.CHAT,
-        observed_at=now - timedelta(seconds=2),
-        expires_at=now + timedelta(minutes=20),
+        observed_at=now - surface_age,
+        expires_at=now + surface_expires_in,
         audit_key=AUDIT_KEY,
         simulated=simulated,
     )
@@ -124,6 +126,55 @@ def test_c1_proof_checker_correlates_one_strict_chat_response(
     assert bundle["observation"]["protocol_v2_reachable"] is False
     assert bundle["correlation_receipt"]["status"] == "live_chat_call_correlated"
     assert CHALLENGE not in json.dumps(bundle)
+
+
+def test_c1_proof_checker_keeps_surface_to_response_freshness_at_thirty_minutes(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    paths = _prepare(
+        tmp_path,
+        surface_age=timedelta(minutes=31),
+        surface_expires_in=timedelta(hours=1),
+    )
+    monkeypatch.setenv("SLG_AUDIT_KEY", AUDIT_KEY)
+    monkeypatch.setattr(
+        "systeme_local_gateway.c1_proof_check._current_commit",
+        lambda: COMMIT,
+    )
+
+    assert main(_argv(paths)) == 1
+    assert "surface observation is stale" in capsys.readouterr().err
+
+
+def test_c1_proof_checker_emits_a_two_hour_bounded_receipt(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    paths = _prepare(
+        tmp_path,
+        surface_age=timedelta(minutes=1),
+        surface_expires_in=timedelta(hours=1, minutes=59),
+    )
+    monkeypatch.setenv("SLG_AUDIT_KEY", AUDIT_KEY)
+    monkeypatch.setattr(
+        "systeme_local_gateway.c1_proof_check._current_commit",
+        lambda: COMMIT,
+    )
+
+    assert main(_argv(paths)) == 0
+    bundle = json.loads(capsys.readouterr().out)
+    checked_at = datetime.fromisoformat(
+        bundle["correlation_receipt"]["checked_at"].replace("Z", "+00:00")
+    )
+    expires_at = datetime.fromisoformat(
+        bundle["correlation_receipt"]["expires_at"].replace("Z", "+00:00")
+    )
+
+    assert expires_at - checked_at > timedelta(hours=1)
+    assert expires_at - checked_at <= timedelta(hours=2)
 
 
 def test_c1_proof_checker_rejects_missing_audit(

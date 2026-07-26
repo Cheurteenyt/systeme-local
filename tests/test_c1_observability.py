@@ -352,6 +352,28 @@ def test_chat_surface_is_verified_before_prompt_and_work_is_never_tested() -> No
     assert surface.work_tested is False
 
 
+def test_manual_surface_evidence_accepts_two_hours_but_not_more() -> None:
+    surface = commit_c1_surface_observation(
+        test_chat_label=C1TestChatLabel.CHAT_A,
+        surface=C1Surface.CHAT,
+        plugin_selected=True,
+        observed_at=NOW,
+        expires_at=NOW + timedelta(hours=2),
+        audit_key=AUDIT_KEY,
+    )
+
+    assert surface.expires_at - surface.observed_at == timedelta(hours=2)
+    with pytest.raises(ValidationError, match="bounded window"):
+        commit_c1_surface_observation(
+            test_chat_label=C1TestChatLabel.CHAT_A,
+            surface=C1Surface.CHAT,
+            plugin_selected=True,
+            observed_at=NOW,
+            expires_at=NOW + timedelta(hours=2, seconds=1),
+            audit_key=AUDIT_KEY,
+        )
+
+
 @pytest.mark.parametrize("surface", [C1Surface.WORK, C1Surface.CODEX, C1Surface.UNKNOWN])
 def test_non_chat_surface_refuses_plugin_selection(surface: C1Surface) -> None:
     with pytest.raises(ValidationError, match="outside Chat"):
@@ -620,6 +642,30 @@ def test_visible_model_cli_emits_ascii_safe_json_for_localized_labels(
     assert "\\u00e8" in output
     assert "\\u00e9" in output
     assert json.loads(output)["visible_reasoning_label"] == "Très élevée"
+
+
+def test_surface_cli_uses_two_hour_manual_evidence_window(
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    monkeypatch.setenv("SLG_AUDIT_KEY", AUDIT_KEY)
+
+    result = c1_evidence_main(
+        [
+            "surface",
+            "--test-chat",
+            "a",
+            "--surface",
+            "chat",
+            "--plugin-selected",
+        ]
+    )
+    output = json.loads(capsys.readouterr().out)
+    observed_at = datetime.fromisoformat(output["observed_at"].replace("Z", "+00:00"))
+    expires_at = datetime.fromisoformat(output["expires_at"].replace("Z", "+00:00"))
+
+    assert result == 0
+    assert expires_at - observed_at == timedelta(hours=2)
 
 
 def test_final_attestation_cli_revalidates_git_policy_and_real_audit_chain(

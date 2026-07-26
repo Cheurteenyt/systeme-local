@@ -177,6 +177,15 @@ domain-separated HMACs. They contain no conversation ID or personal content.
 - `C1FinalAttestation` requires two ordered, distinct, unexpired,
   non-simulated Chat proofs and all revocation bindings.
 
+A manual C1 evidence cycle has a two-hour cryptographic validity window. This
+window exists for the signed surface, visible-label, Chat-proof, negative, and
+revocation artifacts so a human operator can complete the bounded browser and
+revocation sequence without racing a 30-minute finalization deadline. It does
+not weaken call freshness: each challenge remains valid for at most 30 minutes,
+and the strict response must be observed no more than 30 minutes after its
+pre-prompt Chat-surface observation. The final attestation remains valid for at
+most 30 minutes and never outlives any input evidence.
+
 A fixture, mock, local call, stale observation, manually altered receipt, Work
 observation, configured default, duplicated challenge/audit, changed response,
 policy drift, snapshot drift, or secret/private-state field cannot create the
@@ -370,6 +379,22 @@ After the first nine negative checks:
 receipts, and the final attestation. Raw responses and audit material are not
 recoverable. Final cleanup does not require access to either test page or any
 pre-existing conversation.
+
+If final attestation fails because typed evidence expired, fail closed. Stop
+both C1 processes, remove the draft Plugin, revoke the temporary Runtime API
+key, and do not reuse any response, challenge, or receipt from that cycle. Once
+those facts are true and at least one typed artifact is expired, reject and
+erase the failed private state with:
+
+```powershell
+.\scripts\c1\Reject-C1ExpiredCycle.ps1 `
+  -PluginConnectionRemoved `
+  -RuntimeApiKeyRevoked
+```
+
+The rejection path refuses live listeners, a validated attestation, or a cycle
+without expired typed evidence. Its deletion is irreversible and clears all
+process secrets before a fresh `Prepare-C1.ps1` run.
 
 ## Status mapping
 

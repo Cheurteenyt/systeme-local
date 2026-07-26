@@ -1,7 +1,7 @@
 # C1 test and evidence ledger
 
-Status at `2026-07-26T19:16:01Z`:
-`DEVELOPER_MODE_AUTHORIZATION_AND_PLAN_PENDING`
+Status at `2026-07-26T23:05:29Z`:
+`BLOCKED_BY_TEST_FAILURE`
 
 This ledger records what was actually executed for C1. It is an evidence
 index, not a substitute for the signed C1 receipts. A row is successful only
@@ -30,7 +30,7 @@ API-key pages, and unrelated tabs are outside the evidence boundary.
 | Repository | `Cheurteenyt/systeme-local` |
 | C1 issue | `#66` |
 | C1 branch | `interop/chatgpt-web-chat-observability-c1` |
-| Current committed C1 baseline | `59a56365c3f847dcef5035ad0d3e47061b002ec7` |
+| Current committed C1 baseline | `d5eae184290dd90832386d6700ccc9c209aa60a8` |
 | C0 dependency | `912d0d33e119469ff957965104cf20af5e491923` |
 | Policy SHA-256 | `17a53ee929232bae5901037c26c23ad1379dbdb09998c698b1ed85c60a75700e` |
 | Tool snapshot SHA-256 | `6d9a8e0f6dadb9f3a615abcca8c882cb37fb257944922151e97c65a8575da14b` |
@@ -69,6 +69,8 @@ documentation change.
 | `C1-Q10` | `2026-07-26T18:39:25Z` | `git diff --check` and bounded credential-pattern scan of all 5 changed/untracked files | PASS: diff clean; 0 Runtime-key, Tunnel-ID, or assigned process-secret findings. Match values would not have been printed. |
 | `C1-Q11` | `2026-07-26T18:42:09Z`–`18:42:10Z` | Full `tests/test_c1_docs.py`, including deterministic self-excluding change-seal verification | PASS: 16 passed; the ledger is one of 37 sealed C1 files. |
 | `C1-Q12` | `2026-07-26T18:42:51Z`–`18:43:51Z` | Full Python suite with coverage after adding the two ledger contracts | PASS: 860 passed, 5 skipped, 86.11% coverage, exit 0. |
+| `C1-Q13` | `2026-07-26T23:16Z`–`23:17Z` | C1 observability, proof, documentation, PowerShell parsing, Ruff, and self-excluding seal regression after the expiry-window fix | PASS: 82 targeted C1 tests; all 18 C1 PowerShell scripts parsed; Ruff check/format clean. |
+| `C1-Q14` | `2026-07-26T23:17:19Z`–`23:18:21Z` | Full Python suite with coverage on the expiry-window fix | PASS: 868 passed, 5 skipped, 87.09% coverage, exit 0. The known post-exit Windows pytest temporary-symlink warning recurred after the successful result. |
 
 ## Skips and non-failing warning
 
@@ -122,6 +124,56 @@ Base64, decodes them with strict UTF-8, rejects ambiguous raw non-ASCII input,
 and makes all C1 Python CLI JSON output ASCII-safe with `\u` escapes. A new
 clean live session and a new signed visible-label observation are required;
 the rejected observation is not C1 evidence.
+
+## Rejected browser-scope cycle
+
+An earlier authorized cycle reached two positive Chat calls and local
+correlations, but a broad browser inspection then crossed the approved C1
+boundary by including private sidebar/history state. No private title,
+identifier, or content from that inspection is retained in this ledger. The
+entire cycle was rejected rather than partially reused: the processes were
+stopped, the temporary Plugin was removed, the Runtime key was revoked, and
+the local C1 state was irrecoverably cleared. Its positive calls are not final
+C1 evidence.
+
+## Expired-evidence defect discovered by a complete manual cycle
+
+A later clean cycle on committed baseline
+`d5eae184290dd90832386d6700ccc9c209aa60a8` stayed within the browser boundary
+and exercised the full intended sequence:
+
+- runtime setup was signed at `2026-07-26T21:59:14Z`;
+- Chat A returned one read-only result at `22:05:46Z`, correlated to audit ID
+  `a4fc6a0a-7279-483b-b225-d426f480aeee`, and its proof was signed at
+  `22:19:10Z`;
+- Chat B returned one read-only result at `22:20:16Z`, correlated to audit ID
+  `4a26bec3-aaac-43a7-8686-078980bc961e`, and its proof was signed at
+  `22:48:06Z`;
+- same-chat and cross-chat replays produced two failed audit records; unknown
+  fields and a malformed challenge were rejected by schema; local-file,
+  command, secret, B2-evidence, and write capabilities remained unavailable;
+- Work was not invoked, existing chats were not accessed, and private browser
+  state was not accessed;
+- the facade and tunnel stopped, ports `8765/8766` closed, the temporary Plugin
+  was removed, the temporary Runtime key was revoked, and a fresh Chat page
+  returned `C1_APP_UNAVAILABLE_AFTER_REVOCATION`;
+- the audit remained exactly four records: two completed probes and two failed
+  replay attempts, all for the single reviewed probe capability.
+
+The signed negative and revocation receipts were created at
+`2026-07-26T23:05Z`. Final attestation then failed closed because the 30-minute
+surface/proof evidence for Chat A and Chat B had expired at `22:32:27Z` and
+`22:49:16Z`, and the visible-label observation had expired at `23:02:26Z`.
+`Clear-C1Temporary.ps1` correctly refused to erase raw state without a valid
+attestation.
+
+This cycle is a real regression result, not final success evidence. The fix
+extends signed manual artifacts to a two-hour window while retaining a
+30-minute challenge lifetime and a 30-minute maximum from pre-prompt surface
+observation to strict response. It also adds an explicit fail-closed
+`Reject-C1ExpiredCycle.ps1` path that requires stopped listeners, Plugin
+removal, Runtime-key revocation, and at least one expired typed artifact before
+irreversible cleanup. A completely fresh cycle is still required.
 
 ## Final validation still required
 

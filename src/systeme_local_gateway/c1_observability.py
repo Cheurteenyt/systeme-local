@@ -28,6 +28,8 @@ C1_CONFIGURATION_PRECEDENCE = (
 C1_FINAL_STATUS: Literal["COMPLETE_BOUNDED_CHAT_SURFACE_OBSERVABILITY_VERIFIED"] = (
     "COMPLETE_BOUNDED_CHAT_SURFACE_OBSERVABILITY_VERIFIED"
 )
+C1_MANUAL_EVIDENCE_TTL = timedelta(hours=2)
+C1_SURFACE_TO_RESPONSE_MAX_AGE = timedelta(minutes=30)
 
 _OFFICIAL_HOST_RE = re.compile(r"^https://(?:developers\.openai\.com|learn\.chatgpt\.com)/")
 _SOURCE_ID_RE = re.compile(r"^[a-z][a-z0-9_]{2,63}$")
@@ -389,7 +391,7 @@ class C1SurfaceObservation(BaseModel):
         _validate_window(
             observed_at=self.observed_at,
             expires_at=self.expires_at,
-            maximum=timedelta(minutes=30),
+            maximum=C1_MANUAL_EVIDENCE_TTL,
         )
         if self.surface is not C1Surface.CHAT and self.plugin_selected:
             raise ValueError("C1 refuses prompts and Plugin selection outside Chat")
@@ -430,7 +432,7 @@ class C1VisibleModelObservation(BaseModel):
         _validate_window(
             observed_at=self.observed_at,
             expires_at=self.expires_at,
-            maximum=timedelta(hours=1),
+            maximum=C1_MANUAL_EVIDENCE_TTL,
         )
         for label, state, name in (
             (self.visible_model_label, self.model_label_state, "model"),
@@ -489,7 +491,7 @@ class C1TestChatObservation(BaseModel):
         _validate_window(
             observed_at=self.observed_at,
             expires_at=self.expires_at,
-            maximum=timedelta(hours=1),
+            maximum=C1_MANUAL_EVIDENCE_TTL,
         )
         return self
 
@@ -522,7 +524,7 @@ class C1ChatCorrelationReceipt(BaseModel):
         _validate_window(
             observed_at=self.checked_at,
             expires_at=self.expires_at,
-            maximum=timedelta(hours=1),
+            maximum=C1_MANUAL_EVIDENCE_TTL,
         )
         return self
 
@@ -578,7 +580,7 @@ class C1NegativeTestReceipt(BaseModel):
         _validate_window(
             observed_at=self.observed_at,
             expires_at=self.expires_at,
-            maximum=timedelta(hours=1),
+            maximum=C1_MANUAL_EVIDENCE_TTL,
         )
         return self
 
@@ -607,7 +609,7 @@ class C1RevocationReceipt(BaseModel):
         _validate_window(
             observed_at=self.verified_at,
             expires_at=self.expires_at,
-            maximum=timedelta(hours=1),
+            maximum=C1_MANUAL_EVIDENCE_TTL,
         )
         return self
 

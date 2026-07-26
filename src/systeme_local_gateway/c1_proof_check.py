@@ -15,6 +15,8 @@ from .c0_probe import C0_CHALLENGE_PATTERN, C0_TOOL_NAME, C0ConnectivityProbeRes
 from .c0_proof_check import canonical_c0_audit_record_sha256, canonical_c0_response_sha256
 from .c1_observability import (
     C1ChatProofBundle,
+    C1_MANUAL_EVIDENCE_TTL,
+    C1_SURFACE_TO_RESPONSE_MAX_AGE,
     C1Surface,
     C1SurfaceObservation,
     C1TestChatLabel,
@@ -97,6 +99,8 @@ def main(argv: list[str] | None = None) -> int:
             raise ValueError("C1 response predates its local challenge")
         if response.observed_at < surface.observed_at - timedelta(seconds=5):
             raise ValueError("C1 response predates its Chat surface observation")
+        if response.observed_at - surface.observed_at > C1_SURFACE_TO_RESPONSE_MAX_AGE:
+            raise ValueError("C1 Chat surface observation is stale for this response")
         if response.observed_at > checked_at + timedelta(minutes=1):
             raise ValueError("C1 response timestamp is in the future")
         if response.challenge_sha256 != challenge_sha256:
@@ -133,7 +137,7 @@ def main(argv: list[str] | None = None) -> int:
         if not isinstance(agent, dict) or agent.get("provider") != "mcp":
             raise ValueError("C1-correlated audit record is not attributed to MCP")
 
-        expires_at = min(surface.expires_at, checked_at + timedelta(hours=1))
+        expires_at = min(surface.expires_at, checked_at + C1_MANUAL_EVIDENCE_TTL)
         observation = C1TestChatObservation(
             version="1",
             source="manual_chatgpt_web",

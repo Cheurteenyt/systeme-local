@@ -225,6 +225,38 @@ def test_c1_preflight_cleanup_refuses_correlated_or_final_evidence() -> None:
         assert marker in text
 
 
+def test_c1_expired_cycle_rejection_is_explicit_and_fail_closed() -> None:
+    text = (C1_SCRIPTS / "Reject-C1ExpiredCycle.ps1").read_text(encoding="utf-8")
+
+    for marker in (
+        "$PluginConnectionRemoved",
+        "$RuntimeApiKeyRevoked",
+        "at least one expired typed C1 evidence file",
+        "attestation.json",
+        "8765",
+        "8766",
+        "expired_cycle_rejected",
+        "PSObject.Properties.Name",
+        "process_secrets_cleared = $true",
+        "recoverable = $false",
+    ):
+        assert marker in text
+    assert text.count("[Parameter(Mandatory = $true)]") == 2
+
+
+def test_c1_manual_evidence_window_keeps_call_freshness_bounded() -> None:
+    text = C1_DOC.read_text(encoding="utf-8")
+
+    for marker in (
+        "two-hour cryptographic validity window",
+        "challenge remains valid for at most 30 minutes",
+        "no more than 30 minutes after its",
+        "pre-prompt Chat-surface observation",
+        "Reject-C1ExpiredCycle.ps1",
+    ):
+        assert marker in text
+
+
 def test_c1_browser_scope_excludes_private_and_existing_chat_state() -> None:
     text = (C1_SCRIPTS / "Show-C1OperatorSteps.ps1").read_text(encoding="utf-8")
 
@@ -248,10 +280,11 @@ def test_c1_change_seal_is_complete_self_excluding_and_stacked() -> None:
     assert seal["base_commit"] == "912d0d33e119469ff957965104cf20af5e491923"
     assert seal["main_at_start"] == "32515ac9cbb9d658b2ddcb2723ab3c0a71f2b418"
     assert seal["stacked_base_branch"] == "interop/chatgpt-web-mcp-connectivity-c0"
-    assert seal["changed_file_count"] == len(changed) == 37
+    assert seal["changed_file_count"] == len(changed) == 38
     assert changed == sorted(set(changed))
     assert "governance/c1-change-seal.json" in changed
     assert "docs/providers/chatgpt-mcp-c1-test-evidence.md" in changed
+    assert "scripts/c1/Reject-C1ExpiredCycle.ps1" in changed
     assert seal["diff"]["excluded_paths"] == ["governance/c1-change-seal.json"]
     assert len(seal["diff"]["sha256"]) == 64
     assert seal["diff"]["bytes"] > 0
@@ -282,17 +315,20 @@ def test_c1_evidence_ledger_separates_executed_and_pending_tests() -> None:
 
     assert "C1 test and evidence ledger" in runbook
     for marker in (
-        "DEVELOPER_MODE_AUTHORIZATION_AND_PLAN_PENDING",
+        "BLOCKED_BY_TEST_FAILURE",
         "858 passed, 5 skipped, 86.11% coverage",
         "72 C1 tests",
         "live-setup",
         "This proves transport readiness only",
         "Live Chat tests not yet executed",
         "operator subsequently supplied bounded browser authorization",
-        "Developer mode still",
-        "requires a separate action-time authorization",
         "same-chat and cross-chat replay checks",
         "post-revocation failure",
+        "Rejected browser-scope cycle",
+        "Expired-evidence defect discovered by a complete manual cycle",
+        "two completed probes and two failed",
+        "replay attempts",
+        "Reject-C1ExpiredCycle.ps1",
         "Final validation still required",
         "must not rewrite",
         "`not-run` as `PASS`",
