@@ -1,0 +1,116 @@
+# C1 test and evidence ledger
+
+Status at `2026-07-26T18:43:51Z`:
+`READY_BUT_MANUAL_WEB_GATE_PENDING`
+
+This ledger records what was actually executed for C1. It is an evidence
+index, not a substitute for the signed C1 receipts. A row is successful only
+when the cited command completed successfully. A pending row is never evidence
+of a passed test.
+
+## Evidence classes
+
+- `local`: exercised repository code without a ChatGPT Web call;
+- `live-setup`: exercised real local processes and the Secure MCP Tunnel, but
+  did not send a ChatGPT Web prompt;
+- `live-chat`: exercised a newly created sterile Chat page after fresh browser
+  authorization;
+- `not-run`: no execution evidence exists.
+
+Work is detected but never invoked or tested. Existing ChatGPT conversations,
+the sidebar, history, storage, cookies, private requests, personal content,
+API-key pages, and unrelated tabs are outside the evidence boundary.
+
+## Bound baseline
+
+| Field | Value |
+|---|---|
+| Repository | `Cheurteenyt/systeme-local` |
+| C1 issue | `#66` |
+| C1 branch | `interop/chatgpt-web-chat-observability-c1` |
+| Tested C1 commit | `692e75de7b5f9b4ba9d52faf46b368dd6e969f58` |
+| C0 dependency | `912d0d33e119469ff957965104cf20af5e491923` |
+| Policy SHA-256 | `17a53ee929232bae5901037c26c23ad1379dbdb09998c698b1ed85c60a75700e` |
+| Tool snapshot SHA-256 | `6d9a8e0f6dadb9f3a615abcca8c882cb37fb257944922151e97c65a8575da14b` |
+| Tunnel client | `v0.0.10` |
+| Tunnel binary SHA-256 | `d893d8127eee35070d265c1be29bfe008f8d9fcb476e7febf56c8fdc6c0615c8` |
+
+## Executed tests
+
+| ID | Time or window (UTC) | Class | Command or test | Result | Evidence and limitation |
+|---|---|---|---|---|---|
+| `C1-L01` | `2026-07-26T18:33:10Z`–`18:34:11Z` | local | `.venv\Scripts\python.exe -m pytest --cov=systeme_local_gateway --cov-report=term --cov-fail-under=60` | PASS: 858 passed, 5 skipped, 86.11% coverage, exit 0 | Direct terminal result on the tested commit. The five skips are classified below. |
+| `C1-L02` | Same window as `C1-L01` | local | C1 contract tests inside the full suite | PASS: 72 C1 tests | `tests/test_c1_docs.py`: 14; `tests/test_c1_observability.py`: 51; `tests/test_c1_proof_check.py`: 7. |
+| `C1-L03` | `2026-07-26`, pre-live implementation window | local | Actual facade startup and `Test-C1LocalProbe.ps1` against `127.0.0.1:8765/mcp` | PASS: exactly one tool; `read_only=true`; `write_actions_enabled=false`; `real_evidence_access=false`; `protocol_v2_reachable=false` | Direct prior terminal result on the tested commit. Preflight cleanup intentionally deleted the raw local challenge, response, audit, and database. Exact start/end timestamps were not retained, so this is not final live evidence. |
+| `C1-S01` | Observation at `2026-07-26T18:23:29Z` | live-setup | `Prepare-C1.ps1`, prerequisite validation, and `New-C1RuntimeSetupObservation.ps1 -RuntimeModel gpt-5.6-sol -ReasoningEffort xhigh` | PASS: prerequisites ready; direct runtime model/effort recorded; worktree clean | Private typed observation `.systeme-local/c1/runtime-setup.json`; file SHA-256 `93c6330eaf38fc33d28f10467893b935d206dda5eb594bfd9464e3c584869ddc`; 5,947 bytes. The configured default and active runtime remain separate fields. |
+| `C1-S02` | Checks at `2026-07-26T18:25:56Z` and before this ledger | live-setup | `Start-C1Facade.ps1`, `Start-C1Tunnel.ps1`, loopback listener inspection, and `GET http://127.0.0.1:8766/readyz` | PASS: facade on `127.0.0.1:8765`; tunnel health `ready` on `127.0.0.1:8766`; raw logging/UI off; 20-minute TTL | Real processes and real Tunnel client. This proves transport readiness only; it is not a ChatGPT Web call. No credential value is retained. |
+
+## Pre-final quality checks
+
+These checks include the new ledger, but they precede the live Chat evidence
+and final seal. They must be repeated after the last live-evidence
+documentation change.
+
+| ID | Time or window (UTC) | Command or check | Result |
+|---|---|---|---|
+| `C1-Q01` | `2026-07-26T18:37:20Z`–`18:37:26Z` | `uv lock --check` | PASS: frozen lock resolved 76 packages without change. |
+| `C1-Q02` | Same window | `ruff check .` and `check_python_format.py --worktree` | PASS: lint clean; 42 approved legacy format files; 1 changed Python file; 0 new debt. Ruff first identified and then formatted the new test file. |
+| `C1-Q03` | Same window | `check_python_typing.py --worktree` | PASS: 0 approved legacy diagnostics and 0 new diagnostics for 1 changed Python file. |
+| `C1-Q04` | Same window | `check_evidence_governance.py --as-of 2026-07-26T20:00:00Z --fail-within-days 0` | PASS: evidence governance valid at the fixed review instant. |
+| `C1-Q05` | Same window | `audit_python_dependencies.py` | PASS: 76 frozen packages resolved; no known vulnerabilities. |
+| `C1-Q06` | `2026-07-26T18:37:27Z` | Windows PowerShell parser over `scripts/c1/*.ps1` and `*.psm1` | PASS: all 18 C1 PowerShell files parsed without errors. |
+| `C1-Q07` | `2026-07-26T18:37:45Z`–`18:37:47Z` | `check_markdown_links.py` | PASS: links valid across 38 Markdown files. |
+| `C1-Q08` | Same window | `pytest -q tests/test_c1_docs.py -k "not change_seal"` | PASS: 15 passed, 1 seal test deliberately deselected because the documentation edit invalidated the old seal. |
+| `C1-Q09` | `2026-07-26T18:38:20Z`–`18:38:31Z` | Rust 1.97.1: workspace check, format, Clippy with warnings denied, tests, doctests, docs with warnings denied, and `cargo audit` | PASS: all build/lint/doc stages; 106 tests passed, 0 failed; doctests passed; 73 locked dependencies scanned against 1,169 RustSec advisories with no vulnerability reported. |
+| `C1-Q10` | `2026-07-26T18:39:25Z` | `git diff --check` and bounded credential-pattern scan of all 5 changed/untracked files | PASS: diff clean; 0 Runtime-key, Tunnel-ID, or assigned process-secret findings. Match values would not have been printed. |
+| `C1-Q11` | `2026-07-26T18:42:09Z`–`18:42:10Z` | Full `tests/test_c1_docs.py`, including deterministic self-excluding change-seal verification | PASS: 16 passed; the ledger is one of 37 sealed C1 files. |
+| `C1-Q12` | `2026-07-26T18:42:51Z`–`18:43:51Z` | Full Python suite with coverage after adding the two ledger contracts | PASS: 860 passed, 5 skipped, 86.11% coverage, exit 0. |
+
+## Skips and non-failing warning
+
+The five `C1-L01` skips are explicit and do not cover the C1 Web claim:
+
+- two Docker integration tests require
+  `SYSTEME_LOCAL_RUN_DOCKER_TESTS=1`;
+- three Windows symbolic-link tests skipped because the current process could
+  not create the required symbolic links.
+
+After both full-suite runs returned exit code zero, pytest emitted a Windows `atexit`
+`PermissionError` while resolving
+`%LOCALAPPDATA%\Temp\pytest-of-cheur\pytest-current`. The test process had
+already reported all results and exit zero. This warning is recorded rather
+than suppressed; it does not prove or disprove the live C1 claim.
+
+## Live Chat tests not yet executed
+
+At this ledger cutoff, no browser authorization had been supplied and no
+ChatGPT Web prompt had been sent. Therefore all of the following remain
+`not-run`:
+
+- positive Chat A and Chat B calls;
+- visible Chat/model/reasoning observations;
+- same-chat and cross-chat replay checks;
+- unknown-field and malformed-challenge checks;
+- prompt-injection and file/command/secret/protocol-v2/write refusals;
+- non-Chat refusal;
+- Plugin removal, C1 Runtime-key revocation, and post-revocation failure;
+- final signed C1 attestation.
+
+The final documentation update must replace this section with exact result
+rows and hashes only after the signed receipts exist. It must not rewrite
+`not-run` as `PASS` from memory, screenshots, or local-only evidence.
+
+## Final validation still required
+
+Documentation changes invalidate the previous change seal. Before publication,
+the operator must re-run and append exact results for:
+
+- lock, Ruff, Mypy, and both Python ratchets;
+- the full Python test and coverage command;
+- PowerShell parsing and Markdown links;
+- official-evidence governance and dependency/secret audits;
+- Rust check, format, Clippy, tests, doctests, docs, and dependency audit;
+- C1 receipt/final-attestation verification;
+- deterministic C1 change-seal recomputation and `git diff --check`.
+
+The final ledger must identify any skipped or unavailable check explicitly.

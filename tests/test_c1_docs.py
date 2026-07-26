@@ -13,6 +13,7 @@ from systeme_local_gateway.policy import PolicyEngine
 
 ROOT = Path(__file__).resolve().parents[1]
 C1_DOC = ROOT / "docs/providers/chatgpt-mcp-c1-observability.md"
+C1_LEDGER = ROOT / "docs/providers/chatgpt-mcp-c1-test-evidence.md"
 C1_SCRIPTS = ROOT / "scripts/c1"
 
 
@@ -226,9 +227,10 @@ def test_c1_change_seal_is_complete_self_excluding_and_stacked() -> None:
     assert seal["base_commit"] == "912d0d33e119469ff957965104cf20af5e491923"
     assert seal["main_at_start"] == "32515ac9cbb9d658b2ddcb2723ab3c0a71f2b418"
     assert seal["stacked_base_branch"] == "interop/chatgpt-web-mcp-connectivity-c0"
-    assert seal["changed_file_count"] == len(changed) == 36
+    assert seal["changed_file_count"] == len(changed) == 37
     assert changed == sorted(set(changed))
     assert "governance/c1-change-seal.json" in changed
+    assert "docs/providers/chatgpt-mcp-c1-test-evidence.md" in changed
     assert seal["diff"]["excluded_paths"] == ["governance/c1-change-seal.json"]
     assert len(seal["diff"]["sha256"]) == 64
     assert seal["diff"]["bytes"] > 0
@@ -251,3 +253,34 @@ def test_c1_change_seal_is_complete_self_excluding_and_stacked() -> None:
     ).stdout
     assert len(diff) == seal["diff"]["bytes"]
     assert hashlib.sha256(diff).hexdigest() == seal["diff"]["sha256"]
+
+
+def test_c1_evidence_ledger_separates_executed_and_pending_tests() -> None:
+    text = C1_LEDGER.read_text(encoding="utf-8")
+    runbook = C1_DOC.read_text(encoding="utf-8")
+
+    assert "C1 test and evidence ledger" in runbook
+    for marker in (
+        "READY_BUT_MANUAL_WEB_GATE_PENDING",
+        "858 passed, 5 skipped, 86.11% coverage",
+        "72 C1 tests",
+        "live-setup",
+        "This proves transport readiness only",
+        "Live Chat tests not yet executed",
+        "no browser authorization had been supplied",
+        "same-chat and cross-chat replay checks",
+        "post-revocation failure",
+        "Final validation still required",
+        "must not rewrite",
+        "`not-run` as `PASS`",
+    ):
+        assert marker in text
+
+
+def test_c1_evidence_ledger_is_linked_from_navigation() -> None:
+    ledger_path = "docs/providers/chatgpt-mcp-c1-test-evidence.md"
+
+    assert ledger_path in (ROOT / "README.md").read_text(encoding="utf-8")
+    assert "providers/chatgpt-mcp-c1-test-evidence.md" in (ROOT / "docs/index.md").read_text(
+        encoding="utf-8"
+    )

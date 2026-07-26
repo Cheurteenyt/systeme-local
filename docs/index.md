@@ -70,6 +70,7 @@ here conflicts with a linked document, the linked document remains authoritative
 | [ChatGPT MCP connection readiness and evidence reconciliation](providers/chatgpt-mcp-connection-readiness.md) | Provider-specific characterization, evidence, or integration contract. |
 | [C0 ChatGPT Web MCP read-only connectivity probe](providers/chatgpt-mcp-c0-connectivity.md) | Provider-specific bounded live-connectivity and rollback contract. |
 | [C1 ChatGPT Web Chat-surface observability and Codex runtime attribution](providers/chatgpt-mcp-c1-observability.md) | Provider-specific two-Chat correlation, attribution, privacy, and revocation contract. |
+| [C1 test and evidence ledger](providers/chatgpt-mcp-c1-test-evidence.md) | Executed C1 commands, test counts, skips, evidence classes, limitations, and pending live gates. |
 | [ChatGPT MCP deployment evidence and operator contract](providers/chatgpt-mcp-deployment.md) | Provider-specific characterization, evidence, or integration contract. |
 | [ChatGPT MCP sealed operator evidence bundle](providers/chatgpt-mcp-operator-evidence.md) | Provider-specific characterization, evidence, or integration contract. |
 | [ChatGPT provider characterization](providers/chatgpt.md) | Provider-specific characterization, evidence, or integration contract. |

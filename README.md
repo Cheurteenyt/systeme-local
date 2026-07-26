@@ -330,6 +330,9 @@ Le lot
 ajoute une garde Chat/Work, deux conversations de test stériles, l’attribution
 distincte du runtime Codex et des libellés Web, la corrélation d’audit et la
 révocation. Il n’ouvre, ne lit et n’énumère aucun chat existant.
+Son [`journal de tests et de preuves`](docs/providers/chatgpt-mcp-c1-test-evidence.md)
+distingue les validations locales réellement exécutées, la préparation live et
+les tests Web encore en attente.
 
 ## Architecture
 

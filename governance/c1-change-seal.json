@@ -1,7 +1,7 @@
 {
   "version": "1",
   "lot": "C1 — ChatGPT Web Chat-surface observability and Codex runtime attribution",
-  "generated_at": "2026-07-26T18:04:43.2919021Z",
+  "generated_at": "2026-07-26T18:44:16.815714Z",
   "repository": "Cheurteenyt/systeme-local",
   "issue": "https://github.com/Cheurteenyt/systeme-local/issues/66",
   "branch": "interop/chatgpt-web-chat-observability-c1",
@@ -16,16 +16,17 @@
     "excluded_paths": [
       "governance/c1-change-seal.json"
     ],
-    "sha256": "54233895a4b45d220fde6da8f98a65f6ba8395528ab35574b65b42a13f72844d",
-    "bytes": 205826
+    "sha256": "0813846bb2101b292ba9ce219647fc12690a317f13947ada9088ca8184568fea",
+    "bytes": 216498
   },
-  "changed_file_count": 36,
+  "changed_file_count": 37,
   "changed_files": [
     "README.md",
     "docs/adr/0008-bounded-chat-surface-observability.md",
     "docs/architecture.md",
     "docs/index.md",
     "docs/providers/chatgpt-mcp-c1-observability.md",
+    "docs/providers/chatgpt-mcp-c1-test-evidence.md",
     "docs/roadmap.md",
     "docs/threat-model.md",
     "governance/c1-change-seal.json",

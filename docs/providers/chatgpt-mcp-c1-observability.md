@@ -1,5 +1,11 @@
 # C1 ChatGPT Web Chat-surface observability and Codex runtime attribution
 
+The execution status, exact test counts, skips, warnings, and live-evidence
+gaps are maintained in the
+[C1 test and evidence ledger](chatgpt-mcp-c1-test-evidence.md). The ledger
+must be updated from direct command output after every material validation
+round and must never classify an unexecuted Web test as passed.
+
 Status: implementation and local validation in progress; bounded live Web gate not
 yet observed
 
