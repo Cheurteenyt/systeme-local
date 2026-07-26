@@ -37,7 +37,10 @@ if ($LASTEXITCODE -ne 0) {
 $json = ($result -join "`n") | ConvertFrom-Json
 if (
     $json.status -ne "live_call_correlated_pending_revocation" -or
-    $json.real_connection_established -ne $false
+    $json.real_connection_established -ne $false -or
+    $json.receipt_hmac -notmatch "^[0-9a-f]{64}$" -or
+    $json.audit_record_sha256 -notmatch "^[0-9a-f]{64}$" -or
+    $json.response_sha256 -notmatch "^[0-9a-f]{64}$"
 ) {
     throw "C0 proof checker attempted an invalid live-state transition."
 }

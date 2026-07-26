@@ -18,6 +18,12 @@ from .c0_probe import (
     C0_TOOL_NAME,
     C0ConnectivityProbeResponse,
 )
+from .c0_proof_check import (
+    C0PendingLiveProofReceipt,
+    canonical_c0_audit_record_sha256,
+    canonical_c0_response_sha256,
+    verify_c0_pending_live_proof_receipt,
+)
 from .mcp_tools import McpToolRegistry
 from .policy import PolicyEngine
 from .providers.chatgpt_mcp_deployment import (
@@ -177,6 +183,7 @@ def _parser() -> argparse.ArgumentParser:
     parser.add_argument("--response", type=Path, required=True)
     parser.add_argument("--challenge", type=Path, required=True)
     parser.add_argument("--audit-log", type=Path, required=True)
+    parser.add_argument("--pending-live-proof", type=Path, required=True)
     parser.add_argument("--revocation-receipt", type=Path, required=True)
     parser.add_argument("--policy", type=Path, required=True)
     return parser
@@ -190,6 +197,10 @@ def main(argv: list[str] | None = None) -> int:
             raise ValueError("SLG_AUDIT_KEY is required")
         manual = C0ManualWebObservation.model_validate(_load_object(args.manual_observation))
         response = C0ConnectivityProbeResponse.model_validate(_load_object(args.response))
+        pending = verify_c0_pending_live_proof_receipt(
+            C0PendingLiveProofReceipt.model_validate(_load_object(args.pending_live_proof)),
+            audit_key=audit_key,
+        )
         revocation = C0RevocationReceipt.model_validate(_load_object(args.revocation_receipt))
 
         challenge = args.challenge.read_text(encoding="utf-8").strip()
@@ -200,6 +211,10 @@ def main(argv: list[str] | None = None) -> int:
             raise ValueError("live response build does not match current HEAD")
         if response.observed_at < manual.started_at:
             raise ValueError("live response predates the manual live window")
+        if pending.challenge_created_at > manual.started_at:
+            raise ValueError("live window predates the locally generated challenge")
+        if pending.checked_at > revocation.verified_at:
+            raise ValueError("pending live proof postdates revocation verification")
         if response.observed_at > revocation.verified_at:
             raise ValueError("live response postdates revocation verification")
         if revocation.verified_at > datetime.now(UTC) + timedelta(minutes=1):
@@ -217,9 +232,21 @@ def main(argv: list[str] | None = None) -> int:
             raise ValueError("live response policy digest mismatch")
         if response.tool_snapshot_sha256 != registry.tool_snapshot_sha256:
             raise ValueError("live response tool snapshot digest mismatch")
+        if pending.challenge_sha256 != challenge_sha256:
+            raise ValueError("pending live proof challenge digest mismatch")
+        if pending.response_sha256 != canonical_c0_response_sha256(response):
+            raise ValueError("pending live proof response digest mismatch")
+        if pending.server_build_commit != response.server_build_commit:
+            raise ValueError("pending live proof build commit mismatch")
+        if pending.audit_correlation != response.audit_correlation:
+            raise ValueError("pending live proof audit correlation mismatch")
+        if pending.local_policy_sha256 != policy.policy_sha256:
+            raise ValueError("pending live proof policy digest mismatch")
+        if pending.tool_snapshot_sha256 != registry.tool_snapshot_sha256:
+            raise ValueError("pending live proof tool snapshot digest mismatch")
 
         audit_log = AuditLog(args.audit_log, audit_key)
-        audit_log.verify()
+        audit_verification = audit_log.verify()
         records = [
             json.loads(line) for line in args.audit_log.read_text(encoding="utf-8").splitlines()
         ]
@@ -229,6 +256,10 @@ def main(argv: list[str] | None = None) -> int:
         if len(matches) != 1:
             raise ValueError("exactly one correlated audit record is required")
         audit_record = matches[0]
+        if pending.audit_record_sha256 != canonical_c0_audit_record_sha256(audit_record):
+            raise ValueError("pending live proof audit record digest mismatch")
+        if pending.audit_records_verified != audit_verification.records:
+            raise ValueError("pending live proof audit chain length mismatch")
 
         capability_profile = build_current_chatgpt_mcp_capability_profile()
         reconciliation_profile = build_current_chatgpt_mcp_evidence_reconciliation_profile()
@@ -285,6 +316,8 @@ def main(argv: list[str] | None = None) -> int:
             readiness_observation=observation,
             response=response,
             audit_record=audit_record,
+            pending_live_proof=pending,
+            pending_proof_audit_key=audit_key,
             app_configuration_evidence_sha256=manual_digest,
             chatgpt_tool_snapshot_sha256=manual.tool_snapshot_sha256,
             revocation_evidence_sha256=revocation_digest,

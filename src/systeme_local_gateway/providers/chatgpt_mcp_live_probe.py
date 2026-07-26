@@ -14,6 +14,12 @@ from ..c0_probe import (
     C0_TOOL_NAME,
     C0ConnectivityProbeResponse,
 )
+from ..c0_proof_check import (
+    C0PendingLiveProofReceipt,
+    canonical_c0_audit_record_sha256,
+    canonical_c0_response_sha256,
+    verify_c0_pending_live_proof_receipt,
+)
 from .chatgpt_mcp_deployment import evaluate_chatgpt_mcp_deployment
 from .mcp_deployment_models import ChatGptMcpCapabilityProfile
 from .mcp_deployment_models import (
@@ -89,6 +95,7 @@ class ChatGptMcpLiveProbeAttestation(BaseModel):
     response_sha256: str = Field(pattern=C0_SHA256_PATTERN)
     audit_record_sha256: str = Field(pattern=C0_SHA256_PATTERN)
     revocation_evidence_sha256: str = Field(pattern=C0_SHA256_PATTERN)
+    pending_live_proof_sha256: str = Field(pattern=C0_SHA256_PATTERN)
     audit_correlation: str = Field(pattern=C0_AUDIT_ID_PATTERN)
     audit_chain_verified: Literal[True]
     scanned_tool_count: Literal[1]
@@ -134,6 +141,8 @@ def commit_chatgpt_mcp_live_probe_attestation(
     readiness_observation: McpConnectionReadinessObservation,
     response: C0ConnectivityProbeResponse,
     audit_record: dict[str, Any],
+    pending_live_proof: C0PendingLiveProofReceipt,
+    pending_proof_audit_key: str,
     app_configuration_evidence_sha256: str,
     chatgpt_tool_snapshot_sha256: str,
     revocation_evidence_sha256: str,
@@ -149,6 +158,10 @@ def commit_chatgpt_mcp_live_probe_attestation(
     started_at = _require_aware(started_at)
     verified_at = _require_aware(verified_at)
     expires_at = _require_aware(expires_at)
+    pending_live_proof = verify_c0_pending_live_proof_receipt(
+        pending_live_proof,
+        audit_key=pending_proof_audit_key,
+    )
     if not revocation_verified:
         raise ValueError("revocation must be manually verified before attestation")
     if not audit_chain_verified:
@@ -238,6 +251,22 @@ def commit_chatgpt_mcp_live_probe_attestation(
         raise ValueError("response challenge digest does not match the local challenge")
     if response.observed_at < started_at or response.observed_at > verified_at:
         raise ValueError("response timestamp is outside the manual live window")
+    if pending_live_proof.challenge_created_at > started_at:
+        raise ValueError("pending proof challenge postdates the live window start")
+    if pending_live_proof.checked_at < response.observed_at:
+        raise ValueError("pending proof predates the live response")
+    if pending_live_proof.checked_at > verified_at:
+        raise ValueError("pending proof postdates live verification")
+    if pending_live_proof.challenge_sha256 != expected_challenge_sha256:
+        raise ValueError("pending proof challenge digest mismatch")
+    if pending_live_proof.response_sha256 != canonical_c0_response_sha256(response):
+        raise ValueError("pending proof response digest mismatch")
+    if pending_live_proof.server_build_commit != response.server_build_commit:
+        raise ValueError("pending proof build commit mismatch")
+    if pending_live_proof.local_policy_sha256 != response.local_policy_sha256:
+        raise ValueError("pending proof policy digest mismatch")
+    if pending_live_proof.tool_snapshot_sha256 != response.tool_snapshot_sha256:
+        raise ValueError("pending proof tool snapshot digest mismatch")
 
     if audit_record.get("audit_id") != response.audit_correlation:
         raise ValueError("audit record does not match response correlation")
@@ -250,6 +279,10 @@ def commit_chatgpt_mcp_live_probe_attestation(
         raise ValueError("audit record is not attributed to MCP")
     if not isinstance(audit_record.get("entry_hmac"), str):
         raise ValueError("audit record lacks its chain HMAC")
+    if pending_live_proof.audit_correlation != response.audit_correlation:
+        raise ValueError("pending proof audit correlation mismatch")
+    if pending_live_proof.audit_record_sha256 != canonical_c0_audit_record_sha256(audit_record):
+        raise ValueError("pending proof audit record digest mismatch")
     _assert_secret_free(response.model_dump(mode="json"))
     _assert_secret_free(audit_record)
 
@@ -269,6 +302,9 @@ def commit_chatgpt_mcp_live_probe_attestation(
         "response_sha256": sha256(_canonical_json(response.model_dump(mode="json"))).hexdigest(),
         "audit_record_sha256": sha256(_canonical_json(audit_record)).hexdigest(),
         "revocation_evidence_sha256": revocation_evidence_sha256,
+        "pending_live_proof_sha256": sha256(
+            _canonical_json(pending_live_proof.model_dump(mode="json"))
+        ).hexdigest(),
         "audit_correlation": response.audit_correlation,
         "audit_chain_verified": True,
         "scanned_tool_count": 1,

@@ -18,7 +18,8 @@ $state = Get-C0StateDirectory
 if (
     $null -ne (Read-C0Pid -Name "facade") -or
     $null -ne (Read-C0Pid -Name "facade-launcher") -or
-    $null -ne (Read-C0Pid -Name "tunnel")
+    $null -ne (Read-C0Pid -Name "tunnel") -or
+    $null -ne (Read-C0Pid -Name "tunnel-local")
 ) {
     throw "Local C0 processes must be stopped before recording revocation."
 }

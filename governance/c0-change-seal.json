@@ -4,17 +4,17 @@
   "base_commit": "32515ac9cbb9d658b2ddcb2723ab3c0a71f2b418",
   "branch": "interop/chatgpt-web-mcp-connectivity-c0",
   "issue": "https://github.com/Cheurteenyt/systeme-local/issues/64",
-  "generated_at": "2026-07-26T14:30:01.4664114Z",
+  "generated_at": "2026-07-26T15:02:26.8257000Z",
   "diff": {
     "algorithm": "sha256",
-    "sha256": "00d78cd1e2b1ca7778f8008a8b8e8a6bd37cfa1c0c1d7be54962f21d64be04f6",
+    "sha256": "6bf98216ddbbe842124c3101501176e8b372ac57b55c874574c89a4bbe4db341",
     "command": "git diff --binary --full-index --no-ext-diff 32515ac9cbb9d658b2ddcb2723ab3c0a71f2b418 -- . \":(exclude)governance/c0-change-seal.json\"",
     "scope": "the complete C0 patch relative to the recorded base commit, excluding only this self-referential seal file",
     "excluded_paths": [
       "governance/c0-change-seal.json"
     ]
   },
-  "changed_file_count": 66,
+  "changed_file_count": 68,
   "changed_files": [
     ".env.example",
     ".github/workflows/ci.yml",
@@ -54,6 +54,7 @@
     "scripts/c0/Stop-C0.ps1",
     "scripts/c0/Test-C0LocalProbe.ps1",
     "scripts/c0/Test-C0Prerequisites.ps1",
+    "scripts/c0/Test-C0TunnelClientLocal.ps1",
     "src/systeme_local_gateway/c0_attest.py",
     "src/systeme_local_gateway/c0_probe.py",
     "src/systeme_local_gateway/c0_proof_check.py",
@@ -70,6 +71,7 @@
     "tests/test_c0_attest.py",
     "tests/test_c0_docs.py",
     "tests/test_c0_probe.py",
+    "tests/test_c0_proof_check.py",
     "tests/test_chatgpt_mcp_deployment.py",
     "tests/test_chatgpt_mcp_deployment_docs.py",
     "tests/test_chatgpt_mcp_live_probe.py",

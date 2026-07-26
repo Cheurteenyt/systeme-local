@@ -54,7 +54,11 @@ def test_tunnel_client_manifest_pins_official_origin_version_and_integrity() -> 
 
     assert manifest["project"] == "openai/tunnel-client"
     assert manifest["version"] == "v0.0.10"
+    assert manifest["source_commit"] == "105e17a79a36e4e5c897fd698ed2b8dbf935b144"
     assert manifest["release_url"].startswith("https://github.com/openai/tunnel-client/releases/")
+    assert manifest["configuration_url"].startswith(
+        "https://github.com/openai/tunnel-client/blob/v0.0.10/"
+    )
     assert manifest["asset"]["url"].startswith("https://github.com/openai/tunnel-client/releases/")
     assert len(manifest["asset"]["sha256"]) == 64
     assert len(manifest["binary_sha256"]) == 64
@@ -141,6 +145,9 @@ def test_stop_script_clears_every_c0_process_secret_and_runtime_setting() -> Non
         "SLG_AUDIT_ANCHOR_LOG",
         "SLG_AUDIT_ANCHOR_KEY",
         "SLG_MCP_TOKEN",
+        "SLG_MCP_MAX_REQUEST_BYTES",
+        "SLG_MCP_REQUESTS_PER_MINUTE",
+        "SLG_MCP_MAX_CONCURRENCY",
         "SLG_POLICY_FILE",
         "SLG_WORKSPACE",
         "SLG_AUDIT_LOG",
@@ -169,3 +176,22 @@ def test_facade_tracks_windows_launcher_and_socket_owner_separately() -> None:
     assert "$runtimeMetadata.ParentProcessId -ne $process.Id" in start
     assert "Assert-C0LoopbackListener -ProcessId $runtimePid -Port 8765" in start
     assert 'Stop-C0Process -Name "facade-launcher"' in stop
+
+
+def test_local_tunnel_client_probe_is_bounded_and_never_claims_web() -> None:
+    text = (ROOT / "scripts/c0/Test-C0TunnelClientLocal.ps1").read_text(encoding="utf-8")
+
+    assert '"dev",' in text
+    assert '"proxy",' in text
+    assert '"channel=main,url=http://127.0.0.1:8765/mcp"' in text
+    assert "refuses hosted control-plane credentials" in text
+    assert "LOG_HTTP_RAW_UNSAFE" in text
+    assert "real_chatgpt_web = $false" in text
+
+
+def test_final_attestation_requires_authenticated_pending_live_proof() -> None:
+    script = (ROOT / "scripts/c0/Commit-C0LiveAttestation.ps1").read_text(encoding="utf-8")
+    source = (ROOT / "src/systeme_local_gateway/c0_attest.py").read_text(encoding="utf-8")
+
+    assert "--pending-live-proof $paths.pending" in script
+    assert "verify_c0_pending_live_proof_receipt" in source

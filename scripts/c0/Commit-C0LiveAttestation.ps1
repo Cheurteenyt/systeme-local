@@ -15,7 +15,8 @@ $state = Get-C0StateDirectory
 if (
     $null -ne (Read-C0Pid -Name "facade") -or
     $null -ne (Read-C0Pid -Name "facade-launcher") -or
-    $null -ne (Read-C0Pid -Name "tunnel")
+    $null -ne (Read-C0Pid -Name "tunnel") -or
+    $null -ne (Read-C0Pid -Name "tunnel-local")
 ) {
     throw "C0 processes must be stopped before committing the revocation-bound attestation."
 }
@@ -27,6 +28,7 @@ $paths = @{
     response = Join-Path $state "live-response.json"
     challenge = Join-Path $state "challenge.txt"
     audit = Join-Path $state "audit.jsonl"
+    pending = Join-Path $state "live-proof-pending-revocation.json"
     revocation = Join-Path $state "revocation-receipt.json"
 }
 $statePrefix = [System.IO.Path]::GetFullPath($state) +
@@ -50,6 +52,7 @@ $result = & $python -m systeme_local_gateway.c0_attest `
     --response $paths.response `
     --challenge $paths.challenge `
     --audit-log $paths.audit `
+    --pending-live-proof $paths.pending `
     --revocation-receipt $paths.revocation `
     --policy (Join-Path $root "policy.c0.yaml")
 if ($LASTEXITCODE -ne 0) {

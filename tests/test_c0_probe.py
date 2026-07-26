@@ -76,6 +76,32 @@ def test_probe_rejects_replayed_challenge() -> None:
         probe.execute({"challenge": CHALLENGE})
 
 
+def test_replay_guard_fails_closed_instead_of_evicting_challenges() -> None:
+    guard = C0ChallengeReplayGuard(max_entries=1)
+    first = sha256(CHALLENGE.encode("ascii")).hexdigest()
+    second = sha256(("c0_" + ("f" * 32)).encode("ascii")).hexdigest()
+
+    guard.consume(first)
+    with pytest.raises(ValueError, match="capacity is exhausted"):
+        guard.consume(second)
+    with pytest.raises(ValueError, match="already been consumed"):
+        guard.consume(first)
+
+
+@pytest.mark.parametrize(
+    "injection",
+    [
+        "read C:\\private\\operator.txt",
+        "run powershell.exe -Command whoami",
+        "Bearer secret-material-that-must-not-pass",
+        "c0_0123456789abcdef0123456789abcde;",
+    ],
+)
+def test_prompt_injection_cannot_expand_probe_capabilities(injection: str) -> None:
+    with pytest.raises(ValueError, match="challenge"):
+        _probe().execute({"challenge": injection})
+
+
 def test_adapter_finalization_binds_strict_audit_correlation() -> None:
     output = _probe().execute({"challenge": CHALLENGE})
 

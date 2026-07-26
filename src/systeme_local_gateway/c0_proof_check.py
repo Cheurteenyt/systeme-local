@@ -2,18 +2,139 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import hmac
 import json
 import os
 import subprocess
 import sys
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
-from typing import Any
+from typing import Any, Literal
+
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 from .audit import AuditLog
-from .c0_probe import C0_TOOL_NAME, C0ConnectivityProbeResponse
+from .c0_probe import (
+    C0_AUDIT_ID_PATTERN,
+    C0_GIT_COMMIT_PATTERN,
+    C0_SHA256_PATTERN,
+    C0_TOOL_NAME,
+    C0ConnectivityProbeResponse,
+)
 from .mcp_tools import McpToolRegistry
 from .policy import PolicyEngine
+
+_PENDING_PROOF_DOMAIN = b"systeme-local/c0-pending-live-proof/v1\0"
+
+
+def _require_aware(value: datetime) -> datetime:
+    if value.tzinfo is None or value.utcoffset() is None:
+        raise ValueError("C0 pending-proof timestamps must be timezone-aware")
+    return value.astimezone(UTC)
+
+
+def _canonical_json(value: Any) -> bytes:
+    return json.dumps(
+        value,
+        ensure_ascii=False,
+        sort_keys=True,
+        separators=(",", ":"),
+        allow_nan=False,
+    ).encode("utf-8")
+
+
+def canonical_c0_response_sha256(response: C0ConnectivityProbeResponse) -> str:
+    return hashlib.sha256(_canonical_json(response.model_dump(mode="json"))).hexdigest()
+
+
+def canonical_c0_audit_record_sha256(record: dict[str, Any]) -> str:
+    return hashlib.sha256(_canonical_json(record)).hexdigest()
+
+
+class C0PendingLiveProofReceipt(BaseModel):
+    """Authenticated receipt for a fresh, audited call pending revocation."""
+
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    version: Literal["1"]
+    status: Literal["live_call_correlated_pending_revocation"]
+    real_connection_established: Literal[False]
+    challenge_created_at: datetime
+    checked_at: datetime
+    challenge_sha256: str = Field(pattern=C0_SHA256_PATTERN)
+    response_sha256: str = Field(pattern=C0_SHA256_PATTERN)
+    server_build_commit: str = Field(pattern=C0_GIT_COMMIT_PATTERN)
+    audit_correlation: str = Field(pattern=C0_AUDIT_ID_PATTERN)
+    audit_record_sha256: str = Field(pattern=C0_SHA256_PATTERN)
+    audit_records_verified: int = Field(ge=1)
+    local_policy_sha256: str = Field(pattern=C0_SHA256_PATTERN)
+    tool_snapshot_sha256: str = Field(pattern=C0_SHA256_PATTERN)
+    receipt_hmac: str = Field(pattern=C0_SHA256_PATTERN)
+
+    _aware_challenge_created_at = field_validator("challenge_created_at")(_require_aware)
+    _aware_checked_at = field_validator("checked_at")(_require_aware)
+
+    @model_validator(mode="after")
+    def validate_freshness_window(self) -> "C0PendingLiveProofReceipt":
+        if self.checked_at < self.challenge_created_at:
+            raise ValueError("C0 pending proof predates its challenge")
+        if self.checked_at - self.challenge_created_at > timedelta(minutes=30):
+            raise ValueError("C0 pending proof challenge is stale")
+        return self
+
+
+def _pending_proof_hmac(payload: dict[str, Any], audit_key: str) -> str:
+    return hmac.new(
+        audit_key.encode("utf-8"),
+        _PENDING_PROOF_DOMAIN + _canonical_json(payload),
+        hashlib.sha256,
+    ).hexdigest()
+
+
+def commit_c0_pending_live_proof_receipt(
+    *,
+    audit_key: str,
+    challenge_created_at: datetime,
+    checked_at: datetime,
+    challenge_sha256: str,
+    response: C0ConnectivityProbeResponse,
+    audit_record: dict[str, Any],
+    audit_records_verified: int,
+) -> C0PendingLiveProofReceipt:
+    challenge_created_at = _require_aware(challenge_created_at)
+    checked_at = _require_aware(checked_at)
+    payload: dict[str, Any] = {
+        "version": "1",
+        "status": "live_call_correlated_pending_revocation",
+        "real_connection_established": False,
+        "challenge_created_at": challenge_created_at.isoformat().replace("+00:00", "Z"),
+        "checked_at": checked_at.isoformat().replace("+00:00", "Z"),
+        "challenge_sha256": challenge_sha256,
+        "response_sha256": canonical_c0_response_sha256(response),
+        "server_build_commit": response.server_build_commit,
+        "audit_correlation": response.audit_correlation,
+        "audit_record_sha256": canonical_c0_audit_record_sha256(audit_record),
+        "audit_records_verified": audit_records_verified,
+        "local_policy_sha256": response.local_policy_sha256,
+        "tool_snapshot_sha256": response.tool_snapshot_sha256,
+    }
+    return C0PendingLiveProofReceipt(
+        **payload,
+        receipt_hmac=_pending_proof_hmac(payload, audit_key),
+    )
+
+
+def verify_c0_pending_live_proof_receipt(
+    receipt: C0PendingLiveProofReceipt,
+    *,
+    audit_key: str,
+) -> C0PendingLiveProofReceipt:
+    committed = C0PendingLiveProofReceipt.model_validate(receipt.model_dump(mode="python"))
+    payload = committed.model_dump(mode="json", exclude={"receipt_hmac"})
+    expected = _pending_proof_hmac(payload, audit_key)
+    if not hmac.compare_digest(committed.receipt_hmac, expected):
+        raise ValueError("C0 pending live proof HMAC mismatch")
+    return committed
 
 
 def _load_json_object(path: Path) -> dict[str, Any]:
@@ -96,31 +217,15 @@ def main(argv: list[str] | None = None) -> int:
         if not isinstance(agent, dict) or agent.get("provider") != "mcp":
             raise ValueError("correlated audit record is not attributed to MCP")
 
-        output: dict[str, Any] = {
-            "status": "live_call_correlated_pending_revocation",
-            "real_connection_established": False,
-            "challenge_sha256": expected_challenge,
-            "response_sha256": hashlib.sha256(
-                json.dumps(
-                    response.model_dump(mode="json"),
-                    sort_keys=True,
-                    separators=(",", ":"),
-                    ensure_ascii=False,
-                ).encode("utf-8")
-            ).hexdigest(),
-            "audit_correlation": response.audit_correlation,
-            "audit_record_sha256": hashlib.sha256(
-                json.dumps(
-                    record,
-                    sort_keys=True,
-                    separators=(",", ":"),
-                    ensure_ascii=False,
-                ).encode("utf-8")
-            ).hexdigest(),
-            "audit_records_verified": verification.records,
-            "local_policy_sha256": response.local_policy_sha256,
-            "tool_snapshot_sha256": response.tool_snapshot_sha256,
-        }
+        receipt = commit_c0_pending_live_proof_receipt(
+            audit_key=audit_key,
+            challenge_created_at=challenge_created_at,
+            checked_at=checked_at,
+            challenge_sha256=expected_challenge,
+            response=response,
+            audit_record=record,
+            audit_records_verified=verification.records,
+        )
     except Exception as exc:
         print(
             json.dumps(
@@ -132,7 +237,14 @@ def main(argv: list[str] | None = None) -> int:
         )
         return 1
 
-    print(json.dumps(output, ensure_ascii=False, indent=2, sort_keys=True))
+    print(
+        json.dumps(
+            receipt.model_dump(mode="json"),
+            ensure_ascii=False,
+            indent=2,
+            sort_keys=True,
+        )
+    )
     return 0
 
 

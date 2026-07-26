@@ -15,8 +15,11 @@ if ($null -eq $facadePid) {
     throw "Start the C0 facade before the tunnel."
 }
 Assert-C0LoopbackListener -ProcessId $facadePid -Port 8765
-if ($null -ne (Read-C0Pid -Name "tunnel")) {
-    throw "C0 tunnel PID file already exists."
+if (
+    $null -ne (Read-C0Pid -Name "tunnel") -or
+    $null -ne (Read-C0Pid -Name "tunnel-local")
+) {
+    throw "C0 tunnel-client PID file already exists."
 }
 
 $tunnel = Assert-C0TunnelBinary
@@ -25,9 +28,12 @@ if ($existing.Count -gt 0) {
     throw "Port 8766 already has a listener."
 }
 
-$env:MCP_SERVER_URL = "http://127.0.0.1:8765/mcp"
+$env:MCP_SERVER_URL = "channel=main,url=http://127.0.0.1:8765/mcp"
 $env:MCP_EXTRA_HEADERS = "Authorization: env:SLG_MCP_TOKEN"
 $env:MCP_DISCOVERY_EXTRA_HEADERS = "Authorization: env:SLG_MCP_TOKEN"
+$env:MCP_MAX_CONCURRENT_REQUESTS = "1"
+$env:MCP_CONNECTION_MAX_TTL = "5m"
+$env:CONTROL_PLANE_MAX_INFLIGHT_REQUESTS = "1"
 $env:HEALTH_LISTEN_ADDR = "127.0.0.1:8766"
 $env:LOG_HTTP_RAW_UNSAFE = "false"
 $env:OPEN_WEB_UI = "false"
@@ -77,7 +83,7 @@ try {
     status = "started"
     pid = $process.Id
     transport = "secure_mcp_tunnel"
-    local_mcp_endpoint = $env:MCP_SERVER_URL
+    local_mcp_endpoint = "http://127.0.0.1:8765/mcp"
     health_endpoint = "http://127.0.0.1:8766/readyz"
     raw_http_logging = $false
     remote_ui = $false

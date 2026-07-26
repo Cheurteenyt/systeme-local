@@ -12,7 +12,8 @@ Assert-C0GitState
 if (
     $null -ne (Read-C0Pid -Name "facade") -or
     $null -ne (Read-C0Pid -Name "facade-launcher") -or
-    $null -ne (Read-C0Pid -Name "tunnel")
+    $null -ne (Read-C0Pid -Name "tunnel") -or
+    $null -ne (Read-C0Pid -Name "tunnel-local")
 ) {
     throw "Stop C0 processes before cleanup."
 }

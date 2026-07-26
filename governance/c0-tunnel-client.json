@@ -3,6 +3,8 @@
   "project": "openai/tunnel-client",
   "release_url": "https://github.com/openai/tunnel-client/releases/tag/v0.0.10",
   "version": "v0.0.10",
+  "source_commit": "105e17a79a36e4e5c897fd698ed2b8dbf935b144",
+  "configuration_url": "https://github.com/openai/tunnel-client/blob/v0.0.10/docs/configuration.md",
   "published_at": "2026-07-02T18:28:29Z",
   "asset": {
     "name": "tunnel-client-v0.0.10-windows-amd64.zip",

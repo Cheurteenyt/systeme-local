@@ -30,6 +30,9 @@ if ($existing.Count -gt 0) {
 $env:SLG_MCP_ENABLED = "true"
 $env:SLG_C0_ENABLED = "true"
 $env:SLG_C0_SERVER_BUILD_COMMIT = Get-C0BuildCommit
+$env:SLG_MCP_MAX_REQUEST_BYTES = "4096"
+$env:SLG_MCP_REQUESTS_PER_MINUTE = "30"
+$env:SLG_MCP_MAX_CONCURRENCY = "1"
 $env:SLG_POLICY_FILE = Join-Path $root "policy.c0.yaml"
 $env:SLG_WORKSPACE = $root
 $env:SLG_AUDIT_LOG = Join-Path $state "audit.jsonl"

@@ -100,6 +100,10 @@ singleton `Host`/`Origin`/`Authorization`, bearer, size, rate, and concurrency
 controls remain enabled. The official tunnel client health surface binds to
 `127.0.0.1:8766`. No firewall rule, DNS name, TLS private key, public reverse
 proxy, port forward, wildcard bind, or third-party tunnel is created.
+The C0 facade is explicitly capped at a 4 KiB request, 30 requests per minute,
+and one concurrent request. The tunnel client uses the required `main` channel,
+one in-flight MCP request, a five-minute connection TTL, and one buffered
+control-plane command.
 The facade starts from the ignored C0 state directory rather than the
 repository root, so repository-local `.env` values cannot silently widen or
 re-anchor the probe. Explicit process-level audit-anchor configuration is
@@ -122,6 +126,8 @@ Run the scripts from a clean
 .\scripts\c0\Start-C0Facade.ps1
 .\scripts\c0\New-C0Challenge.ps1
 .\scripts\c0\Test-C0LocalProbe.ps1
+.\scripts\c0\New-C0Challenge.ps1
+.\scripts\c0\Test-C0TunnelClientLocal.ps1
 .\scripts\c0\New-C0Challenge.ps1
 .\scripts\c0\Test-C0Prerequisites.ps1 -RequireSecrets -RequireTunnelCredentials
 .\scripts\c0\Start-C0Tunnel.ps1
@@ -153,8 +159,12 @@ Each state is `verified`, `failed`, `unknown`, or `not_applicable`.
 
 After the call, `Confirm-C0LiveProof.ps1` verifies the challenge, schema, current
 build, raw policy digest, canonical tool snapshot, HMAC audit chain, and exact
-audit UUID. Its intermediate receipt deliberately keeps
-`real_connection_established=false`.
+audit UUID. Its intermediate receipt is itself authenticated with a
+domain-separated HMAC, binds the challenge creation/check window, response,
+build, policy, tool snapshot, audit record, and verified chain length, and
+deliberately keeps `real_connection_established=false`. The final attestation
+command requires and revalidates that receipt; directly bypassing the proof
+check fails closed.
 
 The operator's `manual-web-observation.json` is validated by
 `C0ManualWebObservation`. It contains only plan, role, fixed
@@ -188,6 +198,7 @@ readiness decisions. Its committing validator requires:
 - all eleven checks verified or justified not-applicable;
 - local and scanned counts of exactly `1/0/0`;
 - matching policy, tool, challenge, response, and audit data;
+- the authenticated fresh-call receipt produced before revocation;
 - an MCP-attributed completed audit record;
 - a bounded manual Web time window;
 - a manually verified failed call after revocation.

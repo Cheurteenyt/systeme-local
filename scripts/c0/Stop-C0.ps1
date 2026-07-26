@@ -14,6 +14,7 @@ if ($Emergency) {
     Assert-C0GitState
 }
 Stop-C0Process -Name "tunnel" -AllowedExecutableNames @("tunnel-client.exe")
+Stop-C0Process -Name "tunnel-local" -AllowedExecutableNames @("tunnel-client.exe")
 Stop-C0Process -Name "facade" -AllowedExecutableNames @("python.exe")
 Stop-C0Process -Name "facade-launcher" -AllowedExecutableNames @("python.exe")
 
@@ -31,6 +32,9 @@ foreach ($name in @(
     "MCP_SERVER_URL",
     "MCP_EXTRA_HEADERS",
     "MCP_DISCOVERY_EXTRA_HEADERS",
+    "MCP_MAX_CONCURRENT_REQUESTS",
+    "MCP_CONNECTION_MAX_TTL",
+    "CONTROL_PLANE_MAX_INFLIGHT_REQUESTS",
     "HEALTH_LISTEN_ADDR",
     "LOG_HTTP_RAW_UNSAFE",
     "OPEN_WEB_UI",
@@ -43,6 +47,9 @@ foreach ($name in @(
     "SLG_C0_SERVER_BUILD_COMMIT",
     "SLG_MCP_ENABLED",
     "SLG_MCP_TOKEN",
+    "SLG_MCP_MAX_REQUEST_BYTES",
+    "SLG_MCP_REQUESTS_PER_MINUTE",
+    "SLG_MCP_MAX_CONCURRENCY",
     "SLG_POLICY_FILE",
     "SLG_WORKSPACE",
     "SLG_AUDIT_LOG",

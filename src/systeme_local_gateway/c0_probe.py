@@ -3,7 +3,6 @@ from __future__ import annotations
 import hashlib
 import re
 import threading
-from collections import deque
 from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import UTC, datetime
@@ -73,18 +72,15 @@ class C0ChallengeReplayGuard:
             raise ValueError("C0 replay guard size is outside the safe range")
         self._max_entries = max_entries
         self._digests: set[str] = set()
-        self._order: deque[str] = deque()
         self._lock = threading.Lock()
 
     def consume(self, challenge_sha256: str) -> None:
         with self._lock:
             if challenge_sha256 in self._digests:
                 raise ValueError("C0 challenge has already been consumed")
+            if len(self._digests) >= self._max_entries:
+                raise ValueError("C0 replay guard capacity is exhausted")
             self._digests.add(challenge_sha256)
-            self._order.append(challenge_sha256)
-            while len(self._order) > self._max_entries:
-                expired = self._order.popleft()
-                self._digests.remove(expired)
 
 
 class C0ConnectivityProbe:

@@ -5,6 +5,10 @@ import pytest
 from pydantic import ValidationError
 
 from systeme_local_gateway.c0_probe import C0ConnectivityProbeResponse
+from systeme_local_gateway.c0_proof_check import (
+    C0PendingLiveProofReceipt,
+    commit_c0_pending_live_proof_receipt,
+)
 from systeme_local_gateway.providers import (
     ChatGptClientSurface,
     ChatGptPlan,
@@ -34,6 +38,7 @@ POLICY_SHA256 = "a" * 64
 TOOL_SHA256 = "b" * 64
 CHALLENGE_SHA256 = "c" * 64
 AUDIT_ID = "12345678-1234-4123-8123-123456789abc"
+AUDIT_KEY = "independent-audit-key-for-live-probe-negative-tests"
 
 
 def _observation(
@@ -125,6 +130,21 @@ def _audit_record() -> dict[str, object]:
     }
 
 
+def _pending_receipt(
+    response: C0ConnectivityProbeResponse,
+    audit_record: dict[str, object],
+) -> C0PendingLiveProofReceipt:
+    return commit_c0_pending_live_proof_receipt(
+        audit_key=AUDIT_KEY,
+        challenge_created_at=STARTED - timedelta(minutes=1),
+        checked_at=STARTED + timedelta(minutes=2),
+        challenge_sha256=response.challenge_sha256,
+        response=response,
+        audit_record=audit_record,
+        audit_records_verified=1,
+    )
+
+
 def _commit_fails(
     *,
     capability=None,
@@ -132,6 +152,8 @@ def _commit_fails(
     observation=None,
     response=None,
     audit_record=None,
+    pending_live_proof=None,
+    pending_proof_audit_key: str = AUDIT_KEY,
     chatgpt_snapshot: str = TOOL_SHA256,
     expected_challenge: str = CHALLENGE_SHA256,
     revocation_verified: bool = True,
@@ -140,12 +162,20 @@ def _commit_fails(
 ) -> None:
     default_capability, default_observation = _observation()
     default_reconciliation = build_current_chatgpt_mcp_evidence_reconciliation_profile()
+    selected_response = response or _response()
+    selected_audit_record = audit_record or _audit_record()
+    selected_pending = pending_live_proof or _pending_receipt(
+        selected_response,
+        selected_audit_record,
+    )
     commit_chatgpt_mcp_live_probe_attestation(
         capability_profile=capability or default_capability,
         reconciliation_profile=reconciliation or default_reconciliation,
         readiness_observation=observation or default_observation,
-        response=response or _response(),
-        audit_record=audit_record or _audit_record(),
+        response=selected_response,
+        audit_record=selected_audit_record,
+        pending_live_proof=selected_pending,
+        pending_proof_audit_key=pending_proof_audit_key,
         app_configuration_evidence_sha256="f" * 64,
         chatgpt_tool_snapshot_sha256=chatgpt_snapshot,
         revocation_evidence_sha256="1" * 64,
@@ -177,6 +207,21 @@ def test_revocation_is_a_hard_gate() -> None:
 def test_audit_chain_verification_is_a_hard_gate() -> None:
     with pytest.raises(ValueError, match="audit chain"):
         _commit_fails(audit_chain_verified=False)
+
+
+def test_authenticated_pending_live_proof_is_a_hard_gate() -> None:
+    response = _response()
+    audit_record = _audit_record()
+    tampered = _pending_receipt(response, audit_record).model_copy(
+        update={"response_sha256": "9" * 64}
+    )
+
+    with pytest.raises(ValueError, match="HMAC mismatch"):
+        _commit_fails(
+            response=response,
+            audit_record=audit_record,
+            pending_live_proof=tampered,
+        )
 
 
 def test_unknown_readiness_check_blocks_live_attestation() -> None:
