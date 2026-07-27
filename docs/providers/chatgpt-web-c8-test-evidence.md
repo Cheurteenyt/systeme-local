@@ -57,6 +57,18 @@ with the separate C7-branch-only current-tree CI gate. After that correction:
 The post-live and post-seal repository-wide reruns remain pending because C8
 has not admitted a Work cycle.
 
+The pre-live implementation head
+`6b791b2e843192e0db2449cabbe51e196eb3b5a5` was then validated by
+[GitHub Actions run 30291087715](https://github.com/Cheurteenyt/systeme-local/actions/runs/30291087715):
+
+- `test`: passed;
+- `compatibility (Python 3.14)`: passed;
+- `rust quality`: passed;
+- `rust tests (Windows)`: passed.
+
+This remote CI result validates the pre-live implementation only. It is not
+evidence of a ChatGPT Work invocation.
+
 ## Pre-live visible and official refresh
 
 At `2026-07-27T17:33:00Z`, C8 fetched the six previously reviewed official
