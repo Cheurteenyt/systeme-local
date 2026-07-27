@@ -352,6 +352,16 @@ ajoute un registre versionné, les états `current`, `revalidation_due`,
 ChatGPT reste le seul fournisseur enregistré et le verdict Chat demeure
 `BLOCKED_BY_NO_OFFICIAL_CHAT_TOOL_INTERFACE`.
 
+Le lot
+[`C4 — provider-neutral runtime admission`](docs/providers/chatgpt-web-c4-runtime-admission.md)
+transforme cette preuve C3 en décision runtime immuable avant chaque effet
+protégé. Son
+[`journal de tests`](docs/providers/chatgpt-web-c4-test-evidence.md)
+documente l’audit des contournements, les reçus SHA-256, les rejets de
+rejeu/collision et la dérivation d’une surface d’outils effective. Avec le
+profil ChatGPT actuel, les six actions sont refusées et aucun outil n’est
+exposé.
+
 ## Architecture
 
 Commencez par le [`blueprint v2`](docs/blueprint-v2.md), puis consultez le [`connectivity model`](docs/connectivity-model.md), [`docs/architecture.md`](docs/architecture.md), [`docs/threat-model.md`](docs/threat-model.md) et [`docs/roadmap.md`](docs/roadmap.md).

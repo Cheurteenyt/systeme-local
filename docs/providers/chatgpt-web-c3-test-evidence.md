@@ -2,6 +2,9 @@
 
 Status: C3 lifecycle validation complete; final-head CI is reported on the PR
 
+C3 is immutable historical evidence on descendants. C4 now owns runtime
+admission but continues to consume this exact sealed profile and registry.
+
 Review time: `2026-07-27T11:55:00Z`
 
 Revalidation due from: `2026-08-03T11:55:00Z`

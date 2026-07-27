@@ -21,7 +21,7 @@ of another document.
 | `docs/provider-attachments.md` | provider-neutral attachment metadata and batching |
 | `docs/providers/chatgpt.md` | ChatGPT surface characterization and implementation status |
 | `docs/providers/chatgpt-mcp-*.md` | expiring ChatGPT MCP evidence and operator contracts |
-| `docs/providers/chatgpt-web-c*.md` | stacked ChatGPT Web capability gates, evidence lifecycles and test ledgers |
+| `docs/providers/chatgpt-web-c*.md` | stacked ChatGPT Web capability gates, evidence lifecycles, runtime admissions and test ledgers |
 | `docs/operator-evidence-custodian-protocol.md` | private Python/Rust custody subprocess contract |
 | `docs/operator-evidence-orchestration.md` | protocol-v2, inherited-handle, recovery and eleven-check orchestration contract |
 | `docs/operator-evidence-protocol-v2-design.json` | machine-readable B2.0 protocol and compatibility manifest |
@@ -35,6 +35,10 @@ of another document.
 
 Provider-specific facts never become cross-provider defaults. Target architecture never implies
 implementation. A roadmap entry never authorizes a capability.
+
+A C4 admission receipt records one enforcement result. It is not official
+capability evidence, cannot promote an evidence candidate, and cannot register
+a provider.
 
 ## Status vocabulary
 

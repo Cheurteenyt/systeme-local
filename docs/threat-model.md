@@ -404,8 +404,41 @@ blocked, while changed claims, sources, conclusion, or support become
 `contents: read`, creates no issue, and cannot mutate evidence.
 
 C3 performs no browser, ChatGPT, Work, credential, Tunnel, Plugin, listener, or
-MCP action. The C1 live entry points call C3 before their own logic. Residual
+MCP action. C3 remains the evidence authority while C4 owns current runtime
+admission. Residual
 risk is official documentation changing inside the bounded review window and
 a human reviewer misclassifying a bounded claim. Expiry, independent review,
 tests, and deliberate registry promotion limit but cannot eliminate those
 risks.
+
+## C4 runtime-admission threats and controls
+
+C4 addresses direct-script and lower-level-import bypass, missing provider
+context, provider/surface/profile/time substitution, admission-receipt
+mutation or forgery, correlation replay/collision/capacity exhaustion,
+policy-to-provider capability confusion, and tool-manifest privilege
+expansion.
+
+Controls are strict frozen request/decision models; canonical request and
+receipt SHA-256 commitments; exact C3 decision/profile/evidence/registry
+digests; exact production-adapter builder matching; closed action, reason,
+lifecycle, reviewer, support, and access enums; exact identity matching; zero
+tools on every denial; defensive model revalidation; reviewed-path and reparse
+checks; a reduction-only MCP registry filter; per-tool protocol digests; a
+bounded locked process-local correlation table; and one-time controller-issued
+tool authority.
+
+C1 protected entry points call C4 before state initialization, secret
+generation, credential reads, environment mutation, listener creation,
+`Start-Process`, or operator Plugin guidance. The historical C1 branch value
+remains evidence, while current runtime use requires exact C4 branch and exact
+reviewed C1 ancestry. Explicit provider mode repeats committed admission inside
+Python before the MCP registry, audit/replay services, or listener can exist.
+
+Residual risks are explicit. C4 is not an OS sandbox and cannot prevent manual
+provider actions or independently launched out-of-repository processes.
+Process-local replay state is not distributed replay protection. Generic
+local MCP is not automatically a provider surface; a caller classifying it as
+provider-bound must use explicit provider mode and the admitted constructor.
+Scheduled C3 governance, separate live authorization, and future durable
+replay storage remain necessary.

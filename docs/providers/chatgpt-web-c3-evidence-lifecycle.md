@@ -315,3 +315,15 @@ Residual risk is official documentation changing between review and deadline.
 The warning window, expiry, candidate drift state, registry commitments,
 scheduled read-only governance, and mandatory human promotion bound that risk
 without pretending to eliminate it.
+
+## C4 runtime-enforcement ownership
+
+C3 remains the sole authority for official capability evidence, candidate
+comparison, lifecycle, and support. C4 consumes this decision and now owns
+current runtime admission, effective tool derivation, receipts, and
+process-local correlation replay protection.
+
+C4 does not alter this profile, its registry, its deadlines, or its product
+conclusion. A C4 allow is impossible while this C3 profile is
+`unsupported`. See
+[`chatgpt-web-c4-runtime-admission.md`](chatgpt-web-c4-runtime-admission.md).

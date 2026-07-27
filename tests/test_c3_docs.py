@@ -137,20 +137,21 @@ def test_c3_operator_scripts_are_strict_secret_free_and_complete() -> None:
     assert "cannot be a reparse point" in common
 
 
-def test_c1_live_entrypoints_use_c3_gate_before_c1_logic() -> None:
+def test_c3_is_historical_and_c4_owns_current_c1_runtime_admission() -> None:
     expected = {
         "Prepare-C1.ps1": "runtime_key_creation",
-        "Start-C1Facade.ps1": "browser_test",
+        "Start-C1Facade.ps1": "tool_surface_exposure",
         "Start-C1Tunnel.ps1": "tunnel_start",
         "Show-C1OperatorSteps.ps1": "plugin_creation",
     }
     for name, action in expected.items():
         text = (ROOT / "scripts/c1" / name).read_text(encoding="utf-8")
-        gate = f'Assert-C3ProtectedActionAllowed -Action "{action}"'
 
-        assert "..\\c3\\C3.Common.psm1" in text
-        assert gate in text
-        assert text.index(gate) < text.index("Assert-C1GitState")
+        assert "..\\c4\\C4.Common.psm1" in text
+        assert "Assert-C4ProtectedActionAllowed" in text
+        assert f'"{action}"' in text
+        assert text.index("Assert-C4ProtectedActionAllowed") < text.index("Assert-C1GitState")
+        assert "..\\c3\\C3.Common.psm1" not in text
 
 
 def test_c3_governance_and_ci_are_read_only_and_deterministic() -> None:
@@ -226,6 +227,7 @@ def test_c3_change_seal_is_complete_self_excluding_and_stacked() -> None:
             "--full-index",
             "--no-ext-diff",
             seal["base_commit"],
+            "9140801e88ed44afca9481ac06288783a0d52da2",
             "--",
             ".",
             ":(exclude)governance/c3-change-seal.json",

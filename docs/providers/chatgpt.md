@@ -440,6 +440,23 @@ custom/local MCP on native Chat remains `unsupported`. The detailed contract
 and exact future product gate are in
 [`chatgpt-web-c3-evidence-lifecycle.md`](chatgpt-web-c3-evidence-lifecycle.md).
 
+### Phase 15 — provider-bound runtime admission
+
+Status: `implemented`
+
+C4 consumes the reviewed C3 result and derives one immutable runtime admission
+decision plus an effective tool tuple. The production adapter contains only
+ChatGPT and at most the exact read-only connectivity probe. The current
+unsupported native Chat profile reduces that maximum grant to zero tools and
+denies all six runtime actions.
+
+C4 adds request/receipt commitments, exact provider and tool identity, bounded
+process-local replay/collision rejection, an inner Python provider-mode gate,
+and a provider-bound MCP registry constructor with one-time controller-issued
+authority. It does not change the official capability result or authorize a
+live test. See
+[`chatgpt-web-c4-runtime-admission.md`](chatgpt-web-c4-runtime-admission.md).
+
 ## Security invariants
 
 - never store a ChatGPT password, session cookie, bearer token or API key in the repository;
@@ -480,7 +497,7 @@ C0 formats only its touched Python surface, reducing the current Ruff formatting
 baseline from 54 to 42 files while leaving the historical phase-8 measurement
 unchanged.
 
-## C1, C2, and C3 interpretation
+## C1, C2, C3, and C4 interpretation
 
 Historical C1 receipts proved short-lived correlation between two manually
 created synthetic test chats, the single read-only probe, and local audit
@@ -488,8 +505,10 @@ records. They did not prove current official native Chat support, a durable
 final attestation, conversation discovery, production use, or write
 capability.
 
-C2 identified the official product-surface blocker. C3 revalidated it and now
-owns the deterministic lifecycle and action gate. Current decisions deny
+C2 identified the official product-surface blocker. C3 revalidated it and
+owns the deterministic evidence lifecycle. C4 now owns runtime admission.
+Current decisions deny
 Runtime-key creation, Tunnel startup, Plugin creation, browser testing, and
-any ChatGPT action. The historical C1 records remain evidence of bounded calls,
-not authority to bypass current official documentation.
+any ChatGPT action or tool-surface exposure. The historical C1 records remain
+evidence of bounded calls, not authority to bypass current official
+documentation or C4 admission.

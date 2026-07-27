@@ -120,7 +120,9 @@ def test_c1_operator_scripts_have_required_safety_prologue() -> None:
 def test_c1_common_requires_dedicated_stacked_branch_and_private_state() -> None:
     text = (C1_SCRIPTS / "C1.Common.psm1").read_text(encoding="utf-8")
 
-    assert 'C1ExpectedBranch = "interop/chatgpt-web-chat-observability-c1"' in text
+    assert 'C1HistoricalBranch = "interop/chatgpt-web-chat-observability-c1"' in text
+    assert 'C1RuntimeBranch = "interop/provider-runtime-admission-c4"' in text
+    assert 'C1ReviewedCommit = "2aee36fdfa3d20c23acdc75eb3348bc54536ef4f"' in text
     assert '".systeme-local\\c1"' in text
     assert "escaped the repository-private state root" in text
     assert "Assert-C1StateFile" in text

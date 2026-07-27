@@ -393,3 +393,43 @@ C3 supersedes C2 only as the action-gate owner. C2 remains immutable historical
 evidence. C1 preparation, facade startup, Tunnel startup, and Plugin guidance
 now import C3 before C1 runtime logic. See
 [`providers/chatgpt-web-c3-evidence-lifecycle.md`](providers/chatgpt-web-c3-evidence-lifecycle.md).
+
+## C4 provider-bound runtime admission
+
+ADR 0011 inserts runtime enforcement after C3 evidence evaluation and before a
+provider-bound effect:
+
+```text
+C3 reviewed decision
+    + provider/surface/capability/action request
+    + exact read-only tool metadata
+    + UTC time and correlation
+    -> C4 admission controller
+    -> allow | deny + effective tool tuple
+    -> canonical SHA-256 receipt
+    -> one-time controller-issued authority
+    -> provider-bound boundary continues only on allow
+```
+
+The controller preserves C3 as evidence authority. It cannot acquire sources,
+promote a candidate, change support, or grant a tool absent from both the C4
+adapter and local policy.
+
+`McpToolRegistry` now accepts an optional effective tool scope that can only
+reduce policy-derived tools. Provider mode repeats committed C4 evaluation
+inside `main.py`, before tool construction or runtime initialization.
+`build_admitted_mcp_registry` is the provider-bound constructor: it consumes
+controller-issued object authority exactly once, then validates the receipt,
+action, tool presence, and per-tool protocol digest. A receipt SHA-256 alone
+is not authentication. The generic registry remains a local primitive and
+does not by itself claim provider authorization.
+
+A bounded locked process-local correlation table distinguishes replay,
+collision, and capacity exhaustion. Tool authority is also single-use. This
+does not claim distributed replay protection. The committed production
+adapter registry contains only ChatGPT; synthetic providers are test-only.
+
+C1 preparation, facade startup, Tunnel startup, and Plugin guidance call C4
+before C1 logic. Current unsupported ChatGPT evidence yields six denials and
+zero effective tools. See
+[`providers/chatgpt-web-c4-runtime-admission.md`](providers/chatgpt-web-c4-runtime-admission.md).

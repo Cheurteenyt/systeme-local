@@ -94,3 +94,34 @@ def test_c0_security_configuration_can_be_enabled_explicitly() -> None:
 
     assert settings.c0_enabled is True
     assert settings.c0_server_build_commit == "a" * 40
+
+
+def test_provider_runtime_configuration_is_paired_bounded_and_absolute() -> None:
+    base = {
+        "mcp_enabled": True,
+        "mcp_token": "t" * 48,
+        "c0_enabled": True,
+        "c0_server_build_commit": "a" * 40,
+    }
+    with pytest.raises(ValidationError, match="configured together"):
+        _settings(**base, provider_runtime_mode="chatgpt_chat_c4")
+    with pytest.raises(ValidationError, match="absolute path"):
+        _settings(
+            **base,
+            provider_runtime_mode="chatgpt_chat_c4",
+            provider_runtime_root="relative",
+        )
+    with pytest.raises(ValidationError, match="SLG_MCP_ENABLED"):
+        _settings(
+            provider_runtime_mode="chatgpt_chat_c4",
+            provider_runtime_root="D:/reviewed",
+        )
+
+    settings = _settings(
+        **base,
+        provider_runtime_mode="chatgpt_chat_c4",
+        provider_runtime_root="D:/reviewed",
+    )
+    assert settings.provider_runtime_mode == "chatgpt_chat_c4"
+    assert settings.provider_runtime_root is not None
+    assert settings.provider_runtime_root.is_absolute()

@@ -293,3 +293,25 @@ The next permissible activity is documentation-only revalidation no later than
 independent adapter, official sources, native-surface semantics, threat model,
 tests, and seal. See
 [`providers/chatgpt-web-c3-evidence-lifecycle.md`](providers/chatgpt-web-c3-evidence-lifecycle.md).
+
+## C4 provider-neutral runtime admission
+
+Status: `implemented` on the C4 branch; current ChatGPT admission remains
+denied.
+
+C4 is stacked on exact C3 commit
+`9140801e88ed44afca9481ac06288783a0d52da2` and tracked by issue
+[#71](https://github.com/Cheurteenyt/systeme-local/issues/71). It converts the
+reviewed C3 result into a typed runtime request, immutable decision, effective
+tool set, and canonical receipt before a protected effect.
+
+The production registry still contains only ChatGPT. Current native Chat
+derives zero effective tools and denies Runtime-key creation, Tunnel startup,
+Plugin creation, browser tests, ChatGPT actions, and provider tool exposure.
+Synthetic supported providers exist only in tests and make no portability
+claim.
+
+The next product gate remains official native Chat support followed by an
+independently promoted C3 profile. C4 must then admit only the exact reviewed
+read-only tool before a separately authorized live cycle can begin. See
+[`providers/chatgpt-web-c4-runtime-admission.md`](providers/chatgpt-web-c4-runtime-admission.md).
