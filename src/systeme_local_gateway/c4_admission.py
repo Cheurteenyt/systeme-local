@@ -747,11 +747,11 @@ def load_production_c4_registry(
     registry_path: Path,
 ) -> RuntimeAdapterRegistry:
     root_resolved = root.resolve()
+    if _path_has_reparse_component(registry_path.absolute(), root=root_resolved):
+        raise ValueError("C4 runtime adapter registry uses a reparse path")
     path_resolved = registry_path.resolve()
     if root_resolved not in path_resolved.parents:
         raise ValueError("C4 runtime adapter registry escapes the repository")
-    if _path_has_reparse_component(registry_path.absolute(), root=root_resolved):
-        raise ValueError("C4 runtime adapter registry uses a reparse path")
     raw = json.loads(path_resolved.read_text(encoding="utf-8"))
     registry = RuntimeAdapterRegistry.model_validate(raw)
     expected = build_current_c4_adapter_registry()

@@ -1,5 +1,6 @@
 import importlib
 import os
+from pathlib import Path
 from unittest.mock import patch
 
 import pytest
@@ -97,6 +98,7 @@ def test_c0_security_configuration_can_be_enabled_explicitly() -> None:
 
 
 def test_provider_runtime_configuration_is_paired_bounded_and_absolute() -> None:
+    absolute_root = Path.cwd().resolve() / "reviewed"
     base = {
         "mcp_enabled": True,
         "mcp_token": "t" * 48,
@@ -114,13 +116,13 @@ def test_provider_runtime_configuration_is_paired_bounded_and_absolute() -> None
     with pytest.raises(ValidationError, match="SLG_MCP_ENABLED"):
         _settings(
             provider_runtime_mode="chatgpt_chat_c4",
-            provider_runtime_root="D:/reviewed",
+            provider_runtime_root=absolute_root,
         )
 
     settings = _settings(
         **base,
         provider_runtime_mode="chatgpt_chat_c4",
-        provider_runtime_root="D:/reviewed",
+        provider_runtime_root=absolute_root,
     )
     assert settings.provider_runtime_mode == "chatgpt_chat_c4"
     assert settings.provider_runtime_root is not None
