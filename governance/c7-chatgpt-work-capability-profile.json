@@ -1,0 +1,75 @@
+{
+  "canonical_conclusion": "Current reviewed official OpenAI documentation supports the Plugin-mediated custom or local MCP tool path on ChatGPT Work on the web. This evidence is surface-specific: it does not support native Chat, does not authorize a live cycle, and does not expose any local tool without a separate fresh operator grant.",
+  "conclusion_sha256": "bf09b0681cdbf95f0afa4256022d4ebfc993fc03351784723cb49554a0705b47",
+  "evidence_sha256": "a544ba9e5b602f2ef6ef9239c0c545e8e7baa22a1f642976d8c4ae07c2829641",
+  "identity": {
+    "capability": "custom_or_local_mcp_tool_invocation",
+    "native_surface": "work",
+    "provider_id": "chatgpt",
+    "surface_class": "agentic_work"
+  },
+  "profile_id": "chatgpt_work_c7_20260727",
+  "profile_sha256": "d6cca6b29ebdc8d2cb4cccedede4faf3ac06561cfbedd8159bad025b78f61ade",
+  "revalidate_after": "2026-08-10T15:42:00Z",
+  "revalidation_warning_days": 7,
+  "reviewed_at": "2026-07-27T15:42:00Z",
+  "reviewer_state": "reviewed",
+  "sources": [
+    {
+      "canonical_claim": "The official Work guide defines ChatGPT Work as a separately selected surface for outcome-oriented tasks and says it can use plugins and approved tools; it does not make Work equivalent to Chat.",
+      "claim_sha256": "72872279fd9c8ffc0a64baea1de81ea6061e74615d7a47d33a88998bf587a24c",
+      "consulted_at": "2026-07-27T15:42:00Z",
+      "revalidate_after": "2026-08-10T15:42:00Z",
+      "source_id": "chatgpt_work_surface",
+      "title": "Get started with ChatGPT Work",
+      "url": "https://learn.chatgpt.com/docs/get-started-with-work"
+    },
+    {
+      "canonical_claim": "The official MCP guide states that hosted ChatGPT Work chats use installed plugins for remote MCP tools and that available tools are managed through Plugins in ChatGPT Work.",
+      "claim_sha256": "bd1045f8ef13ed310d69ab44ae41bdb9b7521cc626194aa363cf696311eeeda0",
+      "consulted_at": "2026-07-27T15:42:00Z",
+      "revalidate_after": "2026-08-10T15:42:00Z",
+      "source_id": "mcp_work_web_route",
+      "title": "Model Context Protocol",
+      "url": "https://learn.chatgpt.com/docs/extend/mcp"
+    },
+    {
+      "canonical_claim": "Official connection steps register a public HTTPS /mcp endpoint through ChatGPT Plugins and require review of discovered tools and metadata before use.",
+      "claim_sha256": "5bf378c8f11ef1f604c5135e3557c0c2d5c27c765385d82cf707ad2b4913a9e0",
+      "consulted_at": "2026-07-27T15:42:00Z",
+      "revalidate_after": "2026-08-10T15:42:00Z",
+      "source_id": "plugin_connection_route",
+      "title": "Connect and test your plugin",
+      "url": "https://developers.openai.com/plugins/deploy/connect-chatgpt"
+    },
+    {
+      "canonical_claim": "Official local plugin authoring registers the MCP server in developer mode and assigns plugin creation and testing to Work mode or Codex.",
+      "claim_sha256": "a48313a2e1abc0e24077e7a8bcc1682ef61fca9165babb626d0e9579885e81f0",
+      "consulted_at": "2026-07-27T15:42:00Z",
+      "revalidate_after": "2026-08-10T15:42:00Z",
+      "source_id": "plugin_packaging_surface",
+      "title": "Package your plugin",
+      "url": "https://developers.openai.com/plugins/build/plugins"
+    },
+    {
+      "canonical_claim": "The official Plugins overview states that Plugins are available with ChatGPT Work on the web, are unavailable in Chat, and may add MCP tools to new chats.",
+      "claim_sha256": "642196feb67d61ddb3d499d4e02ae83aa56706f8e621378fa731b492020e8f62",
+      "consulted_at": "2026-07-27T15:42:00Z",
+      "revalidate_after": "2026-08-10T15:42:00Z",
+      "source_id": "plugin_surface_availability",
+      "title": "Plugins",
+      "url": "https://learn.chatgpt.com/docs/plugins"
+    },
+    {
+      "canonical_claim": "Official Secure MCP Tunnel guidance routes a local MCP server to supported ChatGPT plugin setup without changing surface, tool, or authorization policy.",
+      "claim_sha256": "a176beebae3978b5edce727a2e0be9552cc49a03b5a2f05b479cd1e50883ed19",
+      "consulted_at": "2026-07-27T15:42:00Z",
+      "revalidate_after": "2026-08-10T15:42:00Z",
+      "source_id": "secure_mcp_tunnel_route",
+      "title": "Secure MCP Tunnel",
+      "url": "https://developers.openai.com/api/docs/guides/secure-mcp-tunnels"
+    }
+  ],
+  "support_state": "supported",
+  "version": "1"
+}

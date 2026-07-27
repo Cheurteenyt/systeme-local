@@ -505,3 +505,26 @@ review, code review, successor sealing, and C4 runtime enforcement limit but
 cannot eliminate those risks. C6 performs no ChatGPT, Plugin, Work, browser,
 conversation, account, credential, Tunnel, listener, or provider-runtime
 action.
+
+## C7 Work-profile and pre-live authorization threats
+
+C7 adds a supported Work profile without permitting Work activity.
+
+| Threat | Control |
+|---|---|
+| Work evidence silently unblocks native Chat | exact literal Work identity; native Chat blocker and profile digest remain bound separately |
+| an ordinary Chat request is upgraded to Work | `automatic_chat_to_work_switch_allowed=false` is immutable in policy and every decision |
+| official support is mistaken for operator authorization | default decision denies all six effects and exposes zero tools |
+| stale or drifted Work evidence authorizes a cycle | fourteen-day evidence window; due and expired states fail closed |
+| a grant is replayed across profile, policy or surface | grant binds exact Work identity plus profile and policy SHA-256 values |
+| a forged operator grant is accepted | process-local audit-key HMAC is mandatory; missing, short or wrong keys deny all actions |
+| an old grant remains usable | maximum twenty-minute lifetime and strict `authorized_at <= now < expires_at` check |
+| Work is unavailable or quota is stale | explicit Work request plus visible surface, available entitlement and usable quota observations no older than five minutes |
+| browser scope expands during a future cycle | grant literals permanently deny existing chats, history, private browser state and account/security settings |
+| tool scope expands | exactly one reviewed read-only probe and its C4 protocol digest are bound |
+| prompt content requests files, commands, secrets or writes | those capabilities remain absent; grant literals cannot enable them |
+| C7 accidentally performs the proposed C8 test | C7 has no grant creator or live script and refuses secrets, Tunnel processes and C0/C1 listeners |
+
+C7 cannot prove a live Work invocation, current account entitlement, usable
+quota, model routing or regular-use readiness. Those residual risks require a
+separate C8 threat review and live evidence cycle.
