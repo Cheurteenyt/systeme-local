@@ -110,6 +110,11 @@ The covered-head candidate was checked under Python 3.12:
 - sensitive process variables, listeners on 8765/8766, and `tunnel-client`
   processes were all absent.
 
+The first complete typing-ratchet invocation correctly rejected a scope
+mismatch: `c5_integration.py` was present in `pyproject.toml` but absent from
+the governance mirror. C5 added the exact scope entry to
+`governance/mypy-baseline.json`; it added no diagnostic or waiver.
+
 The known Windows pytest temporary-directory `PermissionError` occurred only
 in its post-success `atexit` callback and did not change the zero test exit
 code. Final verification, coverage, Rust, dependency, PowerShell, CI, and
