@@ -4,8 +4,10 @@ param()
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
+Import-Module (Join-Path $PSScriptRoot "..\c2\C2.Common.psm1") -Force
 Import-Module (Join-Path $PSScriptRoot "C1.Common.psm1") -Force
 
+Assert-C2LiveActionAllowed -Action "browser_test"
 Assert-C1GitState
 Assert-C1SecretEnvironment
 $root = Get-C1RepositoryRoot

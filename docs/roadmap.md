@@ -250,3 +250,23 @@ must use separate provider profiles, official capability evidence,
 surface/privacy boundaries, revocation semantics, live tests, and seals.
 Shared local primitives do not make ChatGPT evidence portable to another
 provider.
+
+## C2 ChatGPT-first official capability gating
+
+Status: `BLOCKED_BY_NO_OFFICIAL_CHAT_TOOL_INTERFACE`.
+
+C2 is stacked on exact C1 commit
+`2aee36fdfa3d20c23acdc75eb3348bc54536ef4f`. Current official OpenAI
+documentation routes custom/local MCP use through Plugins and explicitly makes
+Plugins unavailable in Chat. C2 therefore implements a typed, expiring
+official-capability profile and atomically blocks Runtime-key creation, Tunnel
+startup, temporary Plugin creation, and browser testing.
+
+No C1 live test is repeated. The next permissible activity is official
+documentation revalidation. A future `supported` result would still require
+the existing privacy, authorization, credential, revocation, and test gates.
+
+C2 adds only minimal provider, native-surface, surface-class, capability,
+evidence, and decision contracts. ChatGPT remains the only implemented Web
+provider. Other AI Web providers remain planned and require independent
+sources, semantics, threat models, tests, and seals.

@@ -334,6 +334,14 @@ Son [`journal de tests et de preuves`](docs/providers/chatgpt-mcp-c1-test-eviden
 distingue les validations locales réellement exécutées, la préparation live et
 les tests Web encore en attente.
 
+Le lot
+[`C2 — ChatGPT-first official capability gate`](docs/providers/chatgpt-web-c2-capability-gating.md)
+vérifie d'abord si la surface native Chat dispose d'une interface officielle
+pour un outil MCP personnalisé ou local. Son
+[`journal de tests et de preuves`](docs/providers/chatgpt-web-c2-test-evidence.md)
+documente le verdict, la fraîcheur des sources et le blocage atomique des clés,
+Tunnels, Plugins et tests navigateur.
+
 ## Architecture
 
 Commencez par le [`blueprint v2`](docs/blueprint-v2.md), puis consultez le [`connectivity model`](docs/connectivity-model.md), [`docs/architecture.md`](docs/architecture.md), [`docs/threat-model.md`](docs/threat-model.md) et [`docs/roadmap.md`](docs/roadmap.md).

@@ -11,6 +11,7 @@
     "src/systeme_local_gateway/c1_evidence.py",
     "src/systeme_local_gateway/c1_observability.py",
     "src/systeme_local_gateway/c1_proof_check.py",
+    "src/systeme_local_gateway/c2_capability.py",
     "src/systeme_local_gateway/providers/_canonicalization.py",
     "src/systeme_local_gateway/providers/_operator_evidence",
     "src/systeme_local_gateway/providers/chatgpt_mcp_live_probe.py",

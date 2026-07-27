@@ -19,3 +19,13 @@ revalidate_assignment = "_REVALIDATE_AFTER"
 reviewed_at = "2026-07-26T00:00:00Z"
 revalidate_after = "2026-08-09T00:00:00Z"
 warning_days = 7
+
+[[profiles]]
+id = "chatgpt_chat_c2_official_capability_profile"
+source = "src/systeme_local_gateway/c2_capability.py"
+document = "docs/providers/chatgpt-web-c2-capability-gating.md"
+reviewed_assignment = "C2_REVIEWED_AT"
+revalidate_assignment = "C2_REVALIDATE_AFTER"
+reviewed_at = "2026-07-27T01:40:00Z"
+revalidate_after = "2026-08-10T01:40:00Z"
+warning_days = 7

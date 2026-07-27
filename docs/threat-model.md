@@ -352,3 +352,32 @@ conversation identifiers. The absence of that contract is a blocker, not
 permission to scrape. Residual risk remains in manual truthfulness and visible
 UI changes; signed receipts authenticate the recorded claims but do not turn
 unsupported UI state into provider-issued evidence.
+
+## C2 official-capability gate threats and controls
+
+C2 addresses an earlier and narrower threat: performing sensitive setup for a
+transport that the requested native Chat surface cannot officially use.
+
+Threats include generic “ChatGPT” wording being mistaken for Chat, Tunnel
+support being mistaken for surface support, stale documentation, source or
+summary substitution, partial action enablement, provider-value confusion, and
+bypass through C1 live scripts.
+
+Controls are an exact provider/native-surface/capability tuple, a closed
+three-state capability enum, official-host allowlisting, canonical summary and
+profile SHA-256 commitments, sorted unique sources, synchronized
+timezone-aware timestamps, a 14-day maximum freshness window, strict unknown
+field rejection, and one atomic decision over Runtime key, Tunnel, Plugin, and
+browser actions. The C1 preparation, facade, Tunnel, and operator-instruction
+entry points call the C2 gate first.
+
+C2 never opens Work, ChatGPT, history, existing chats, browser private state,
+Security/Account settings, cookies, storage, private requests, or personal
+content. It creates no credentials, listeners, tunnels, Plugins, prompts, or
+tool calls.
+
+Residual risk is official product documentation changing before the deadline.
+Scheduled governance and fail-closed expiry bound but cannot eliminate that
+risk. An officially supported profile would remain only a necessary
+capability condition; live authorization and all C1 safety controls would
+still be required.

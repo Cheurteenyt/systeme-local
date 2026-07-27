@@ -47,6 +47,7 @@ here conflicts with a linked document, the linked document remains authoritative
 | [ADR 0003: Use evidence-bound staged ChatGPT MCP readiness](adr/0003-evidence-bound-chatgpt-mcp-readiness.md) | Durable architectural decision and consequences. |
 | [ADR 0007: Permit a bounded Secure MCP Tunnel connectivity probe](adr/0007-bounded-secure-mcp-tunnel-probe.md) | Durable architectural decision and consequences. |
 | [ADR 0008: Bound Chat-surface observability to two sterile conversations](adr/0008-bounded-chat-surface-observability.md) | Durable architectural decision and consequences. |
+| [ADR 0009: Gate live Web integration on official Chat-surface capability](adr/0009-chatgpt-chat-official-capability-gate.md) | Durable architectural decision and consequences. |
 | [ADR 0004: Exclude raw provider evidence from public models](adr/0004-raw-provider-evidence-exclusion.md) | Durable architectural decision and consequences. |
 | [ADR 0005: Split operator-evidence authority between Python and Rust](adr/0005-python-rust-operator-evidence-custody.md) | Durable architectural decision and consequences. |
 | [ADR 0006: Use inherited read-only handles for bounded operator evidence](adr/0006-inherited-handles-for-operator-evidence.md) | Durable architectural decision and consequences. |
@@ -71,6 +72,8 @@ here conflicts with a linked document, the linked document remains authoritative
 | [C0 ChatGPT Web MCP read-only connectivity probe](providers/chatgpt-mcp-c0-connectivity.md) | Provider-specific bounded live-connectivity and rollback contract. |
 | [C1 ChatGPT Web Chat-surface observability and Codex runtime attribution](providers/chatgpt-mcp-c1-observability.md) | Provider-specific two-Chat correlation, attribution, privacy, and revocation contract. |
 | [C1 test and evidence ledger](providers/chatgpt-mcp-c1-test-evidence.md) | Executed C1 commands, test counts, skips, evidence classes, limitations, and pending live gates. |
+| [C2 ChatGPT-first official capability gate](providers/chatgpt-web-c2-capability-gating.md) | Typed official-source profile and fail-closed gate before credentials, Tunnel, Plugin, or browser use. |
+| [C2 test and evidence ledger](providers/chatgpt-web-c2-test-evidence.md) | Exact official review, deterministic tests, prohibited live actions, and validation closeout. |
 | [ChatGPT MCP deployment evidence and operator contract](providers/chatgpt-mcp-deployment.md) | Provider-specific characterization, evidence, or integration contract. |
 | [ChatGPT MCP sealed operator evidence bundle](providers/chatgpt-mcp-operator-evidence.md) | Provider-specific characterization, evidence, or integration contract. |
 | [ChatGPT provider characterization](providers/chatgpt.md) | Provider-specific characterization, evidence, or integration contract. |

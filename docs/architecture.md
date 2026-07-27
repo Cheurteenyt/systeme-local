@@ -339,3 +339,27 @@ bounded negative results, explicit Plugin/key revocation, and a failed
 post-revocation call are required for the short-lived final attestation. The
 full contract is in
 [`providers/chatgpt-mcp-c1-observability.md`](providers/chatgpt-mcp-c1-observability.md).
+
+## C2 official Chat-surface capability gate
+
+ADR 0009 inserts a documentation-derived gate before every C1 live action:
+
+```text
+official OpenAI sources
+    -> canonical source summaries + SHA-256
+    -> strict ChatGPT / Chat / custom-or-local-MCP profile
+    -> freshness and schema validation
+    -> supported | unsupported | unobservable
+    -> one atomic decision for Runtime key, Tunnel, Plugin, and browser
+```
+
+The current `unsupported` result denies all four actions before credentials or
+processes exist. Stale, ambiguous, malformed, or mismatched evidence also
+denies all four. The gate has no network, browser, credential, or process
+dependency and cannot convert C1 transport readiness into surface support.
+
+Provider ID, native surface, surface class, official capability, evidence, and
+policy decision are separated so a future AI Web provider can supply an
+independent profile. Only ChatGPT is registered; no evidence or capability is
+portable. See
+[`providers/chatgpt-web-c2-capability-gating.md`](providers/chatgpt-web-c2-capability-gating.md).

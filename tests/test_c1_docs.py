@@ -376,6 +376,7 @@ def test_c1_change_seal_is_complete_self_excluding_and_stacked() -> None:
             "--full-index",
             "--no-ext-diff",
             seal["base_commit"],
+            "2aee36fdfa3d20c23acdc75eb3348bc54536ef4f",
             "--",
             ".",
             ":(exclude)governance/c1-change-seal.json",
