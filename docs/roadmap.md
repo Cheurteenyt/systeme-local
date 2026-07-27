@@ -315,3 +315,25 @@ The next product gate remains official native Chat support followed by an
 independently promoted C3 profile. C4 must then admit only the exact reviewed
 read-only tool before a separately authorized live cycle can begin. See
 [`providers/chatgpt-web-c4-runtime-admission.md`](providers/chatgpt-web-c4-runtime-admission.md).
+
+## C5 squash-safe C0-C4 main integration
+
+Status: `implemented` on the C5 integration branch; final merge remains gated
+on final-head and post-merge `main` CI.
+
+C5 is tracked by issue
+[#73](https://github.com/Cheurteenyt/systeme-local/issues/73). A direct
+simulation proved that the five green stacked pull requests cannot be
+independently squash-merged without invalidating the historical C4
+seal/HEAD assumption.
+
+C5 therefore creates one aggregate pull request to `main`, keeps the exact
+C0-C4 ancestry reachable through
+`evidence/c0-c4-main-integration-v1`, and binds the integrated tree with a
+framed SHA-256 commitment over paths, modes, lengths, and blob bytes. It
+changes no capability: current ChatGPT remains denied for all six C4 actions
+with zero tools and zero live actions.
+
+After aggregate merge and green `main` CI, PRs #65, #67, #68, #70, and #72
+are closed as superseded rather than independently merged. See
+[`providers/chatgpt-web-c5-main-integration.md`](providers/chatgpt-web-c5-main-integration.md).

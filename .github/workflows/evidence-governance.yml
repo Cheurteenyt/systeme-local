@@ -55,5 +55,13 @@ jobs:
           --c4-registry governance/c4-runtime-adapters.json
           --expect-all-denied
 
+      - name: Verify C5 squash integration tree and ancestry
+        run: >-
+          uv run --frozen
+          python -m systeme_local_gateway.c5_integration
+          verify
+          --root .
+          --require-clean
+
       - name: Check current evidence dates
         run: python scripts/check_evidence_governance.py --fail-within-days 7

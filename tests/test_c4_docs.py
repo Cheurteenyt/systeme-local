@@ -10,6 +10,7 @@ ROOT = Path(__file__).resolve().parents[1]
 C4_DOC = ROOT / "docs/providers/chatgpt-web-c4-runtime-admission.md"
 C4_LEDGER = ROOT / "docs/providers/chatgpt-web-c4-test-evidence.md"
 C4_SCRIPTS = ROOT / "scripts/c4"
+C4_SEALED_COMMIT = "3a1d2b8286773eaaf69b0b41fade978f09403adb"
 
 
 def test_c4_contract_binds_exact_base_issue_registry_and_chatgpt_identity() -> None:
@@ -275,7 +276,7 @@ def test_c4_change_seal_is_complete_self_excluding_and_stacked() -> None:
             "diff",
             "--name-only",
             seal["covered_head"],
-            "HEAD",
+            C4_SEALED_COMMIT,
             "--",
             ".",
         ],

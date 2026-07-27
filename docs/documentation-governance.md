@@ -40,6 +40,10 @@ A C4 admission receipt records one enforcement result. It is not official
 capability evidence, cannot promote an evidence candidate, and cannot register
 a provider.
 
+A C5 integration seal records exact repository content and preserves reviewed
+commit ancestry across a squash merge. It is not a release signature, provider
+evidence, runtime admission, or permission to perform a live action.
+
 ## Status vocabulary
 
 Documents that describe implementation use only:

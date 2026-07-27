@@ -50,6 +50,7 @@ here conflicts with a linked document, the linked document remains authoritative
 | [ADR 0009: Gate live Web integration on official Chat-surface capability](adr/0009-chatgpt-chat-official-capability-gate.md) | Durable architectural decision and consequences. |
 | [ADR 0010: Separate official evidence acquisition from capability decisions](adr/0010-provider-capability-evidence-lifecycle.md) | Durable architectural decision and consequences. |
 | [ADR 0011: Enforce provider capability admission before runtime effects](adr/0011-provider-runtime-admission.md) | Durable architectural decision and consequences. |
+| [ADR 0012: Preserve reviewed evidence across squash-only integration](adr/0012-squash-safe-evidence-integration.md) | Durable architectural decision and consequences. |
 | [ADR 0004: Exclude raw provider evidence from public models](adr/0004-raw-provider-evidence-exclusion.md) | Durable architectural decision and consequences. |
 | [ADR 0005: Split operator-evidence authority between Python and Rust](adr/0005-python-rust-operator-evidence-custody.md) | Durable architectural decision and consequences. |
 | [ADR 0006: Use inherited read-only handles for bounded operator evidence](adr/0006-inherited-handles-for-operator-evidence.md) | Durable architectural decision and consequences. |
@@ -80,6 +81,7 @@ here conflicts with a linked document, the linked document remains authoritative
 | [C3 test and evidence ledger](providers/chatgpt-web-c3-test-evidence.md) | Official review, gap analysis, deterministic lifecycle tests, prohibited actions, and validation closeout. |
 | [C4 provider-neutral runtime admission](providers/chatgpt-web-c4-runtime-admission.md) | Provider-bound admission requests, effective read-only tool derivation, receipts, replay controls, and bypass audit. |
 | [C4 test and evidence ledger](providers/chatgpt-web-c4-test-evidence.md) | Runtime admission matrices, adversarial tests, safety state, seal, and validation closeout. |
+| [C5 squash-safe C0-C4 main integration](providers/chatgpt-web-c5-main-integration.md) | Aggregate main-integration manifest, evidence tag, framed tree seal, merge audit, and zero-live-action boundary. |
 | [ChatGPT MCP deployment evidence and operator contract](providers/chatgpt-mcp-deployment.md) | Provider-specific characterization, evidence, or integration contract. |
 | [ChatGPT MCP sealed operator evidence bundle](providers/chatgpt-mcp-operator-evidence.md) | Provider-specific characterization, evidence, or integration contract. |
 | [ChatGPT provider characterization](providers/chatgpt.md) | Provider-specific characterization, evidence, or integration contract. |

@@ -433,3 +433,26 @@ C1 preparation, facade startup, Tunnel startup, and Plugin guidance call C4
 before C1 logic. Current unsupported ChatGPT evidence yields six denials and
 zero effective tools. See
 [`providers/chatgpt-web-c4-runtime-admission.md`](providers/chatgpt-web-c4-runtime-admission.md).
+
+## C5 squash-safe evidence integration
+
+ADR 0012 separates historical commit evidence from repository integration:
+
+```text
+C0 -> C1 -> C2 -> C3 -> C4 reviewed commit ancestry
+    -> C5 aggregate branch + exact manifest
+    -> self-excluding binary-diff seal
+    -> framed SHA-256 commitment of paths, modes, lengths, and blob bytes
+    -> immutable evidence tag preserving the reviewed ancestry
+    -> squash-only pull request
+    -> identical sealed tree on main
+```
+
+The aggregate tree commitment excludes only the self-referential C5 seal.
+Historical C4 checks terminate at the exact C4 seal commit rather than an
+unrelated future `HEAD`. The C5 verifier independently requires the covered,
+tagged, and current trees to match.
+
+This is repository governance, not provider capability. It initializes no
+runtime service and changes none of the six current ChatGPT denials. See
+[`providers/chatgpt-web-c5-main-integration.md`](providers/chatgpt-web-c5-main-integration.md).

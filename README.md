@@ -34,6 +34,11 @@ Le runtime MCP actuellement implémenté couvre le premier canal. Il reste la fa
 
 Les règles communes sont définies dans [`docs/connectivity-model.md`](docs/connectivity-model.md). La caractérisation initiale de ChatGPT est définie dans [`docs/providers/chatgpt.md`](docs/providers/chatgpt.md).
 
+La pile de validation ChatGPT C0 à C4 reste fail-closed et est intégrée vers
+`main` par un contrat C5 compatible avec le squash obligatoire. C5 conserve
+les commits de preuve, scelle l'arbre agrégé et n'autorise aucune action live.
+Voir [`docs/providers/chatgpt-web-c5-main-integration.md`](docs/providers/chatgpt-web-c5-main-integration.md).
+
 ### Scénario de validation initial
 
 Le premier scénario testable est l'amélioration d'un harness d'évaluation d'IA locales :

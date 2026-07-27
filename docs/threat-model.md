@@ -442,3 +442,28 @@ local MCP is not automatically a provider surface; a caller classifying it as
 provider-bound must use explicit provider mode and the admitted constructor.
 Scheduled C3 governance, separate live authorization, and future durable
 replay storage remain necessary.
+
+## C5 squash-integration threats and controls
+
+C5 addresses evidence loss or ambiguity caused by squash-only history:
+independent merging of stacked branches, deletion of a reviewed base branch,
+commit substitution, reordered stack layers, tag substitution, diff-only
+verification that misses modes, and tree-only verification that loses the
+reviewed change boundary.
+
+Controls are an exact frozen C0-C4 manifest; strict main base, PR, branch, and
+head identities; pairwise ancestry verification; a SHA-256 binary-diff
+commitment; an independent framed SHA-256 commitment over every tracked path,
+mode, blob length, and blob byte; a one-file self-excluding final seal commit;
+and an evidence tag that keeps the reviewed ancestry reachable after squash.
+
+The current checkout must match the sealed tree. Unknown fields, missing or
+moved tags, changed ancestry, file additions/removals/renames, mode changes,
+blob mutations, manifest changes, or non-canonical paths fail closed.
+
+C5 does not protect against a repository administrator deleting every evidence
+reference or rewriting the remote outside the reviewed workflow. It is not
+code signing and does not replace independent review. The aggregate pull
+request remains large, but this is an explicit consequence of preserving a
+squash-only linear `main`. C5 performs no network, browser, provider, secret,
+Tunnel, Plugin, listener, or ChatGPT action.
