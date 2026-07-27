@@ -193,6 +193,14 @@ A proof is rejected and cannot contribute to a final attestation.
 can be erased immediately after the required shutdown, Plugin removal, key
 revocation, and tab-closure confirmations.
 
+The next cycle must not use the Plugin-directory `Essayer dans le chat`
+control or an `@` selection pill. The current official developer-mode
+instructions permit referring to the draft app directly in the prompt. The
+next attempt therefore requires a visibly Chat-only blank page, one plain-text
+prompt naming the exact temporary app and tool, and local audit correlation as
+the authority for the actual invocation. Any Work transition still rejects the
+cycle before a prompt.
+
 ## Final validation still required
 
 Documentation changes invalidate the previous change seal. Before publication,

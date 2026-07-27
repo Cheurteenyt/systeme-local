@@ -274,6 +274,16 @@ labels only; no provider title or conversation ID is collected.
 
 For Chat A:
 
+The current official developer-mode instructions allow either selecting the
+draft app from the ChatGPT tools menu or referring to the app in the prompt.
+Do not use the Plugin-directory `Essayer dans le chat` / `Try in chat` control:
+it can switch the current surface to Work. Do not use an `@` selection pill
+whose click target opens Plugin details. If the tools menu does not expose an
+unambiguous selection that visibly remains in Chat, keep the new page in Chat
+and use one plain-text prompt that names the temporary app and exact tool. The
+pre-prompt surface observation records that bounded app target, and the local
+audit correlation remains the authority for which tool actually ran.
+
 ```powershell
 .\scripts\c1\New-C1Challenge.ps1 -TestChat a
 .\scripts\c1\New-C1SurfaceObservation.ps1 `

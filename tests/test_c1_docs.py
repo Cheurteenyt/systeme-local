@@ -295,6 +295,7 @@ def test_c1_browser_scope_excludes_private_and_existing_chat_state() -> None:
         "private requests",
         "unrelated tabs",
         "Work is detected but never prompted",
+        'Never use "Try in chat"',
         "Reject-C1ScopeViolationCycle.ps1",
     ):
         assert marker in text

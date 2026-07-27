@@ -14,7 +14,9 @@ C1 browser gate (manual or freshly authorized bounded in-app browser control):
 1. Confirm an eligible ChatGPT plan/role and enable Developer mode.
 2. Create a fresh temporary Runtime API key and configure the existing Tunnel ID.
 3. Start C1 facade and Secure MCP Tunnel.
-4. Create/select the reviewed draft Plugin; verify exactly one read-only tool.
+4. Create the reviewed draft Plugin and verify exactly one read-only tool. In each
+   sterile Chat, select it only if the tools menu remains on Chat; otherwise use the
+   official exact-name prompt-reference path. Never use "Try in chat", which may open Work.
 5. Before every prompt, visibly classify the surface. If Work/Codex/unknown: STOP.
 6. Use exactly two new sterile Chat pages, locally labeled c1-test-chat-a/b.
 7. Never open the sidebar, history, existing chats, storage, cookies, private requests,
