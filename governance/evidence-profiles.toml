@@ -21,6 +21,16 @@ revalidate_after = "2026-08-09T00:00:00Z"
 warning_days = 7
 
 [[profiles]]
+id = "chatgpt_work_c7_official_capability_profile"
+source = "src/systeme_local_gateway/c7_work_admission.py"
+document = "docs/providers/chatgpt-web-c7-work-prelive-admission.md"
+reviewed_assignment = "C7_REVIEWED_AT"
+revalidate_assignment = "C7_REVALIDATE_AFTER"
+reviewed_at = "2026-07-27T15:42:00Z"
+revalidate_after = "2026-08-10T15:42:00Z"
+warning_days = 7
+
+[[profiles]]
 id = "chatgpt_chat_c2_official_capability_profile"
 source = "src/systeme_local_gateway/c2_capability.py"
 document = "docs/providers/chatgpt-web-c2-capability-gating.md"

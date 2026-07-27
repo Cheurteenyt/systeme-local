@@ -487,3 +487,31 @@ a candidate. Drift creates no candidate. Neither path can modify the registry,
 grant a tool, or invoke a provider surface. Scheduled governance has only
 `contents: read` and emits warnings/errors without repository mutation. See
 [`providers/chatgpt-web-c6-official-revalidation.md`](providers/chatgpt-web-c6-official-revalidation.md).
+
+## C7 Work pre-live admission overlay
+
+ADR 0014 introduces a separate Work identity without modifying the historical
+native Chat authority:
+
+```text
+reviewed official Work sources
+    -> exact Work capability profile
+    -> C7 policy binds Chat blocker + C6 policy + C4 probe protocol
+    -> default decision: six denials, zero tools
+    -> future HMAC-bound C8 operator grant
+    -> at most one read-only probe becomes eligible for a bounded Work cycle
+```
+
+The overlay is deliberately outside the C3 native Chat registry. Chat remains
+`BLOCKED_BY_NO_OFFICIAL_CHAT_TOOL_INTERFACE`, and no Work evidence is accepted
+for a Chat request. C7 also contains no grant-creation, credential, Tunnel,
+Plugin, browser or provider-effect path.
+
+This separation preserves three independent facts:
+
+1. official surface eligibility;
+2. local deterministic admission;
+3. fresh operator authorization for a live cycle.
+
+Only all three may be combined by the future C8 implementation. See
+[`providers/chatgpt-web-c7-work-prelive-admission.md`](providers/chatgpt-web-c7-work-prelive-admission.md).

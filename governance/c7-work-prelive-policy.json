@@ -1,0 +1,77 @@
+{
+  "accepted_base_commit": "81bed9b81f266709fab0ea4178f98f0607c3da44",
+  "approved_tool": {
+    "destructive": false,
+    "high_risk": false,
+    "idempotent": true,
+    "name": "systeme_local_connectivity_probe",
+    "protocol_sha256": "de0389f0a2329daa8afa3ad8126eb6e3e80aba1b77ed2e0f29998c37c383c65b",
+    "protocol_v2_reachable": false,
+    "read_only": true,
+    "real_evidence_access": false
+  },
+  "c6_revalidation_policy": {
+    "path": "governance/c6-revalidation-policy.json",
+    "sha256": "c58e4bf06123f844f28e5365cb25b9509d34b6055c83a1c091cf4f3ba09b8e3b"
+  },
+  "default_boundary": {
+    "account_or_security_settings_allowed": false,
+    "automatic_chat_to_work_switch_allowed": false,
+    "effective_tool_count": 0,
+    "existing_chats_allowed": false,
+    "history_allowed": false,
+    "live_actions_allowed": false,
+    "private_browser_state_allowed": false,
+    "protocol_v2_allowed": false,
+    "raw_secrets_allowed": false,
+    "real_evidence_access_allowed": false,
+    "write_actions_allowed": false
+  },
+  "future_live_cycle_grant": {
+    "account_or_security_settings_allowed": false,
+    "exact_internal_model_id_required": false,
+    "existing_chats_allowed": false,
+    "explicit_operator_authorization_required": true,
+    "explicit_work_request_required": true,
+    "fresh_work_quota_observation_required": true,
+    "history_allowed": false,
+    "hmac_required": true,
+    "max_live_cycle_seconds": 1200,
+    "max_new_synthetic_work_chats": 2,
+    "max_work_observation_age_seconds": 300,
+    "private_browser_state_allowed": false,
+    "protocol_v2_allowed": false,
+    "raw_secrets_allowed": false,
+    "real_evidence_access_allowed": false,
+    "work_entitlement_observation_required": true,
+    "work_only": true,
+    "work_surface_required": true,
+    "write_actions_allowed": false
+  },
+  "identity": {
+    "capability": "custom_or_local_mcp_tool_invocation",
+    "native_surface": "work",
+    "provider_id": "chatgpt",
+    "surface_class": "agentic_work"
+  },
+  "native_chat_gate_status": "BLOCKED_BY_NO_OFFICIAL_CHAT_TOOL_INTERFACE",
+  "native_chat_profile": {
+    "path": "governance/c3-chatgpt-chat-capability-profile.json",
+    "sha256": "5d832794b246e11a045299f80dafedb4b4af8475b13cfa7193872f16ff8dbd68"
+  },
+  "policy_id": "chatgpt_work_prelive_c7_20260727",
+  "policy_sha256": "74d79861fbd5cb78e729f39b3416ea856b9ec2f8de6b4650e16e28050383df77",
+  "protected_actions": [
+    "browser_test",
+    "chatgpt_work_action",
+    "plugin_creation",
+    "runtime_key_creation",
+    "tool_surface_exposure",
+    "tunnel_start"
+  ],
+  "version": "1",
+  "work_profile": {
+    "path": "governance/c7-chatgpt-work-capability-profile.json",
+    "sha256": "d6cca6b29ebdc8d2cb4cccedede4faf3ac06561cfbedd8159bad025b78f61ade"
+  }
+}

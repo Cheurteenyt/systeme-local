@@ -478,6 +478,24 @@ no Runtime key, Tunnel, Plugin, browser session, chat, Work surface, history,
 conversation, or account setting is used. See
 [`chatgpt-web-c6-official-revalidation.md`](chatgpt-web-c6-official-revalidation.md).
 
+### Phase 17 — ChatGPT Work pre-live admission
+
+Status: `COMPLETE_C7_WORK_PROFILE_READY_FOR_BOUNDED_LIVE_VALIDATION` pending
+final seal and remote CI.
+
+C7 models Work independently as
+`chatgpt:work:agentic_work:custom_or_local_mcp_tool_invocation`. Six reviewed
+official sources support the Plugin-mediated MCP route on Work. The existing
+native Chat profile remains unsupported and no Work evidence can satisfy it.
+
+The C7 default decision denies all six protected effects and exposes zero
+tools. It requires a fresh future C8 operator grant, authenticated by a
+process-local audit key and bound to a Work-only, two-new-chat, twenty-minute
+maximum cycle with fresh surface, entitlement and usable-quota observations.
+C7 itself creates no grant and performs no ChatGPT, browser,
+credential, Tunnel, Plugin or provider action. See
+[`chatgpt-web-c7-work-prelive-admission.md`](chatgpt-web-c7-work-prelive-admission.md).
+
 ## Security invariants
 
 - never store a ChatGPT password, session cookie, bearer token or API key in the repository;
@@ -518,7 +536,7 @@ C0 formats only its touched Python surface, reducing the current Ruff formatting
 baseline from 54 to 42 files while leaving the historical phase-8 measurement
 unchanged.
 
-## C1 through C6 interpretation
+## C1 through C7 interpretation
 
 Historical C1 receipts proved short-lived correlation between two manually
 created synthetic test chats, the single read-only probe, and local audit
@@ -534,3 +552,7 @@ Runtime-key creation, Tunnel startup, Plugin creation, browser testing, and
 any ChatGPT action or tool-surface exposure. The historical C1 records remain
 evidence of bounded calls, not authority to bypass current official
 documentation or C4 admission.
+
+C7 adds a separate Work eligibility and pre-live policy overlay. It does not
+change native Chat, repeat C1 or claim a live Work result. Its successful
+status authorizes only the design of a separately approved C8 validation.

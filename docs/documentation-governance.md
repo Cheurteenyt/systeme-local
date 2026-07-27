@@ -97,3 +97,10 @@ The scheduled evidence-governance workflow intentionally uses current time. Unit
 tests use an explicit `--as-of` timestamp so they remain deterministic. Its
 C6 network step uses only public official documentation, has `contents: read`,
 and cannot promote or persist a candidate.
+
+C7 adds a separately reviewed Work profile and pre-live policy. Documentation
+must never collapse `supported on Work` into `supported on Chat`, or
+`officially eligible` into `operator-authorized live action`. Every C7 status
+report must retain the native Chat blocker, the automatic-switch denial, six
+default action denials and zero effective tools. A future C8 receipt is a
+separate evidence class and cannot be manufactured from C7 profile data.

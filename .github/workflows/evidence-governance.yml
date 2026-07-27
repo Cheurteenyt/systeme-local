@@ -74,6 +74,18 @@ jobs:
           --root .
           verify
 
+      - name: Verify C7 Work pre-live admission remains zero effect
+        run: >-
+          uv run --frozen
+          python -m systeme_local_gateway.c7_work_admission
+          status
+
+      - name: Verify historical C7 Work pre-live admission seal
+        run: >-
+          uv run --frozen
+          python -m systeme_local_gateway.c7_seal
+          verify
+
       - name: Verify C5 squash integration tree and ancestry
         run: >-
           uv run --frozen

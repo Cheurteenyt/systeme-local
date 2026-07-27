@@ -372,3 +372,32 @@ The next product gate is not another C1 live cycle. It is either:
 
 See
 [`providers/chatgpt-web-c6-official-revalidation.md`](providers/chatgpt-web-c6-official-revalidation.md).
+
+## C7 ChatGPT Work pre-live admission
+
+Status: `COMPLETE_C7_WORK_PROFILE_READY_FOR_BOUNDED_LIVE_VALIDATION` pending
+final seal and remote CI.
+
+C7 starts from accepted C6 `main`
+`81bed9b81f266709fab0ea4178f98f0607c3da44` and is tracked by issue
+[#76](https://github.com/Cheurteenyt/systeme-local/issues/76). It adds the
+first independent ChatGPT Work capability profile for the exact
+`chatgpt:work:agentic_work:custom_or_local_mcp_tool_invocation` tuple.
+
+Current official documentation supports the Plugin-mediated MCP route on Work
+and excludes Plugins from native Chat. C7 therefore preserves the native Chat
+blocker unchanged, forbids automatic Chat-to-Work switching and binds the
+historical C3/C4/C6 artifacts instead of rewriting their evidence.
+
+Official Work support is an eligibility fact, not live authorization. The
+default policy denies Runtime-key creation, Tunnel startup, Plugin creation,
+browser testing, ChatGPT Work actions and tool exposure. It exposes zero tools.
+A future C8 cycle requires a fresh HMAC-authenticated operator grant bound to
+the exact profile/policy, Work-only surface, maximum twenty-minute lifetime
+and at most two new synthetic Work chats. It must include an explicit Work
+request plus fresh visible-surface, entitlement and usable-quota observations.
+
+C7 performs no browser, credential, Tunnel, Plugin, chat or provider action.
+The next gate after a green C7 seal is a separately authorized C8 Work-only
+live validation. See
+[`providers/chatgpt-web-c7-work-prelive-admission.md`](providers/chatgpt-web-c7-work-prelive-admission.md).

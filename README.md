@@ -46,6 +46,13 @@ sections inchangées : ChatGPT Chat reste
 refusées et zéro outil est exposé. Voir
 [`docs/providers/chatgpt-web-c6-official-revalidation.md`](docs/providers/chatgpt-web-c6-official-revalidation.md).
 
+C7 sépare maintenant l’éligibilité officielle de ChatGPT Work de toute
+autorisation live. Le profil Work est supporté pour la route Plugin/MCP, mais
+la décision par défaut refuse les six effets protégés, expose zéro outil,
+conserve le blocage de Chat et exige un futur reçu opérateur C8 frais et signé.
+Voir
+[`docs/providers/chatgpt-web-c7-work-prelive-admission.md`](docs/providers/chatgpt-web-c7-work-prelive-admission.md).
+
 ### Scénario de validation initial
 
 Le premier scénario testable est l'amélioration d'un harness d'évaluation d'IA locales :
@@ -390,6 +397,13 @@ indépendante. Son
 documente les tests déterministes et l'acquisition publique réellement
 exécutée. Ni le contenu récupéré, ni le rapport, ni le candidat ne peuvent
 modifier C3 ou autoriser C4.
+
+Le lot
+[`C7 — ChatGPT Work pre-live admission`](docs/providers/chatgpt-web-c7-work-prelive-admission.md)
+ajoute un profil Work indépendant et une admission pré-live à zéro effet. Son
+[`journal de tests`](docs/providers/chatgpt-web-c7-test-evidence.md)
+documente les preuves officielles, les tests de séparation Chat/Work et les
+gates exacts du futur lot C8.
 
 ## Architecture
 
