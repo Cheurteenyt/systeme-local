@@ -14,7 +14,7 @@
   "max_new_synthetic_work_tasks": 2,
   "max_live_cycle_seconds": 1200,
   "operator_authorization_received": true,
-  "implementation_status": "authorized_pre_live_work_surface_unconfirmed",
+  "implementation_status": "authorized_pre_live_work_surface_rechecked_unconfirmed",
   "changed_files": [
     "README.md",
     "docs/adr/0015-bind-live-work-effects-to-one-revocable-c8-cycle.md",
@@ -67,6 +67,9 @@
   "visible_work_task_surface_confirmed": false,
   "visible_work_entitlement_confirmed": false,
   "visible_work_quota_confirmed": false,
+  "latest_visible_surface_check_at": "2026-07-27T22:46:00Z",
+  "latest_visible_surface_check_result": "plugins_visible_work_entry_absent_public_work_page_only",
+  "signed_work_observation_created": false,
   "official_work_product_rollout_observed": true,
   "runtime_key_created": false,
   "tunnel_started": false,

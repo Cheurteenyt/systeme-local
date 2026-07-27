@@ -91,6 +91,26 @@ counter remains `0/2`. The refreshed governance and recovery checks selected
 51 tests: all 51 passed. This is evidence of a correctly closed admission
 gate, not a live connectivity result.
 
+### Resumed visible-surface check
+
+At `2026-07-27T22:46:00Z` (`2026-07-28` in Europe/Paris), the blocked C8
+cycle was resumed without running any operator command:
+
+- the direct `https://chatgpt.com/work` route still resolved to the public
+  product page rather than an authenticated Work task composer;
+- the signed-in Plugins directory was reachable, but its navigation exposed
+  no Work or Travail control;
+- the operator identified a separately opened Chat tab; C8 left that tab
+  unclaimed and uninspected;
+- no history, existing conversation, Chat composer, account setting, private
+  browser state or desktop application was opened;
+- no Work observation was signed because surface, entitlement and quota were
+  still not independently observable.
+
+The resumed check therefore preserves the exact fail-closed result
+`BLOCKED_BY_WORK_SURFACE_AMBIGUITY`. Preparation, Runtime-key creation,
+Tunnel startup and synthetic task creation remain premature.
+
 ## Live evidence
 
 No live success is recorded in this section until all of these local ignored

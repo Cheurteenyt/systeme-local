@@ -61,6 +61,13 @@ Official documentation does not prove the current account's Work entitlement
 or usable quota. Those facts require visible observations no older than five
 minutes.
 
+A resumed visible-surface check at `2026-07-27T22:46:00Z` found the same
+boundary: the direct Work route remained the public product page and the
+signed-in Plugins directory exposed no Work or Travail control. An
+operator-opened Chat tab was deliberately left unclaimed and uninspected.
+This check created no signed Work, entitlement or quota observation and did
+not run preparation commands.
+
 ## Authorization and privacy boundary
 
 One durable operator authorization covers the C8 goal until success, explicit
