@@ -233,9 +233,7 @@ def test_c4_ledger_separates_audit_local_live_and_closeout_evidence() -> None:
 
 
 def test_c4_change_seal_is_complete_self_excluding_and_stacked() -> None:
-    seal = json.loads(
-        (ROOT / "governance/c4-change-seal.json").read_text(encoding="utf-8")
-    )
+    seal = json.loads((ROOT / "governance/c4-change-seal.json").read_text(encoding="utf-8"))
     changed = seal["changed_files"]
 
     assert seal["base_commit"] == "9140801e88ed44afca9481ac06288783a0d52da2"
