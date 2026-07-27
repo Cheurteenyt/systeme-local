@@ -111,6 +111,41 @@ The resumed check therefore preserves the exact fail-closed result
 `BLOCKED_BY_WORK_SURFACE_AMBIGUITY`. Preparation, Runtime-key creation,
 Tunnel startup and synthetic task creation remain premature.
 
+### First admitted local cycle and freshness refusal
+
+At `2026-07-27T22:59Z`, current operator screenshots established a distinct
+Work composer, visible tools entry, available entitlement, no visible quota
+exhaustion, and the labels `GPT-5.6 Sol` / `Minimal`. C8 admitted one
+twenty-minute grant and started the loopback facade with exactly one effective
+tool. The reviewed local probe completed with:
+
+- `read_only = true`;
+- `write_actions_enabled = false`;
+- `real_evidence_access = false`;
+- `protocol_v2_reachable = false`;
+- one matching local audit correlation.
+
+Creating the operator-managed Runtime key and Tunnel resource exceeded the
+separate five-minute observation window. The credentialed prerequisite
+correctly returned `BLOCKED_BY_SECURITY_INVARIANT` with zero effective tools
+before `Start-C8Tunnel.ps1` ran. No tunnel-client, Plugin connection, Work
+task or remote call existed. The facade was stopped and ports `8765` and
+`8766` were verified closed.
+
+This real refusal exposed a recovery gap between the narrower pre-grant reset
+and final-attestation cleanup. `Reset-C8LocalOnly.ps1` now provides a distinct
+fail-closed recovery for exactly one verified loopback probe and zero remote
+or Work evidence. It never refreshes stale observations, and it continues to
+require platform revocation of any operator-created Runtime key.
+
+The committed recovery was then exercised against that exact interrupted
+state. It verified the one safe local probe and its audit correlation, refused
+no invariant, removed the 11 allowlisted local-cycle artifacts, left the C8
+state directory empty, and reconfirmed that ports `8765` and `8766` were
+closed. The unused Tunnel resource remains reusable. Platform revocation of
+the operator-created Runtime key remains an explicit operator action and is
+not claimed by the local reset.
+
 ## Live evidence
 
 No live success is recorded in this section until all of these local ignored

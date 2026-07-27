@@ -75,6 +75,7 @@ def test_c8_scripts_cover_complete_bounded_lifecycle() -> None:
         "New-C8WorkAdmission.ps1",
         "New-C8WorkTaskObservation.ps1",
         "Prepare-C8.ps1",
+        "Reset-C8LocalOnly.ps1",
         "Reset-C8PreLive.ps1",
         "Start-C8Facade.ps1",
         "Start-C8Tunnel.ps1",
@@ -108,6 +109,24 @@ def test_c8_pre_live_reset_is_narrow_and_fails_closed() -> None:
     assert "Reset-C8PreLive.ps1 -ConfirmedNoLiveActions" in provider
 
 
+def test_c8_local_only_reset_requires_exact_safe_probe_and_zero_remote_state() -> None:
+    script = _text("scripts/c8/Reset-C8LocalOnly.ps1")
+    provider = _text("docs/providers/chatgpt-web-c8-work-live-validation.md")
+    assert "ConfirmedNoRemoteOrWorkActions" in script
+    assert "exactly one local probe audit record" in script
+    assert "systeme_local_connectivity_probe" in script
+    assert "local-response.json" in script
+    assert "audit_correlation" in script
+    assert "task-surface-a.json" in script
+    assert "proof-a.json" in script
+    assert "tunnel.pid" in script
+    assert "Get-NetTCPConnection" in script
+    assert "unexpected" in script
+    assert "Reset-C8LocalOnly.ps1 -ConfirmedNoRemoteOrWorkActions" in provider
+    assert "does not refresh" in provider
+    assert "bypass stale evidence" in provider
+
+
 def test_c8_ledger_does_not_claim_unexecuted_live_success() -> None:
     ledger = _text("docs/providers/chatgpt-web-c8-test-evidence.md")
     assert "live Work evidence not" in ledger
@@ -123,13 +142,20 @@ def test_c8_manifest_records_exact_pre_live_boundary() -> None:
     assert manifest["operator_authorization_received"] is True
     assert manifest["browser_actions_performed"] is True
     assert manifest["visible_plugins_surface_confirmed"] is True
-    assert manifest["visible_work_task_surface_confirmed"] is False
-    assert manifest["visible_work_entitlement_confirmed"] is False
-    assert manifest["visible_work_quota_confirmed"] is False
+    assert manifest["visible_work_task_surface_confirmed"] is True
+    assert manifest["visible_work_entitlement_confirmed"] is True
+    assert manifest["visible_work_quota_confirmed"] is True
     assert manifest["official_work_product_rollout_observed"] is True
-    assert manifest["runtime_key_created"] is False
+    assert manifest["runtime_key_created"] is True
+    assert manifest["runtime_key_platform_revocation_confirmed"] is False
+    assert manifest["tunnel_started"] is False
     assert manifest["work_tasks_created"] == 0
+    assert manifest["local_probe_calls_correlated"] == 1
     assert manifest["live_work_calls_correlated"] == 0
+    assert manifest["work_surface_freshness_refusal_observed"] is True
+    assert manifest["local_only_reset_verified"] is True
+    assert manifest["local_state_artifact_count_after_reset"] == 0
+    assert manifest["ports_closed_after_local_only_reset"] is True
     assert manifest["revocation_verified"] is False
     assert manifest["effective_tool_count_before_grant"] == 0
     assert manifest["changed_files"] == sorted(set(manifest["changed_files"]))

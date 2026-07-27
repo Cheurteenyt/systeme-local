@@ -225,6 +225,23 @@ pre-live receipt and observations:
 The reset refuses any live-cycle grant, proof, PID, listener or unexpected
 state. It is not a recovery path after any live effect.
 
+If one reviewed loopback probe completed but the five-minute Work observation
+expired before Tunnel startup, stop C8 first and use the separate local-only
+recovery:
+
+```powershell
+.\scripts\c8\Stop-C8.ps1
+.\scripts\c8\Reset-C8LocalOnly.ps1 -ConfirmedNoRemoteOrWorkActions
+```
+
+This reset requires exactly one completed local probe whose correlation and
+safe response match the single local audit record. It refuses a process,
+listener, Tunnel marker, task surface, challenge, response, proof, negative
+test, revocation, attestation or any unexpected state. It removes only the
+aborted local-cycle material and process secrets. It does not refresh or
+bypass stale evidence. Any operator-created Runtime key must still be revoked
+on the platform; an unused Tunnel resource may be reused by the next cycle.
+
 ## Portability
 
 The HMAC, chronology, negative-test and revocation structures are reusable
