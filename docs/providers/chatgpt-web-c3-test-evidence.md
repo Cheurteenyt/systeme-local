@@ -1,6 +1,6 @@
 # C3 test and evidence ledger
 
-Status: local validation complete; publication CI pending
+Status: C3 lifecycle validation complete; final-head CI is reported on the PR
 
 Review time: `2026-07-27T11:55:00Z`
 
@@ -17,6 +17,7 @@ Expiry: `2026-08-10T11:55:00Z`
 | C3 branch | `interop/provider-capability-revalidation-c3` |
 | Exact C2 base | `cf05e963ba30539f9b2c9ec2f5f71326cbba8399` |
 | C2 draft PR | [#68](https://github.com/Cheurteenyt/systeme-local/pull/68) |
+| C3 draft PR | [#70](https://github.com/Cheurteenyt/systeme-local/pull/70) |
 | Profile | `chatgpt_chat_c3_20260727` |
 | Profile SHA-256 | `512d26961dd33429850c2599b1c970be3910e990b92bc23aa759e92784f0dc3a` |
 | Registry SHA-256 | `9567dd0bbb9ec80d6bf24ea86048f6229f9c956731053b1191208ac6bcecdd62` |
@@ -112,16 +113,17 @@ not relabeled as C3 evidence.
 | `C3-Q14` | Runtime and network safety inventory | PASS: no sensitive process environment variable, listener on 8765/8766, or `tunnel-client` process |
 | `C3-Q15` | `git diff --check` | PASS |
 | `C3-Q16` | Self-excluding C3 seal and focused C2/C3 regression | PASS: exact diff bytes/digest reproduced; 65 focused tests |
+| `C3-Q17` | Clean-commit offline operator replay | PASS on `6b48b00b0ffef9b751ba2f520259adaa44aab141`: `current`, `unsupported`, five actions denied, candidate sealed, comparison `unchanged`, candidate cannot change the gate |
+| `C3-Q18` | Initial stacked draft-PR CI | PASS: [run `30266197962`](https://github.com/Cheurteenyt/systeme-local/actions/runs/30266197962), all 4 jobs green (`test`, Python 3.14 compatibility, Rust quality, Rust tests on Windows) |
 
 The complete Python run again emitted the known Windows pytest
 temporary-directory `PermissionError` from an `atexit` cleanup callback after
 pytest had returned exit zero. The successful result and the cleanup warning
 are both retained in this ledger.
 
-The following publication-dependent checks remain open:
-
-- clean-commit operator replay;
-- stacked draft-PR CI.
+The final-head CI rerun after this ledger and seal update is intentionally
+reported on draft PR #70 and in the C3 handoff. Updating this ledger again
+solely to cite that rerun would create an unbounded documentation/CI loop.
 
 Required failures remain failures and change the C3 final status. They are not
 deleted or softened.

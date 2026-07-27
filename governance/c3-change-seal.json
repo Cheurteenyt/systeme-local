@@ -1,7 +1,7 @@
 {
   "version": "1",
   "lot": "C3 — Provider-neutral official capability evidence lifecycle and deterministic revalidation",
-  "generated_at": "2026-07-27T12:28:04Z",
+  "generated_at": "2026-07-27T12:34:24Z",
   "repository": "Cheurteenyt/systeme-local",
   "branch": "interop/provider-capability-revalidation-c3",
   "stacked_base_branch": "interop/chatgpt-web-capability-gating-c2",
@@ -10,7 +10,7 @@
   "issue": "https://github.com/Cheurteenyt/systeme-local/issues/69",
   "chatgpt_support_decision": "unsupported",
   "product_gate_status": "BLOCKED_BY_NO_OFFICIAL_CHAT_TOOL_INTERFACE",
-  "lifecycle_validation_status": "LOCAL_VALIDATION_COMPLETE_CI_PENDING",
+  "lifecycle_validation_status": "COMPLETE_C3_REVALIDATION_LIFECYCLE_VERIFIED",
   "official_capability_profile_sha256": "512d26961dd33429850c2599b1c970be3910e990b92bc23aa759e92784f0dc3a",
   "capability_registry_sha256": "9567dd0bbb9ec80d6bf24ea86048f6229f9c956731053b1191208ac6bcecdd62",
   "diff": {
@@ -19,8 +19,8 @@
     "excluded_paths": [
       "governance/c3-change-seal.json"
     ],
-    "sha256": "1ee0fb85dddd79cdc4a1dcd04616a093f23103757654a6ea72cc35ba49f0e702",
-    "bytes": 165116
+    "sha256": "6ab285edbb1c15031d5aeaac74ad7b690325385c77a67ac8114b5c204e66e2d3",
+    "bytes": 165790
   },
   "changed_file_count": 35,
   "changed_files": [
