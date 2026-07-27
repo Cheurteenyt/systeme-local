@@ -38,27 +38,28 @@ def test_committed_c8_governance_matches_reviewed_builders() -> None:
     assert policy.max_new_synthetic_work_tasks == 2
 
 
-def test_revalidation_preserves_fetch_route_inconsistency_without_overclaim() -> None:
+def test_revalidation_records_resolved_fetch_route_without_overclaim() -> None:
     receipt = build_current_c8_revalidation(ROOT)
 
-    assert receipt.mcp_fetch_route_inconsistency_observed is True
+    assert receipt.mcp_fetch_route_inconsistency_observed is False
     assert receipt.route_inconsistency_changes_support_conclusion is False
-    assert any(
+    assert not any(
         item.route_state is C8SourceRouteState.FETCH_ROUTE_INCONSISTENCY_CORROBORATED
         for item in receipt.source_checks
     )
+    assert "web rollout is progressive" in receipt.current_conclusion
     assert receipt.native_chat_gate_status == "BLOCKED_BY_NO_OFFICIAL_CHAT_TOOL_INTERFACE"
 
 
 def test_c8_governance_is_current_then_expires_closed() -> None:
     receipt, policy = verify_committed_c8_governance(ROOT, evaluated_at=NOW)
-    assert receipt.revalidate_after.isoformat() == "2026-08-10T16:50:00+00:00"
+    assert receipt.revalidate_after.isoformat() == "2026-08-10T17:33:00+00:00"
     assert policy.authorization_required is True
 
     with pytest.raises(ValueError, match="expired"):
         verify_committed_c8_governance(
             ROOT,
-            evaluated_at=datetime(2026, 8, 10, 16, 50, tzinfo=UTC),
+            evaluated_at=datetime(2026, 8, 10, 17, 33, tzinfo=UTC),
         )
 
 
@@ -82,9 +83,15 @@ def test_revalidation_and_policy_reject_unknown_or_tampered_fields() -> None:
 def test_all_c8_sources_are_official_https_and_bounded() -> None:
     receipt = build_current_c8_revalidation(ROOT)
 
-    assert len(receipt.source_checks) == 6
+    assert len(receipt.source_checks) == 7
     assert all(
-        item.url.startswith(("https://learn.chatgpt.com/", "https://developers.openai.com/"))
+        item.url.startswith(
+            (
+                "https://chatgpt.com/",
+                "https://learn.chatgpt.com/",
+                "https://developers.openai.com/",
+            )
+        )
         for item in receipt.source_checks
     )
     assert all(item.revalidate_after == receipt.revalidate_after for item in receipt.source_checks)

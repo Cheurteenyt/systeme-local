@@ -36,6 +36,28 @@ combined C4/config/main/C7/C8 regression run selected 109 cases: 108 passed
 and one existing environment-dependent case skipped. The exact repository-wide
 and post-seal results will be added only after they run.
 
+## Pre-live visible and official refresh
+
+At `2026-07-27T17:33:00Z`, C8 fetched the six previously reviewed official
+guides again and inspected the official ChatGPT Work product page:
+
+- the MCP guide now directly states that ChatGPT web can use remote
+  MCP-backed tools supplied by Plugins, resolving the earlier fetched-body
+  inconsistency;
+- the signed-in Plugins directory was visibly reachable;
+- the official Work product page stated that desktop access was available and
+  that Web/mobile availability was rolling out progressively;
+- the direct Work URL showed the product page and a Windows download control,
+  not an authenticated Work task composer;
+- no visible account-specific Work entitlement control or usable quota signal
+  was observed.
+
+Consequently, no Work-surface, entitlement or quota observation was signed,
+no C8 grant was issued, no Runtime key or Tunnel was started, and the task
+counter remains `0/2`. The refreshed governance and recovery checks selected
+51 tests: all 51 passed. This is evidence of a correctly closed admission
+gate, not a live connectivity result.
+
 ## Live evidence
 
 No live success is recorded in this section until all of these local ignored

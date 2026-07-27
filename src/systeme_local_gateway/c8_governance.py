@@ -23,11 +23,11 @@ from .c7_work_admission import (
 C8_REVALIDATION_PATH = "governance/c8-official-work-revalidation.json"
 C8_POLICY_PATH = "governance/c8-live-work-policy.json"
 C8_ACCEPTED_C7_MAIN = "e0a1dccfa13c95a1ce077d2b6f9ef4f1ed70231f"
-C8_REVIEWED_AT = datetime(2026, 7, 27, 16, 50, tzinfo=timezone.utc)
+C8_REVIEWED_AT = datetime(2026, 7, 27, 17, 33, tzinfo=timezone.utc)
 C8_REVALIDATE_AFTER = C8_REVIEWED_AT + timedelta(days=14)
 _SHA256_PATTERN = r"^[0-9a-f]{64}$"
 _SOURCE_ID_PATTERN = r"^[a-z][a-z0-9_]{2,63}$"
-_ALLOWED_HOSTS = ("developers.openai.com", "learn.chatgpt.com")
+_ALLOWED_HOSTS = ("chatgpt.com", "developers.openai.com", "learn.chatgpt.com")
 
 
 def _require_utc(value: datetime) -> datetime:
@@ -97,7 +97,7 @@ class C8OfficialWorkRevalidation(BaseModel):
     support_state: Literal["supported"]
     native_chat_gate_status: Literal["BLOCKED_BY_NO_OFFICIAL_CHAT_TOOL_INTERFACE"]
     source_checks: tuple[C8OfficialSourceCheck, ...]
-    mcp_fetch_route_inconsistency_observed: Literal[True]
+    mcp_fetch_route_inconsistency_observed: Literal[False]
     route_inconsistency_changes_support_conclusion: Literal[False]
     current_conclusion: str = Field(min_length=1, max_length=2_000)
     conclusion_sha256: str = Field(pattern=_SHA256_PATTERN)
@@ -115,11 +115,12 @@ class C8OfficialWorkRevalidation(BaseModel):
         source_ids = tuple(item.source_id for item in self.source_checks)
         if len(source_ids) < 5 or source_ids != tuple(sorted(set(source_ids))):
             raise ValueError("C8 revalidation sources must be sorted and unique")
-        if not any(
+        has_route_inconsistency = any(
             item.route_state is C8SourceRouteState.FETCH_ROUTE_INCONSISTENCY_CORROBORATED
             for item in self.source_checks
-        ):
-            raise ValueError("C8 revalidation must preserve the observed route inconsistency")
+        )
+        if has_route_inconsistency != self.mcp_fetch_route_inconsistency_observed:
+            raise ValueError("C8 revalidation route-inconsistency state is contradictory")
         if any(
             item.consulted_at != self.reviewed_at or item.revalidate_after != self.revalidate_after
             for item in self.source_checks
@@ -238,11 +239,10 @@ def build_current_c8_revalidation(root: Path) -> C8OfficialWorkRevalidation:
                     "mcp_work_route",
                     "Model Context Protocol",
                     "https://learn.chatgpt.com/docs/extend/mcp",
-                    C8SourceRouteState.FETCH_ROUTE_INCONSISTENCY_CORROBORATED,
-                    "The official search index currently describes remote MCP tools through "
-                    "Plugins in hosted ChatGPT Work, while the fetched document body omitted "
-                    "that indexed section. Independent official Plugin, admin, and Tunnel "
-                    "pages corroborate the same Work-only route.",
+                    C8SourceRouteState.FETCHED,
+                    "The current official MCP guide states that ChatGPT web can use remote "
+                    "MCP-backed tools supplied by plugins. The separate Plugins page provides "
+                    "the Work-only availability boundary.",
                 ),
                 _source(
                     "plugin_surface",
@@ -271,16 +271,28 @@ def build_current_c8_revalidation(root: Path) -> C8OfficialWorkRevalidation:
                     "connected-workflow runtime boundaries separate; controls are not "
                     "interchangeable across those surfaces.",
                 ),
+                _source(
+                    "work_rollout_surface",
+                    "ChatGPT Work",
+                    "https://chatgpt.com/fr-FR/work/",
+                    C8SourceRouteState.FETCHED,
+                    "The official ChatGPT Work product page states that Work is available for "
+                    "all plans on desktop and is rolling out progressively on the web and "
+                    "mobile for Plus, Pro, Business, Enterprise, and Edu. This does not prove "
+                    "account-specific web access.",
+                ),
             ),
             key=lambda item: item.source_id,
         )
     )
     conclusion = (
         "Current official OpenAI evidence continues to support Plugin-mediated custom or "
-        "local MCP tool use on ChatGPT Work on the web. It does not support native Chat, "
-        "does not establish account entitlement or usable quota, and does not authorize a "
-        "live action. C8 therefore requires separate fresh visible Work, entitlement, quota, "
-        "and operator authorization evidence before exposing the single reviewed probe."
+        "local MCP tool use on ChatGPT Work on the web. The official product page says the "
+        "web rollout is progressive, so route-level support does not establish current "
+        "account access or usable quota. It does not support native Chat and does not "
+        "authorize a live action. C8 therefore requires separate fresh visible Work, "
+        "entitlement, quota, and operator authorization evidence before exposing the single "
+        "reviewed probe."
     )
     c7_profile_sha256 = _file_canonical_sha256(root / C7_PROFILE_PATH)
     payload: dict[str, Any] = {
@@ -292,7 +304,7 @@ def build_current_c8_revalidation(root: Path) -> C8OfficialWorkRevalidation:
         "support_state": "supported",
         "native_chat_gate_status": "BLOCKED_BY_NO_OFFICIAL_CHAT_TOOL_INTERFACE",
         "source_checks": [item.model_dump(mode="json") for item in sources],
-        "mcp_fetch_route_inconsistency_observed": True,
+        "mcp_fetch_route_inconsistency_observed": False,
         "route_inconsistency_changes_support_conclusion": False,
         "current_conclusion": conclusion,
         "conclusion_sha256": text_sha256(conclusion),

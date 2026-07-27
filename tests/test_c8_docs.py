@@ -121,7 +121,12 @@ def test_c8_manifest_records_exact_pre_live_boundary() -> None:
     assert manifest["base_commit"] == "e0a1dccfa13c95a1ce077d2b6f9ef4f1ed70231f"
     assert manifest["issue"] == 78
     assert manifest["operator_authorization_received"] is True
-    assert manifest["browser_actions_performed"] is False
+    assert manifest["browser_actions_performed"] is True
+    assert manifest["visible_plugins_surface_confirmed"] is True
+    assert manifest["visible_work_task_surface_confirmed"] is False
+    assert manifest["visible_work_entitlement_confirmed"] is False
+    assert manifest["visible_work_quota_confirmed"] is False
+    assert manifest["official_work_product_rollout_observed"] is True
     assert manifest["runtime_key_created"] is False
     assert manifest["work_tasks_created"] == 0
     assert manifest["live_work_calls_correlated"] == 0

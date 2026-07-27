@@ -38,23 +38,24 @@ No automatic Chat-to-Work switch is permitted.
 ## Current official evidence
 
 C8 revalidated the current official route at
-`2026-07-27T16:50:00Z`, with revalidation due by
-`2026-08-10T16:50:00Z`.
+`2026-07-27T17:33:00Z`, with revalidation due by
+`2026-08-10T17:33:00Z`.
 
 | Official source | Result used by C8 |
 |---|---|
 | [Plugins](https://learn.chatgpt.com/docs/plugins) | Plugins are available with Work on the Web, unavailable in Chat/IDE/mobile, and can add MCP tools to new chats. |
-| [Model Context Protocol](https://learn.chatgpt.com/docs/extend/mcp) | The current search index describes the hosted Work/Plugins/MCP route. The fetched body omitted that indexed section, so C8 records a route inconsistency instead of hiding it. |
+| [Model Context Protocol](https://learn.chatgpt.com/docs/extend/mcp) | The fetched guide now directly confirms that ChatGPT web can use remote MCP-backed tools supplied by Plugins; the Plugins page supplies the Work-only boundary. |
 | [Secure MCP Tunnel](https://developers.openai.com/api/docs/guides/secure-mcp-tunnels) | ChatGPT Plugins can select a workspace-associated Tunnel; the operator needs Tunnel Read and Use permissions. |
 | [Apps and connectors](https://learn.chatgpt.com/docs/enterprise/apps-and-connectors) | The official enterprise route independently corroborates Work-on-Web and non-Chat availability. |
 | [Enterprise admin setup](https://learn.chatgpt.com/docs/enterprise/admin-setup) | Least-access and non-sensitive validation remain the correct setup boundary. |
 | [Work admin FAQ](https://learn.chatgpt.com/docs/enterprise/work-admin-faq) | Work, Chat and connected workflow runtime boundaries are separate. |
+| [ChatGPT Work](https://chatgpt.com/fr-FR/work/) | The visible official product page says desktop access is available while web/mobile rollout is progressive for Plus, Pro, Business, Enterprise and Edu; this cannot prove account-specific web access. |
 
 The machine-readable receipt is
 [`governance/c8-official-work-revalidation.json`](../../governance/c8-official-work-revalidation.json).
-Its route inconsistency does not silently become a positive claim: the Work
-conclusion is accepted only because multiple independent official pages
-corroborate it.
+The earlier fetched-body inconsistency is now resolved and recorded as such.
+The Work conclusion still requires multiple independent official pages, and
+the progressive rollout means current account access cannot be inferred.
 
 Official documentation does not prove the current account's Work entitlement
 or usable quota. Those facts require visible observations no older than five

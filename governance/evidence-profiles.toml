@@ -36,8 +36,8 @@ source = "src/systeme_local_gateway/c8_governance.py"
 document = "docs/providers/chatgpt-web-c8-work-live-validation.md"
 reviewed_assignment = "C8_REVIEWED_AT"
 revalidate_assignment = "C8_REVALIDATE_AFTER"
-reviewed_at = "2026-07-27T16:50:00Z"
-revalidate_after = "2026-08-10T16:50:00Z"
+reviewed_at = "2026-07-27T17:33:00Z"
+revalidate_after = "2026-08-10T17:33:00Z"
 warning_days = 7
 
 [[profiles]]

@@ -11,7 +11,7 @@
   },
   "c8_official_revalidation": {
     "path": "governance/c8-official-work-revalidation.json",
-    "sha256": "b5e2adf9c9c5992def62a0c69336c0f5d2b26a8691aa2b18b92276dcd376794d"
+    "sha256": "54997efcdc02cf35e042bee17868fc1b52a3b4350c626808c276b455c710cde0"
   },
   "default_live_actions_allowed": false,
   "entitlement_required": "available",
@@ -28,7 +28,7 @@
   "native_chat_gate_status": "BLOCKED_BY_NO_OFFICIAL_CHAT_TOOL_INTERFACE",
   "only_eligible_tool": "systeme_local_connectivity_probe",
   "policy_id": "chatgpt_work_live_c8_20260727",
-  "policy_sha256": "07ae33cd56e289d87530ac8a43dcfd7829aedcc8040e585340639ee8ce58a29b",
+  "policy_sha256": "df5528d1945bd4915fef03932d3a68487204c51e0369c44a9b58fc73b0dc01ac",
   "private_browser_state_allowed": false,
   "protocol_v2_allowed": false,
   "quota_required": "usable",

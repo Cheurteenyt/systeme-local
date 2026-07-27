@@ -1,6 +1,6 @@
 {
-  "conclusion_sha256": "3ee6b4758aff27eb169f913d1ba9b681761c2f7fbd3248053d8e00860b1a83f3",
-  "current_conclusion": "Current official OpenAI evidence continues to support Plugin-mediated custom or local MCP tool use on ChatGPT Work on the web. It does not support native Chat, does not establish account entitlement or usable quota, and does not authorize a live action. C8 therefore requires separate fresh visible Work, entitlement, quota, and operator authorization evidence before exposing the single reviewed probe.",
+  "conclusion_sha256": "f8cbb6bb601c79dccdf3aaa8bc274d56ddd62fab5406d4ed34e67e98735c3ae5",
+  "current_conclusion": "Current official OpenAI evidence continues to support Plugin-mediated custom or local MCP tool use on ChatGPT Work on the web. The official product page says the web rollout is progressive, so route-level support does not establish current account access or usable quota. It does not support native Chat and does not authorize a live action. C8 therefore requires separate fresh visible Work, entitlement, quota, and operator authorization evidence before exposing the single reviewed probe.",
   "identity": {
     "capability": "custom_or_local_mcp_tool_invocation",
     "native_surface": "work",
@@ -9,19 +9,19 @@
   },
   "inherited_c7_profile_path": "governance/c7-chatgpt-work-capability-profile.json",
   "inherited_c7_profile_sha256": "0c74b2208800dd3011df5608671bf842a42b7d10ab9c70d07e31b3daf09240ad",
-  "mcp_fetch_route_inconsistency_observed": true,
+  "mcp_fetch_route_inconsistency_observed": false,
   "native_chat_gate_status": "BLOCKED_BY_NO_OFFICIAL_CHAT_TOOL_INTERFACE",
   "receipt_id": "chatgpt_work_c8_revalidation_20260727",
-  "receipt_sha256": "b5e2adf9c9c5992def62a0c69336c0f5d2b26a8691aa2b18b92276dcd376794d",
-  "revalidate_after": "2026-08-10T16:50:00Z",
-  "reviewed_at": "2026-07-27T16:50:00Z",
+  "receipt_sha256": "54997efcdc02cf35e042bee17868fc1b52a3b4350c626808c276b455c710cde0",
+  "revalidate_after": "2026-08-10T17:33:00Z",
+  "reviewed_at": "2026-07-27T17:33:00Z",
   "route_inconsistency_changes_support_conclusion": false,
   "source_checks": [
     {
       "canonical_claim": "The current official admin guidance corroborates that Plugins are available on ChatGPT Work on the web and recommends least-access, non-sensitive validation.",
       "claim_sha256": "fc17003bad48b7cf18b7f39ab143fff884ffe1620035665c55986f766b5f1f86",
-      "consulted_at": "2026-07-27T16:50:00Z",
-      "revalidate_after": "2026-08-10T16:50:00Z",
+      "consulted_at": "2026-07-27T17:33:00Z",
+      "revalidate_after": "2026-08-10T17:33:00Z",
       "route_state": "search_index_corroborated",
       "source_id": "admin_setup",
       "title": "Enterprise admin setup",
@@ -30,19 +30,19 @@
     {
       "canonical_claim": "The current official enterprise guide corroborates Plugins on ChatGPT Work on the web and their absence from native Chat, IDE, and mobile.",
       "claim_sha256": "bbc12051bb11d00590cc7008c2d2580f6367ea9494af15c56992f198cb784462",
-      "consulted_at": "2026-07-27T16:50:00Z",
-      "revalidate_after": "2026-08-10T16:50:00Z",
+      "consulted_at": "2026-07-27T17:33:00Z",
+      "revalidate_after": "2026-08-10T17:33:00Z",
       "route_state": "search_index_corroborated",
       "source_id": "enterprise_apps",
       "title": "Apps and connectors",
       "url": "https://learn.chatgpt.com/docs/enterprise/apps-and-connectors"
     },
     {
-      "canonical_claim": "The official search index currently describes remote MCP tools through Plugins in hosted ChatGPT Work, while the fetched document body omitted that indexed section. Independent official Plugin, admin, and Tunnel pages corroborate the same Work-only route.",
-      "claim_sha256": "2eb8b759a6477a5cb52cd8a2340000e68fd4d0d9d81bad58eedfab2b6ee3c4d0",
-      "consulted_at": "2026-07-27T16:50:00Z",
-      "revalidate_after": "2026-08-10T16:50:00Z",
-      "route_state": "fetch_route_inconsistency_corroborated",
+      "canonical_claim": "The current official MCP guide states that ChatGPT web can use remote MCP-backed tools supplied by plugins. The separate Plugins page provides the Work-only availability boundary.",
+      "claim_sha256": "388322fd5995f0c65702d3119ecdf165bab5352d9353ef8af0726b664df82487",
+      "consulted_at": "2026-07-27T17:33:00Z",
+      "revalidate_after": "2026-08-10T17:33:00Z",
+      "route_state": "fetched",
       "source_id": "mcp_work_route",
       "title": "Model Context Protocol",
       "url": "https://learn.chatgpt.com/docs/extend/mcp"
@@ -50,8 +50,8 @@
     {
       "canonical_claim": "The current official Plugins overview states that Plugins are available with ChatGPT Work on the web, unavailable in Chat, IDE, and mobile, and may add MCP tools to new chats.",
       "claim_sha256": "96433df97af7831054f57479712e072b856c0c14c4af6f57023c8904ab4c7a38",
-      "consulted_at": "2026-07-27T16:50:00Z",
-      "revalidate_after": "2026-08-10T16:50:00Z",
+      "consulted_at": "2026-07-27T17:33:00Z",
+      "revalidate_after": "2026-08-10T17:33:00Z",
       "route_state": "fetched",
       "source_id": "plugin_surface",
       "title": "Plugins",
@@ -60,8 +60,8 @@
     {
       "canonical_claim": "The current official secure Tunnel guide directs an operator to Plugins, the Tunnel connection option, and a workspace-associated tunnel ID; Tunnels Read and Use permissions are required.",
       "claim_sha256": "7629857ac1131314d0edc1ee76b494ad40ce0432fea0a8a565bd6c8045063e45",
-      "consulted_at": "2026-07-27T16:50:00Z",
-      "revalidate_after": "2026-08-10T16:50:00Z",
+      "consulted_at": "2026-07-27T17:33:00Z",
+      "revalidate_after": "2026-08-10T17:33:00Z",
       "route_state": "fetched",
       "source_id": "secure_tunnel",
       "title": "Secure MCP Tunnel",
@@ -70,12 +70,22 @@
     {
       "canonical_claim": "The current official Work administration guidance keeps Work, Chat, and connected-workflow runtime boundaries separate; controls are not interchangeable across those surfaces.",
       "claim_sha256": "140f10de748ae6375ec554b691f06377468b86640c68ad841ee651b3c0a083c8",
-      "consulted_at": "2026-07-27T16:50:00Z",
-      "revalidate_after": "2026-08-10T16:50:00Z",
+      "consulted_at": "2026-07-27T17:33:00Z",
+      "revalidate_after": "2026-08-10T17:33:00Z",
       "route_state": "search_index_corroborated",
       "source_id": "work_admin_boundary",
       "title": "Work admin FAQ",
       "url": "https://learn.chatgpt.com/docs/enterprise/work-admin-faq"
+    },
+    {
+      "canonical_claim": "The official ChatGPT Work product page states that Work is available for all plans on desktop and is rolling out progressively on the web and mobile for Plus, Pro, Business, Enterprise, and Edu. This does not prove account-specific web access.",
+      "claim_sha256": "6b98b64b964a4feb2dfea08669dc191962e2a879af139625257083c568a69b52",
+      "consulted_at": "2026-07-27T17:33:00Z",
+      "revalidate_after": "2026-08-10T17:33:00Z",
+      "route_state": "fetched",
+      "source_id": "work_rollout_surface",
+      "title": "ChatGPT Work",
+      "url": "https://chatgpt.com/fr-FR/work/"
     }
   ],
   "support_state": "supported",
