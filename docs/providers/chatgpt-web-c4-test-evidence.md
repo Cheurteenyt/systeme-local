@@ -67,6 +67,8 @@ are recorded in the
 | `C4-L26` | C0-C4 PowerShell parser and actual fixed-time C4 scripts | PASS: 50 files; six denials and zero tools |
 | `C4-L27` | Fixed-time and real-time C3/C4 governance | PASS: C3 current/reviewed/unsupported; C4 six denials and zero tools |
 | `C4-L28` | Changed-file credential-shape scan and local runtime safety state | PASS: 40 files, 0 findings; 0 sensitive process variables, listeners, or Tunnel processes |
+| `C4-L29` | Self-excluding C4 change seal | PASS: exact C3 base, covered head, 41-file manifest, byte count, and SHA-256 reproduced |
+| `C4-L30` | Clean-commit offline operator replay | PASS at `13d7fa168f4fd6ad3fd8d33e0e268081d8fb6075`: preflight denied; six matrix denials; zero tools |
 
 The known Windows pytest temporary-directory `PermissionError` occurred in an
 `atexit` cleanup callback after pytest returned success. It did not alter the
@@ -104,7 +106,6 @@ Before publication, this ledger must record:
 
 No failed check may be deleted, softened, or relabeled.
 
-The local closeout above satisfies every locally executable item. The C4
-self-excluding seal, clean-commit operator replay, stacked draft-PR
-final-head CI, and manual evidence-governance dispatch remain publication
-steps and are not predeclared as successful here.
+The local closeout above satisfies every locally executable item. Stacked
+draft-PR final-head CI and manual evidence-governance dispatch remain external
+publication steps and are not predeclared as successful here.
