@@ -86,6 +86,17 @@ jobs:
           --as-of 2026-07-27T12:00:00Z
           --github-annotations
 
+      - name: Check C4 runtime admission remains fail closed
+        run: >-
+          uv run --frozen --extra dev
+          python -m systeme_local_gateway.c4_admission
+          matrix
+          --root .
+          --c3-registry governance/c3-capability-registry.json
+          --c4-registry governance/c4-runtime-adapters.json
+          --as-of 2026-07-27T12:00:00Z
+          --expect-all-denied
+
       - name: Check documentation contracts
         run: uv run --frozen --extra dev pytest -q tests/test_documentation_governance.py
 

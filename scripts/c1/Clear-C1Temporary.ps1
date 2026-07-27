@@ -62,7 +62,9 @@ foreach ($name in @(
     "SLG_SHARED_SECRET",
     "SLG_MCP_TOKEN",
     "CONTROL_PLANE_API_KEY",
-    "CONTROL_PLANE_TUNNEL_ID"
+    "CONTROL_PLANE_TUNNEL_ID",
+    "SLG_PROVIDER_RUNTIME_MODE",
+    "SLG_PROVIDER_RUNTIME_ROOT"
 )) {
     Remove-Item -LiteralPath "Env:$name" -ErrorAction SilentlyContinue
 }

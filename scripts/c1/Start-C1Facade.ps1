@@ -4,10 +4,12 @@ param()
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
-Import-Module (Join-Path $PSScriptRoot "..\c3\C3.Common.psm1") -Force
+Import-Module (Join-Path $PSScriptRoot "..\c4\C4.Common.psm1") -Force
 Import-Module (Join-Path $PSScriptRoot "C1.Common.psm1") -Force
 
-Assert-C3ProtectedActionAllowed -Action "browser_test"
+Assert-C4ProtectedActionAllowed `
+    -Action "tool_surface_exposure" `
+    -RequestApprovedTools
 Assert-C1GitState
 Assert-C1SecretEnvironment
 $root = Get-C1RepositoryRoot
@@ -18,7 +20,12 @@ if (
 ) {
     throw "C1 facade PID file already exists."
 }
-foreach ($name in @("SLG_AUDIT_ANCHOR_LOG", "SLG_AUDIT_ANCHOR_KEY")) {
+foreach ($name in @(
+    "SLG_AUDIT_ANCHOR_LOG",
+    "SLG_AUDIT_ANCHOR_KEY",
+    "SLG_PROVIDER_RUNTIME_MODE",
+    "SLG_PROVIDER_RUNTIME_ROOT"
+)) {
     if ($null -ne [Environment]::GetEnvironmentVariable($name, "Process")) {
         throw "C1 refuses inherited audit-anchor configuration: $name."
     }
@@ -30,6 +37,8 @@ if (@(Get-NetTCPConnection -State Listen -LocalPort 8765 -ErrorAction SilentlyCo
 $env:SLG_MCP_ENABLED = "true"
 $env:SLG_C0_ENABLED = "true"
 $env:SLG_C0_SERVER_BUILD_COMMIT = Get-C1BuildCommit
+$env:SLG_PROVIDER_RUNTIME_MODE = "chatgpt_chat_c4"
+$env:SLG_PROVIDER_RUNTIME_ROOT = $root
 $env:SLG_MCP_MAX_REQUEST_BYTES = "4096"
 $env:SLG_MCP_REQUESTS_PER_MINUTE = "30"
 $env:SLG_MCP_MAX_CONCURRENCY = "1"

@@ -1,6 +1,7 @@
 import hmac
 import os
 from pathlib import Path
+from typing import Literal
 
 from pydantic import Field, ValidationInfo, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -43,6 +44,8 @@ class Settings(BaseSettings):
         default=None,
         pattern=r"^[0-9a-f]{40}$",
     )
+    provider_runtime_mode: Literal["chatgpt_chat_c4"] | None = None
+    provider_runtime_root: Path | None = None
     mcp_max_request_bytes: int = Field(
         default=1_048_576,
         ge=1_024,
@@ -73,7 +76,8 @@ class Settings(BaseSettings):
             "change-me-change-me-change-me-change-me",
         }
         if value in insecure_values:
-            variable = f"SLG_{info.field_name.upper()}"
+            field_name = info.field_name or "secret"
+            variable = f"SLG_{field_name.upper()}"
             raise ValueError(f"{variable} must be replaced with a random secret")
         return value
 
@@ -111,6 +115,20 @@ class Settings(BaseSettings):
                 raise ValueError(
                     "SLG_C0_SERVER_BUILD_COMMIT is required when SLG_C0_ENABLED is true"
                 )
+
+        provider_mode_configured = self.provider_runtime_mode is not None
+        provider_root_configured = self.provider_runtime_root is not None
+        if provider_mode_configured != provider_root_configured:
+            raise ValueError(
+                "SLG_PROVIDER_RUNTIME_MODE and SLG_PROVIDER_RUNTIME_ROOT "
+                "must be configured together"
+            )
+        if provider_mode_configured:
+            if not self.mcp_enabled or not self.c0_enabled:
+                raise ValueError("C4 provider runtime requires SLG_MCP_ENABLED and SLG_C0_ENABLED")
+            assert self.provider_runtime_root is not None
+            if not self.provider_runtime_root.is_absolute():
+                raise ValueError("SLG_PROVIDER_RUNTIME_ROOT must be an absolute path")
 
         if self.mcp_token is not None:
             secrets_to_compare = {

@@ -4,10 +4,10 @@ param()
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
-Import-Module (Join-Path $PSScriptRoot "..\c3\C3.Common.psm1") -Force
+Import-Module (Join-Path $PSScriptRoot "..\c4\C4.Common.psm1") -Force
 Import-Module (Join-Path $PSScriptRoot "C1.Common.psm1") -Force
 
-Assert-C3ProtectedActionAllowed -Action "runtime_key_creation"
+Assert-C4ProtectedActionAllowed -Action "runtime_key_creation"
 Assert-C1GitState
 $root = Get-C1RepositoryRoot
 $state = Initialize-C1StateDirectory

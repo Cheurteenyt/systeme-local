@@ -4,10 +4,10 @@ param()
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
-Import-Module (Join-Path $PSScriptRoot "..\c3\C3.Common.psm1") -Force
+Import-Module (Join-Path $PSScriptRoot "..\c4\C4.Common.psm1") -Force
 Import-Module (Join-Path $PSScriptRoot "C1.Common.psm1") -Force
 
-Assert-C3ProtectedActionAllowed -Action "tunnel_start"
+Assert-C4ProtectedActionAllowed -Action "tunnel_start"
 Assert-C1GitState
 Assert-C1SecretEnvironment
 Assert-C1TunnelEnvironment

@@ -216,6 +216,7 @@ class McpToolRegistry:
         policy: DeclaredCapabilitiesProtocol,
         *,
         c0_mode: bool = False,
+        effective_tool_names: frozenset[str] | None = None,
     ):
         tools: list[McpToolDefinition] = []
         for capability in policy.declared_capabilities():
@@ -249,7 +250,13 @@ class McpToolRegistry:
                     input_schema=input_schema,
                 )
             )
-        self._tools = tuple(sorted(tools, key=lambda tool: tool.name))
+        built_tools = tuple(sorted(tools, key=lambda tool: tool.name))
+        if effective_tool_names is not None:
+            built_names = {tool.name for tool in built_tools}
+            if not effective_tool_names <= built_names:
+                raise RuntimeError("effective MCP tool scope is not provided by the local policy")
+            built_tools = tuple(tool for tool in built_tools if tool.name in effective_tool_names)
+        self._tools = built_tools
         self._tools_by_name = {tool.name: tool for tool in self._tools}
 
     def list_tools(self) -> tuple[McpToolDefinition, ...]:

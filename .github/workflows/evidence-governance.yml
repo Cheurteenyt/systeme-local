@@ -45,5 +45,15 @@ jobs:
           governance
           --github-annotations
 
+      - name: Verify derived C4 runtime admission remains denied
+        run: >-
+          uv run --frozen
+          python -m systeme_local_gateway.c4_admission
+          matrix
+          --root .
+          --c3-registry governance/c3-capability-registry.json
+          --c4-registry governance/c4-runtime-adapters.json
+          --expect-all-denied
+
       - name: Check current evidence dates
         run: python scripts/check_evidence_governance.py --fail-within-days 7

@@ -1,7 +1,9 @@
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
-$script:C1ExpectedBranch = "interop/chatgpt-web-chat-observability-c1"
+$script:C1HistoricalBranch = "interop/chatgpt-web-chat-observability-c1"
+$script:C1RuntimeBranch = "interop/provider-runtime-admission-c4"
+$script:C1ReviewedCommit = "2aee36fdfa3d20c23acdc75eb3348bc54536ef4f"
 $script:C1ToolName = "systeme_local_connectivity_probe"
 $script:C1Port = 8765
 $script:C1HealthPort = 8766
@@ -43,8 +45,12 @@ function Assert-C1GitState {
 
     $root = Get-C1RepositoryRoot
     $branch = (& git -C $root branch --show-current).Trim()
-    if ($LASTEXITCODE -ne 0 -or $branch -ne $script:C1ExpectedBranch) {
-        throw "C1 requires branch $script:C1ExpectedBranch; observed '$branch'."
+    if ($LASTEXITCODE -ne 0 -or $branch -ne $script:C1RuntimeBranch) {
+        throw "C1 protected runtime requires branch $script:C1RuntimeBranch; observed '$branch'."
+    }
+    & git -C $root merge-base --is-ancestor $script:C1ReviewedCommit HEAD
+    if ($LASTEXITCODE -ne 0) {
+        throw "C1 protected runtime does not descend from the reviewed C1 commit."
     }
     if (-not $AllowDirty) {
         $dirty = & git -C $root status --porcelain
