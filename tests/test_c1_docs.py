@@ -43,6 +43,9 @@ def test_c1_document_keeps_chat_work_runtime_and_visible_labels_separate() -> No
         "does not infer ChatGPT's internal model routing",
         "No reviewed official integration contract exposes existing ChatGPT Web chat",
         "BLOCKED_BY_NO_OFFICIAL_CHAT_HISTORY_INTERFACE",
+        "BLOCKED_BY_PLUGIN_UNAVAILABLE_IN_CHAT",
+        "Plugins are available on ChatGPT Web in Work",
+        "are not available in Chat",
     ):
         assert marker in text
 
@@ -245,9 +248,7 @@ def test_c1_expired_cycle_rejection_is_explicit_and_fail_closed() -> None:
 
 
 def test_c1_scope_violation_rejection_is_explicit_and_fail_closed() -> None:
-    text = (C1_SCRIPTS / "Reject-C1ScopeViolationCycle.ps1").read_text(
-        encoding="utf-8"
-    )
+    text = (C1_SCRIPTS / "Reject-C1ScopeViolationCycle.ps1").read_text(encoding="utf-8")
 
     for marker in (
         "$Violation",
@@ -297,6 +298,23 @@ def test_c1_browser_scope_excludes_private_and_existing_chat_state() -> None:
         "Work is detected but never prompted",
         'Never use "Try in chat"',
         "Reject-C1ScopeViolationCycle.ps1",
+        "do not request it again for every cycle",
+        "BLOCKED_BY_PLUGIN_UNAVAILABLE_IN_CHAT",
+    ):
+        assert marker in text
+
+
+def test_c1_runbook_has_goal_scoped_authorization_and_product_gate() -> None:
+    text = C1_DOC.read_text(encoding="utf-8")
+
+    for marker in (
+        "Product-surface compatibility gate",
+        "Goal-scoped browser authorization gate",
+        "same bounded authorization remains valid",
+        "at most two newly created sterile Chat pages per cycle",
+        "must not switch the surface",
+        "BLOCKED_BY_PLUGIN_UNAVAILABLE_IN_CHAT",
+        "https://learn.chatgpt.com/docs/plugins",
     ):
         assert marker in text
 
@@ -344,9 +362,10 @@ def test_c1_evidence_ledger_separates_executed_and_pending_tests() -> None:
 
     assert "C1 test and evidence ledger" in runbook
     for marker in (
-        "BLOCKED_BY_TEST_FAILURE",
+        "BLOCKED_BY_PLUGIN_UNAVAILABLE_IN_CHAT",
         "858 passed, 5 skipped, 86.11% coverage",
         "72 C1 tests",
+        "83 targeted C1 tests",
         "live-setup",
         "This proves transport readiness only",
         "Live Chat tests not yet executed",
@@ -358,6 +377,9 @@ def test_c1_evidence_ledger_separates_executed_and_pending_tests() -> None:
         "two completed probes and two failed",
         "replay attempts",
         "Reject-C1ExpiredCycle.ps1",
+        "Current official product-surface blocker",
+        "both pages reported `Chat=off` and `Work=on`",
+        "local audit remained zero",
         "Final validation still required",
         "must not rewrite",
         "`not-run` as `PASS`",

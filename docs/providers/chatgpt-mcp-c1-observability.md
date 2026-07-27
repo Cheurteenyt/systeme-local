@@ -6,12 +6,12 @@ gaps are maintained in the
 must be updated from direct command output after every material validation
 round and must never classify an unexecuted Web test as passed.
 
-Status: implementation and local validation in progress; bounded live Web gate not
-yet observed
+Status: `BLOCKED_BY_PLUGIN_UNAVAILABLE_IN_CHAT`; the current official Web
+surface contract exposes Plugins in Work and not in Chat, while C1 forbids Work
 
-Reviewed: 2026-07-26T17:36:35Z
+Reviewed: 2026-07-27T00:45:00Z
 
-Revalidate no later than: 2026-08-09T17:36:35Z
+Revalidate no later than: 2026-08-10T00:45:00Z
 
 Issue: [#66](https://github.com/Cheurteenyt/systeme-local/issues/66)
 
@@ -30,6 +30,13 @@ C1 can establish only this narrow claim after its complete live procedure:
 C1 does not detect, enumerate, search, identify, or read the operator's existing
 chats. It does not prove access to arbitrary conversations. It does not test
 ChatGPT Work. It does not infer ChatGPT's internal model routing.
+
+The current official Plugins documentation creates a product-surface blocker
+for that claim: Plugins are available on ChatGPT Web in Work and are not
+available in Chat. Because the operator's standing authorization permanently
+excludes Work for this goal, no Plugin-backed Chat call may be attempted. C1
+must fail closed before a prompt until an official contract explicitly makes
+Plugins available in Chat or a separately authorized goal changes the surface.
 
 The boundaries remain independent:
 
@@ -68,7 +75,7 @@ proven live ChatGPT Web connection.
 The canonical source profile is
 [`governance/c1-official-evidence-profile.json`](../../governance/c1-official-evidence-profile.json).
 Its profile SHA-256 is
-`1b293c78a46d9ff15f6dec4556acefd05c78ae9e8dc76f306538bf7c96ba8110`.
+`940ea95013c98dbef476432265d2542278888c70fdeaa9128bf823cbfebb8295`.
 The builder recomputes every summary digest and the profile digest.
 
 | Official source | C1 fact | Summary SHA-256 |
@@ -78,6 +85,7 @@ The builder recomputes every summary digest and the profile digest.
 | [Config basics](https://learn.chatgpt.com/docs/config-file/config-basic) | Precedence is CLI, project, profile, user, system, built-in. A configured default is not runtime proof. | `34d07ae296b4496c79590d1d1332e4487d3584cd5eef562ee916df12ad9075a1` |
 | [Models](https://developers.openai.com/api/docs/models) | `gpt-5.6-sol`, `gpt-5.6-terra`, and `gpt-5.6-luna` are distinct official IDs. | `408b74017cc9d42ff0dcf63476bc433e2374fc70ebb2b53e5cfb697747df8c71` |
 | [Connect and test your plugin](https://developers.openai.com/plugins/deploy/connect-chatgpt) | The reviewed Plugin is selected in a new conversation. The documented flow does not expose account chat history. | `c87ac8d404a8fbf1aa776eae82410f42132ee7314a6e79cc3a94aac37fbea42b` |
+| [Plugins](https://learn.chatgpt.com/docs/plugins) | Plugins are available with ChatGPT Work on the Web and are not available in Chat. A Chat-only Plugin test is therefore blocked before any prompt. | `2bea24e00c73e66791d0696d198ca766d318c7c248a12fa0009a8f456449fa93` |
 | [Authentication](https://developers.openai.com/plugins/build/auth) | C1 reuses only the reviewed draft C0 `noauth` probe behind independent local and Tunnel controls. | `057f6725dd2509d41003f923deeabf4e097944a9925d5c4af28f5a3871ee71ae` |
 | [Secure MCP Tunnel](https://developers.openai.com/api/docs/guides/secure-mcp-tunnels) | The official client provides outbound-only private connectivity with distinct Tunnel and Runtime-key permissions. | `0b4e1c1e3b717280dfcd3c9960706c2b48e06b443821b1208fabb27747bb7666` |
 | [Browser](https://learn.chatgpt.com/docs/browser) | The in-app browser is a distinct surface; C1 restricts control to visible state in two sterile chats. | `6be663d6eb35833fd8114eb8462db7d1ca1b906111def89355885b43bdecfb41` |
@@ -224,14 +232,33 @@ The previous revoked C0 key must never be reused.
 Run `Prepare-C1.ps1` again in the live-test PowerShell after the preflight
 cleanup so the live audit chain and all three process secrets are fresh.
 
-## Fresh browser authorization gate
+## Product-surface compatibility gate
 
-Browser control is forbidden until the operator provides fresh explicit
-authorization at C1 execution time. Ambient browser state is not authorization.
+Before creating a Runtime key, starting C1 processes, creating a temporary
+Plugin, or opening test pages, revalidate the official Plugins surface
+contract. At the current review instant, the contract says:
+
+- Plugins are available with ChatGPT Work on the Web;
+- Plugins are not available in Chat.
+
+The C1 claim and the operator's authorization both prohibit Work. Therefore the
+current result is `BLOCKED_BY_PLUGIN_UNAVAILABLE_IN_CHAT`. Do not treat a
+default Work page, a Plugin-directory action, an app mention, or a successful
+Tunnel connection as permission to continue. Close any newly opened test
+pages, disconnect the temporary Plugin, stop local processes, revoke the
+temporary Runtime key, and retain no positive evidence from that cycle.
+
+## Goal-scoped browser authorization gate
+
+Browser control is forbidden until the operator provides explicit
+authorization for the current C1 goal. Ambient browser state is not
+authorization. Once granted, the same bounded authorization remains valid
+across necessary retries until the operator revokes it, the goal ends, or the
+requested scope changes. It must not be requested again for every cycle.
 
 After authorization, control is limited to:
 
-- two newly created sterile Chat pages;
+- at most two newly created sterile Chat pages per cycle;
 - the visible Chat/Work/Codex selector;
 - visible model and reasoning labels;
 - selecting the reviewed draft Plugin;
@@ -244,9 +271,9 @@ It must not open or inspect:
 - account, API-key, or billing pages;
 - unrelated tabs, developer tools, raw CDP state, or personal content.
 
-If the current selector is Work, Codex, or unknown, no prompt is sent. The
-operator must manually switch to Chat or the run ends with
-`BLOCKED_BY_CHAT_SURFACE`.
+If the current selector is Work, Codex, or unknown, no prompt is sent and Codex
+must not switch the surface. The run ends with the most specific product or
+surface blocker.
 
 If a browser-control action opens Work or Codex, accesses an existing chat or
 private browser state, sends an unexpected prompt, or invokes a tool outside
@@ -437,6 +464,7 @@ Otherwise use exactly the most specific allowed C1 status:
 - `READY_BUT_MANUAL_WEB_GATE_PENDING`
 - `BLOCKED_BY_C0_NOT_COMPLETE`
 - `BLOCKED_BY_CHATGPT_PLAN_OR_ROLE`
+- `BLOCKED_BY_PLUGIN_UNAVAILABLE_IN_CHAT`
 - `BLOCKED_BY_CHAT_SURFACE`
 - `BLOCKED_BY_BROWSER_AUTHORIZATION`
 - `BLOCKED_BY_NO_OFFICIAL_CHAT_HISTORY_INTERFACE`

@@ -684,6 +684,8 @@ def commit_official_source_reference(
 def build_current_c1_official_evidence_profile() -> C1OfficialEvidenceProfile:
     consulted = datetime(2026, 7, 26, 17, 36, 35, tzinfo=UTC)
     revalidate = datetime(2026, 8, 9, 17, 36, 35, tzinfo=UTC)
+    plugin_surface_consulted = datetime(2026, 7, 27, 0, 45, tzinfo=UTC)
+    plugin_surface_revalidate = datetime(2026, 8, 10, 0, 45, tzinfo=UTC)
     raw = (
         (
             "chat_and_work",
@@ -748,22 +750,32 @@ def build_current_c1_official_evidence_profile() -> C1OfficialEvidenceProfile:
             "private requests, unrelated tabs, or existing chat history.",
         ),
     )
-    sources = tuple(
-        sorted(
-            (
-                commit_official_source_reference(
-                    source_id=source_id,
-                    title=title,
-                    url=url,
-                    consulted_at=consulted,
-                    canonical_summary=summary,
-                    revalidate_after=revalidate,
-                )
-                for source_id, title, url, summary in raw
+    source_items = [
+        commit_official_source_reference(
+            source_id=source_id,
+            title=title,
+            url=url,
+            consulted_at=consulted,
+            canonical_summary=summary,
+            revalidate_after=revalidate,
+        )
+        for source_id, title, url, summary in raw
+    ]
+    source_items.append(
+        commit_official_source_reference(
+            source_id="plugin_surface_availability",
+            title="Plugins",
+            url="https://learn.chatgpt.com/docs/plugins",
+            consulted_at=plugin_surface_consulted,
+            canonical_summary=(
+                "Plugins are available with ChatGPT Work on the web and are not available in "
+                "Chat. Therefore a C1 run that forbids Work cannot invoke a Plugin from Chat "
+                "and must fail closed before any prompt."
             ),
-            key=lambda item: item.source_id,
+            revalidate_after=plugin_surface_revalidate,
         )
     )
+    sources = tuple(sorted(source_items, key=lambda item: item.source_id))
     payload: dict[str, Any] = {
         "version": "1",
         "profile_id": "chatgpt_web_c1_20260726",

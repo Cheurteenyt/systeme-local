@@ -272,7 +272,7 @@ def _complete_inputs(*, simulated_setup: bool = False):
 def test_official_profile_is_current_sorted_and_canonically_hashed() -> None:
     profile = build_current_c1_official_evidence_profile()
 
-    assert len(profile.sources) == 8
+    assert len(profile.sources) == 9
     assert tuple(item.source_id for item in profile.sources) == tuple(
         sorted(item.source_id for item in profile.sources)
     )
@@ -280,6 +280,11 @@ def test_official_profile_is_current_sorted_and_canonically_hashed() -> None:
         profile.model_dump(mode="json", exclude={"profile_sha256"})
     )
     assert all(item.url.startswith("https://") for item in profile.sources)
+    plugin_surface = next(
+        item for item in profile.sources if item.source_id == "plugin_surface_availability"
+    )
+    assert plugin_surface.url == "https://learn.chatgpt.com/docs/plugins"
+    assert "not available in Chat" in plugin_surface.canonical_summary
 
 
 def test_runtime_setup_observes_model_and_keeps_defaults_separate() -> None:

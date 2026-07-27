@@ -1,7 +1,7 @@
 # C1 test and evidence ledger
 
-Status at `2026-07-26T23:05:29Z`:
-`BLOCKED_BY_TEST_FAILURE`
+Status at `2026-07-27T00:51:10Z`:
+`BLOCKED_BY_PLUGIN_UNAVAILABLE_IN_CHAT`
 
 This ledger records what was actually executed for C1. It is an evidence
 index, not a substitute for the signed C1 receipts. A row is successful only
@@ -15,8 +15,8 @@ of a passed test.
   did not send a ChatGPT Web prompt;
 - `visible-web`: inspected only visible controls on a new sterile Chat page
   after bounded browser authorization, without sending a prompt;
-- `live-chat`: exercised a newly created sterile Chat page after fresh browser
-  authorization;
+- `live-chat`: exercised a newly created sterile Chat page after bounded
+  goal-scoped browser authorization;
 - `not-run`: no execution evidence exists.
 
 Work is detected but never invoked or tested. Existing ChatGPT conversations,
@@ -30,7 +30,7 @@ API-key pages, and unrelated tabs are outside the evidence boundary.
 | Repository | `Cheurteenyt/systeme-local` |
 | C1 issue | `#66` |
 | C1 branch | `interop/chatgpt-web-chat-observability-c1` |
-| Current committed C1 baseline | `d5eae184290dd90832386d6700ccc9c209aa60a8` |
+| Current committed C1 baseline | `c88ad8166585cdd36f84e1fa339aaf9deaa0a1fc` |
 | C0 dependency | `912d0d33e119469ff957965104cf20af5e491923` |
 | Policy SHA-256 | `17a53ee929232bae5901037c26c23ad1379dbdb09998c698b1ed85c60a75700e` |
 | Tool snapshot SHA-256 | `6d9a8e0f6dadb9f3a615abcca8c882cb37fb257944922151e97c65a8575da14b` |
@@ -71,6 +71,8 @@ documentation change.
 | `C1-Q12` | `2026-07-26T18:42:51Z`–`18:43:51Z` | Full Python suite with coverage after adding the two ledger contracts | PASS: 860 passed, 5 skipped, 86.11% coverage, exit 0. |
 | `C1-Q13` | `2026-07-26T23:16Z`–`23:17Z` | C1 observability, proof, documentation, PowerShell parsing, Ruff, and self-excluding seal regression after the expiry-window fix | PASS: 82 targeted C1 tests; all 18 C1 PowerShell scripts parsed; Ruff check/format clean. |
 | `C1-Q14` | `2026-07-26T23:17:19Z`–`23:18:21Z` | Full Python suite with coverage on the expiry-window fix | PASS: 868 passed, 5 skipped, 87.09% coverage, exit 0. The known post-exit Windows pytest temporary-symlink warning recurred after the successful result. |
+
+| `C1-Q15` | `2026-07-27T00:23Z` | Documentation, targeted C1, PowerShell parsing, and deterministic seal checkpoint on commit `c88ad81` | PASS: 20 documentation tests; 83 targeted C1 tests; all 19 C1 PowerShell scripts parsed; the 39-file self-excluding seal matched SHA-256 `7789faf109ac53a7ac635cb137378c4a6ca7f3365a078763dc0ff58556fe9678`. The known post-exit Windows pytest temporary-directory warning followed exit 0. |
 
 ## Skips and non-failing warning
 
@@ -193,13 +195,49 @@ A proof is rejected and cannot contribute to a final attestation.
 can be erased immediately after the required shutdown, Plugin removal, key
 revocation, and tab-closure confirmations.
 
-The next cycle must not use the Plugin-directory `Essayer dans le chat`
-control or an `@` selection pill. The current official developer-mode
-instructions permit referring to the draft app directly in the prompt. The
-next attempt therefore requires a visibly Chat-only blank page, one plain-text
-prompt naming the exact temporary app and tool, and local audit correlation as
-the authority for the actual invocation. Any Work transition still rejects the
-cycle before a prompt.
+This proposed retry path was superseded by the official product-surface
+finding below. It must not be attempted while Plugins remain unavailable in
+Chat.
+
+## Current official product-surface blocker
+
+At `2026-07-27T00:45Z`, the operator granted one persistent but bounded
+authorization for the current C1 goal. It covers only the Plugins surface and
+at most two newly created synthetic Chat pages per cycle, remains valid across
+strictly necessary retries, and still permanently excludes Work, existing
+chats, history, account/security settings, and private browser state.
+
+One fresh cycle then produced only the following setup observations:
+
+- the temporary development Plugin
+  `systeme-local-c1-chatonly-20260727` connected through the reviewed Tunnel;
+- its visible metadata exposed exactly one `LECTURE` action,
+  `systeme_local_connectivity_probe`, with `additionalProperties=false` and the
+  exact `^c0_[0-9a-f]{32}$` challenge pattern;
+- exactly two new pages were opened and classified only through the visible
+  surface selector;
+- both pages reported `Chat=off` and `Work=on` before any prompt;
+- no prompt was sent, no tool was invoked, the local audit remained zero
+  records, and no existing chat, history, private browser state, or personal
+  content was accessed.
+
+Both test pages were immediately closed without switching the surface. The
+temporary Plugin was disconnected, the facade and Tunnel were stopped, ports
+`8765/8766` closed, and process-local transport secrets were cleared.
+
+The current official [Plugins](https://learn.chatgpt.com/docs/plugins)
+documentation was then fetched directly. It states that Plugins are available
+with ChatGPT Work on the Web and are not available in Chat. This makes the
+intended Chat-only Plugin invocation unavailable by product contract, not by a
+Tunnel, schema, or local implementation failure. Because Work remains outside
+the operator's authorization and the C1 claim boundary, the exact status is
+`BLOCKED_BY_PLUGIN_UNAVAILABLE_IN_CHAT`.
+
+This cycle created no positive, negative, or final C1 receipt. Its temporary
+Runtime key must be revoked before private preflight state is irreversibly
+cleared. No new live cycle may start until official revalidation shows Plugins
+available in Chat or a separate goal explicitly authorizes another supported
+surface.
 
 ## Final validation still required
 

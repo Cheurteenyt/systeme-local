@@ -1,6 +1,6 @@
 {
   "profile_id": "chatgpt_web_c1_20260726",
-  "profile_sha256": "1b293c78a46d9ff15f6dec4556acefd05c78ae9e8dc76f306538bf7c96ba8110",
+  "profile_sha256": "940ea95013c98dbef476432265d2542278888c70fdeaa9128bf823cbfebb8295",
   "sources": [
     {
       "canonical_summary": "The ChatGPT desktop in-app browser is a distinct browser surface. C1 limits control to visible controls and two new sterile chats and does not inspect cookies, storage, private requests, unrelated tabs, or existing chat history.",
@@ -64,6 +64,15 @@
       "summary_sha256": "c87ac8d404a8fbf1aa776eae82410f42132ee7314a6e79cc3a94aac37fbea42b",
       "title": "Connect and test your plugin",
       "url": "https://developers.openai.com/plugins/deploy/connect-chatgpt"
+    },
+    {
+      "canonical_summary": "Plugins are available with ChatGPT Work on the web and are not available in Chat. Therefore a C1 run that forbids Work cannot invoke a Plugin from Chat and must fail closed before any prompt.",
+      "consulted_at": "2026-07-27T00:45:00Z",
+      "revalidate_after": "2026-08-10T00:45:00Z",
+      "source_id": "plugin_surface_availability",
+      "summary_sha256": "2bea24e00c73e66791d0696d198ca766d318c7c248a12fa0009a8f456449fa93",
+      "title": "Plugins",
+      "url": "https://learn.chatgpt.com/docs/plugins"
     },
     {
       "canonical_summary": "The official customer-run tunnel client keeps the local MCP server private through outbound-only connectivity and uses distinct Tunnel and Runtime API-key permissions.",

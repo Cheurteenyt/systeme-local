@@ -228,9 +228,11 @@ from 54 to 42 files.
 
 ## C1 bounded Chat-surface observability
 
-Status: `partial` until fresh browser authorization, two real sterile Chat
-calls, both audit correlations, all bounded negative checks, and post-test
-revocation are observed.
+Status: `blocked` by the current official product surface contract. Plugins
+are available on ChatGPT Web only in Work and are unavailable in Chat, while
+C1 explicitly forbids Work. The live gate can resume only after official
+revalidation shows Plugin availability in Chat or a separate goal explicitly
+authorizes a compatible surface.
 
 C1 is stacked on the unmerged C0 branch and tracked by issue
 [#66](https://github.com/Cheurteenyt/systeme-local/issues/66). It adds strict
