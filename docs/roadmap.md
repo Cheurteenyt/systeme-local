@@ -244,3 +244,9 @@ enables writes, or changes the exact C0 probe snapshot.
 
 The live gate and rollback are specified in
 [`providers/chatgpt-mcp-c1-observability.md`](providers/chatgpt-mcp-c1-observability.md).
+
+ChatGPT remains the first Web-provider priority. Later AI Web integrations
+must use separate provider profiles, official capability evidence,
+surface/privacy boundaries, revocation semantics, live tests, and seals.
+Shared local primitives do not make ChatGPT evidence portable to another
+provider.

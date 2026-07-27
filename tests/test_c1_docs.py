@@ -319,6 +319,37 @@ def test_c1_runbook_has_goal_scoped_authorization_and_product_gate() -> None:
         assert marker in text
 
 
+def test_c1_runbook_keeps_future_web_provider_claims_independent() -> None:
+    text = C1_DOC.read_text(encoding="utf-8")
+    roadmap = (ROOT / "docs/roadmap.md").read_text(encoding="utf-8")
+
+    for marker in (
+        "Project priority and future Web providers",
+        "ChatGPT Web is the current provider priority",
+        "separately reviewed official-capability profile",
+        "must not inherit",
+        "ChatGPT claims or receipts",
+        "No generic “AI Web compatibility” claim",
+    ):
+        assert marker in text
+    for marker in (
+        "ChatGPT remains the first Web-provider priority",
+        "Shared local primitives do not make ChatGPT evidence portable",
+    ):
+        assert marker in roadmap
+
+
+def test_python_314_ci_checkout_fetches_the_c1_seal_base_commit() -> None:
+    workflow = (ROOT / ".github/workflows/ci.yml").read_text(encoding="utf-8")
+    compatibility = workflow.split("  compatibility:", maxsplit=1)[1].split(
+        "  rust-quality:", maxsplit=1
+    )[0]
+
+    assert "name: compatibility (Python 3.14)" in compatibility
+    assert "persist-credentials: false" in compatibility
+    assert "fetch-depth: 0" in compatibility
+
+
 def test_c1_change_seal_is_complete_self_excluding_and_stacked() -> None:
     seal = json.loads((ROOT / "governance/c1-change-seal.json").read_text(encoding="utf-8"))
     changed = seal["changed_files"]
@@ -326,9 +357,10 @@ def test_c1_change_seal_is_complete_self_excluding_and_stacked() -> None:
     assert seal["base_commit"] == "912d0d33e119469ff957965104cf20af5e491923"
     assert seal["main_at_start"] == "32515ac9cbb9d658b2ddcb2723ab3c0a71f2b418"
     assert seal["stacked_base_branch"] == "interop/chatgpt-web-mcp-connectivity-c0"
-    assert seal["changed_file_count"] == len(changed) == 39
+    assert seal["changed_file_count"] == len(changed) == 40
     assert changed == sorted(set(changed))
     assert "governance/c1-change-seal.json" in changed
+    assert ".github/workflows/ci.yml" in changed
     assert "docs/providers/chatgpt-mcp-c1-test-evidence.md" in changed
     assert "scripts/c1/Reject-C1ScopeViolationCycle.ps1" in changed
     assert "scripts/c1/Reject-C1ExpiredCycle.ps1" in changed

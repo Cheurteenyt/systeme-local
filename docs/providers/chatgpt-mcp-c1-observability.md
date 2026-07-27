@@ -51,6 +51,27 @@ The boundaries remain independent:
 
 A value observed at one boundary is never proof about another.
 
+## Project priority and future Web providers
+
+ChatGPT Web is the current provider priority. C1 is deliberately
+provider-specific: its official source profile, surface classifier, Plugin
+contract, evidence vocabulary, negative checks, and revocation procedure prove
+only facts about the reviewed ChatGPT path.
+
+Future AI Web providers may reuse the generic local primitives—closed tool
+registries, one-shot synthetic challenges, loopback-only facades, correlated
+audit records, fail-closed cleanup, and typed attestations—but must not inherit
+ChatGPT claims or receipts. Each provider requires:
+
+- a separately reviewed official-capability profile;
+- an explicit browser-surface and privacy boundary;
+- provider-specific authentication and revocation semantics;
+- independent positive, negative, replay, and cleanup tests;
+- a distinct evidence status and change seal.
+
+No generic “AI Web compatibility” claim is allowed until at least one such
+provider profile independently passes its own complete live gate.
+
 ## C0 dependency and cleanup
 
 C0 did not complete a real ChatGPT Web call. Its allowed status remains
