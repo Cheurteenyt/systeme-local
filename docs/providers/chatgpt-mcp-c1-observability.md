@@ -248,6 +248,25 @@ If the current selector is Work, Codex, or unknown, no prompt is sent. The
 operator must manually switch to Chat or the run ends with
 `BLOCKED_BY_CHAT_SURFACE`.
 
+If a browser-control action opens Work or Codex, accesses an existing chat or
+private browser state, sends an unexpected prompt, or invokes a tool outside
+the exact two-Chat protocol, the cycle is rejected immediately. Close both
+test tabs, stop both C1 processes, remove the temporary Plugin, revoke the
+Runtime API key, and run:
+
+```powershell
+.\scripts\c1\Reject-C1ScopeViolationCycle.ps1 `
+  -Violation work_surface_opened_without_prompt `
+  -TestTabsClosed `
+  -PluginConnectionRemoved `
+  -RuntimeApiKeyRevoked
+```
+
+The rejection refuses an open listener, a validated final attestation, missing
+operator confirmations, or a state directory without typed evidence. It
+irreversibly removes the rejected cycle and all process secrets. No response,
+challenge, receipt, audit record, or browser page from that cycle may be reused.
+
 ## Two sterile Chat protocol
 
 Use exactly two new pages. `c1-test-chat-a` and `c1-test-chat-b` are local

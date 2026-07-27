@@ -175,6 +175,24 @@ observation to strict response. It also adds an explicit fail-closed
 removal, Runtime-key revocation, and at least one expired typed artifact before
 irreversible cleanup. A completely fresh cycle is still required.
 
+## Rejected Work-surface transition cycle
+
+A later fresh cycle reached one validated Chat A call at commit `5740e57`.
+The local verifier correlated exactly one completed read-only probe and
+confirmed that write actions, real-evidence access, and protocol v2 remained
+disabled. Before Chat B received any prompt, the official
+`Essayer dans le chat` control for the temporary development Plugin opened the
+Work surface (`?surface=work`) and the visible selector reported Chat as off.
+
+This is not a successful C1 run. Work received no prompt and no tool call, but
+opening it exceeded the operator's explicit Chat-only authorization. Both test
+tabs were closed, the temporary Plugin was removed, the tunnel and facade were
+stopped, and the Runtime key required immediate revocation. The validated Chat
+A proof is rejected and cannot contribute to a final attestation.
+`Reject-C1ScopeViolationCycle.ps1` was added so a non-expired correlated cycle
+can be erased immediately after the required shutdown, Plugin removal, key
+revocation, and tab-closure confirmations.
+
 ## Final validation still required
 
 Documentation changes invalidate the previous change seal. Before publication,

@@ -1,7 +1,7 @@
 {
   "version": "1",
   "lot": "C1 — ChatGPT Web Chat-surface observability and Codex runtime attribution",
-  "generated_at": "2026-07-26T23:20:06.6099527Z",
+  "generated_at": "2026-07-27T00:15:36.2896749Z",
   "repository": "Cheurteenyt/systeme-local",
   "issue": "https://github.com/Cheurteenyt/systeme-local/issues/66",
   "branch": "interop/chatgpt-web-chat-observability-c1",
@@ -16,10 +16,10 @@
     "excluded_paths": [
       "governance/c1-change-seal.json"
     ],
-    "sha256": "75f3d822fa75aa083a4fe4c673c539d6ff25ec5c18b564c45d97e4486925e52f",
-    "bytes": 236997
+    "sha256": "42f754b01a0234c042c975e5a9406011dac2b52bdc5d06aff1fcaf076b81cdc2",
+    "bytes": 244520
   },
-  "changed_file_count": 38,
+  "changed_file_count": 39,
   "changed_files": [
     "README.md",
     "docs/adr/0008-bounded-chat-surface-observability.md",
@@ -46,6 +46,7 @@
     "scripts/c1/New-C1VisibleModelObservation.ps1",
     "scripts/c1/Prepare-C1.ps1",
     "scripts/c1/Reject-C1ExpiredCycle.ps1",
+    "scripts/c1/Reject-C1ScopeViolationCycle.ps1",
     "scripts/c1/Show-C1OperatorSteps.ps1",
     "scripts/c1/Start-C1Facade.ps1",
     "scripts/c1/Start-C1Tunnel.ps1",

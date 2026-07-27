@@ -244,6 +244,31 @@ def test_c1_expired_cycle_rejection_is_explicit_and_fail_closed() -> None:
     assert text.count("[Parameter(Mandatory = $true)]") == 2
 
 
+def test_c1_scope_violation_rejection_is_explicit_and_fail_closed() -> None:
+    text = (C1_SCRIPTS / "Reject-C1ScopeViolationCycle.ps1").read_text(
+        encoding="utf-8"
+    )
+
+    for marker in (
+        "$Violation",
+        "$TestTabsClosed",
+        "$PluginConnectionRemoved",
+        "$RuntimeApiKeyRevoked",
+        "work_surface_opened_without_prompt",
+        "unexpected_prompt_or_tool_invocation",
+        "typed C1 evidence from an active cycle",
+        "attestation.json",
+        "8765",
+        "8766",
+        "scope_violation_cycle_rejected",
+        "audit_records_discarded",
+        "process_secrets_cleared = $true",
+        "recoverable = $false",
+    ):
+        assert marker in text
+    assert text.count("[Parameter(Mandatory = $true)]") == 4
+
+
 def test_c1_manual_evidence_window_keeps_call_freshness_bounded() -> None:
     text = C1_DOC.read_text(encoding="utf-8")
 
@@ -252,6 +277,7 @@ def test_c1_manual_evidence_window_keeps_call_freshness_bounded() -> None:
         "challenge remains valid for at most 30 minutes",
         "no more than 30 minutes after its",
         "pre-prompt Chat-surface observation",
+        "Reject-C1ScopeViolationCycle.ps1",
         "Reject-C1ExpiredCycle.ps1",
     ):
         assert marker in text
@@ -269,6 +295,7 @@ def test_c1_browser_scope_excludes_private_and_existing_chat_state() -> None:
         "private requests",
         "unrelated tabs",
         "Work is detected but never prompted",
+        "Reject-C1ScopeViolationCycle.ps1",
     ):
         assert marker in text
 
@@ -280,10 +307,11 @@ def test_c1_change_seal_is_complete_self_excluding_and_stacked() -> None:
     assert seal["base_commit"] == "912d0d33e119469ff957965104cf20af5e491923"
     assert seal["main_at_start"] == "32515ac9cbb9d658b2ddcb2723ab3c0a71f2b418"
     assert seal["stacked_base_branch"] == "interop/chatgpt-web-mcp-connectivity-c0"
-    assert seal["changed_file_count"] == len(changed) == 38
+    assert seal["changed_file_count"] == len(changed) == 39
     assert changed == sorted(set(changed))
     assert "governance/c1-change-seal.json" in changed
     assert "docs/providers/chatgpt-mcp-c1-test-evidence.md" in changed
+    assert "scripts/c1/Reject-C1ScopeViolationCycle.ps1" in changed
     assert "scripts/c1/Reject-C1ExpiredCycle.ps1" in changed
     assert seal["diff"]["excluded_paths"] == ["governance/c1-change-seal.json"]
     assert len(seal["diff"]["sha256"]) == 64
