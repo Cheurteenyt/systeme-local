@@ -104,3 +104,12 @@ must never collapse `supported on Work` into `supported on Chat`, or
 report must retain the native Chat blocker, the automatic-switch denial, six
 default action denials and zero effective tools. A future C8 receipt is a
 separate evidence class and cannot be manufactured from C7 profile data.
+
+C8 documentation must keep five facts separate: current official Work
+eligibility, fresh visible entitlement/quota, local admission, two real Work
+correlations and completed revocation. A positive statement about one class
+cannot substitute for another. The exact final status may be recorded only
+from the validated final attestation. Visible model or reasoning labels are
+presentation evidence, never internal model attribution. Historical receipts
+may remain verifiable after expiry, but expiry can never be extended to
+authorize another action.

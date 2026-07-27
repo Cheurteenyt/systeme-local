@@ -401,3 +401,30 @@ C7 performs no browser, credential, Tunnel, Plugin, chat or provider action.
 The next gate after a green C7 seal is a separately authorized C8 Work-only
 live validation. See
 [`providers/chatgpt-web-c7-work-prelive-admission.md`](providers/chatgpt-web-c7-work-prelive-admission.md).
+
+## C8 bounded ChatGPT Work live validation
+
+Status: `in progress`; implementation and offline gates are green, while the
+two authorized live Work correlations and revocation remain to be executed.
+
+C8 starts from accepted C7 `main`
+`e0a1dccfa13c95a1ce077d2b6f9ef4f1ed70231f` and is tracked by issue
+[#78](https://github.com/Cheurteenyt/systeme-local/issues/78). It does not
+reopen native Chat. It implements the fresh C7 grant contract for one explicit
+Work-only cycle, at most twenty minutes and exactly two new synthetic tasks.
+
+The runtime requires a durable HMAC-bound operator scope plus fresh visible
+Work, entitlement and quota evidence. It exposes only the reviewed read-only
+probe, correlates each result to local audit, then requires bounded negatives,
+Plugin removal, Runtime-key revocation, closed listeners and post-revocation
+unreachability.
+
+Success will mean only
+`COMPLETE_C8_TWO_WORK_CALLS_LIVE_CORRELATED_AND_REVOKED`. It will not mean
+regular-use readiness, native Chat support or exact model attribution.
+
+After C8, the next product lot should convert the proven one-tool pathway into
+a deliberately scoped, user-facing read-only capability design. Support for a
+different Web AI remains a later provider-specific profile and adapter lot,
+not an inference from ChatGPT evidence. See
+[`providers/chatgpt-web-c8-work-live-validation.md`](providers/chatgpt-web-c8-work-live-validation.md).

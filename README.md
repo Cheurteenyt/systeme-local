@@ -405,6 +405,13 @@ ajoute un profil Work indépendant et une admission pré-live à zéro effet. So
 documente les preuves officielles, les tests de séparation Chat/Work et les
 gates exacts du futur lot C8.
 
+Le lot
+[`C8 — ChatGPT Work bounded live validation`](docs/providers/chatgpt-web-c8-work-live-validation.md)
+implémente le grant Work révocable, exactement deux appels synthétiques,
+la corrélation d'audit locale et la preuve de révocation. Son
+[`journal de tests`](docs/providers/chatgpt-web-c8-test-evidence.md)
+sépare strictement les validations hors ligne des preuves Work réelles.
+
 ## Architecture
 
 Commencez par le [`blueprint v2`](docs/blueprint-v2.md), puis consultez le [`connectivity model`](docs/connectivity-model.md), [`docs/architecture.md`](docs/architecture.md), [`docs/threat-model.md`](docs/threat-model.md) et [`docs/roadmap.md`](docs/roadmap.md).

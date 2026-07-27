@@ -53,6 +53,7 @@ here conflicts with a linked document, the linked document remains authoritative
 | [ADR 0012: Preserve reviewed evidence across squash-only integration](adr/0012-squash-safe-evidence-integration.md) | Durable architectural decision and consequences. |
 | [ADR 0013: Automate official capability revalidation without promotion](adr/0013-automated-official-capability-revalidation.md) | Durable architectural decision and consequences. |
 | [ADR 0014: Separate ChatGPT Work eligibility from live authorization](adr/0014-separate-chatgpt-work-prelive-admission.md) | Work-specific evidence, default-deny pre-live admission and future C8 authorization boundary. |
+| [ADR 0015: Bind live Work effects to one revocable C8 cycle](adr/0015-bind-live-work-effects-to-one-revocable-c8-cycle.md) | Durable authorization, Work-only runtime admission, two-call proof and revocation boundary. |
 | [ADR 0004: Exclude raw provider evidence from public models](adr/0004-raw-provider-evidence-exclusion.md) | Durable architectural decision and consequences. |
 | [ADR 0005: Split operator-evidence authority between Python and Rust](adr/0005-python-rust-operator-evidence-custody.md) | Durable architectural decision and consequences. |
 | [ADR 0006: Use inherited read-only handles for bounded operator evidence](adr/0006-inherited-handles-for-operator-evidence.md) | Durable architectural decision and consequences. |
@@ -88,6 +89,8 @@ here conflicts with a linked document, the linked document remains authoritative
 | [C6 test and evidence ledger](providers/chatgpt-web-c6-test-evidence.md) | Deterministic, mocked-transport, public-doc acquisition, PowerShell, and zero-live-action evidence. |
 | [C7 ChatGPT Work pre-live admission](providers/chatgpt-web-c7-work-prelive-admission.md) | Independent Work profile, native Chat preservation, zero-effect default and future C8 gate. |
 | [C7 test and evidence ledger](providers/chatgpt-web-c7-test-evidence.md) | Official-source, deterministic, PowerShell and no-live evidence for C7. |
+| [C8 ChatGPT Work bounded live validation](providers/chatgpt-web-c8-work-live-validation.md) | Revocable Work-only grant, exactly two synthetic calls, local audit correlation and cleanup contract. |
+| [C8 test and evidence ledger](providers/chatgpt-web-c8-test-evidence.md) | Offline, live-call, negative, revocation and final evidence for C8. |
 | [ChatGPT MCP deployment evidence and operator contract](providers/chatgpt-mcp-deployment.md) | Provider-specific characterization, evidence, or integration contract. |
 | [ChatGPT MCP sealed operator evidence bundle](providers/chatgpt-mcp-operator-evidence.md) | Provider-specific characterization, evidence, or integration contract. |
 | [ChatGPT provider characterization](providers/chatgpt.md) | Provider-specific characterization, evidence, or integration contract. |

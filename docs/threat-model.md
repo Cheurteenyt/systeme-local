@@ -528,3 +528,26 @@ C7 adds a supported Work profile without permitting Work activity.
 C7 cannot prove a live Work invocation, current account entitlement, usable
 quota, model routing or regular-use readiness. Those residual risks require a
 separate C8 threat review and live evidence cycle.
+
+## C8 bounded Work live-cycle threats
+
+| Threat | Control |
+|---|---|
+| a broad assent is interpreted as Work authority | exact cycle-wide scope is committed and HMAC-authenticated; every excluded surface/capability is a literal false field |
+| Work is selected implicitly from Chat | explicit visible Work selection is required; automatic switching and native Chat are immutable false |
+| a different account/surface or stale quota is used | Work, entitlement and quota observations are visible, cycle-bound and no older than five minutes at grant/startup |
+| the ignored grant file is substituted | exact cycle, profile, policy and observation digests plus HMAC; file must stay below `.systeme-local/c8` |
+| provider mode bypasses admission | `main.py` revalidates committed C7/C8 governance and the live bundle before registry construction |
+| a third or existing task is tested | exact labels A/B, maximum count two, separate fresh task receipts and no conversation identifiers |
+| one call is replayed as two | unique challenges, responses, audit IDs and audit-record digests are required |
+| prompt injection expands capability | registry contains one read-only probe; files, commands, secrets, writes, real evidence and protocol v2 do not exist in the surface |
+| sensitive browser state is collected | no DOM scraping, cookies, storage, private requests, history, sidebar or existing conversation access |
+| a visible label is promoted to internal model identity | only optional visible labels are stored; exact internal ID and regular-use claims remain false |
+| live access survives the test | Tunnel/facade stop, listener check, Plugin removal, Runtime-key revocation, secret clearing and failed post-revocation call are all required |
+| short-lived evidence expires before finalization | chronology proves calls occurred inside the grant; HMAC-bound historical receipts remain verifiable without extending authority |
+
+Residual risks are a misleading visible product label, provider-side behavior
+outside the observed two calls, compromised official pages and operator error
+when revoking external credentials. Independent official sources, two-call
+limits, one-tool local enforcement, short TTLs and explicit final revocation
+reduce but do not eliminate those risks.

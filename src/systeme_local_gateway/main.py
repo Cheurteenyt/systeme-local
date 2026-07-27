@@ -75,6 +75,22 @@ if settings.mcp_enabled:
             controller=controller,
             c0_mode=settings.c0_enabled,
         )
+    elif settings.provider_runtime_mode == "chatgpt_work_c8":
+        from .c8_live_cycle import load_live_cycle_bundle, verify_live_cycle_bundle
+
+        if settings.provider_runtime_root is None:
+            raise RuntimeError("C8 provider runtime root is missing")
+        if settings.c8_live_cycle_file is None:
+            raise RuntimeError("C8 live-cycle evidence file is missing")
+        c8_decision = verify_live_cycle_bundle(
+            bundle=load_live_cycle_bundle(settings.c8_live_cycle_file),
+            root=settings.provider_runtime_root,
+            audit_key=settings.audit_key,
+            evaluated_at=datetime.now(timezone.utc),
+        )
+        if not c8_decision.live_actions_allowed or c8_decision.effective_tool_count != 1:
+            raise RuntimeError("C8 provider runtime admission denied")
+        mcp_registry = McpToolRegistry(policy, c0_mode=settings.c0_enabled)
     else:
         mcp_registry = McpToolRegistry(policy, c0_mode=settings.c0_enabled)
     if settings.c0_enabled:
