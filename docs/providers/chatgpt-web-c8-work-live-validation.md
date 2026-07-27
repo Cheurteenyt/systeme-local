@@ -186,22 +186,34 @@ and must never be treated as a continuation of the same cycle.
 ```powershell
 .\scripts\c8\Prepare-C8.ps1 -ConfirmedExactScope
 .\scripts\c8\Test-C8Prerequisites.ps1 -RequireSecrets
-.\scripts\c8\New-C8WorkAdmission.ps1 `
-    -WorkVisible -EntitlementAvailable -QuotaUsable -PluginSurfaceVisible
-.\scripts\c8\Test-C8Prerequisites.ps1 -RequireSecrets -RequireLiveCycle
-.\scripts\c8\Start-C8Facade.ps1
-.\scripts\c8\Test-C8LocalProbe.ps1
 ```
 
-Only after the local probe succeeds does the operator create a fresh Runtime
-key and place that key plus the existing Tunnel ID in the same process
-environment. The key value is never printed, persisted or committed. Then:
+The operator then creates a fresh Runtime key and places that key plus the
+existing Tunnel ID in the same process environment. This staging occurs only
+after the authorization receipt exists. It neither starts transport nor
+exposes a tool remotely. Validate the staged values before starting the
+five-minute UI evidence window:
 
 ```powershell
 .\scripts\c8\Test-C8Prerequisites.ps1 `
+    -RequireSecrets -RequireTunnelCredentials
+```
+
+With Work explicitly selected and the reviewed Plugin surface visible, run
+the remaining pre-live sequence without delay:
+
+```powershell
+.\scripts\c8\New-C8WorkAdmission.ps1 `
+    -WorkVisible -EntitlementAvailable -QuotaUsable -PluginSurfaceVisible
+.\scripts\c8\Test-C8Prerequisites.ps1 `
     -RequireSecrets -RequireLiveCycle -RequireTunnelCredentials
+.\scripts\c8\Start-C8Facade.ps1
+.\scripts\c8\Test-C8LocalProbe.ps1
 .\scripts\c8\Start-C8Tunnel.ps1
 ```
+
+The key value is never printed, persisted or committed. A failed admission or
+local probe cannot cause `Start-C8Tunnel.ps1` to run.
 
 Work A and Work B then use:
 

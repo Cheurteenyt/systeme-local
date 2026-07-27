@@ -146,6 +146,14 @@ closed. The unused Tunnel resource remains reusable. Platform revocation of
 the operator-created Runtime key remains an explicit operator action and is
 not claimed by the local reset.
 
+At `2026-07-27T23:16:00Z`, the operator confirmed that the interrupted
+cycle's Runtime key had been revoked and its process variables cleared. This
+confirmation closes the aborted credential lifecycle but is not the final C8
+revocation receipt, which still requires two live Work correlations first.
+The retry procedure now stages the fresh operator-managed key and existing
+Tunnel ID before creating the five-minute Work observations. No transport is
+started by credential staging, and the live sequence remains fail-closed.
+
 ## Live evidence
 
 No live success is recorded in this section until all of these local ignored

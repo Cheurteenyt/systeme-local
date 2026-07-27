@@ -14,7 +14,7 @@
   "max_new_synthetic_work_tasks": 2,
   "max_live_cycle_seconds": 1200,
   "operator_authorization_received": true,
-  "implementation_status": "local_only_reset_runtime_key_revocation_pending",
+  "implementation_status": "local_only_reset_runtime_key_revoked_ready_for_retry",
   "changed_files": [
     "README.md",
     "docs/adr/0015-bind-live-work-effects-to-one-revocable-c8-cycle.md",
@@ -73,7 +73,8 @@
   "signed_work_observation_created": true,
   "official_work_product_rollout_observed": true,
   "runtime_key_created": true,
-  "runtime_key_platform_revocation_confirmed": false,
+  "runtime_key_platform_revocation_confirmed": true,
+  "interrupted_cycle_runtime_key_revocation_confirmed_at": "2026-07-27T23:16:00Z",
   "tunnel_started": false,
   "plugin_connection_created": false,
   "work_tasks_created": 0,
