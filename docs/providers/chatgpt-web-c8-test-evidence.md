@@ -33,8 +33,29 @@ Recorded at: `2026-07-27`
 
 The focused pre-documentation run selected 22 tests: all 22 passed. The
 combined C4/config/main/C7/C8 regression run selected 109 cases: 108 passed
-and one existing environment-dependent case skipped. The exact repository-wide
-and post-seal results will be added only after they run.
+and one existing environment-dependent case skipped.
+
+The first repository-wide C8 run correctly exposed one branch-coupled C7 test:
+it required the current C8 tree to equal the historical C7 sealed tree.
+The test now verifies the historical annotated C7 seal without confusing it
+with the separate C7-branch-only current-tree CI gate. After that correction:
+
+- Python collected 1,132 cases: 1,126 passed and 6 intentionally skipped;
+- total Python coverage was 84.22%, above the unchanged 60% floor;
+- Ruff lint was clean; the format ratchet found 10 changed Python files and
+  zero new debt;
+- the mypy ratchet found 10 changed Python files and zero new diagnostics;
+- `uv lock --check`, Markdown links across 58 files, deterministic evidence
+  governance and the frozen Python dependency audit all passed;
+- all 79 tracked PowerShell files parsed without errors;
+- 43 changed C8 files contained zero high-confidence credential shapes;
+- Rust check, rustfmt, clippy with warnings denied, workspace tests, doctests
+  and rustdoc with warnings denied all passed;
+- `cargo audit` scanned 73 locked dependencies against 1,170 advisories with
+  no vulnerability reported.
+
+The post-live and post-seal repository-wide reruns remain pending because C8
+has not admitted a Work cycle.
 
 ## Pre-live visible and official refresh
 

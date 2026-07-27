@@ -53,6 +53,7 @@
     "src/systeme_local_gateway/c8_proof_check.py",
     "src/systeme_local_gateway/config.py",
     "src/systeme_local_gateway/main.py",
+    "tests/test_c7_seal.py",
     "tests/test_c8_docs.py",
     "tests/test_c8_governance.py",
     "tests/test_c8_live_cycle.py",
