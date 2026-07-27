@@ -149,8 +149,7 @@ def test_c8_manifest_records_exact_pre_live_boundary() -> None:
     assert manifest["runtime_key_created"] is True
     assert manifest["runtime_key_platform_revocation_confirmed"] is True
     assert (
-        manifest["interrupted_cycle_runtime_key_revocation_confirmed_at"]
-        == "2026-07-27T23:16:00Z"
+        manifest["interrupted_cycle_runtime_key_revocation_confirmed_at"] == "2026-07-27T23:16:00Z"
     )
     assert manifest["tunnel_started"] is False
     assert manifest["work_tasks_created"] == 0
