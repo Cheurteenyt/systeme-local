@@ -303,3 +303,156 @@ immediate disposition and a separate recovery operation.
 
 No version-2 operation is implemented or wire-reachable. Real operator-evidence collection remains
 `planned`; the current binary still exposes only protocol-v1 `describe_contract`.
+
+## Optional C0 inbound connectivity boundary
+
+ADR 0007 adds a disabled-by-default operator path:
+
+```text
+manual ChatGPT Web draft Plugin
+    -> OpenAI Secure MCP Tunnel control plane
+    -> official customer-run tunnel client (outbound-only)
+    -> http://127.0.0.1:8765/mcp
+    -> authenticated TaskProcessor
+    -> one synthetic read-only probe
+    -> HMAC-chained local audit
+```
+
+The separate C0 policy prevents inheritance of file, command, task, provider, or
+B2 tools. The runtime aborts unless the registry contains exactly the single C0
+tool. The facade and tunnel health surface bind to explicit loopback addresses;
+public endpoint construction is outside the implementation. The full contract
+and rollback are in
+[`providers/chatgpt-mcp-c0-connectivity.md`](providers/chatgpt-mcp-c0-connectivity.md).
+
+## Optional C1 Chat-surface observation boundary
+
+ADR 0008 layers typed observation and correlation over the unchanged C0 probe.
+It does not add a provider-conversation transport or a browser-history reader.
+Two locally labeled, newly created Chat pages each receive one distinct
+positive challenge. A pre-prompt visible-surface observation must be `chat`;
+`work`, `codex`, and `unknown` fail closed before prompting.
+
+Codex turn metadata, Codex configured defaults, and ChatGPT-visible labels are
+stored in separate fields and evidence domains. Two response/audit pairs,
+bounded negative results, explicit Plugin/key revocation, and a failed
+post-revocation call are required for the short-lived final attestation. The
+full contract is in
+[`providers/chatgpt-mcp-c1-observability.md`](providers/chatgpt-mcp-c1-observability.md).
+
+## C2 official Chat-surface capability gate
+
+ADR 0009 inserts a documentation-derived gate before every C1 live action:
+
+```text
+official OpenAI sources
+    -> canonical source summaries + SHA-256
+    -> strict ChatGPT / Chat / custom-or-local-MCP profile
+    -> freshness and schema validation
+    -> supported | unsupported | unobservable
+    -> one atomic decision for Runtime key, Tunnel, Plugin, and browser
+```
+
+The current `unsupported` result denies all four actions before credentials or
+processes exist. Stale, ambiguous, malformed, or mismatched evidence also
+denies all four. The gate has no network, browser, credential, or process
+dependency and cannot convert C1 transport readiness into surface support.
+
+Provider ID, native surface, surface class, official capability, evidence, and
+policy decision are separated so a future AI Web provider can supply an
+independent profile. Only ChatGPT is registered; no evidence or capability is
+portable. See
+[`providers/chatgpt-web-c2-capability-gating.md`](providers/chatgpt-web-c2-capability-gating.md).
+
+## C3 provider capability evidence lifecycle
+
+ADR 0010 makes source review and capability decisions separate trust domains:
+
+```text
+official OpenAI documentation review
+    -> bounded candidate claims outside Git
+    -> strict candidate validation and comparison
+    -> source_drift | unchanged
+    -> independent review and deliberate promotion
+
+committed reviewed registry + active profile
+    -> adapter/identity/host validation
+    -> claim/evidence/profile/registry SHA-256 validation
+    -> current | revalidation_due | expired | source_drift | invalid
+    -> supported | unsupported | unobservable
+    -> atomic decision for five protected actions
+```
+
+The active registry contains one ChatGPT adapter, one native Chat capability
+identity, and one reviewed profile. Provider-neutral data shapes do not
+inherit evidence or support. A candidate never changes the gate. The scheduled
+workflow is read-only, warns at `revalidation_due`, and fails on expired,
+invalid, or drifted evidence.
+
+C3 supersedes C2 only as the action-gate owner. C2 remains immutable historical
+evidence. C1 preparation, facade startup, Tunnel startup, and Plugin guidance
+now import C3 before C1 runtime logic. See
+[`providers/chatgpt-web-c3-evidence-lifecycle.md`](providers/chatgpt-web-c3-evidence-lifecycle.md).
+
+## C4 provider-bound runtime admission
+
+ADR 0011 inserts runtime enforcement after C3 evidence evaluation and before a
+provider-bound effect:
+
+```text
+C3 reviewed decision
+    + provider/surface/capability/action request
+    + exact read-only tool metadata
+    + UTC time and correlation
+    -> C4 admission controller
+    -> allow | deny + effective tool tuple
+    -> canonical SHA-256 receipt
+    -> one-time controller-issued authority
+    -> provider-bound boundary continues only on allow
+```
+
+The controller preserves C3 as evidence authority. It cannot acquire sources,
+promote a candidate, change support, or grant a tool absent from both the C4
+adapter and local policy.
+
+`McpToolRegistry` now accepts an optional effective tool scope that can only
+reduce policy-derived tools. Provider mode repeats committed C4 evaluation
+inside `main.py`, before tool construction or runtime initialization.
+`build_admitted_mcp_registry` is the provider-bound constructor: it consumes
+controller-issued object authority exactly once, then validates the receipt,
+action, tool presence, and per-tool protocol digest. A receipt SHA-256 alone
+is not authentication. The generic registry remains a local primitive and
+does not by itself claim provider authorization.
+
+A bounded locked process-local correlation table distinguishes replay,
+collision, and capacity exhaustion. Tool authority is also single-use. This
+does not claim distributed replay protection. The committed production
+adapter registry contains only ChatGPT; synthetic providers are test-only.
+
+C1 preparation, facade startup, Tunnel startup, and Plugin guidance call C4
+before C1 logic. Current unsupported ChatGPT evidence yields six denials and
+zero effective tools. See
+[`providers/chatgpt-web-c4-runtime-admission.md`](providers/chatgpt-web-c4-runtime-admission.md).
+
+## C5 squash-safe evidence integration
+
+ADR 0012 separates historical commit evidence from repository integration:
+
+```text
+C0 -> C1 -> C2 -> C3 -> C4 reviewed commit ancestry
+    -> C5 aggregate branch + exact manifest
+    -> self-excluding binary-diff seal
+    -> framed SHA-256 commitment of paths, modes, lengths, and blob bytes
+    -> immutable evidence tag preserving the reviewed ancestry
+    -> squash-only pull request
+    -> identical sealed tree on main
+```
+
+The aggregate tree commitment excludes only the self-referential C5 seal.
+Historical C4 checks terminate at the exact C4 seal commit rather than an
+unrelated future `HEAD`. The C5 verifier independently requires the covered,
+tagged, and current trees to match.
+
+This is repository governance, not provider capability. It initializes no
+runtime service and changes none of the six current ChatGPT denials. See
+[`providers/chatgpt-web-c5-main-integration.md`](providers/chatgpt-web-c5-main-integration.md).

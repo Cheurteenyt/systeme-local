@@ -1,0 +1,22 @@
+{
+  "schema_version": "1",
+  "project": "openai/tunnel-client",
+  "release_url": "https://github.com/openai/tunnel-client/releases/tag/v0.0.10",
+  "version": "v0.0.10",
+  "source_commit": "105e17a79a36e4e5c897fd698ed2b8dbf935b144",
+  "configuration_url": "https://github.com/openai/tunnel-client/blob/v0.0.10/docs/configuration.md",
+  "published_at": "2026-07-02T18:28:29Z",
+  "asset": {
+    "name": "tunnel-client-v0.0.10-windows-amd64.zip",
+    "url": "https://github.com/openai/tunnel-client/releases/download/v0.0.10/tunnel-client-v0.0.10-windows-amd64.zip",
+    "sha256": "5e64a056f1d96786da0a6f8db1da5f5f4a03fd19a90d951a25cf2ca8d9093d00",
+    "size": 7658615
+  },
+  "binary_sha256": "d893d8127eee35070d265c1be29bfe008f8d9fcb476e7febf56c8fdc6c0615c8",
+  "checksum_manifest": {
+    "name": "SHA256SUMS.txt",
+    "url": "https://github.com/openai/tunnel-client/releases/download/v0.0.10/SHA256SUMS.txt",
+    "sha256": "8eb968ef5dbdc00eca182e4da9758c683ed5d5ab3ccd1ec1980509a87b330fff"
+  },
+  "reviewed_at": "2026-07-26T00:00:00Z"
+}

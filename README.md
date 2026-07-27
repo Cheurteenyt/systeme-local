@@ -2,7 +2,7 @@
 
 Passerelle locale sécurisée permettant à un agent IA distant de demander des actions limitées sur un poste de travail, sans lui donner un accès direct au système hôte.
 
-> **État : fondation expérimentale, locale et fail-closed.** Le gateway sécurisé, le MCP loopback, le lifecycle provider, le registre de contexte, les manifests de pièces jointes et les contrats ChatGPT MCP jusqu’au bundle de preuves opérateur sont implémentés de manière déterministe. Aucun transport provider réel, tunnel, client OAuth/OIDC ou app ChatGPT n’est configuré.
+> **État : fondation expérimentale, locale et fail-closed.** Le gateway sécurisé, le MCP loopback, le lifecycle provider, le registre de contexte, les manifests de pièces jointes et les contrats ChatGPT MCP jusqu’au bundle de preuves opérateur sont implémentés de manière déterministe. Un probe C0 optionnel et désactivé par défaut peut tester un unique outil synthétique via Secure MCP Tunnel ; aucun tunnel, client OAuth/OIDC ou app ChatGPT n’est configuré dans le dépôt et aucune connexion live n’est revendiquée.
 
 ## Principes
 
@@ -33,6 +33,11 @@ Système Local sépare trois responsabilités qui ne doivent jamais être confon
 Le runtime MCP actuellement implémenté couvre le premier canal. Il reste la façade d'outils locale sécurisée et réutilisable ; il ne prétend pas créer, lister ou observer les conversations d'un fournisseur web.
 
 Les règles communes sont définies dans [`docs/connectivity-model.md`](docs/connectivity-model.md). La caractérisation initiale de ChatGPT est définie dans [`docs/providers/chatgpt.md`](docs/providers/chatgpt.md).
+
+La pile de validation ChatGPT C0 à C4 reste fail-closed et est intégrée vers
+`main` par un contrat C5 compatible avec le squash obligatoire. C5 conserve
+les commits de preuve, scelle l'arbre agrégé et n'autorise aucune action live.
+Voir [`docs/providers/chatgpt-web-c5-main-integration.md`](docs/providers/chatgpt-web-c5-main-integration.md).
 
 ### Scénario de validation initial
 
@@ -318,6 +323,49 @@ Les autorités documentaires restent :
 
 Une interface web privée n’est jamais traitée comme une API publique. Les cookies, endpoints
 privés, sidebars et signaux DOM ne sont pas des contrats d’intégration.
+
+Le lot borné
+[`C0 — ChatGPT Web MCP read-only connectivity probe`](docs/providers/chatgpt-mcp-c0-connectivity.md)
+documente l’unique exception de connectivité entrante : app en brouillon,
+Secure MCP Tunnel officiel, façade loopback et un outil synthétique. Il
+n’autorise ni automatisation web, ni preuve B2 réelle, ni outil d’écriture.
+
+Le lot
+[`C1 — ChatGPT Web Chat-surface observability`](docs/providers/chatgpt-mcp-c1-observability.md)
+ajoute une garde Chat/Work, deux conversations de test stériles, l’attribution
+distincte du runtime Codex et des libellés Web, la corrélation d’audit et la
+révocation. Il n’ouvre, ne lit et n’énumère aucun chat existant.
+Son [`journal de tests et de preuves`](docs/providers/chatgpt-mcp-c1-test-evidence.md)
+distingue les validations locales réellement exécutées, la préparation live et
+les tests Web encore en attente.
+
+Le lot
+[`C2 — ChatGPT-first official capability gate`](docs/providers/chatgpt-web-c2-capability-gating.md)
+vérifie d'abord si la surface native Chat dispose d'une interface officielle
+pour un outil MCP personnalisé ou local. Son
+[`journal de tests et de preuves`](docs/providers/chatgpt-web-c2-test-evidence.md)
+documente le verdict, la fraîcheur des sources et le blocage atomique des clés,
+Tunnels, Plugins et tests navigateur.
+
+Le lot
+[`C3 — provider capability evidence lifecycle`](docs/providers/chatgpt-web-c3-evidence-lifecycle.md)
+sépare la consultation non déterministe des sources officielles de la décision
+hors ligne. Son
+[`journal de tests et de preuves`](docs/providers/chatgpt-web-c3-test-evidence.md)
+ajoute un registre versionné, les états `current`, `revalidation_due`,
+`expired`, `source_drift` et `invalid`, puis refuse aussi toute action ChatGPT.
+ChatGPT reste le seul fournisseur enregistré et le verdict Chat demeure
+`BLOCKED_BY_NO_OFFICIAL_CHAT_TOOL_INTERFACE`.
+
+Le lot
+[`C4 — provider-neutral runtime admission`](docs/providers/chatgpt-web-c4-runtime-admission.md)
+transforme cette preuve C3 en décision runtime immuable avant chaque effet
+protégé. Son
+[`journal de tests`](docs/providers/chatgpt-web-c4-test-evidence.md)
+documente l’audit des contournements, les reçus SHA-256, les rejets de
+rejeu/collision et la dérivation d’une surface d’outils effective. Avec le
+profil ChatGPT actuel, les six actions sont refusées et aucun outil n’est
+exposé.
 
 ## Architecture
 

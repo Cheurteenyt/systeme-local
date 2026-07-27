@@ -210,3 +210,130 @@ wire-reachable operation and no real evidence.
 B2.1 may implement synthetic protocol-v2 transaction mechanics only after independent review.
 Profile gaps, Python orchestration, bundle construction and the operator command remain separate
 gates.
+
+## C0 bounded ChatGPT Web MCP connectivity
+
+Status: `partial` until the manual Web call, correlated audit, and revocation
+test are independently observed.
+
+C0 is the ADR 0007 sequencing exception that tests the inbound MCP path without
+collecting B2 evidence. It adds a disabled-by-default `1/0/0` tool policy,
+synthetic probe, official Secure MCP Tunnel scripts, and a separate expiring
+live-attestation model. It does not make protocol v2 reachable, publish a
+Plugin, enable writes, add provider-outbound transport, or automate ChatGPT
+Web. The next gate is the exact manual procedure in
+[`providers/chatgpt-mcp-c0-connectivity.md`](providers/chatgpt-mcp-c0-connectivity.md).
+Formatting only the Python files touched by C0 reduces the current Ruff debt
+from 54 to 42 files.
+
+## C1 bounded Chat-surface observability
+
+Status: `blocked` by the current official product surface contract. Plugins
+are available on ChatGPT Web only in Work and are unavailable in Chat, while
+C1 explicitly forbids Work. The live gate can resume only after official
+revalidation shows Plugin availability in Chat or a separate goal explicitly
+authorizes a compatible surface.
+
+C1 is stacked on the unmerged C0 branch and tracked by issue
+[#66](https://github.com/Cheurteenyt/systeme-local/issues/66). It adds strict
+runtime/default/Web-label attribution, a Chat-versus-Work fail-closed guard,
+two-chat correlation receipts, negative-test and revocation receipts, a
+short-lived final attestation, and a raw-evidence cleanup. It never tests Work,
+enumerates existing chats, stores conversation IDs, infers hidden routing,
+enables writes, or changes the exact C0 probe snapshot.
+
+The live gate and rollback are specified in
+[`providers/chatgpt-mcp-c1-observability.md`](providers/chatgpt-mcp-c1-observability.md).
+
+ChatGPT remains the first Web-provider priority. Later AI Web integrations
+must use separate provider profiles, official capability evidence,
+surface/privacy boundaries, revocation semantics, live tests, and seals.
+Shared local primitives do not make ChatGPT evidence portable to another
+provider.
+
+## C2 ChatGPT-first official capability gating
+
+Status: `BLOCKED_BY_NO_OFFICIAL_CHAT_TOOL_INTERFACE`.
+
+C2 is stacked on exact C1 commit
+`2aee36fdfa3d20c23acdc75eb3348bc54536ef4f`. Current official OpenAI
+documentation routes custom/local MCP use through Plugins and explicitly makes
+Plugins unavailable in Chat. C2 therefore implements a typed, expiring
+official-capability profile and atomically blocks Runtime-key creation, Tunnel
+startup, temporary Plugin creation, and browser testing.
+
+No C1 live test is repeated. The next permissible activity is official
+documentation revalidation. A future `supported` result would still require
+the existing privacy, authorization, credential, revocation, and test gates.
+
+C2 adds only minimal provider, native-surface, surface-class, capability,
+evidence, and decision contracts. ChatGPT remains the only implemented Web
+provider. Other AI Web providers remain planned and require independent
+sources, semantics, threat models, tests, and seals.
+
+## C3 provider capability evidence lifecycle
+
+Status: `BLOCKED_BY_NO_OFFICIAL_CHAT_TOOL_INTERFACE`; lifecycle `current`.
+
+C3 is stacked on exact C2 commit
+`cf05e963ba30539f9b2c9ec2f5f71326cbba8399` and tracked by issue
+[#69](https://github.com/Cheurteenyt/systeme-local/issues/69). It separates
+official-document acquisition from deterministic decisions, adds a strict
+ChatGPT-only provider registry and adapter, binds canonical claims, evidence,
+profiles, and the registry by SHA-256, and distinguishes `current`,
+`revalidation_due`, `expired`, `source_drift`, and `invalid`.
+
+Candidate evidence is never authoritative and cannot change an action.
+Runtime-key creation, Tunnel startup, Plugin creation, browser testing, and
+any ChatGPT action are atomically denied under the current `unsupported`
+profile. The four C1 live entry points now call C3 before C1 logic.
+
+The next permissible activity is documentation-only revalidation no later than
+`2026-08-10T11:55:00Z`. A future provider remains out of scope until it has an
+independent adapter, official sources, native-surface semantics, threat model,
+tests, and seal. See
+[`providers/chatgpt-web-c3-evidence-lifecycle.md`](providers/chatgpt-web-c3-evidence-lifecycle.md).
+
+## C4 provider-neutral runtime admission
+
+Status: `implemented` on the C4 branch; current ChatGPT admission remains
+denied.
+
+C4 is stacked on exact C3 commit
+`9140801e88ed44afca9481ac06288783a0d52da2` and tracked by issue
+[#71](https://github.com/Cheurteenyt/systeme-local/issues/71). It converts the
+reviewed C3 result into a typed runtime request, immutable decision, effective
+tool set, and canonical receipt before a protected effect.
+
+The production registry still contains only ChatGPT. Current native Chat
+derives zero effective tools and denies Runtime-key creation, Tunnel startup,
+Plugin creation, browser tests, ChatGPT actions, and provider tool exposure.
+Synthetic supported providers exist only in tests and make no portability
+claim.
+
+The next product gate remains official native Chat support followed by an
+independently promoted C3 profile. C4 must then admit only the exact reviewed
+read-only tool before a separately authorized live cycle can begin. See
+[`providers/chatgpt-web-c4-runtime-admission.md`](providers/chatgpt-web-c4-runtime-admission.md).
+
+## C5 squash-safe C0-C4 main integration
+
+Status: `implemented` on the C5 integration branch; final merge remains gated
+on final-head and post-merge `main` CI.
+
+C5 is tracked by issue
+[#73](https://github.com/Cheurteenyt/systeme-local/issues/73). A direct
+simulation proved that the five green stacked pull requests cannot be
+independently squash-merged without invalidating the historical C4
+seal/HEAD assumption.
+
+C5 therefore creates one aggregate pull request to `main`, keeps the exact
+C0-C4 ancestry reachable through
+`evidence/c0-c4-main-integration-v2`, and binds the integrated tree with a
+framed SHA-256 commitment over paths, modes, lengths, and blob bytes. It
+changes no capability: current ChatGPT remains denied for all six C4 actions
+with zero tools and zero live actions.
+
+After aggregate merge and green `main` CI, PRs #65, #67, #68, #70, and #72
+are closed as superseded rather than independently merged. See
+[`providers/chatgpt-web-c5-main-integration.md`](providers/chatgpt-web-c5-main-integration.md).

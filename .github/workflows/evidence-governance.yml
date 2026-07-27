@@ -8,6 +8,9 @@ on:
 permissions:
   contents: read
 
+env:
+  UV_VERSION: "0.11.29"
+
 concurrency:
   group: evidence-governance
   cancel-in-progress: false
@@ -23,11 +26,43 @@ jobs:
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
         with:
           persist-credentials: false
+          fetch-depth: 0
 
       - name: Set up Python
         uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
         with:
           python-version: "3.12"
+
+      - name: Install pinned dependency manager
+        run: python -m pip install --disable-pip-version-check "uv==${UV_VERSION}"
+
+      - name: Sync frozen runtime
+        run: uv sync --frozen --python python
+
+      - name: Evaluate C3 capability evidence lifecycle
+        run: >-
+          uv run --frozen
+          python -m systeme_local_gateway.c3_evidence
+          governance
+          --github-annotations
+
+      - name: Verify derived C4 runtime admission remains denied
+        run: >-
+          uv run --frozen
+          python -m systeme_local_gateway.c4_admission
+          matrix
+          --root .
+          --c3-registry governance/c3-capability-registry.json
+          --c4-registry governance/c4-runtime-adapters.json
+          --expect-all-denied
+
+      - name: Verify C5 squash integration tree and ancestry
+        run: >-
+          uv run --frozen
+          python -m systeme_local_gateway.c5_integration
+          verify
+          --root .
+          --require-clean
 
       - name: Check current evidence dates
         run: python scripts/check_evidence_governance.py --fail-within-days 7

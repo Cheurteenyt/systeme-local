@@ -3,6 +3,7 @@ from typing import Any, Protocol
 
 from .paths import resolve_inside
 from .sandbox import DockerSandboxRunner
+from .c0_probe import C0ConnectivityProbe, C0_TOOL_NAME
 
 
 class SandboxRunner(Protocol):
@@ -23,11 +24,13 @@ class CapabilityExecutor:
         limits: dict[str, Any],
         sandbox_root: Path | None = None,
         sandbox_runner: SandboxRunner | None = None,
+        c0_probe: C0ConnectivityProbe | None = None,
     ):
         self.workspace = workspace.resolve()
         self.workspace.mkdir(parents=True, exist_ok=True)
         self.docker_image = docker_image
         self.limits = limits
+        self.c0_probe = c0_probe
         resolved_sandbox_root = (
             sandbox_root.resolve()
             if sandbox_root is not None
@@ -52,10 +55,21 @@ class CapabilityExecutor:
             "sandbox.run_tests": self._run_tests,
             "git.diff": self._run_git_command,
         }
+        if self.c0_probe is not None:
+            handlers[C0_TOOL_NAME] = self._run_c0_probe
         handler = handlers.get(capability)
         if handler is None:
             raise ValueError("capability has no executor")
         return handler(arguments, config)
+
+    def _run_c0_probe(
+        self,
+        arguments: dict[str, Any],
+        _config: dict[str, Any],
+    ) -> dict[str, Any]:
+        if self.c0_probe is None:
+            raise ValueError("C0 connectivity probe is disabled")
+        return self.c0_probe.execute(arguments)
 
     def _list(self, arguments: dict[str, Any], _config: dict[str, Any]) -> dict[str, Any]:
         target = resolve_inside(self.workspace, str(arguments.get("path", ".")))
@@ -96,8 +110,10 @@ class CapabilityExecutor:
     @staticmethod
     def _validated_command(arguments: dict[str, Any], config: dict[str, Any]) -> list[str]:
         command = arguments.get("command")
-        if not isinstance(command, list) or not command or not all(
-            isinstance(item, str) and item for item in command
+        if (
+            not isinstance(command, list)
+            or not command
+            or not all(isinstance(item, str) and item for item in command)
         ):
             raise ValueError("command must be a non-empty argv array")
         allowed = config.get("allowed_commands", [])

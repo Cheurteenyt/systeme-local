@@ -1,0 +1,44 @@
+{
+  "version": "1",
+  "repository": "Cheurteenyt/systeme-local",
+  "issue": "https://github.com/Cheurteenyt/systeme-local/issues/73",
+  "default_branch": "main",
+  "integration_branch": "interop/c0-c4-main-integration-c5",
+  "base_commit": "32515ac9cbb9d658b2ddcb2723ab3c0a71f2b418",
+  "merge_method": "squash",
+  "evidence_tag": "evidence/c0-c4-main-integration-v2",
+  "source_stack": [
+    {
+      "gate": "C0",
+      "pull_request": 65,
+      "branch": "interop/chatgpt-web-mcp-connectivity-c0",
+      "head": "912d0d33e119469ff957965104cf20af5e491923"
+    },
+    {
+      "gate": "C1",
+      "pull_request": 67,
+      "branch": "interop/chatgpt-web-chat-observability-c1",
+      "head": "2aee36fdfa3d20c23acdc75eb3348bc54536ef4f"
+    },
+    {
+      "gate": "C2",
+      "pull_request": 68,
+      "branch": "interop/chatgpt-web-capability-gating-c2",
+      "head": "cf05e963ba30539f9b2c9ec2f5f71326cbba8399"
+    },
+    {
+      "gate": "C3",
+      "pull_request": 70,
+      "branch": "interop/provider-capability-revalidation-c3",
+      "head": "9140801e88ed44afca9481ac06288783a0d52da2"
+    },
+    {
+      "gate": "C4",
+      "pull_request": 72,
+      "branch": "interop/provider-runtime-admission-c4",
+      "head": "3a1d2b8286773eaaf69b0b41fade978f09403adb"
+    }
+  ],
+  "historical_branches_are_evidence": true,
+  "live_actions_permitted": false
+}

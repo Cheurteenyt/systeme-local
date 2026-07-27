@@ -239,3 +239,11 @@ trusted conversation identity.
 - [Developer mode and MCP apps in ChatGPT](https://help.openai.com/en/articles/12584461)
 - [Apps in ChatGPT](https://help.openai.com/en/articles/11487775-apps-in-chatgpt)
 - [Admin controls, security, and compliance for plugins and apps](https://help.openai.com/en/articles/11509118-admin-controls-security-and-compliance-in-apps-connectors-enterprise-edu-and-business)
+
+## C0 isolation
+
+C0 does not execute this real-evidence pipeline. Its manual operator receipt is
+limited to eligibility/configuration states, `1/0/0` tool counts, and SHA-256
+commitments needed for a synthetic connectivity attestation. It never admits
+raw B2 evidence, and protocol v2 remains unreachable. See the
+[C0 connectivity contract](chatgpt-mcp-c0-connectivity.md).

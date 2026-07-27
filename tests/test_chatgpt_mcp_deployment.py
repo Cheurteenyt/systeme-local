@@ -26,7 +26,7 @@ from systeme_local_gateway.providers.mcp_deployment_models import (
 )
 from systeme_local_gateway.providers.models import CapabilitySupport
 
-NOW = datetime(2026, 7, 18, 12, 0, tzinfo=timezone.utc)
+NOW = datetime(2026, 7, 26, 12, 0, tzinfo=timezone.utc)
 
 
 def request(**updates: object) -> McpDeploymentRequest:
@@ -62,8 +62,8 @@ def decide(**updates: object):
 def test_profile_is_complete_digest_bound_and_current() -> None:
     profile = build_current_chatgpt_mcp_capability_profile()
     assert len(profile.rows) == len(McpCapabilityId)
-    assert profile.reviewed_at == datetime(2026, 7, 18, tzinfo=timezone.utc)
-    assert profile.revalidate_after == datetime(2026, 8, 17, tzinfo=timezone.utc)
+    assert profile.reviewed_at == datetime(2026, 7, 26, tzinfo=timezone.utc)
+    assert profile.revalidate_after == datetime(2026, 8, 25, tzinfo=timezone.utc)
     assert verify_chatgpt_mcp_capability_profile(profile) == profile
     tampered = profile.model_copy(update={"profile_sha256": "0" * 64})
     with pytest.raises(ValueError, match="digest mismatch"):
@@ -76,8 +76,7 @@ def test_profile_keeps_chat_and_project_enumeration_unknown() -> None:
     assert rows[McpCapabilityId.ENUMERATE_PERSONAL_CHATS].claim.state is CapabilitySupport.UNKNOWN
     assert rows[McpCapabilityId.ENUMERATE_PROJECTS].claim.state is CapabilitySupport.UNKNOWN
     assert (
-        rows[McpCapabilityId.DIRECT_LOCAL_CONNECTION].claim.state
-        is CapabilitySupport.UNSUPPORTED
+        rows[McpCapabilityId.DIRECT_LOCAL_CONNECTION].claim.state is CapabilitySupport.UNSUPPORTED
     )
     assert rows[McpCapabilityId.SECURE_MCP_TUNNEL].claim.state is CapabilitySupport.SUPPORTED
 
@@ -139,9 +138,7 @@ def test_pro_cannot_write_or_publish() -> None:
 )
 def test_business_testing_requires_admin_or_owner(role: ChatGptWorkspaceRole) -> None:
     decision = decide(plan=ChatGptPlan.BUSINESS, role=role)
-    assert decision.reasons == (
-        McpDecisionReason.BUSINESS_DEVELOPER_MODE_REQUIRES_ADMIN,
-    )
+    assert decision.reasons == (McpDecisionReason.BUSINESS_DEVELOPER_MODE_REQUIRES_ADMIN,)
 
 
 @pytest.mark.parametrize("role", [ChatGptWorkspaceRole.ADMIN, ChatGptWorkspaceRole.OWNER])
@@ -170,9 +167,7 @@ def test_business_member_can_use_published_app_but_not_create_it() -> None:
 def test_enterprise_and_edu_testing_require_authorized_developer() -> None:
     for plan in (ChatGptPlan.ENTERPRISE, ChatGptPlan.EDU):
         member = decide(plan=plan, role=ChatGptWorkspaceRole.MEMBER)
-        assert member.reasons == (
-            McpDecisionReason.ENTERPRISE_EDU_DEVELOPER_NOT_AUTHORIZED,
-        )
+        assert member.reasons == (McpDecisionReason.ENTERPRISE_EDU_DEVELOPER_NOT_AUTHORIZED,)
         developer = decide(plan=plan, role=ChatGptWorkspaceRole.AUTHORIZED_DEVELOPER)
         assert developer.allowed
 
@@ -183,9 +178,7 @@ def test_publication_requires_admin_or_owner() -> None:
         role=ChatGptWorkspaceRole.AUTHORIZED_DEVELOPER,
         phase=McpDeploymentPhase.PUBLISH,
     )
-    assert refused.reasons == (
-        McpDecisionReason.PUBLICATION_REQUIRES_ADMIN_OR_OWNER,
-    )
+    assert refused.reasons == (McpDecisionReason.PUBLICATION_REQUIRES_ADMIN_OR_OWNER,)
     approved = decide(
         plan=ChatGptPlan.ENTERPRISE,
         role=ChatGptWorkspaceRole.ADMIN,
@@ -270,14 +263,10 @@ def test_expired_or_predating_evidence_is_rejected() -> None:
     assert predating.reasons == (McpDecisionReason.REQUEST_PREDATES_PROFILE,)
 
 
-
 def test_profile_contains_complete_plan_phase_access_grid() -> None:
     profile = build_current_chatgpt_mcp_capability_profile()
     assert len(profile.entitlements) == 42
-    keys = {
-        (item.plan, item.phase, item.access_mode)
-        for item in profile.entitlements
-    }
+    keys = {(item.plan, item.phase, item.access_mode) for item in profile.entitlements}
     expected = {
         (plan, phase, access_mode)
         for plan in ChatGptPlan
@@ -348,9 +337,8 @@ def test_test_phase_may_use_no_auth_only_as_local_prepublication_exception() -> 
         authentication=McpAuthenticationKind.NONE,
         refresh_token_capability=RefreshTokenCapability.NOT_APPLICABLE,
     )
-    assert use.reasons == (
-        McpDecisionReason.AUTHENTICATION_REQUIRED_BY_LOCAL_POLICY,
-    )
+    assert use.reasons == (McpDecisionReason.AUTHENTICATION_REQUIRED_BY_LOCAL_POLICY,)
+
 
 def test_decision_verification_rejects_tampering() -> None:
     profile = build_current_chatgpt_mcp_capability_profile()
@@ -360,11 +348,14 @@ def test_decision_verification_rejects_tampering() -> None:
         request=req,
         evaluated_at=NOW,
     )
-    assert verify_chatgpt_mcp_deployment_decision(
-        profile=profile,
-        request=req,
-        decision=decision,
-    ) == decision
+    assert (
+        verify_chatgpt_mcp_deployment_decision(
+            profile=profile,
+            request=req,
+            decision=decision,
+        )
+        == decision
+    )
     tampered = decision.model_copy(update={"requires_admin_or_owner": True})
     with pytest.raises(ValueError, match="decision mismatch"):
         verify_chatgpt_mcp_deployment_decision(
@@ -403,9 +394,7 @@ def test_managed_workspace_use_requires_app_access() -> None:
         phase=McpDeploymentPhase.USE,
         workspace_app_access_granted=False,
     )
-    assert decision.reasons == (
-        McpDecisionReason.WORKSPACE_APP_ACCESS_NOT_GRANTED,
-    )
+    assert decision.reasons == (McpDecisionReason.WORKSPACE_APP_ACCESS_NOT_GRANTED,)
 
 
 def test_published_managed_app_use_does_not_require_developer_mode() -> None:

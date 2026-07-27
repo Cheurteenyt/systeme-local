@@ -2,6 +2,11 @@ from pathlib import Path
 
 import pytest
 
+from systeme_local_gateway.c0_probe import (
+    C0ConnectivityProbe,
+    C0ProbeContext,
+    C0_TOOL_NAME,
+)
 from systeme_local_gateway.executor import CapabilityExecutor
 
 
@@ -69,3 +74,36 @@ def test_command_must_be_validated_before_sandbox(tmp_path: Path) -> None:
         )
 
     assert fake.calls == []
+
+
+def test_c0_probe_is_unavailable_unless_explicitly_injected(
+    tmp_path: Path,
+) -> None:
+    executor = CapabilityExecutor(tmp_path, "image", {})
+
+    with pytest.raises(ValueError, match="no executor"):
+        executor.execute(
+            C0_TOOL_NAME,
+            {"challenge": "c0_" + ("0" * 32)},
+            {},
+        )
+
+
+def test_c0_probe_execution_does_not_touch_workspace(tmp_path: Path) -> None:
+    probe = C0ConnectivityProbe(
+        C0ProbeContext(
+            server_build_commit="a" * 40,
+            local_policy_sha256="b" * 64,
+            tool_snapshot_sha256="c" * 64,
+        )
+    )
+    executor = CapabilityExecutor(tmp_path, "image", {}, c0_probe=probe)
+
+    output = executor.execute(
+        C0_TOOL_NAME,
+        {"challenge": "c0_" + ("0" * 32)},
+        {},
+    )
+
+    assert output["write_actions_enabled"] is False
+    assert list(tmp_path.iterdir()) == []

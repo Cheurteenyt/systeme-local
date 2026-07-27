@@ -1,0 +1,88 @@
+{
+  "profile_id": "chatgpt_web_c1_20260726",
+  "profile_sha256": "940ea95013c98dbef476432265d2542278888c70fdeaa9128bf823cbfebb8295",
+  "sources": [
+    {
+      "canonical_summary": "The ChatGPT desktop in-app browser is a distinct browser surface. C1 limits control to visible controls and two new sterile chats and does not inspect cookies, storage, private requests, unrelated tabs, or existing chat history.",
+      "consulted_at": "2026-07-26T17:36:35Z",
+      "revalidate_after": "2026-08-09T17:36:35Z",
+      "source_id": "browser_boundary",
+      "summary_sha256": "6be663d6eb35833fd8114eb8462db7d1ca1b906111def89355885b43bdecfb41",
+      "title": "Browser",
+      "url": "https://learn.chatgpt.com/docs/browser"
+    },
+    {
+      "canonical_summary": "Chat is documented for answers, explanations, brainstorming, and short drafts; Work is a separately selected surface for tasks with a clear outcome. C1 may visibly distinguish the selector but tests Chat only.",
+      "consulted_at": "2026-07-26T17:36:35Z",
+      "revalidate_after": "2026-08-09T17:36:35Z",
+      "source_id": "chat_and_work",
+      "summary_sha256": "c544c6e81799b7623b8a54dde0942a252563758894bb2ae71c65656470f1ac7e",
+      "title": "Get started with ChatGPT Work",
+      "url": "https://learn.chatgpt.com/docs/get-started-with-work"
+    },
+    {
+      "canonical_summary": "Current clients may visibly present model and reasoning controls. Codex canonical reasoning labels include low, medium, high, xhigh, max, and ultra; visible ChatGPT labels remain presentation evidence and do not establish hidden model routing.",
+      "consulted_at": "2026-07-26T17:36:35Z",
+      "revalidate_after": "2026-08-09T17:36:35Z",
+      "source_id": "chatgpt_and_codex_models",
+      "summary_sha256": "ff1ff72a22abb6cd99e22d16545260ca97212c2bf896a77c8dc6d3259fa163f8",
+      "title": "Models",
+      "url": "https://learn.chatgpt.com/docs/models"
+    },
+    {
+      "canonical_summary": "Codex configuration precedence is CLI overrides, project configuration, profile configuration, user configuration, system configuration, then built-in defaults. A config.toml value is a configured default, not active runtime proof.",
+      "consulted_at": "2026-07-26T17:36:35Z",
+      "revalidate_after": "2026-08-09T17:36:35Z",
+      "source_id": "codex_configuration",
+      "summary_sha256": "34d07ae296b4496c79590d1d1332e4487d3584cd5eef562ee916df12ad9075a1",
+      "title": "Config basics",
+      "url": "https://learn.chatgpt.com/docs/config-file/config-basic"
+    },
+    {
+      "canonical_summary": "The official API catalog identifies gpt-5.6-sol, gpt-5.6-terra, and gpt-5.6-luna as distinct model IDs. Those API identifiers may describe direct Codex runtime metadata but must not be inferred from a ChatGPT Web display label.",
+      "consulted_at": "2026-07-26T17:36:35Z",
+      "revalidate_after": "2026-08-09T17:36:35Z",
+      "source_id": "gpt_5_6_models",
+      "summary_sha256": "408b74017cc9d42ff0dcf63476bc433e2374fc70ebb2b53e5cfb697747df8c71",
+      "title": "Models",
+      "url": "https://developers.openai.com/api/docs/models"
+    },
+    {
+      "canonical_summary": "Plugin tools declare per-tool noauth or OAuth security schemes. C1 reuses only the reviewed draft C0 noauth probe behind independent loopback bearer and tunnel controls.",
+      "consulted_at": "2026-07-26T17:36:35Z",
+      "revalidate_after": "2026-08-09T17:36:35Z",
+      "source_id": "plugin_authentication",
+      "summary_sha256": "057f6725dd2509d41003f923deeabf4e097944a9925d5c4af28f5a3871ee71ae",
+      "title": "Authentication",
+      "url": "https://developers.openai.com/plugins/build/auth"
+    },
+    {
+      "canonical_summary": "A developer connects an MCP endpoint or Secure MCP Tunnel, reviews discovered tools, and selects the reviewed connection in a new ChatGPT conversation. The documented flow is scoped to the current conversation and does not expose account chat history.",
+      "consulted_at": "2026-07-26T17:36:35Z",
+      "revalidate_after": "2026-08-09T17:36:35Z",
+      "source_id": "plugin_connection",
+      "summary_sha256": "c87ac8d404a8fbf1aa776eae82410f42132ee7314a6e79cc3a94aac37fbea42b",
+      "title": "Connect and test your plugin",
+      "url": "https://developers.openai.com/plugins/deploy/connect-chatgpt"
+    },
+    {
+      "canonical_summary": "Plugins are available with ChatGPT Work on the web and are not available in Chat. Therefore a C1 run that forbids Work cannot invoke a Plugin from Chat and must fail closed before any prompt.",
+      "consulted_at": "2026-07-27T00:45:00Z",
+      "revalidate_after": "2026-08-10T00:45:00Z",
+      "source_id": "plugin_surface_availability",
+      "summary_sha256": "2bea24e00c73e66791d0696d198ca766d318c7c248a12fa0009a8f456449fa93",
+      "title": "Plugins",
+      "url": "https://learn.chatgpt.com/docs/plugins"
+    },
+    {
+      "canonical_summary": "The official customer-run tunnel client keeps the local MCP server private through outbound-only connectivity and uses distinct Tunnel and Runtime API-key permissions.",
+      "consulted_at": "2026-07-26T17:36:35Z",
+      "revalidate_after": "2026-08-09T17:36:35Z",
+      "source_id": "secure_mcp_tunnel",
+      "summary_sha256": "0b4e1c1e3b717280dfcd3c9960706c2b48e06b443821b1208fabb27747bb7666",
+      "title": "Secure MCP Tunnel",
+      "url": "https://developers.openai.com/api/docs/guides/secure-mcp-tunnels"
+    }
+  ],
+  "version": "1"
+}

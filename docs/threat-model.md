@@ -309,3 +309,161 @@ B1 outputs, per-check attestation domains, a hash-chained owner-only journal,
 minimum-rights handle duplication, before/after identity verification, hard
 timeouts and checked record/bundle expiry. None is described as implemented
 runtime behavior.
+
+## C0 Secure MCP Tunnel boundary
+
+C0 introduces a temporary outbound control-plane connection while keeping the
+MCP origin private on loopback. Threats include accidental public binding,
+stolen runtime or bearer credentials, forwarded-header substitution, tool-scan
+drift, replayed challenges, prompt-driven capability expansion, forged live
+claims, raw-log leakage, and incomplete revocation.
+
+Controls are a pinned official tunnel-client archive and SHA-256, process-local
+secrets, exact loopback URLs, literal Host/Origin allowlists, independent bearer
+authentication, disabled raw HTTP logging, a default-deny one-tool policy,
+strict input/output schemas, process-local replay protection, fixed read-only
+annotations, HMAC audit correlation, no B2 executor, no browser automation, and
+a manual post-revocation failed call. Any unknown plan/role/permission,
+metadata mismatch, non-loopback listener, OAuth requirement, missing audit, or
+revocation failure blocks live attestation.
+
+Residual risk is limited to the manually observed ChatGPT Web configuration and
+the OpenAI control plane. C0 records only bounded states and digests; it cannot
+cryptographically prove UI truth without the operator. The attestation expires
+within 24 hours and never authorizes regular or write-capable use.
+
+## C1 Chat-surface and attribution boundary
+
+C1 adds threats from surface confusion, existing-chat overreach, hidden-model
+inference, localized-label misattribution, cross-chat challenge replay, edited
+manual receipts, and incomplete post-test revocation.
+
+Controls are a pre-prompt enum-only surface observation, immutable
+`work_tested=false`, two local test labels without provider conversation IDs,
+separate runtime/default/Web-label models, domain-separated HMAC receipts,
+strict extra-field rejection, one-tool policy/snapshot binding, distinct
+challenge/response/audit requirements, bounded expiry, and a mandatory failed
+post-revocation Chat call. Browser control requires fresh explicit operator
+authorization and excludes sidebar/history access, private requests, cookies,
+storage, unrelated tabs, developer tools, personal content, and API-key pages.
+
+No official Plugin interface reviewed by C1 exposes account chat history or
+conversation identifiers. The absence of that contract is a blocker, not
+permission to scrape. Residual risk remains in manual truthfulness and visible
+UI changes; signed receipts authenticate the recorded claims but do not turn
+unsupported UI state into provider-issued evidence.
+
+## C2 official-capability gate threats and controls
+
+C2 addresses an earlier and narrower threat: performing sensitive setup for a
+transport that the requested native Chat surface cannot officially use.
+
+Threats include generic “ChatGPT” wording being mistaken for Chat, Tunnel
+support being mistaken for surface support, stale documentation, source or
+summary substitution, partial action enablement, provider-value confusion, and
+bypass through C1 live scripts.
+
+Controls are an exact provider/native-surface/capability tuple, a closed
+three-state capability enum, official-host allowlisting, canonical summary and
+profile SHA-256 commitments, sorted unique sources, synchronized
+timezone-aware timestamps, a 14-day maximum freshness window, strict unknown
+field rejection, and one atomic decision over Runtime key, Tunnel, Plugin, and
+browser actions. The C1 preparation, facade, Tunnel, and operator-instruction
+entry points call the C2 gate first.
+
+C2 never opens Work, ChatGPT, history, existing chats, browser private state,
+Security/Account settings, cookies, storage, private requests, or personal
+content. It creates no credentials, listeners, tunnels, Plugins, prompts, or
+tool calls.
+
+Residual risk is official product documentation changing before the deadline.
+Scheduled governance and fail-closed expiry bound but cannot eliminate that
+risk. An officially supported profile would remain only a necessary
+capability condition; live authorization and all C1 safety controls would
+still be required.
+
+## C3 evidence-lifecycle threats and controls
+
+C3 addresses stale-evidence promotion, candidate self-authorization, active
+profile replacement with recomputed digests, registry substitution,
+cross-provider or cross-profile evidence reuse, official-domain lookalikes,
+path traversal, time-boundary ambiguity, and partial enablement of a new
+ChatGPT-side action.
+
+Controls are separate canonical claim, conclusion, evidence-set, profile, and
+registry SHA-256 commitments; exact reviewed-builder matching; a
+registry-bound active-profile digest; strict HTTPS URL normalization; exact
+provider-owned host allowlists; repository-contained profile paths; closed
+provider, surface, capability, lifecycle, reviewer, and action enums; exact
+warning/expiry boundaries; and atomic denial of Runtime-key, Tunnel, Plugin,
+browser, and ChatGPT actions.
+
+Candidate evidence is always non-authoritative. An unchanged candidate remains
+blocked, while changed claims, sources, conclusion, or support become
+`source_drift` and require independent review. Scheduled governance has
+`contents: read`, creates no issue, and cannot mutate evidence.
+
+C3 performs no browser, ChatGPT, Work, credential, Tunnel, Plugin, listener, or
+MCP action. C3 remains the evidence authority while C4 owns current runtime
+admission. Residual
+risk is official documentation changing inside the bounded review window and
+a human reviewer misclassifying a bounded claim. Expiry, independent review,
+tests, and deliberate registry promotion limit but cannot eliminate those
+risks.
+
+## C4 runtime-admission threats and controls
+
+C4 addresses direct-script and lower-level-import bypass, missing provider
+context, provider/surface/profile/time substitution, admission-receipt
+mutation or forgery, correlation replay/collision/capacity exhaustion,
+policy-to-provider capability confusion, and tool-manifest privilege
+expansion.
+
+Controls are strict frozen request/decision models; canonical request and
+receipt SHA-256 commitments; exact C3 decision/profile/evidence/registry
+digests; exact production-adapter builder matching; closed action, reason,
+lifecycle, reviewer, support, and access enums; exact identity matching; zero
+tools on every denial; defensive model revalidation; reviewed-path and reparse
+checks; a reduction-only MCP registry filter; per-tool protocol digests; a
+bounded locked process-local correlation table; and one-time controller-issued
+tool authority.
+
+C1 protected entry points call C4 before state initialization, secret
+generation, credential reads, environment mutation, listener creation,
+`Start-Process`, or operator Plugin guidance. The historical C1 branch value
+remains evidence, while current runtime use requires exact C4 branch and exact
+reviewed C1 ancestry. Explicit provider mode repeats committed admission inside
+Python before the MCP registry, audit/replay services, or listener can exist.
+
+Residual risks are explicit. C4 is not an OS sandbox and cannot prevent manual
+provider actions or independently launched out-of-repository processes.
+Process-local replay state is not distributed replay protection. Generic
+local MCP is not automatically a provider surface; a caller classifying it as
+provider-bound must use explicit provider mode and the admitted constructor.
+Scheduled C3 governance, separate live authorization, and future durable
+replay storage remain necessary.
+
+## C5 squash-integration threats and controls
+
+C5 addresses evidence loss or ambiguity caused by squash-only history:
+independent merging of stacked branches, deletion of a reviewed base branch,
+commit substitution, reordered stack layers, tag substitution, diff-only
+verification that misses modes, and tree-only verification that loses the
+reviewed change boundary.
+
+Controls are an exact frozen C0-C4 manifest; strict main base, PR, branch, and
+head identities; pairwise ancestry verification; a SHA-256 binary-diff
+commitment; an independent framed SHA-256 commitment over every tracked path,
+mode, blob length, and blob byte; a one-file self-excluding final seal commit;
+and an evidence tag that keeps the reviewed ancestry reachable after squash.
+
+The current checkout must match the sealed tree. Unknown fields, missing or
+moved tags, changed ancestry, file additions/removals/renames, mode changes,
+blob mutations, manifest changes, or non-canonical paths fail closed.
+
+C5 does not protect against a repository administrator deleting every evidence
+reference or rewriting the remote outside the reviewed workflow. It is not
+code signing and does not replace independent review. The aggregate pull
+request remains large, but this is an explicit consequence of preserving a
+squash-only linear `main`. C5 performs no network, browser, provider, secret,
+Tunnel, Plugin, listener, or ChatGPT action.

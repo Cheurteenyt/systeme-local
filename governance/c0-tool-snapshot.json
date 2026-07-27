@@ -1,0 +1,112 @@
+{
+  "high_risk_tool_count": 0,
+  "local_policy_sha256": "17a53ee929232bae5901037c26c23ad1379dbdb09998c698b1ed85c60a75700e",
+  "schema_version": "1",
+  "tool_count": 1,
+  "tool_snapshot_sha256": "6d9a8e0f6dadb9f3a615abcca8c882cb37fb257944922151e97c65a8575da14b",
+  "tools": [
+    {
+      "annotations": {
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false,
+        "readOnlyHint": true
+      },
+      "description": "Return a synthetic, read-only connectivity attestation for one locally generated challenge.",
+      "inputSchema": {
+        "additionalProperties": false,
+        "properties": {
+          "challenge": {
+            "description": "Single-use synthetic challenge generated locally for this connectivity attempt.",
+            "maxLength": 35,
+            "minLength": 35,
+            "pattern": "^c0_[0-9a-f]{32}$",
+            "type": "string"
+          }
+        },
+        "required": [
+          "challenge"
+        ],
+        "type": "object"
+      },
+      "name": "systeme_local_connectivity_probe",
+      "outputSchema": {
+        "additionalProperties": false,
+        "description": "Strict, synthetic response returned by the C0 connectivity probe.",
+        "properties": {
+          "audit_correlation": {
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
+            "title": "Audit Correlation",
+            "type": "string"
+          },
+          "challenge_sha256": {
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Challenge Sha256",
+            "type": "string"
+          },
+          "local_policy_sha256": {
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Local Policy Sha256",
+            "type": "string"
+          },
+          "observed_at": {
+            "format": "date-time",
+            "title": "Observed At",
+            "type": "string"
+          },
+          "probe_protocol_version": {
+            "const": "c0.v1",
+            "title": "Probe Protocol Version",
+            "type": "string"
+          },
+          "protocol_v2_reachable": {
+            "const": false,
+            "title": "Protocol V2 Reachable",
+            "type": "boolean"
+          },
+          "read_only": {
+            "const": true,
+            "title": "Read Only",
+            "type": "boolean"
+          },
+          "real_evidence_access": {
+            "const": false,
+            "title": "Real Evidence Access",
+            "type": "boolean"
+          },
+          "server_build_commit": {
+            "pattern": "^[0-9a-f]{40}$",
+            "title": "Server Build Commit",
+            "type": "string"
+          },
+          "tool_snapshot_sha256": {
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Tool Snapshot Sha256",
+            "type": "string"
+          },
+          "write_actions_enabled": {
+            "const": false,
+            "title": "Write Actions Enabled",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "probe_protocol_version",
+          "challenge_sha256",
+          "server_build_commit",
+          "local_policy_sha256",
+          "tool_snapshot_sha256",
+          "read_only",
+          "write_actions_enabled",
+          "real_evidence_access",
+          "protocol_v2_reachable",
+          "audit_correlation",
+          "observed_at"
+        ],
+        "title": "C0ConnectivityProbeResponse",
+        "type": "object"
+      }
+    }
+  ],
+  "write_tool_count": 0
+}

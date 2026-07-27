@@ -1,6 +1,7 @@
 import hmac
 import os
 from pathlib import Path
+from typing import Literal
 
 from pydantic import Field, ValidationInfo, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -38,6 +39,13 @@ class Settings(BaseSettings):
     docker_image: str = "python:3.12-slim"
     mcp_enabled: bool = False
     mcp_token: str | None = Field(default=None, min_length=32, max_length=512)
+    c0_enabled: bool = False
+    c0_server_build_commit: str | None = Field(
+        default=None,
+        pattern=r"^[0-9a-f]{40}$",
+    )
+    provider_runtime_mode: Literal["chatgpt_chat_c4"] | None = None
+    provider_runtime_root: Path | None = None
     mcp_max_request_bytes: int = Field(
         default=1_048_576,
         ge=1_024,
@@ -68,23 +76,21 @@ class Settings(BaseSettings):
             "change-me-change-me-change-me-change-me",
         }
         if value in insecure_values:
-            variable = f"SLG_{info.field_name.upper()}"
+            field_name = info.field_name or "secret"
+            variable = f"SLG_{field_name.upper()}"
             raise ValueError(f"{variable} must be replaced with a random secret")
         return value
 
     @model_validator(mode="after")
     def require_consistent_security_configuration(self) -> "Settings":
         if hmac.compare_digest(self.shared_secret, self.audit_key):
-            raise ValueError(
-                "SLG_AUDIT_KEY must be different from SLG_SHARED_SECRET"
-            )
+            raise ValueError("SLG_AUDIT_KEY must be different from SLG_SHARED_SECRET")
 
         anchor_path_configured = self.audit_anchor_log is not None
         anchor_key_configured = self.audit_anchor_key is not None
         if anchor_path_configured != anchor_key_configured:
             raise ValueError(
-                "SLG_AUDIT_ANCHOR_LOG and SLG_AUDIT_ANCHOR_KEY "
-                "must be configured together"
+                "SLG_AUDIT_ANCHOR_LOG and SLG_AUDIT_ANCHOR_KEY must be configured together"
             )
 
         if self.audit_anchor_key is not None:
@@ -92,23 +98,37 @@ class Settings(BaseSettings):
                 self.audit_anchor_key,
                 self.shared_secret,
             ):
-                raise ValueError(
-                    "SLG_AUDIT_ANCHOR_KEY must be different from "
-                    "SLG_SHARED_SECRET"
-                )
+                raise ValueError("SLG_AUDIT_ANCHOR_KEY must be different from SLG_SHARED_SECRET")
             if hmac.compare_digest(
                 self.audit_anchor_key,
                 self.audit_key,
             ):
-                raise ValueError(
-                    "SLG_AUDIT_ANCHOR_KEY must be different from "
-                    "SLG_AUDIT_KEY"
-                )
+                raise ValueError("SLG_AUDIT_ANCHOR_KEY must be different from SLG_AUDIT_KEY")
 
         if self.mcp_enabled and self.mcp_token is None:
+            raise ValueError("SLG_MCP_TOKEN must be configured when SLG_MCP_ENABLED is true")
+
+        if self.c0_enabled:
+            if not self.mcp_enabled:
+                raise ValueError("SLG_MCP_ENABLED must be true when SLG_C0_ENABLED is true")
+            if self.c0_server_build_commit is None:
+                raise ValueError(
+                    "SLG_C0_SERVER_BUILD_COMMIT is required when SLG_C0_ENABLED is true"
+                )
+
+        provider_mode_configured = self.provider_runtime_mode is not None
+        provider_root_configured = self.provider_runtime_root is not None
+        if provider_mode_configured != provider_root_configured:
             raise ValueError(
-                "SLG_MCP_TOKEN must be configured when SLG_MCP_ENABLED is true"
+                "SLG_PROVIDER_RUNTIME_MODE and SLG_PROVIDER_RUNTIME_ROOT "
+                "must be configured together"
             )
+        if provider_mode_configured:
+            if not self.mcp_enabled or not self.c0_enabled:
+                raise ValueError("C4 provider runtime requires SLG_MCP_ENABLED and SLG_C0_ENABLED")
+            assert self.provider_runtime_root is not None
+            if not self.provider_runtime_root.is_absolute():
+                raise ValueError("SLG_PROVIDER_RUNTIME_ROOT must be an absolute path")
 
         if self.mcp_token is not None:
             secrets_to_compare = {
@@ -116,14 +136,10 @@ class Settings(BaseSettings):
                 "SLG_AUDIT_KEY": self.audit_key,
             }
             if self.audit_anchor_key is not None:
-                secrets_to_compare["SLG_AUDIT_ANCHOR_KEY"] = (
-                    self.audit_anchor_key
-                )
+                secrets_to_compare["SLG_AUDIT_ANCHOR_KEY"] = self.audit_anchor_key
             for variable, secret in secrets_to_compare.items():
                 if hmac.compare_digest(self.mcp_token, secret):
-                    raise ValueError(
-                        f"SLG_MCP_TOKEN must be different from {variable}"
-                    )
+                    raise ValueError(f"SLG_MCP_TOKEN must be different from {variable}")
 
         if self.audit_anchor_log is not None:
             audit_paths = {
@@ -135,10 +151,7 @@ class Settings(BaseSettings):
                 _normalized_path(_lock_path(self.audit_anchor_log)),
             }
             if audit_paths & anchor_paths:
-                raise ValueError(
-                    "audit log, audit anchor, and their lock paths "
-                    "must not overlap"
-                )
+                raise ValueError("audit log, audit anchor, and their lock paths must not overlap")
 
         return self
 

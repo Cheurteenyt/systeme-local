@@ -1,5 +1,7 @@
 from pathlib import Path
+import re
 
+from systeme_local_gateway.c0_probe import C0_TOOL_NAME
 from systeme_local_gateway.mcp_tools import McpToolRegistry
 from systeme_local_gateway.policy import PolicyEngine
 
@@ -192,3 +194,49 @@ capabilities:
         "workspace.read_text",
     ]
     assert declared[0].allowed_commands == (("python", "-m", "pytest", "-q"),)
+
+
+def test_c0_registry_exposes_exactly_one_annotated_tool(tmp_path: Path) -> None:
+    policy = _write_policy(
+        tmp_path,
+        f"""version: 1
+default: deny
+capabilities:
+  {C0_TOOL_NAME}:
+    decision: allow
+  workspace.list:
+    decision: allow
+""",
+    )
+
+    registry = McpToolRegistry(policy, c0_mode=True)
+    tools = registry.protocol_tools()
+
+    assert len(tools) == 1
+    assert tools[0]["name"] == C0_TOOL_NAME
+    assert tools[0]["inputSchema"]["required"] == ["challenge"]
+    assert tools[0]["inputSchema"]["additionalProperties"] is False
+    assert tools[0]["outputSchema"]["additionalProperties"] is False
+    assert tools[0]["annotations"] == {
+        "readOnlyHint": True,
+        "destructiveHint": False,
+        "idempotentHint": True,
+        "openWorldHint": False,
+    }
+    assert re.fullmatch(r"[0-9a-f]{64}", registry.tool_snapshot_sha256)
+
+
+def test_c0_registry_fails_closed_without_exact_policy_capability(
+    tmp_path: Path,
+) -> None:
+    policy = _write_policy(
+        tmp_path,
+        """version: 1
+default: deny
+capabilities:
+  workspace.list:
+    decision: allow
+""",
+    )
+
+    assert McpToolRegistry(policy, c0_mode=True).list_tools() == ()

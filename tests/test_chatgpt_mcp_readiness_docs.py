@@ -15,7 +15,7 @@ def text(path: Path) -> str:
 
 def test_readiness_doc_declares_no_real_connection() -> None:
     content = text(DOC)
-    assert "real connection not implemented" in content
+    assert "pending manual verification" in content
     assert "real_connection_established = false" in content
     assert "secrets_stored = false" in content
 
@@ -92,7 +92,15 @@ def test_readiness_doc_contains_only_official_openai_sources() -> None:
         if line.startswith("- [")
     ]
     assert links
-    assert all(link.startswith("https://help.openai.com/") for link in links)
+    assert all(
+        link.startswith(
+            (
+                "https://help.openai.com/",
+                "https://developers.openai.com/",
+            )
+        )
+        for link in links
+    )
 
 
 def test_cross_provider_docs_link_to_readiness_contract() -> None:

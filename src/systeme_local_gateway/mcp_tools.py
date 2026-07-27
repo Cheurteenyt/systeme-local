@@ -1,13 +1,22 @@
 from __future__ import annotations
 
 import json
+from hashlib import sha256
 from collections.abc import Callable
 from dataclasses import dataclass, field
 from typing import Any, Protocol
 
 from .policy import DeclaredCapability
+from .c0_probe import (
+    C0_TOOL_NAME,
+    c0_annotations,
+    c0_input_schema,
+    c0_output_schema,
+)
 
 InputSchema = dict[str, Any]
+OutputSchema = dict[str, Any]
+Annotations = dict[str, bool]
 SchemaBuilder = Callable[[DeclaredCapability], InputSchema | None]
 
 
@@ -20,6 +29,8 @@ class McpToolDefinition:
     name: str
     description: str
     _input_schema_json: str = field(repr=False)
+    _output_schema_json: str | None = field(default=None, repr=False)
+    _annotations_json: str | None = field(default=None, repr=False)
 
     @classmethod
     def create(
@@ -28,6 +39,8 @@ class McpToolDefinition:
         name: str,
         description: str,
         input_schema: InputSchema,
+        output_schema: OutputSchema | None = None,
+        annotations: Annotations | None = None,
     ) -> McpToolDefinition:
         return cls(
             name=name,
@@ -36,6 +49,24 @@ class McpToolDefinition:
                 input_schema,
                 sort_keys=True,
                 separators=(",", ":"),
+            ),
+            _output_schema_json=(
+                json.dumps(
+                    output_schema,
+                    sort_keys=True,
+                    separators=(",", ":"),
+                )
+                if output_schema is not None
+                else None
+            ),
+            _annotations_json=(
+                json.dumps(
+                    annotations,
+                    sort_keys=True,
+                    separators=(",", ":"),
+                )
+                if annotations is not None
+                else None
             ),
         )
 
@@ -46,12 +77,35 @@ class McpToolDefinition:
             raise RuntimeError("MCP tool schema is not a JSON object")
         return decoded
 
+    @property
+    def output_schema(self) -> OutputSchema | None:
+        if self._output_schema_json is None:
+            return None
+        decoded = json.loads(self._output_schema_json)
+        if not isinstance(decoded, dict):
+            raise RuntimeError("MCP tool output schema is not a JSON object")
+        return decoded
+
+    @property
+    def annotations(self) -> Annotations | None:
+        if self._annotations_json is None:
+            return None
+        decoded = json.loads(self._annotations_json)
+        if not isinstance(decoded, dict):
+            raise RuntimeError("MCP tool annotations are not a JSON object")
+        return decoded
+
     def protocol_dict(self) -> dict[str, Any]:
-        return {
+        tool: dict[str, Any] = {
             "name": self.name,
             "description": self.description,
             "inputSchema": self.input_schema,
         }
+        if self.output_schema is not None:
+            tool["outputSchema"] = self.output_schema
+        if self.annotations is not None:
+            tool["annotations"] = self.annotations
+        return tool
 
 
 @dataclass(frozen=True)
@@ -157,10 +211,31 @@ _TOOL_TEMPLATES: dict[str, _ToolTemplate] = {
 
 
 class McpToolRegistry:
-    def __init__(self, policy: DeclaredCapabilitiesProtocol):
+    def __init__(
+        self,
+        policy: DeclaredCapabilitiesProtocol,
+        *,
+        c0_mode: bool = False,
+        effective_tool_names: frozenset[str] | None = None,
+    ):
         tools: list[McpToolDefinition] = []
         for capability in policy.declared_capabilities():
             if capability.decision != "allow":
+                continue
+            if c0_mode:
+                if capability.name == C0_TOOL_NAME:
+                    tools.append(
+                        McpToolDefinition.create(
+                            name=C0_TOOL_NAME,
+                            description=(
+                                "Return a synthetic, read-only connectivity "
+                                "attestation for one locally generated challenge."
+                            ),
+                            input_schema=c0_input_schema(),
+                            output_schema=c0_output_schema(),
+                            annotations=c0_annotations(),
+                        )
+                    )
                 continue
             template = _TOOL_TEMPLATES.get(capability.name)
             if template is None:
@@ -175,7 +250,13 @@ class McpToolRegistry:
                     input_schema=input_schema,
                 )
             )
-        self._tools = tuple(sorted(tools, key=lambda tool: tool.name))
+        built_tools = tuple(sorted(tools, key=lambda tool: tool.name))
+        if effective_tool_names is not None:
+            built_names = {tool.name for tool in built_tools}
+            if not effective_tool_names <= built_names:
+                raise RuntimeError("effective MCP tool scope is not provided by the local policy")
+            built_tools = tuple(tool for tool in built_tools if tool.name in effective_tool_names)
+        self._tools = built_tools
         self._tools_by_name = {tool.name: tool for tool in self._tools}
 
     def list_tools(self) -> tuple[McpToolDefinition, ...]:
@@ -186,3 +267,13 @@ class McpToolRegistry:
 
     def protocol_tools(self) -> list[dict[str, Any]]:
         return [tool.protocol_dict() for tool in self._tools]
+
+    @property
+    def tool_snapshot_sha256(self) -> str:
+        encoded = json.dumps(
+            self.protocol_tools(),
+            sort_keys=True,
+            separators=(",", ":"),
+            ensure_ascii=False,
+        ).encode("utf-8")
+        return sha256(encoded).hexdigest()

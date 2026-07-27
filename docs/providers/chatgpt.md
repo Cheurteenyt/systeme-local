@@ -1,7 +1,7 @@
 # ChatGPT provider characterization
 
-Status: provider characterization plus deterministic lifecycle, context, attachment and ChatGPT MCP evidence foundations implemented; no live provider transport or connection
-Last reviewed: 2026-07-18
+Status: provider characterization plus deterministic lifecycle, context, attachment and ChatGPT MCP evidence foundations implemented; optional C0 live probe pending its manual ChatGPT Web gate
+Last reviewed: 2026-07-26
 Cross-provider rules: [`../connectivity-model.md`](../connectivity-model.md)
 
 ## Purpose
@@ -125,7 +125,7 @@ The profile must be revised when evidence changes. “Unknown” is an intention
 
 ## Chat, Work, projects and provider context
 
-Last characterized: 2026-07-18.
+Last characterized: 2026-07-26.
 
 Chat is the Système Local default. Automatic selection never upgrades a request to Work. Work requires an explicit user request, proven availability for the active account and a fresh usable `work_agentic` quota observation. The default local freshness window is five minutes. If Work support or quota is stale, unknown, unavailable, reset-pending or exhausted, the local policy falls back to Chat. Système Local never purchases provider credits automatically.
 
@@ -424,6 +424,39 @@ Status: `blocked_by_evidence`
 Investigate only documented or explicitly supported mechanisms. If no reliable contract exists,
 retain `research` or `unsupported` and use an official provider transport or interactive handoff.
 
+### Phase 14 — provider capability evidence lifecycle
+
+Status: `implemented`
+
+C3 separates official-document acquisition from deterministic capability
+decisions. A strict registry contains the only active provider adapter
+(`chatgpt`), native Chat identity, official-domain allowlist, reviewed profile
+digest, and five protected actions. Candidate profiles cannot authorize any
+action. `revalidation_due`, `expired`, `source_drift`, and `invalid` all fail
+closed independently of the support state.
+
+Current official documentation still makes Plugins unavailable in Chat, so
+custom/local MCP on native Chat remains `unsupported`. The detailed contract
+and exact future product gate are in
+[`chatgpt-web-c3-evidence-lifecycle.md`](chatgpt-web-c3-evidence-lifecycle.md).
+
+### Phase 15 — provider-bound runtime admission
+
+Status: `implemented`
+
+C4 consumes the reviewed C3 result and derives one immutable runtime admission
+decision plus an effective tool tuple. The production adapter contains only
+ChatGPT and at most the exact read-only connectivity probe. The current
+unsupported native Chat profile reduces that maximum grant to zero tools and
+denies all six runtime actions.
+
+C4 adds request/receipt commitments, exact provider and tool identity, bounded
+process-local replay/collision rejection, an inner Python provider-mode gate,
+and a provider-bound MCP registry constructor with one-time controller-issued
+authority. It does not change the official capability result or authorize a
+live test. See
+[`chatgpt-web-c4-runtime-admission.md`](chatgpt-web-c4-runtime-admission.md).
+
 ## Security invariants
 
 - never store a ChatGPT password, session cookie, bearer token or API key in the repository;
@@ -447,3 +480,35 @@ Recheck these official sources before implementation because product availabilit
 - [Apps in ChatGPT](https://help.openai.com/en/articles/11487775-connectors-in)
 - [OpenAI Responses API reference](https://platform.openai.com/docs/api-reference/responses)
 - [OpenAI streaming events](https://platform.openai.com/docs/api-reference/responses-streaming/response/refusal/delta)
+- [Connect from ChatGPT](https://developers.openai.com/plugins/deploy/connect-chatgpt)
+- [Secure MCP Tunnels](https://developers.openai.com/api/docs/guides/secure-mcp-tunnels)
+- [Plugin authentication](https://developers.openai.com/plugins/build/auth)
+
+## C0 connectivity exception
+
+The bounded [C0 connectivity contract](chatgpt-mcp-c0-connectivity.md) permits a
+manual draft ChatGPT Web Plugin to call exactly one synthetic read-only MCP tool
+through Secure MCP Tunnel. It is an inbound connectivity test, not an outbound
+provider transport, chat automation, publication, or B2 evidence collection.
+No live claim exists until the separate attestation proves the call, audit
+correlation, and revocation failure.
+
+C0 formats only its touched Python surface, reducing the current Ruff formatting
+baseline from 54 to 42 files while leaving the historical phase-8 measurement
+unchanged.
+
+## C1, C2, C3, and C4 interpretation
+
+Historical C1 receipts proved short-lived correlation between two manually
+created synthetic test chats, the single read-only probe, and local audit
+records. They did not prove current official native Chat support, a durable
+final attestation, conversation discovery, production use, or write
+capability.
+
+C2 identified the official product-surface blocker. C3 revalidated it and
+owns the deterministic evidence lifecycle. C4 now owns runtime admission.
+Current decisions deny
+Runtime-key creation, Tunnel startup, Plugin creation, browser testing, and
+any ChatGPT action or tool-surface exposure. The historical C1 records remain
+evidence of bounded calls, not authority to bypass current official
+documentation or C4 admission.

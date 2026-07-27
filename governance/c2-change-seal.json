@@ -1,0 +1,50 @@
+{
+  "version": "1",
+  "lot": "C2 — ChatGPT-first Web official-capability gating and provider-neutral readiness",
+  "generated_at": "2026-07-27T02:12:30Z",
+  "repository": "Cheurteenyt/systeme-local",
+  "branch": "interop/chatgpt-web-capability-gating-c2",
+  "stacked_base_branch": "interop/chatgpt-web-chat-observability-c1",
+  "base_commit": "2aee36fdfa3d20c23acdc75eb3348bc54536ef4f",
+  "c1_pull_request": "https://github.com/Cheurteenyt/systeme-local/pull/67",
+  "c1_status": "BLOCKED_BY_PLUGIN_UNAVAILABLE_IN_CHAT",
+  "official_capability_profile_sha256": "fa6f144d6867c00e995c791182cc78e7aabcc781ff6462bf885be26faa706305",
+  "final_status": "BLOCKED_BY_NO_OFFICIAL_CHAT_TOOL_INTERFACE",
+  "diff": {
+    "algorithm": "sha256",
+    "command": "git diff --binary --full-index --no-ext-diff 2aee36fdfa3d20c23acdc75eb3348bc54536ef4f -- . \":(exclude)governance/c2-change-seal.json\"",
+    "excluded_paths": [
+      "governance/c2-change-seal.json"
+    ],
+    "sha256": "9af8d70f474f4b929de5a7ab66623c580e81f8409a1bfd46351f681493beb9e2",
+    "bytes": 87311
+  },
+  "changed_file_count": 25,
+  "changed_files": [
+    "README.md",
+    "docs/adr/0009-chatgpt-chat-official-capability-gate.md",
+    "docs/architecture.md",
+    "docs/index.md",
+    "docs/providers/chatgpt-web-c2-capability-gating.md",
+    "docs/providers/chatgpt-web-c2-test-evidence.md",
+    "docs/roadmap.md",
+    "docs/threat-model.md",
+    "governance/c2-change-seal.json",
+    "governance/c2-official-capability-profile.json",
+    "governance/evidence-profiles.toml",
+    "governance/mypy-baseline.json",
+    "pyproject.toml",
+    "scripts/c1/Prepare-C1.ps1",
+    "scripts/c1/Show-C1OperatorSteps.ps1",
+    "scripts/c1/Start-C1Facade.ps1",
+    "scripts/c1/Start-C1Tunnel.ps1",
+    "scripts/c2/C2.Common.psm1",
+    "scripts/c2/Show-C2OperatorSteps.ps1",
+    "scripts/c2/Test-C2OfficialProfile.ps1",
+    "scripts/c2/Test-C2Preflight.ps1",
+    "src/systeme_local_gateway/c2_capability.py",
+    "tests/test_c1_docs.py",
+    "tests/test_c2_capability.py",
+    "tests/test_c2_docs.py"
+  ]
+}

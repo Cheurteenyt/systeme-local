@@ -334,3 +334,12 @@ close behavior and before/after identity checks are exact. Version 2 supports
 Timestamps are bounded to `0..=253402300799`; process and recovery timeouts are
 60 and 30 seconds. Record and bundle expiry use checked, deterministic
 equations. Version 2 remains non-reachable and real evidence remains prohibited.
+
+## C0 non-interference
+
+ADR 0007 permits a separate synthetic connectivity probe before B2 collection.
+The probe has no operator-evidence handle, staging path, protocol-v2 operation,
+or provider-outbound transport. Its fixed response explicitly reports
+`real_evidence_access=false` and `protocol_v2_reachable=false`. A successful C0
+call therefore proves only the inbound MCP path and does not satisfy any B2
+gate.

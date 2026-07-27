@@ -1,0 +1,24 @@
+{
+  "version": "1",
+  "adapters": [
+    {
+      "identity": {
+        "provider_id": "chatgpt",
+        "native_surface": "chat",
+        "surface_class": "conversational_chat",
+        "capability": "custom_or_local_mcp_tool_invocation"
+      },
+      "approved_tools": [
+        {
+          "name": "systeme_local_connectivity_probe",
+          "access_mode": "read_only",
+          "protocol_sha256": "de0389f0a2329daa8afa3ad8126eb6e3e80aba1b77ed2e0f29998c37c383c65b",
+          "read_only": true,
+          "destructive": false,
+          "high_risk": false
+        }
+      ]
+    }
+  ],
+  "registry_sha256": "c63ae8d266ba25f7871b60f4f36b659b97a4f17e6fd13fc32b7acd6dcf85c20d"
+}

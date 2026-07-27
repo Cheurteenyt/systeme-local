@@ -67,6 +67,10 @@ fully formatted and removed from `governance/ruff-format-baseline.txt`.
 Unrelated legacy files remain governed by the non-growing ratchet and are not mechanically
 reformatted in this lot.
 
+C0 later formats twelve additional files that it changes and removes them from
+the baseline. The current debt therefore decreases from 54 to 42 files without
+formatting untouched files.
+
 ## Typing boundary
 
 The provider-model Mypy baseline is retired from three diagnostics to zero:

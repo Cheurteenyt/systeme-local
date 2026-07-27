@@ -94,13 +94,14 @@ def _validated_timeout(value: float) -> float:
 async def run_smoke(
     *,
     endpoint: str,
-    token: str,
+    token: str | None,
     timeout_seconds: float,
     call_tool: str | None,
     arguments: dict[str, Any],
 ) -> dict[str, Any]:
+    headers = {"Authorization": f"Bearer {token}"} if token is not None else {}
     async with httpx.AsyncClient(
-        headers={"Authorization": f"Bearer {token}"},
+        headers=headers,
         timeout=httpx.Timeout(timeout_seconds),
         follow_redirects=False,
         trust_env=False,
@@ -121,9 +122,7 @@ async def run_smoke(
                 }
                 if call_tool is not None:
                     if call_tool not in tool_names:
-                        raise McpSmokeInputError(
-                            f"requested tool is not advertised: {call_tool}"
-                        )
+                        raise McpSmokeInputError(f"requested tool is not advertised: {call_tool}")
                     result = await session.call_tool(call_tool, arguments)
                     if result.isError:
                         raise McpSmokeInputError(
@@ -134,7 +133,6 @@ async def run_smoke(
                         "structured_content": result.structuredContent,
                     }
                 return payload
-
 
 
 def _redact_secret(value: Any, secret: str) -> Any:
@@ -151,11 +149,10 @@ def _redact_secret(value: Any, secret: str) -> Any:
         }
     return value
 
+
 def _build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        description=(
-            "Verify the local Système Local MCP endpoint with the official MCP client"
-        )
+        description=("Verify the local Système Local MCP endpoint with the official MCP client")
     )
     parser.add_argument(
         "--url",

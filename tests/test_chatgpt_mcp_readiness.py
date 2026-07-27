@@ -35,7 +35,7 @@ from systeme_local_gateway.providers.mcp_readiness_models import (
     commit_mcp_readiness_check,
 )
 
-NOW = datetime(2026, 7, 18, 15, 0, tzinfo=timezone.utc)
+NOW = datetime(2026, 7, 26, 15, 0, tzinfo=timezone.utc)
 DIGEST = "a" * 64
 
 
@@ -81,10 +81,15 @@ def checks(
     result = []
     for check_id in McpReadinessCheckId:
         state = states.get(check_id, McpReadinessCheckState.UNKNOWN)
-        evidence = DIGEST if state in (
-            McpReadinessCheckState.VERIFIED,
-            McpReadinessCheckState.FAILED,
-        ) else None
+        evidence = (
+            DIGEST
+            if state
+            in (
+                McpReadinessCheckState.VERIFIED,
+                McpReadinessCheckState.FAILED,
+            )
+            else None
+        )
         detail = "CHECK_FAILED" if state is McpReadinessCheckState.FAILED else None
         result.append(
             commit_mcp_readiness_check(
@@ -112,21 +117,15 @@ def observation(
     capability = build_current_chatgpt_mcp_capability_profile()
     reconciliation = build_current_chatgpt_mcp_evidence_reconciliation_profile()
     states = states or {}
-    tool_verified = (
-        states.get(McpReadinessCheckId.TOOL_SNAPSHOT)
-        is McpReadinessCheckState.VERIFIED
-    )
+    tool_verified = states.get(McpReadinessCheckId.TOOL_SNAPSHOT) is McpReadinessCheckState.VERIFIED
     local_policy_verified = (
-        states.get(McpReadinessCheckId.LOCAL_POLICY)
-        is McpReadinessCheckState.VERIFIED
+        states.get(McpReadinessCheckId.LOCAL_POLICY) is McpReadinessCheckState.VERIFIED
     )
     return commit_mcp_connection_readiness_observation(
         observation_id="obs_readiness",
         request=deployment_request or request(),
         capability_profile_sha256=capability_digest or capability.profile_sha256,
-        reconciliation_profile_sha256=(
-            reconciliation_digest or reconciliation.profile_sha256
-        ),
+        reconciliation_profile_sha256=(reconciliation_digest or reconciliation.profile_sha256),
         checks=checks(states, checked_at=observed_at),
         tool_snapshot_sha256=DIGEST if tool_verified else None,
         tool_count=tool_count if tool_verified else None,
@@ -315,10 +314,7 @@ def test_read_fetch_snapshot_with_write_tools_is_blocked() -> None:
         )
     )
     assert decision.ready is False
-    assert (
-        McpReadinessReason.READ_FETCH_SNAPSHOT_CONTAINS_WRITE_TOOLS
-        in decision.reasons
-    )
+    assert McpReadinessReason.READ_FETCH_SNAPSHOT_CONTAINS_WRITE_TOOLS in decision.reasons
 
 
 def test_high_risk_tools_require_a_separate_review() -> None:
@@ -339,10 +335,7 @@ def test_high_risk_tools_require_a_separate_review() -> None:
         )
     )
     assert decision.ready is False
-    assert (
-        McpReadinessReason.HIGH_RISK_TOOLS_REQUIRE_SEPARATE_REVIEW
-        in decision.reasons
-    )
+    assert McpReadinessReason.HIGH_RISK_TOOLS_REQUIRE_SEPARATE_REVIEW in decision.reasons
 
 
 @pytest.mark.parametrize(

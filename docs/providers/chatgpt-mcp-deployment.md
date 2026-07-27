@@ -1,10 +1,10 @@
 # ChatGPT MCP deployment evidence and operator contract
 
-Status: evidence-bound deployment profile implemented; real connection not implemented
+Status: evidence-bound deployment profile implemented; optional C0 connection path pending manual verification
 
-Reviewed: 2026-07-18
+Reviewed: 2026-07-26
 
-Revalidate no later than: 2026-08-17
+Revalidate no later than: 2026-08-25
 
 ## Decision
 
@@ -213,3 +213,16 @@ The real-connection lot must repeat the official-source review before enabling a
 - [Developer mode and MCP apps in ChatGPT](https://help.openai.com/en/articles/12584461)
 - [Apps in ChatGPT](https://help.openai.com/en/articles/11487775-apps-in-chatgpt)
 - [Projects in ChatGPT](https://help.openai.com/en/articles/10169521-projects-in-chatgpt)
+- [Connect from ChatGPT](https://developers.openai.com/plugins/deploy/connect-chatgpt)
+- [Secure MCP Tunnels](https://developers.openai.com/api/docs/guides/secure-mcp-tunnels)
+- [Plugin authentication](https://developers.openai.com/plugins/build/auth)
+
+## C0 deployment profile
+
+C0 is the only current exception to the non-goal of starting Secure MCP Tunnel.
+It is governed by the separate
+[read-only connectivity contract](chatgpt-mcp-c0-connectivity.md), stays in
+draft, permits only one synthetic tool, and does not alter the deployment
+entitlement matrix. Plan, role, Web client, workspace access, developer mode,
+Tunnel permissions, and Runtime API-key permissions must be observed
+independently and fail closed when unknown.

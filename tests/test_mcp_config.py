@@ -1,5 +1,6 @@
 import importlib
 import os
+from pathlib import Path
 from unittest.mock import patch
 
 import pytest
@@ -30,6 +31,8 @@ def test_mcp_is_disabled_by_default_without_a_token() -> None:
 
     assert settings.mcp_enabled is False
     assert settings.mcp_token is None
+    assert settings.c0_enabled is False
+    assert settings.c0_server_build_commit is None
 
 
 def test_enabled_mcp_requires_a_token() -> None:
@@ -70,7 +73,57 @@ def test_placeholder_mcp_token_is_rejected() -> None:
     with pytest.raises(ValidationError, match="SLG_MCP_TOKEN"):
         _settings(
             mcp_enabled=True,
-            mcp_token=(
-                "replace-with-fourth-independent-at-least-32-random-characters"
-            ),
+            mcp_token=("replace-with-fourth-independent-at-least-32-random-characters"),
         )
+
+
+def test_c0_requires_mcp_and_full_build_commit() -> None:
+    with pytest.raises(ValidationError, match="SLG_MCP_ENABLED"):
+        _settings(c0_enabled=True, c0_server_build_commit="a" * 40)
+
+    with pytest.raises(ValidationError, match="SLG_C0_SERVER_BUILD_COMMIT"):
+        _settings(mcp_enabled=True, mcp_token="t" * 48, c0_enabled=True)
+
+
+def test_c0_security_configuration_can_be_enabled_explicitly() -> None:
+    settings = _settings(
+        mcp_enabled=True,
+        mcp_token="t" * 48,
+        c0_enabled=True,
+        c0_server_build_commit="a" * 40,
+    )
+
+    assert settings.c0_enabled is True
+    assert settings.c0_server_build_commit == "a" * 40
+
+
+def test_provider_runtime_configuration_is_paired_bounded_and_absolute() -> None:
+    absolute_root = Path.cwd().resolve() / "reviewed"
+    base = {
+        "mcp_enabled": True,
+        "mcp_token": "t" * 48,
+        "c0_enabled": True,
+        "c0_server_build_commit": "a" * 40,
+    }
+    with pytest.raises(ValidationError, match="configured together"):
+        _settings(**base, provider_runtime_mode="chatgpt_chat_c4")
+    with pytest.raises(ValidationError, match="absolute path"):
+        _settings(
+            **base,
+            provider_runtime_mode="chatgpt_chat_c4",
+            provider_runtime_root="relative",
+        )
+    with pytest.raises(ValidationError, match="SLG_MCP_ENABLED"):
+        _settings(
+            provider_runtime_mode="chatgpt_chat_c4",
+            provider_runtime_root=absolute_root,
+        )
+
+    settings = _settings(
+        **base,
+        provider_runtime_mode="chatgpt_chat_c4",
+        provider_runtime_root=absolute_root,
+    )
+    assert settings.provider_runtime_mode == "chatgpt_chat_c4"
+    assert settings.provider_runtime_root is not None
+    assert settings.provider_runtime_root.is_absolute()
