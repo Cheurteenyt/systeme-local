@@ -6,24 +6,24 @@
   "evidence_tag": "evidence/c0-c4-main-integration-v1",
   "base_commit": "32515ac9cbb9d658b2ddcb2723ab3c0a71f2b418",
   "source_head": "3a1d2b8286773eaaf69b0b41fade978f09403adb",
-  "covered_head": "c4b7d46af259e4a26abb55897f994b9301f92605",
+  "covered_head": "8a3d3ad0546e1dbf764479b146e15f163abbca21",
   "manifest_sha256": "c516f6368a743ed80f0b4dd5090f482af49359691613cb66147ea10bdcd2fe5d",
   "diff": {
     "algorithm": "sha256",
     "excluded_paths": [
       "governance/c5-change-seal.json"
     ],
-    "sha256": "c7a947767bcca584e35bd0fb3b8775eccc00f3579d3386e8fa89643253c06ae9",
-    "bytes": 939135
+    "sha256": "06a24c0b03f409d86c7b2c93205ed25d5ec0648983e28b8079e2efdc0b5a27d2",
+    "bytes": 939467
   },
   "tree": {
     "algorithm": "sha256-framed-tree-v1",
     "excluded_paths": [
       "governance/c5-change-seal.json"
     ],
-    "sha256": "d612ea17c58f79864988e38f351e5b609d3078608b54eaad9c7ff9f86aaf85b8",
+    "sha256": "b5ce779582216f1b4ebf0027fe60854101eafd6cb54b39cca0255277ffd2c108",
     "file_count": 320,
-    "blob_bytes": 3328251
+    "blob_bytes": 3328577
   },
   "changed_file_count": 152,
   "changed_files": [
