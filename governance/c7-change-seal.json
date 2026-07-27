@@ -1,0 +1,35 @@
+{
+  "base_commit": "81bed9b81f266709fab0ea4178f98f0607c3da44",
+  "branch": "codex/chatgpt-work-capability-c7",
+  "browser_actions_performed": false,
+  "covered_changed_file_count": 29,
+  "covered_head": "4e07d0c633b8e539229e238e0dfc8d3e388cf3a0",
+  "credentials_created": false,
+  "diff": {
+    "algorithm": "sha256-git-binary-diff-v1",
+    "bytes": 135054,
+    "excluded_paths": [
+      "governance/c7-change-seal.json"
+    ],
+    "sha256": "42dae0433b009eb34b202d22e49cec20fbb313074d1c8cda275d8b24c7d0b722"
+  },
+  "effective_tool_count": 0,
+  "evidence_tag": "evidence/chatgpt-work-prelive-c7-v1",
+  "manifest_sha256": "6538d9e463106b880bca38886c7bf8821a766335b76474c765affa67a75e56a1",
+  "official_docs_review_performed": true,
+  "plugin_created": false,
+  "provider_live_actions_performed": false,
+  "repository": "Cheurteenyt/systeme-local",
+  "tree": {
+    "algorithm": "sha256-framed-tree-v1",
+    "blob_bytes": 3597522,
+    "excluded_paths": [
+      "governance/c7-change-seal.json"
+    ],
+    "file_count": 355,
+    "sha256": "68edb58a67646a057bc8a1a3dc1da5c6f4b15f32d9aff10f2ee12103e972ee05"
+  },
+  "tunnel_started": false,
+  "validation_status": "C7_WORK_PRELIVE_ADMISSION_SEALED",
+  "version": "1"
+}
