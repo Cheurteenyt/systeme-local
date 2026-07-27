@@ -71,9 +71,9 @@ The repository quality and governance checks passed:
 
 - `uv lock --check`;
 - Ruff lint;
-- Ruff-format ratchet: 42 approved legacy files, 5 changed Python files and
+- Ruff-format ratchet: 42 approved legacy files, 6 changed Python files and
   zero new debt;
-- mypy ratchet: zero approved legacy diagnostics, 5 changed Python files and
+- mypy ratchet: zero approved legacy diagnostics, 6 changed Python files and
   zero new diagnostics;
 - Markdown links across 55 files;
 - evidence governance at `2026-07-27T16:00:00Z`;
@@ -81,7 +81,7 @@ The repository quality and governance checks passed:
 - GitHub Actions YAML parsing;
 - every repository PowerShell file parsing;
 - `git diff --check`;
-- bounded scanning of all 28 changed or untracked text files: zero
+- bounded scanning of all 29 changed or untracked text files: zero
   credential-shaped Runtime keys, zero exact Tunnel IDs and zero assigned
   process-secret values.
 
@@ -96,6 +96,14 @@ The deterministic product gates also passed:
   all six protected effects and exposing zero tools;
 - C7 PowerShell prerequisites confirmed zero sensitive process variables,
   zero listeners on the C0/C1 ports and zero Tunnel client processes.
+
+The first post-seal complete run also exposed an inherited C6 test that
+required every future branch to reproduce the exact C6 tree. C6's historical
+tag, diff, manifest and tree were all still valid; only that test confused a
+historical seal check with the C6-branch-only current-tree check. C7 corrects
+the test to verify C6 historically. The dedicated GitHub Actions step still
+requires current-tree equality when the pull request branch is C6. The full
+pre-seal Python suite above passed again after this correction.
 
 Final seal commitments and the remote check results are recorded only after
 those commands have run. They are not predicted here.
