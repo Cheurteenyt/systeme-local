@@ -1,7 +1,7 @@
 {
   "version": "1",
   "lot": "C2 — ChatGPT-first Web official-capability gating and provider-neutral readiness",
-  "generated_at": "2026-07-27T02:06:50Z",
+  "generated_at": "2026-07-27T02:12:30Z",
   "repository": "Cheurteenyt/systeme-local",
   "branch": "interop/chatgpt-web-capability-gating-c2",
   "stacked_base_branch": "interop/chatgpt-web-chat-observability-c1",
@@ -16,8 +16,8 @@
     "excluded_paths": [
       "governance/c2-change-seal.json"
     ],
-    "sha256": "de217b3fd04bd9ee37a7cf6852e20ee33347793996642c495f7e15fec6ebb3e9",
-    "bytes": 87037
+    "sha256": "9af8d70f474f4b929de5a7ab66623c580e81f8409a1bfd46351f681493beb9e2",
+    "bytes": 87311
   },
   "changed_file_count": 25,
   "changed_files": [

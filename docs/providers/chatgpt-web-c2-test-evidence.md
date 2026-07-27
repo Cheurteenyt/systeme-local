@@ -78,6 +78,7 @@ the inference and its source-specific summary digests.
 | `C2-Q13` | `2026-07-27T02:03Z` | Post-review substituted-profile and Python-launcher hardening | PASS: 17 capability tests; Ruff and direct Mypy clean; 4 C2 PowerShell files parsed; real preflight denied all 4 actions |
 | `C2-Q14` | `2026-07-27T02:04Z` to `02:05Z` | Complete Python suite after hardening with the deterministic C1 and C2 seals | PASS: 900 tests passed, 5 skipped, 87.16% coverage, exit 0 |
 | `C2-Q15` | `2026-07-27T02:06Z` | Clean-commit PowerShell operator flow on `028bdb4`: official-profile verification, preflight, operator steps, and attempted C1 preparation | PASS: all three C2 commands returned the exact blocked status; 4 actions denied; C1 preparation stopped at C2 before secret initialization; 0 sensitive variables before/after; 0 listeners; 0 `tunnel-client` processes |
+| `C2-Q16` | `2026-07-27T02:08Z` to `02:12Z` | First GitHub Actions run for stacked draft PR [#68](https://github.com/Cheurteenyt/systeme-local/pull/68) on `269a30f` | PASS: Python test 57s; Python 3.14 compatibility 36s; Rust Windows 1m18s; Rust quality and audit 3m27s |
 
 The C1 seal correction does not modify the C1 seal or its historical digest.
 It makes the test verify the artifact against exact sealed C1 commit
