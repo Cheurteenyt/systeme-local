@@ -51,7 +51,7 @@ The C5 manifest binds:
 - C4 head `3a1d2b8286773eaaf69b0b41fade978f09403adb`;
 - branch `interop/c0-c4-main-integration-c5`;
 - merge method `squash`;
-- evidence tag `evidence/c0-c4-main-integration-v1`;
+- evidence tag `evidence/c0-c4-main-integration-v2`;
 - zero live actions.
 
 The self-excluding C5 seal commits two independent values:
@@ -114,6 +114,12 @@ The first complete typing-ratchet invocation correctly rejected a scope
 mismatch: `c5_integration.py` was present in `pyproject.toml` but absent from
 the governance mirror. C5 added the exact scope entry to
 `governance/mypy-baseline.json`; it added no diagnostic or waiver.
+
+The first manual evidence-governance run also failed correctly: its shallow
+checkout could not prove that the exact main base was an ancestor of C0. The
+workflow now uses `fetch-depth: 0`, matching the main CI evidence checkout.
+The already published `v1` tag remains an immutable rejected-candidate record;
+the strict manifest accepts only the final `v2` tag.
 
 The known Windows pytest temporary-directory `PermissionError` occurred only
 in its post-success `atexit` callback and did not change the zero test exit

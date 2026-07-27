@@ -6,7 +6,7 @@
   "integration_branch": "interop/c0-c4-main-integration-c5",
   "base_commit": "32515ac9cbb9d658b2ddcb2723ab3c0a71f2b418",
   "merge_method": "squash",
-  "evidence_tag": "evidence/c0-c4-main-integration-v1",
+  "evidence_tag": "evidence/c0-c4-main-integration-v2",
   "source_stack": [
     {
       "gate": "C0",

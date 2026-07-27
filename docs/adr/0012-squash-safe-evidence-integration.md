@@ -32,7 +32,7 @@ The integration has three independent commitments:
 2. `governance/c5-change-seal.json` binds the aggregate binary diff and a
    framed SHA-256 commitment over every tracked blob, mode, and UTF-8 path
    except the self-referential seal.
-3. `evidence/c0-c4-main-integration-v1` points to the final integration-branch
+3. `evidence/c0-c4-main-integration-v2` points to the final integration-branch
    seal commit and therefore keeps every C0 through C4 commit reachable after
    the aggregate pull request is squash-merged.
 
@@ -71,3 +71,8 @@ authorization.
   the validated implementation from reaching `main`.
 - **Trust only a tag or only a tree hash.** The tag preserves ancestry while
   the framed tree commitment proves integrated content; both are required.
+
+The initially published `v1` tag identifies the pre-correction candidate whose
+manual governance run failed because the workflow used a shallow checkout. It
+is retained as rejected evidence and is never moved. Only `v2` is accepted by
+the strict manifest and verifier.

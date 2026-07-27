@@ -329,7 +329,7 @@ seal/HEAD assumption.
 
 C5 therefore creates one aggregate pull request to `main`, keeps the exact
 C0-C4 ancestry reachable through
-`evidence/c0-c4-main-integration-v1`, and binds the integrated tree with a
+`evidence/c0-c4-main-integration-v2`, and binds the integrated tree with a
 framed SHA-256 commitment over paths, modes, lengths, and blob bytes. It
 changes no capability: current ChatGPT remains denied for all six C4 actions
 with zero tools and zero live actions.

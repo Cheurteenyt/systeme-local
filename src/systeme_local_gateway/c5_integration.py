@@ -16,7 +16,7 @@ from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 C5_MANIFEST_PATH = "governance/c5-integration-manifest.json"
 C5_SEAL_PATH: Final[Literal["governance/c5-change-seal.json"]] = "governance/c5-change-seal.json"
-C5_EVIDENCE_TAG = "evidence/c0-c4-main-integration-v1"
+C5_EVIDENCE_TAG = "evidence/c0-c4-main-integration-v2"
 C5_MAIN_BASE = "32515ac9cbb9d658b2ddcb2723ab3c0a71f2b418"
 C5_INTEGRATION_BRANCH = "interop/c0-c4-main-integration-c5"
 C4_SEALED_COMMIT = "3a1d2b8286773eaaf69b0b41fade978f09403adb"
@@ -68,7 +68,7 @@ class IntegrationManifest(BaseModel):
     integration_branch: Literal["interop/c0-c4-main-integration-c5"]
     base_commit: Literal["32515ac9cbb9d658b2ddcb2723ab3c0a71f2b418"]
     merge_method: Literal["squash"]
-    evidence_tag: Literal["evidence/c0-c4-main-integration-v1"]
+    evidence_tag: Literal["evidence/c0-c4-main-integration-v2"]
     source_stack: tuple[StackLayer, ...]
     historical_branches_are_evidence: Literal[True]
     live_actions_permitted: Literal[False]
@@ -125,7 +125,7 @@ class IntegrationSeal(BaseModel):
     repository: Literal["Cheurteenyt/systeme-local"]
     issue: Literal["https://github.com/Cheurteenyt/systeme-local/issues/73"]
     integration_branch: Literal["interop/c0-c4-main-integration-c5"]
-    evidence_tag: Literal["evidence/c0-c4-main-integration-v1"]
+    evidence_tag: Literal["evidence/c0-c4-main-integration-v2"]
     base_commit: Literal["32515ac9cbb9d658b2ddcb2723ab3c0a71f2b418"]
     source_head: Literal["3a1d2b8286773eaaf69b0b41fade978f09403adb"]
     covered_head: str = Field(pattern=_COMMIT_PATTERN)

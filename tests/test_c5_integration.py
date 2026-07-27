@@ -113,3 +113,14 @@ def test_c5_module_has_no_network_browser_or_secret_dependency() -> None:
         "SLG_MCP_TOKEN",
     ):
         assert forbidden not in source
+
+
+def test_c5_scheduled_governance_fetches_complete_tagged_ancestry() -> None:
+    workflow = (ROOT / ".github/workflows/evidence-governance.yml").read_text(encoding="utf-8")
+
+    checkout = workflow.split("- name: Check out repository", maxsplit=1)[1].split(
+        "- name: Set up Python", maxsplit=1
+    )[0]
+    assert "persist-credentials: false" in checkout
+    assert "fetch-depth: 0" in checkout
+    assert "contents: write" not in workflow
