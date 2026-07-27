@@ -1,12 +1,12 @@
 {
   "version": "1",
   "lot": "C4 — Provider-neutral runtime admission enforcement",
-  "generated_at": "2026-07-27T13:28:51Z",
+  "generated_at": "2026-07-27T13:33:40Z",
   "repository": "Cheurteenyt/systeme-local",
   "branch": "interop/provider-runtime-admission-c4",
   "stacked_base_branch": "interop/provider-capability-revalidation-c3",
   "base_commit": "9140801e88ed44afca9481ac06288783a0d52da2",
-  "covered_head": "a3e54ccdc2d5fd2fc052ed4d06e78806f1df9ec5",
+  "covered_head": "01eb4e04916a094eb7fa59f0725086ca7955f27c",
   "c3_pull_request": "https://github.com/Cheurteenyt/systeme-local/pull/70",
   "issue": "https://github.com/Cheurteenyt/systeme-local/issues/71",
   "chatgpt_admission": "denied",
@@ -15,12 +15,12 @@
   "runtime_adapter_registry_sha256": "c63ae8d266ba25f7871b60f4f36b659b97a4f17e6fd13fc32b7acd6dcf85c20d",
   "diff": {
     "algorithm": "sha256",
-    "command": "git diff --binary --full-index --no-ext-diff 9140801e88ed44afca9481ac06288783a0d52da2 a3e54ccdc2d5fd2fc052ed4d06e78806f1df9ec5 -- . \":(exclude)governance/c4-change-seal.json\"",
+    "command": "git diff --binary --full-index --no-ext-diff 9140801e88ed44afca9481ac06288783a0d52da2 01eb4e04916a094eb7fa59f0725086ca7955f27c -- . \":(exclude)governance/c4-change-seal.json\"",
     "excluded_paths": [
       "governance/c4-change-seal.json"
     ],
-    "sha256": "5dae5465b256bd8e6db28f6c9313299e43d8545052be0281688fa7a8ab94d10f",
-    "bytes": 157770
+    "sha256": "ed196dc5cddeb0061925f108afd065904e71252bcdccd3dbf2100083ab0f728a",
+    "bytes": 157946
   },
   "changed_file_count": 41,
   "changed_files": [
