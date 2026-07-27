@@ -75,6 +75,7 @@ def test_c8_scripts_cover_complete_bounded_lifecycle() -> None:
         "New-C8WorkAdmission.ps1",
         "New-C8WorkTaskObservation.ps1",
         "Prepare-C8.ps1",
+        "Reset-C8PreLive.ps1",
         "Start-C8Facade.ps1",
         "Start-C8Tunnel.ps1",
         "Stop-C8.ps1",
@@ -90,6 +91,21 @@ def test_c8_scripts_cover_complete_bounded_lifecycle() -> None:
     assert 'LOG_HTTP_RAW_UNSAFE = "false"' in combined
     assert 'ALLOW_REMOTE_UI = "false"' in combined
     assert "Read-Host" not in combined
+
+
+def test_c8_pre_live_reset_is_narrow_and_fails_closed() -> None:
+    script = _text("scripts/c8/Reset-C8PreLive.ps1")
+    provider = _text("docs/providers/chatgpt-web-c8-work-live-validation.md")
+    assert "ConfirmedNoLiveActions" in script
+    assert "authorization.json" in script
+    assert "work-surface.json" in script
+    assert "work-quota.json" in script
+    assert "live-cycle.json" not in script
+    assert "proof-a.json" not in script
+    assert "Get-NetTCPConnection" in script
+    assert "unexpected" in script
+    assert "one PowerShell terminal" in provider
+    assert "Reset-C8PreLive.ps1 -ConfirmedNoLiveActions" in provider
 
 
 def test_c8_ledger_does_not_claim_unexecuted_live_success() -> None:

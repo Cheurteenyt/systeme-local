@@ -42,6 +42,7 @@
     "scripts/c8/New-C8WorkAdmission.ps1",
     "scripts/c8/New-C8WorkTaskObservation.ps1",
     "scripts/c8/Prepare-C8.ps1",
+    "scripts/c8/Reset-C8PreLive.ps1",
     "scripts/c8/Start-C8Facade.ps1",
     "scripts/c8/Start-C8Tunnel.ps1",
     "scripts/c8/Stop-C8.ps1",

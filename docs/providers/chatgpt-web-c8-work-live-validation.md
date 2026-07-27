@@ -170,6 +170,11 @@ partial success.
 These commands are intentionally split around visible UI and
 operator-managed credential steps:
 
+Run the complete live cycle in one PowerShell terminal and keep that terminal
+open until the final attestation. `Prepare-C8.ps1` creates three independent
+process-local secrets; a different terminal cannot verify the HMAC receipts
+and must never be treated as a continuation of the same cycle.
+
 ```powershell
 .\scripts\c8\Prepare-C8.ps1 -ConfirmedExactScope
 .\scripts\c8\Test-C8Prerequisites.ps1 -RequireSecrets
@@ -178,6 +183,15 @@ operator-managed credential steps:
 .\scripts\c8\Test-C8Prerequisites.ps1 -RequireSecrets -RequireLiveCycle
 .\scripts\c8\Start-C8Facade.ps1
 .\scripts\c8\Test-C8LocalProbe.ps1
+```
+
+Only after the local probe succeeds does the operator create a fresh Runtime
+key and place that key plus the existing Tunnel ID in the same process
+environment. The key value is never printed, persisted or committed. Then:
+
+```powershell
+.\scripts\c8\Test-C8Prerequisites.ps1 `
+    -RequireSecrets -RequireLiveCycle -RequireTunnelCredentials
 .\scripts\c8\Start-C8Tunnel.ps1
 ```
 
@@ -191,6 +205,17 @@ Work A and Work B then use:
 ```
 
 The same sequence runs once for `b`. No third Work task is allowed.
+
+If preparation is interrupted before a grant, facade, Tunnel, Plugin
+connection or Work task exists, the operator can discard only the bounded
+pre-live receipt and observations:
+
+```powershell
+.\scripts\c8\Reset-C8PreLive.ps1 -ConfirmedNoLiveActions
+```
+
+The reset refuses any live-cycle grant, proof, PID, listener or unexpected
+state. It is not a recovery path after any live effect.
 
 ## Portability
 
