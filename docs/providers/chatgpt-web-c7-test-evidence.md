@@ -1,7 +1,6 @@
 # C7 test and evidence ledger
 
-Status: local pre-seal validation complete; final repository seal and remote
-CI pending
+Status: local validation and repository seal complete; remote CI pending
 
 Recorded at: `2026-07-27`
 
@@ -104,6 +103,20 @@ historical seal check with the C6-branch-only current-tree check. C7 corrects
 the test to verify C6 historically. The dedicated GitHub Actions step still
 requires current-tree equality when the pull request branch is C6. The full
 pre-seal Python suite above passed again after this correction.
+
+## Complete sealed-tree validation
+
+After the corrected C7 seal and annotated tag were created, the repository
+suite ran again without a deselection:
+
+- 1,098 passed;
+- 6 skipped by their existing platform or environment conditions;
+- 85.41% total statement coverage against the unchanged 60% required floor.
+
+The final documentation-only ledger update was included in a newly computed
+seal before publication. The machine-readable exact commitments are in
+[`c7-change-seal.json`](../../governance/c7-change-seal.json); local seal and
+targeted documentation tests are required again after that final computation.
 
 Final seal commitments and the remote check results are recorded only after
 those commands have run. They are not predicted here.
