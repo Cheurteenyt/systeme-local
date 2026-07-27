@@ -318,8 +318,8 @@ read-only tool before a separately authorized live cycle can begin. See
 
 ## C5 squash-safe C0-C4 main integration
 
-Status: `implemented` on the C5 integration branch; final merge remains gated
-on final-head and post-merge `main` CI.
+Status: `implemented` and accepted on `main` by PR #74 at
+`418112758d8675326835d9947ccce3a1b12f6f25`.
 
 C5 is tracked by issue
 [#73](https://github.com/Cheurteenyt/systeme-local/issues/73). A direct
@@ -335,5 +335,40 @@ changes no capability: current ChatGPT remains denied for all six C4 actions
 with zero tools and zero live actions.
 
 After aggregate merge and green `main` CI, PRs #65, #67, #68, #70, and #72
-are closed as superseded rather than independently merged. See
+were superseded rather than independently merged. The C5 verifier now proves
+the immutable historical/tagged tree against the exact accepted `main` commit
+and requires later repository heads to descend from it; ordinary future
+changes do not rewrite historical evidence. See
 [`providers/chatgpt-web-c5-main-integration.md`](providers/chatgpt-web-c5-main-integration.md).
+
+## C6 official capability revalidation
+
+Status: `implemented` on the C6 branch; local public-source validation is
+green, while the draft pull request, final-head CI, and manual governance
+closeout remain pending.
+
+C6 starts from exact accepted C5 `main`
+`418112758d8675326835d9947ccce3a1b12f6f25`. It adds a provider-neutral,
+strictly typed revalidation protocol with ChatGPT as the only production
+profile. The policy binds exact C3 registry/profile digests and four official
+OpenAI documentation sections.
+
+The acquisition client uses only the public read-only OpenAI Docs MCP,
+persists no raw document body, detects exact fingerprint or marker drift, and
+can create only a review candidate. It cannot promote C3 evidence or change C4
+admission. Network, protocol, policy, drift, due, and expiry failures all keep
+six actions denied and zero tools exposed.
+
+The first real public-document acquisition returned four unchanged sections.
+This does not unblock ChatGPT: Plugins remain unavailable in Chat, so the
+result is still `BLOCKED_BY_NO_OFFICIAL_CHAT_TOOL_INTERFACE`.
+
+The next product gate is not another C1 live cycle. It is either:
+
+1. a future official source change that is independently reviewed and
+   deliberately promoted through a successor evidence/seal change; or
+2. an independent official provider profile with its own semantics, sources,
+   threat model, tests, and seal.
+
+See
+[`providers/chatgpt-web-c6-official-revalidation.md`](providers/chatgpt-web-c6-official-revalidation.md).

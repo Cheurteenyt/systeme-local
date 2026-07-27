@@ -63,6 +63,8 @@ files = [
   "src/systeme_local_gateway/c3_evidence.py",
   "src/systeme_local_gateway/c4_admission.py",
   "src/systeme_local_gateway/c5_integration.py",
+  "src/systeme_local_gateway/c6_revalidation.py",
+  "src/systeme_local_gateway/c6_seal.py",
   "src/systeme_local_gateway/config.py",
   "src/systeme_local_gateway/main.py",
   "src/systeme_local_gateway/mcp_tools.py",

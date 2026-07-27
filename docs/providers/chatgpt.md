@@ -457,6 +457,27 @@ authority. It does not change the official capability result or authorize a
 live test. See
 [`chatgpt-web-c4-runtime-admission.md`](chatgpt-web-c4-runtime-admission.md).
 
+### Phase 16 — official capability revalidation
+
+Status: `implemented`
+
+C6 automates bounded retrieval of the four reviewed official documentation
+sections through the public read-only OpenAI Docs MCP endpoint. Strict models
+bind the exact ChatGPT native Chat identity, C3 registry/profile digests,
+routes, anchors, normalized byte counts, fingerprints, semantic markers, and
+review dates.
+
+The first public acquisition found all four sources unchanged. It created only
+a review candidate and did not modify C3. ChatGPT Chat therefore remains
+`BLOCKED_BY_NO_OFFICIAL_CHAT_TOOL_INTERFACE`; C4 still denies all six actions
+and exposes zero tools.
+
+Drift, network/protocol failure, due or expired evidence, policy substitution,
+or output-path escape all fail closed. No raw document body is persisted and
+no Runtime key, Tunnel, Plugin, browser session, chat, Work surface, history,
+conversation, or account setting is used. See
+[`chatgpt-web-c6-official-revalidation.md`](chatgpt-web-c6-official-revalidation.md).
+
 ## Security invariants
 
 - never store a ChatGPT password, session cookie, bearer token or API key in the repository;
@@ -497,7 +518,7 @@ C0 formats only its touched Python surface, reducing the current Ruff formatting
 baseline from 54 to 42 files while leaving the historical phase-8 measurement
 unchanged.
 
-## C1, C2, C3, and C4 interpretation
+## C1 through C6 interpretation
 
 Historical C1 receipts proved short-lived correlation between two manually
 created synthetic test chats, the single read-only probe, and local audit
@@ -505,9 +526,10 @@ records. They did not prove current official native Chat support, a durable
 final attestation, conversation discovery, production use, or write
 capability.
 
-C2 identified the official product-surface blocker. C3 revalidated it and
-owns the deterministic evidence lifecycle. C4 now owns runtime admission.
-Current decisions deny
+C2 identified the official product-surface blocker. C3 owns the deterministic
+evidence lifecycle. C4 owns runtime admission. C5 preserved the reviewed stack
+through squash integration. C6 now retrieves bounded official sources and
+prepares review-only candidates without promotion. Current decisions deny
 Runtime-key creation, Tunnel startup, Plugin creation, browser testing, and
 any ChatGPT action or tool-surface exposure. The historical C1 records remain
 evidence of bounded calls, not authority to bypass current official

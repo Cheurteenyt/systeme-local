@@ -39,6 +39,13 @@ La pile de validation ChatGPT C0 à C4 reste fail-closed et est intégrée vers
 les commits de preuve, scelle l'arbre agrégé et n'autorise aucune action live.
 Voir [`docs/providers/chatgpt-web-c5-main-integration.md`](docs/providers/chatgpt-web-c5-main-integration.md).
 
+C6 automatise maintenant la revalidation bornée des sources officielles sans
+promotion automatique. La dernière acquisition publique a retrouvé les quatre
+sections inchangées : ChatGPT Chat reste
+`BLOCKED_BY_NO_OFFICIAL_CHAT_TOOL_INTERFACE`, les six actions runtime restent
+refusées et zéro outil est exposé. Voir
+[`docs/providers/chatgpt-web-c6-official-revalidation.md`](docs/providers/chatgpt-web-c6-official-revalidation.md).
+
 ### Scénario de validation initial
 
 Le premier scénario testable est l'amélioration d'un harness d'évaluation d'IA locales :
@@ -366,6 +373,23 @@ documente l’audit des contournements, les reçus SHA-256, les rejets de
 rejeu/collision et la dérivation d’une surface d’outils effective. Avec le
 profil ChatGPT actuel, les six actions sont refusées et aucun outil n’est
 exposé.
+
+Le lot
+[`C5 — squash-safe C0-C4 main integration`](docs/providers/chatgpt-web-c5-main-integration.md)
+a intégré la pile exacte dans `main` via la PR #74 tout en conservant les
+commits revus et l'arbre scellé. Le vérificateur lie désormais la preuve
+historique au commit `main` accepté, puis exige seulement que les évolutions
+ultérieures en descendent.
+
+Le lot
+[`C6 — official capability revalidation`](docs/providers/chatgpt-web-c6-official-revalidation.md)
+interroge uniquement le MCP public de documentation OpenAI, détecte les
+changements exacts et prépare au plus un candidat destiné à une revue
+indépendante. Son
+[`journal de tests`](docs/providers/chatgpt-web-c6-test-evidence.md)
+documente les tests déterministes et l'acquisition publique réellement
+exécutée. Ni le contenu récupéré, ni le rapport, ni le candidat ne peuvent
+modifier C3 ou autoriser C4.
 
 ## Architecture
 

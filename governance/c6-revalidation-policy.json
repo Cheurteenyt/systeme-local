@@ -1,0 +1,69 @@
+{
+  "automatic_promotion_supported": false,
+  "c3_profile_sha256": "512d26961dd33429850c2599b1c970be3910e990b92bc23aa759e92784f0dc3a",
+  "c3_registry_sha256": "9567dd0bbb9ec80d6bf24ea86048f6229f9c956731053b1191208ac6bcecdd62",
+  "docs_mcp_endpoint": "https://developers.openai.com/mcp",
+  "fetched_content_can_change_gate": false,
+  "identity": {
+    "capability": "custom_or_local_mcp_tool_invocation",
+    "native_surface": "chat",
+    "provider_id": "chatgpt",
+    "surface_class": "conversational_chat"
+  },
+  "policy_sha256": "602e4fc6313f0d7e95c3255fbaad47c77d65dc2b28c47406b6c9c323fdc4d8dd",
+  "profile_id": "chatgpt_chat_c3_20260727",
+  "revalidate_after": "2026-08-10T14:42:00Z",
+  "revalidation_warning_days": 7,
+  "reviewed_at": "2026-07-27T14:42:00Z",
+  "sources": [
+    {
+      "anchor": "#add-the-mcp-server",
+      "required_markers": [
+        "Enter the public MCP server URL, including the /mcp path.",
+        "Go to ChatGPT Plugins."
+      ],
+      "reviewed_content_sha256": "3cc37a424d4a5fe60e9f0921f253403794c717b8ece56e1ec24b423d823dc388",
+      "reviewed_normalized_bytes": 464,
+      "source_id": "plugin_connection_route",
+      "title": "Connect and test your plugin",
+      "url": "https://developers.openai.com/plugins/deploy/connect-chatgpt"
+    },
+    {
+      "anchor": "#create-and-test-a-plugin-locally-with-an-mcp-server",
+      "required_markers": [
+        "Give that plugin_asdk_app... ID to @plugin-creator in Work mode in ChatGPT",
+        "register the MCP server connection in ChatGPT developer mode."
+      ],
+      "reviewed_content_sha256": "28c1bc7403d2f21cec1aeff959a0450e0e85b21e2dbc46bcaf4b3859d6065d8c",
+      "reviewed_normalized_bytes": 2620,
+      "source_id": "plugin_packaging_surface",
+      "title": "Package your plugin",
+      "url": "https://developers.openai.com/plugins/build/plugins"
+    },
+    {
+      "anchor": "#overview",
+      "required_markers": [
+        "Plugins are available with ChatGPT Work on the web",
+        "Plugins aren't available in Chat"
+      ],
+      "reviewed_content_sha256": "1a2f67b7287610eb66162b2afcc24db7cb319f68281dbc970f2f334c9f751e7e",
+      "reviewed_normalized_bytes": 2682,
+      "source_id": "plugin_surface_availability",
+      "title": "Plugins",
+      "url": "https://learn.chatgpt.com/docs/plugins"
+    },
+    {
+      "anchor": "#connect-from-chatgpt",
+      "required_markers": [
+        "Go to ChatGPT Plugins",
+        "choose Tunnel under Connection."
+      ],
+      "reviewed_content_sha256": "8b80437089c00abdb8d75a777ef3208746e87c7149feb7f9c6606c4555eed1dd",
+      "reviewed_normalized_bytes": 493,
+      "source_id": "secure_mcp_tunnel_route",
+      "title": "Secure MCP Tunnel",
+      "url": "https://developers.openai.com/api/docs/guides/secure-mcp-tunnels"
+    }
+  ],
+  "version": "1"
+}

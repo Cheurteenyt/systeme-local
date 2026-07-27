@@ -56,6 +56,24 @@ jobs:
           --c4-registry governance/c4-runtime-adapters.json
           --expect-all-denied
 
+      - name: Acquire current official capability evidence without promotion
+        run: >-
+          uv run --frozen
+          python -m systeme_local_gateway.c6_revalidation
+          acquire
+          --root .
+          --policy governance/c6-revalidation-policy.json
+          --c3-registry governance/c3-capability-registry.json
+          --github-annotations
+          --expect-all-denied
+
+      - name: Verify historical C6 official revalidation seal
+        run: >-
+          uv run --frozen
+          python -m systeme_local_gateway.c6_seal
+          --root .
+          verify
+
       - name: Verify C5 squash integration tree and ancestry
         run: >-
           uv run --frozen

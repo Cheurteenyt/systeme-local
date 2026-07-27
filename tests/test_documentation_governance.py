@@ -166,7 +166,7 @@ def test_roadmap_matches_merged_foundations() -> None:
 def test_chatgpt_phases_are_reconciled() -> None:
     content = text("docs/providers/chatgpt.md")
     assert "deterministic lifecycle, context, attachment" in content
-    for phase in range(14):
+    for phase in range(17):
         assert f"### Phase {phase} " in content
 
     phase_7 = section(

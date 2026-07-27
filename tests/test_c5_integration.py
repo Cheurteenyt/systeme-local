@@ -8,6 +8,7 @@ from pydantic import ValidationError
 
 from systeme_local_gateway.c5_integration import (
     C4_SEALED_COMMIT,
+    C5_ACCEPTED_MAIN_COMMIT,
     C5_EVIDENCE_TAG,
     C5_MAIN_BASE,
     IntegrationManifest,
@@ -69,6 +70,7 @@ def test_c5_integration_verifies_exact_tag_diff_tree_and_ancestry() -> None:
     assert result.status == "verified"
     assert result.base_commit == C5_MAIN_BASE
     assert result.source_head == C4_SEALED_COMMIT
+    assert result.accepted_main_commit == C5_ACCEPTED_MAIN_COMMIT
     assert result.tree_file_count > 100
     assert result.tree_blob_bytes > 100_000
     assert result.live_actions_performed is False
@@ -94,6 +96,8 @@ def test_c5_document_records_simulation_failure_and_integration_contract() -> No
         "zero live actions",
         "PRs #65, #67, #68, #70, and #72",
         "must not be merged independently",
+        C5_ACCEPTED_MAIN_COMMIT,
+        "current head to descend from accepted `main`",
     ):
         assert marker in text
 

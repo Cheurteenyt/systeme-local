@@ -457,9 +457,11 @@ commitment; an independent framed SHA-256 commitment over every tracked path,
 mode, blob length, and blob byte; a one-file self-excluding final seal commit;
 and an evidence tag that keeps the reviewed ancestry reachable after squash.
 
-The current checkout must match the sealed tree. Unknown fields, missing or
-moved tags, changed ancestry, file additions/removals/renames, mode changes,
-blob mutations, manifest changes, or non-canonical paths fail closed.
+The covered, tagged, and accepted `main` trees must match the seal. The current
+head must descend from the exact accepted C5 `main` commit. Unknown fields,
+missing or moved tags, changed ancestry, mutations to any sealed tree,
+manifest changes, or non-canonical paths fail closed. Later descendant changes
+do not rewrite the historical C5 proof.
 
 C5 does not protect against a repository administrator deleting every evidence
 reference or rewriting the remote outside the reviewed workflow. It is not
@@ -467,3 +469,39 @@ code signing and does not replace independent review. The aggregate pull
 request remains large, but this is an explicit consequence of preserving a
 squash-only linear `main`. C5 performs no network, browser, provider, secret,
 Tunnel, Plugin, listener, or ChatGPT action.
+
+## C6 official-acquisition threats and controls
+
+C6 addresses stale official evidence without allowing a remote documentation
+service to become a capability authority. Threats include DNS or transport
+failure, redirects, proxy or credential leakage, oversized responses,
+malformed SSE/JSON-RPC, tool errors, multiple or substituted content blocks,
+Unicode/whitespace ambiguity, harmless or semantic source drift, marker
+spoofing, policy or C3 digest substitution, unsafe output paths, raw-content
+retention, candidate auto-promotion, and scheduled-workflow privilege
+expansion.
+
+Controls are a fixed HTTPS endpoint and source-host allowlist; no redirects;
+`trust_env=False`; no authorization or cookie; strict time and size bounds;
+closed SSE/JSON-RPC/result schemas; NFC/newline/whitespace normalization;
+exact reviewed byte counts and SHA-256 fingerprints plus bounded semantic
+markers; strict frozen Pydantic contracts; canonical report digests; exact C3
+registry/profile binding; reparse-aware repository inputs; atomic local output
+restricted below `.systeme-local/c6`; and refusal when any transport/runtime
+secret is configured.
+
+Raw document bodies exist only in memory. An exact match may create only a
+review candidate reproducing the current unsupported claims. Any drift creates
+no candidate. Reports and candidates always state that they cannot change the
+gate or promote evidence, and every outcome denies all six protected actions.
+The scheduled workflow has only `contents: read` and uploads no candidate or
+raw-content artifact.
+
+Residual risks are compromise of every official source and reviewer at once,
+documentation changes between scheduled runs, false-positive exact drift from
+formatting, and human misclassification during a future deliberate promotion.
+Short review windows, daily acquisition, multiple exact sources, independent
+review, code review, successor sealing, and C4 runtime enforcement limit but
+cannot eliminate those risks. C6 performs no ChatGPT, Plugin, Work, browser,
+conversation, account, credential, Tunnel, listener, or provider-runtime
+action.
