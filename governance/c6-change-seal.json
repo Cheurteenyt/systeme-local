@@ -1,0 +1,32 @@
+{
+  "automatic_promotion_performed": false,
+  "base_commit": "418112758d8675326835d9947ccce3a1b12f6f25",
+  "branch": "codex/chatgpt-official-revalidation-c6",
+  "covered_changed_file_count": 34,
+  "covered_head": "1d66ed296b6efa8cd4aac073cba40dca7df83e77",
+  "diff": {
+    "algorithm": "sha256-git-binary-diff-v1",
+    "bytes": 169587,
+    "excluded_paths": [
+      "governance/c6-change-seal.json"
+    ],
+    "sha256": "9aa51fdc7ca48355a2c834bc93334d78d3cf48ea13fc0c1358886c3e4702e816"
+  },
+  "evidence_tag": "evidence/chatgpt-official-revalidation-c6-v1",
+  "manifest_sha256": "58bf19044056f788cfb3b9cb26f6e309cdd69cd4f0401845d5b46b759b6ef7c5",
+  "provider_live_actions_performed": false,
+  "public_docs_acquisition_performed": true,
+  "raw_content_persisted": false,
+  "repository": "Cheurteenyt/systeme-local",
+  "tree": {
+    "algorithm": "sha256-framed-tree-v1",
+    "blob_bytes": 3478781,
+    "excluded_paths": [
+      "governance/c6-change-seal.json"
+    ],
+    "file_count": 338,
+    "sha256": "6ef32e5b802e82cf48a9a3ad08af618e1509ce32bb74f97a5f7e274ba924c5a4"
+  },
+  "validation_status": "C6_OFFICIAL_REVALIDATION_SEALED",
+  "version": "1"
+}
