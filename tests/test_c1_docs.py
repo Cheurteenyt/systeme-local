@@ -380,7 +380,8 @@ def test_c1_evidence_ledger_separates_executed_and_pending_tests() -> None:
         "Current official product-surface blocker",
         "both pages reported `Chat=off` and `Work=on`",
         "local audit remained zero",
-        "Final validation still required",
+        "Final validation completed",
+        "C1-Q19",
         "must not rewrite",
         "`not-run` as `PASS`",
     ):

@@ -1,6 +1,6 @@
 # C1 test and evidence ledger
 
-Status at `2026-07-27T00:51:10Z`:
+Status at `2026-07-27T00:59:09Z`:
 `BLOCKED_BY_PLUGIN_UNAVAILABLE_IN_CHAT`
 
 This ledger records what was actually executed for C1. It is an evidence
@@ -30,7 +30,7 @@ API-key pages, and unrelated tabs are outside the evidence boundary.
 | Repository | `Cheurteenyt/systeme-local` |
 | C1 issue | `#66` |
 | C1 branch | `interop/chatgpt-web-chat-observability-c1` |
-| Current committed C1 baseline | `c88ad8166585cdd36f84e1fa339aaf9deaa0a1fc` |
+| Current committed C1 baseline | `7c5b41507ffa4eca8f30abe6945dadc97b43d3f0` |
 | C0 dependency | `912d0d33e119469ff957965104cf20af5e491923` |
 | Policy SHA-256 | `17a53ee929232bae5901037c26c23ad1379dbdb09998c698b1ed85c60a75700e` |
 | Tool snapshot SHA-256 | `6d9a8e0f6dadb9f3a615abcca8c882cb37fb257944922151e97c65a8575da14b` |
@@ -73,6 +73,10 @@ documentation change.
 | `C1-Q14` | `2026-07-26T23:17:19Z`–`23:18:21Z` | Full Python suite with coverage on the expiry-window fix | PASS: 868 passed, 5 skipped, 87.09% coverage, exit 0. The known post-exit Windows pytest temporary-symlink warning recurred after the successful result. |
 
 | `C1-Q15` | `2026-07-27T00:23Z` | Documentation, targeted C1, PowerShell parsing, and deterministic seal checkpoint on commit `c88ad81` | PASS: 20 documentation tests; 83 targeted C1 tests; all 19 C1 PowerShell scripts parsed; the 39-file self-excluding seal matched SHA-256 `7789faf109ac53a7ac635cb137378c4a6ca7f3365a078763dc0ff58556fe9678`. The known post-exit Windows pytest temporary-directory warning followed exit 0. |
+| `C1-Q16` | `2026-07-27T01:00Z` | Lock, Ruff, format and Mypy ratchets, evidence governance, Python dependency audit, Markdown links, and PowerShell parsing after fail-closed cleanup | PASS: 76 locked packages resolved; Ruff clean; 42 approved legacy format files and no new debt; zero Mypy diagnostics; evidence governance valid at `2026-07-27T01:00:00Z`; no known Python vulnerabilities; links valid across 38 Markdown files; all 20 C1 PowerShell files parsed. The first ratchet invocation omitted the virtual-environment executable directory from `PATH`; the three affected commands were immediately rerun with the correct environment and passed. |
+| `C1-Q17` | `2026-07-27T01:01Z` to `01:02Z` | Full Python suite with coverage after the official product-surface guard | PASS: 870 passed, 5 skipped, 87.10% coverage, exit 0. The known post-exit Windows pytest temporary-directory warning recurred after the successful result. |
+| `C1-Q18` | `2026-07-27T01:02Z` | Rust workspace check, format, Clippy with warnings denied, tests, doctests, docs with warnings denied, and `cargo audit` | PASS: all build/lint/doc stages; 106 tests passed, 0 failed; doctests passed; 73 locked dependencies scanned against 1,169 RustSec advisories with no vulnerability reported. |
+| `C1-Q19` | `2026-07-27T01:03Z` | Final documentation, official-profile, deterministic seal, Markdown-link, diff, and bounded credential checks | PASS: 21 documentation tests including byte-for-byte official-profile and self-excluding seal verification; links valid across 38 Markdown files; `git diff --check` clean; zero Runtime-key, Tunnel-ID, or assigned process-secret findings. |
 
 ## Skips and non-failing warning
 
@@ -233,23 +237,27 @@ Tunnel, schema, or local implementation failure. Because Work remains outside
 the operator's authorization and the C1 claim boundary, the exact status is
 `BLOCKED_BY_PLUGIN_UNAVAILABLE_IN_CHAT`.
 
-This cycle created no positive, negative, or final C1 receipt. Its temporary
-Runtime key must be revoked before private preflight state is irreversibly
-cleared. No new live cycle may start until official revalidation shows Plugins
+This cycle created no positive, negative, or final C1 receipt. At
+`2026-07-27T00:59Z`, the operator confirmed revocation of its temporary Runtime
+key. `Clear-C1Preflight.ps1` then completed with `status=preflight_clean`,
+removed the private runtime observation, logs, replay/approval databases, and
+audit lock, reported `correlated_evidence_removed=false`, and cleared every
+process secret. Independent checks found zero listeners on ports `8765/8766`
+and zero remaining C1 state items.
+
+No new live cycle may start until official revalidation shows Plugins
 available in Chat or a separate goal explicitly authorizes another supported
 surface.
 
-## Final validation still required
+## Final validation completed
 
-Documentation changes invalidate the previous change seal. Before publication,
-the operator must re-run and append exact results for:
+The complete local quality suite was rerun after the fail-closed cleanup and
+the official product-surface guard. Exact results are recorded in `C1-Q16`
+through `C1-Q18`; the final deterministic seal, diff, and bounded credential
+checks are recorded in `C1-Q19`.
 
-- lock, Ruff, Mypy, and both Python ratchets;
-- the full Python test and coverage command;
-- PowerShell parsing and Markdown links;
-- official-evidence governance and dependency/secret audits;
-- Rust check, format, Clippy, tests, doctests, docs, and dependency audit;
-- C1 receipt/final-attestation verification;
-- deterministic C1 change-seal recomputation and `git diff --check`.
-
-The final ledger must identify any skipped or unavailable check explicitly.
+No C1 final attestation exists or was attempted for this cycle. That check is
+correctly unavailable because the official Plugin surface prevents the two
+required Chat calls, and manufacturing an attestation from setup-only evidence
+would violate the C1 contract. The five Python skips remain the explicitly
+classified environment-dependent skips above and do not cover this blocker.
