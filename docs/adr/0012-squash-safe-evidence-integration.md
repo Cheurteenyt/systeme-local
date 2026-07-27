@@ -38,8 +38,10 @@ The integration has three independent commitments:
 
 Historical C4 verification compares its covered commit with the exact final
 C4 seal commit. It does not compare a historical seal to an unrelated future
-`HEAD`. C5 separately proves that the current tree is byte-for-byte and
-mode-for-mode equal to the sealed aggregate tree.
+`HEAD`. C5 separately proves that the covered and tagged trees plus the exact
+accepted squash commit on `main` are byte-for-byte and mode-for-mode equal to
+the sealed aggregate tree. Later heads must descend from that accepted commit;
+they do not need to equal the historical C5 tree.
 
 The historical stacked pull requests must not be merged independently. After
 the aggregate pull request and `main` CI succeed, they may be closed as
@@ -50,8 +52,9 @@ authorization.
 
 - `main` can receive the reviewed aggregate tree without weakening C0 through
   C4 decisions or losing their commit objects.
-- Any later tracked-file change invalidates the C5 tree commitment until a
-  deliberate successor seal is reviewed.
+- A change to the covered, tagged, or accepted-main tree invalidates the C5
+  proof. A later descendant can add reviewed work without rewriting the
+  historical commitment.
 - A Git tag is evidence retention, not release authorization and not provider
   capability evidence.
 - C1 and C4 live boundaries remain fail closed. Integration performs no

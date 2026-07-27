@@ -18,6 +18,7 @@ C5_MANIFEST_PATH = "governance/c5-integration-manifest.json"
 C5_SEAL_PATH: Final[Literal["governance/c5-change-seal.json"]] = "governance/c5-change-seal.json"
 C5_EVIDENCE_TAG = "evidence/c0-c4-main-integration-v2"
 C5_MAIN_BASE = "32515ac9cbb9d658b2ddcb2723ab3c0a71f2b418"
+C5_ACCEPTED_MAIN_COMMIT = "418112758d8675326835d9947ccce3a1b12f6f25"
 C5_INTEGRATION_BRANCH = "interop/c0-c4-main-integration-c5"
 C4_SEALED_COMMIT = "3a1d2b8286773eaaf69b0b41fade978f09403adb"
 
@@ -156,6 +157,7 @@ class IntegrationVerification(BaseModel):
     source_head: str = Field(pattern=_COMMIT_PATTERN)
     covered_head: str = Field(pattern=_COMMIT_PATTERN)
     tag_target: str = Field(pattern=_COMMIT_PATTERN)
+    accepted_main_commit: str = Field(pattern=_COMMIT_PATTERN)
     current_head: str = Field(pattern=_COMMIT_PATTERN)
     manifest_sha256: str = Field(pattern=_SHA256_PATTERN)
     diff_sha256: str = Field(pattern=_SHA256_PATTERN)
@@ -397,10 +399,12 @@ def verify_integration(
         raise ValueError("C5 aggregate diff commitment mismatch")
     covered_tree = compute_tree_commitment(resolved_root, seal.covered_head)
     tagged_tree = compute_tree_commitment(resolved_root, tag_target)
+    accepted_main_commit = _resolve_commit(resolved_root, C5_ACCEPTED_MAIN_COMMIT)
+    accepted_main_tree = compute_tree_commitment(resolved_root, accepted_main_commit)
     current_head = _resolve_commit(resolved_root, "HEAD")
-    current_tree = compute_tree_commitment(resolved_root, current_head)
-    if not (covered_tree == tagged_tree == current_tree == seal.tree):
-        raise ValueError("C5 current tree differs from the sealed aggregate tree")
+    _assert_ancestor(resolved_root, accepted_main_commit, current_head)
+    if not (covered_tree == tagged_tree == accepted_main_tree == seal.tree):
+        raise ValueError("C5 accepted main commit differs from the sealed aggregate tree")
 
     if require_clean and _git_text(resolved_root, "status", "--porcelain=v1"):
         raise ValueError("C5 verification requires a clean worktree")
@@ -411,12 +415,13 @@ def verify_integration(
         source_head=manifest.source_stack[-1].head,
         covered_head=seal.covered_head,
         tag_target=tag_target,
+        accepted_main_commit=accepted_main_commit,
         current_head=current_head,
         manifest_sha256=manifest_digest,
         diff_sha256=observed_diff.sha256,
-        tree_sha256=current_tree.sha256,
-        tree_file_count=current_tree.file_count,
-        tree_blob_bytes=current_tree.blob_bytes,
+        tree_sha256=accepted_main_tree.sha256,
+        tree_file_count=accepted_main_tree.file_count,
+        tree_blob_bytes=accepted_main_tree.blob_bytes,
     )
 
 

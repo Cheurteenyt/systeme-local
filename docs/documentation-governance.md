@@ -44,6 +44,12 @@ A C5 integration seal records exact repository content and preserves reviewed
 commit ancestry across a squash merge. It is not a release signature, provider
 evidence, runtime admission, or permission to perform a live action.
 
+A C6 acquisition receipt records bounded official-source fingerprints and
+drift state. A C6 candidate is review input only. Neither is reviewed provider
+evidence, promotion authority, runtime admission, or permission to perform a
+live action. Raw fetched document bodies must not be committed, persisted as
+local C6 state, attached to CI, or printed in logs.
+
 ## Status vocabulary
 
 Documents that describe implementation use only:
@@ -84,7 +90,10 @@ CI verifies:
 - implemented/planned status consistency;
 - provider phase references;
 - evidence review and revalidation dates;
+- exact C6 policy/C3 digest binding and review-only acquisition behavior;
 - CODEOWNERS and PR-template governance markers.
 
 The scheduled evidence-governance workflow intentionally uses current time. Unit and pull-request
-tests use an explicit `--as-of` timestamp so they remain deterministic.
+tests use an explicit `--as-of` timestamp so they remain deterministic. Its
+C6 network step uses only public official documentation, has `contents: read`,
+and cannot promote or persist a candidate.

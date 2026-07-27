@@ -450,9 +450,40 @@ C0 -> C1 -> C2 -> C3 -> C4 reviewed commit ancestry
 
 The aggregate tree commitment excludes only the self-referential C5 seal.
 Historical C4 checks terminate at the exact C4 seal commit rather than an
-unrelated future `HEAD`. The C5 verifier independently requires the covered,
-tagged, and current trees to match.
+unrelated future `HEAD`. The C5 verifier independently requires the covered
+and tagged trees plus accepted `main` commit
+`418112758d8675326835d9947ccce3a1b12f6f25` to match, then requires the
+current repository head to descend from that accepted commit. This preserves
+the immutable C5 proof without forbidding later reviewed repository changes.
 
 This is repository governance, not provider capability. It initializes no
 runtime service and changes none of the six current ChatGPT denials. See
 [`providers/chatgpt-web-c5-main-integration.md`](providers/chatgpt-web-c5-main-integration.md).
+
+## C6 official-source revalidation
+
+ADR 0013 adds a read-only acquisition layer outside the C3/C4 authority path:
+
+```text
+fixed C6 policy + exact C3 digests
+    -> public OpenAI Docs MCP
+    -> allowlisted URL + anchor retrieval
+    -> bounded SSE / JSON-RPC / document validation
+    -> in-memory canonical normalization
+    -> exact fingerprint and semantic-marker comparison
+    -> unchanged candidate | drift report | typed failure
+    -> independent human/code review remains mandatory
+
+committed C3 registry -> C4 admission -> six denials / zero tools
+```
+
+The production policy contains only ChatGPT native Chat. Provider-neutral
+models make no cross-provider evidence claim. The HTTP client disables
+redirects and proxy-environment inheritance, sends no credential, bounds
+response and normalized-document sizes, and persists no raw document body.
+
+An unchanged acquisition can only reproduce the active unsupported profile as
+a candidate. Drift creates no candidate. Neither path can modify the registry,
+grant a tool, or invoke a provider surface. Scheduled governance has only
+`contents: read` and emits warnings/errors without repository mutation. See
+[`providers/chatgpt-web-c6-official-revalidation.md`](providers/chatgpt-web-c6-official-revalidation.md).

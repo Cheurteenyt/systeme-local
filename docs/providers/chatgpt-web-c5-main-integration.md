@@ -1,7 +1,7 @@
 # C5 squash-safe C0-C4 main integration
 
-Status: `implemented` on the C5 integration branch; merge requires final-head
-CI and post-merge `main` CI.
+Status: `implemented` and accepted on `main` by PR #74 at
+`418112758d8675326835d9947ccce3a1b12f6f25`.
 
 Issue: [#73](https://github.com/Cheurteenyt/systeme-local/issues/73)
 
@@ -77,7 +77,10 @@ uv run --frozen python -m systeme_local_gateway.c5_integration verify `
 
 It verifies strict schemas, the canonical manifest digest, exact ancestry,
 the one-file final seal commit, aggregate binary-diff bytes, evidence tag,
-covered tree, tagged tree, and current tree. It returns no environment values.
+covered tree, tagged tree, and exact accepted `main` tree. It then requires
+the current head to descend from accepted `main`. This preserves historical
+proof while permitting later reviewed changes. It returns no environment
+values.
 
 ## Merge sequence
 
@@ -90,8 +93,14 @@ covered tree, tagged tree, and current tree. It returns no environment values.
 6. require all final-head CI jobs and manual evidence governance to pass;
 7. squash-merge with expected-head protection;
 8. require the resulting `main` CI to pass and rerun C5 verification;
-9. close PRs #65, #67, #68, #70, and #72 as superseded without deleting
+9. record accepted `main` commit
+   `418112758d8675326835d9947ccce3a1b12f6f25`;
+10. close PRs #65, #67, #68, #70, and #72 as superseded without deleting
    their evidence branches.
+
+This sequence completed through PR #74. Later repository heads are accepted
+only as descendants of the recorded commit; they are not compared as though
+they were the immutable C5 tree.
 
 No step creates or reads a Runtime key, Tunnel ID, provider secret, Plugin,
 browser state, ChatGPT chat, listener, or tunnel process.
