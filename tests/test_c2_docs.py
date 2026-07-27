@@ -12,6 +12,7 @@ from systeme_local_gateway.c2_capability import (
 )
 
 ROOT = Path(__file__).resolve().parents[1]
+C2_SEALED_COMMIT = "cf05e963ba30539f9b2c9ec2f5f71326cbba8399"
 C2_DOC = ROOT / "docs/providers/chatgpt-web-c2-capability-gating.md"
 C2_LEDGER = ROOT / "docs/providers/chatgpt-web-c2-test-evidence.md"
 C2_SCRIPTS = ROOT / "scripts/c2"
@@ -109,20 +110,18 @@ def test_c2_operator_scripts_have_strict_safety_prologues() -> None:
         assert "CONTROL_PLANE_TUNNEL_ID" not in text
 
 
-def test_c1_live_entrypoints_call_c2_gate_before_c1_runtime_logic() -> None:
-    expected = {
-        "Prepare-C1.ps1": "runtime_key_creation",
-        "Start-C1Facade.ps1": "browser_test",
-        "Start-C1Tunnel.ps1": "tunnel_start",
-        "Show-C1OperatorSteps.ps1": "plugin_creation",
-    }
-    for name, action in expected.items():
-        text = (ROOT / "scripts/c1" / name).read_text(encoding="utf-8")
-        gate = f'Assert-C2LiveActionAllowed -Action "{action}"'
+def test_c2_document_records_stronger_c3_gate_ownership_without_rewriting_history() -> None:
+    text = C2_DOC.read_text(encoding="utf-8")
 
-        assert "..\\c2\\C2.Common.psm1" in text
-        assert gate in text
-        assert text.index(gate) < text.index("Assert-C1GitState")
+    for marker in (
+        "Current action-gate owner: C3.",
+        "C2 remains an immutable historical capability",
+        "C1 live entry",
+        "imported C2 at this historical commit",
+        "On the C3 descendant they import",
+        "stronger C3 registry/lifecycle gate",
+    ):
+        assert marker in text
 
 
 def test_c2_evidence_governance_profile_is_registered() -> None:
@@ -192,6 +191,7 @@ def test_c2_change_seal_is_complete_self_excluding_and_stacked() -> None:
             "--full-index",
             "--no-ext-diff",
             seal["base_commit"],
+            C2_SEALED_COMMIT,
             "--",
             ".",
             ":(exclude)governance/c2-change-seal.json",

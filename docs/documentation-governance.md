@@ -21,6 +21,7 @@ of another document.
 | `docs/provider-attachments.md` | provider-neutral attachment metadata and batching |
 | `docs/providers/chatgpt.md` | ChatGPT surface characterization and implementation status |
 | `docs/providers/chatgpt-mcp-*.md` | expiring ChatGPT MCP evidence and operator contracts |
+| `docs/providers/chatgpt-web-c*.md` | stacked ChatGPT Web capability gates, evidence lifecycles and test ledgers |
 | `docs/operator-evidence-custodian-protocol.md` | private Python/Rust custody subprocess contract |
 | `docs/operator-evidence-orchestration.md` | protocol-v2, inherited-handle, recovery and eleven-check orchestration contract |
 | `docs/operator-evidence-protocol-v2-design.json` | machine-readable B2.0 protocol and compatibility manifest |

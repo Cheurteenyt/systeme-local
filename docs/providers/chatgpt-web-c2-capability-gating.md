@@ -2,6 +2,11 @@
 
 Status: `BLOCKED_BY_NO_OFFICIAL_CHAT_TOOL_INTERFACE`
 
+Current action-gate owner: C3. C2 remains an immutable historical capability
+snapshot. See the
+[C3 evidence lifecycle](chatgpt-web-c3-evidence-lifecycle.md) for the active
+registry, candidate comparison, lifecycle states, and five-action gate.
+
 Reviewed: `2026-07-27T01:40:00Z`
 
 Revalidate no later than: `2026-08-10T01:40:00Z`
@@ -98,9 +103,9 @@ browser_test = false
 
 The gate performs no network request and reads no browser or credential state.
 It validates only the committed profile and current UTC time. The C1 live entry
-points for preparation, facade startup, tunnel startup, and operator Plugin
-instructions import the C2 gate before their existing logic. On the current
-profile they stop with
+points imported C2 at this historical commit. On the C3 descendant they import
+the stronger C3 registry/lifecycle gate before their existing logic. Both the
+C2 snapshot and the current C3 profile stop with
 `BLOCKED_BY_NO_OFFICIAL_CHAT_TOOL_INTERFACE`.
 
 The repository cannot stop a person from manually creating a Platform key

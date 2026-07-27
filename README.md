@@ -342,6 +342,16 @@ pour un outil MCP personnalisé ou local. Son
 documente le verdict, la fraîcheur des sources et le blocage atomique des clés,
 Tunnels, Plugins et tests navigateur.
 
+Le lot
+[`C3 — provider capability evidence lifecycle`](docs/providers/chatgpt-web-c3-evidence-lifecycle.md)
+sépare la consultation non déterministe des sources officielles de la décision
+hors ligne. Son
+[`journal de tests et de preuves`](docs/providers/chatgpt-web-c3-test-evidence.md)
+ajoute un registre versionné, les états `current`, `revalidation_due`,
+`expired`, `source_drift` et `invalid`, puis refuse aussi toute action ChatGPT.
+ChatGPT reste le seul fournisseur enregistré et le verdict Chat demeure
+`BLOCKED_BY_NO_OFFICIAL_CHAT_TOOL_INTERFACE`.
+
 ## Architecture
 
 Commencez par le [`blueprint v2`](docs/blueprint-v2.md), puis consultez le [`connectivity model`](docs/connectivity-model.md), [`docs/architecture.md`](docs/architecture.md), [`docs/threat-model.md`](docs/threat-model.md) et [`docs/roadmap.md`](docs/roadmap.md).

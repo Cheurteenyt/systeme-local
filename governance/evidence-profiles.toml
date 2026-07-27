@@ -29,3 +29,13 @@ revalidate_assignment = "C2_REVALIDATE_AFTER"
 reviewed_at = "2026-07-27T01:40:00Z"
 revalidate_after = "2026-08-10T01:40:00Z"
 warning_days = 7
+
+[[profiles]]
+id = "chatgpt_chat_c3_official_capability_profile"
+source = "src/systeme_local_gateway/c3_evidence.py"
+document = "docs/providers/chatgpt-web-c3-evidence-lifecycle.md"
+reviewed_assignment = "C3_REVIEWED_AT"
+revalidate_assignment = "C3_REVALIDATE_AFTER"
+reviewed_at = "2026-07-27T11:55:00Z"
+revalidate_after = "2026-08-10T11:55:00Z"
+warning_days = 7

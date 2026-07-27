@@ -424,6 +424,22 @@ Status: `blocked_by_evidence`
 Investigate only documented or explicitly supported mechanisms. If no reliable contract exists,
 retain `research` or `unsupported` and use an official provider transport or interactive handoff.
 
+### Phase 14 — provider capability evidence lifecycle
+
+Status: `implemented`
+
+C3 separates official-document acquisition from deterministic capability
+decisions. A strict registry contains the only active provider adapter
+(`chatgpt`), native Chat identity, official-domain allowlist, reviewed profile
+digest, and five protected actions. Candidate profiles cannot authorize any
+action. `revalidation_due`, `expired`, `source_drift`, and `invalid` all fail
+closed independently of the support state.
+
+Current official documentation still makes Plugins unavailable in Chat, so
+custom/local MCP on native Chat remains `unsupported`. The detailed contract
+and exact future product gate are in
+[`chatgpt-web-c3-evidence-lifecycle.md`](chatgpt-web-c3-evidence-lifecycle.md).
+
 ## Security invariants
 
 - never store a ChatGPT password, session cookie, bearer token or API key in the repository;
@@ -463,3 +479,17 @@ correlation, and revocation failure.
 C0 formats only its touched Python surface, reducing the current Ruff formatting
 baseline from 54 to 42 files while leaving the historical phase-8 measurement
 unchanged.
+
+## C1, C2, and C3 interpretation
+
+Historical C1 receipts proved short-lived correlation between two manually
+created synthetic test chats, the single read-only probe, and local audit
+records. They did not prove current official native Chat support, a durable
+final attestation, conversation discovery, production use, or write
+capability.
+
+C2 identified the official product-surface blocker. C3 revalidated it and now
+owns the deterministic lifecycle and action gate. Current decisions deny
+Runtime-key creation, Tunnel startup, Plugin creation, browser testing, and
+any ChatGPT action. The historical C1 records remain evidence of bounded calls,
+not authority to bypass current official documentation.

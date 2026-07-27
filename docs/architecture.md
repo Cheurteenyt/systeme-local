@@ -363,3 +363,33 @@ policy decision are separated so a future AI Web provider can supply an
 independent profile. Only ChatGPT is registered; no evidence or capability is
 portable. See
 [`providers/chatgpt-web-c2-capability-gating.md`](providers/chatgpt-web-c2-capability-gating.md).
+
+## C3 provider capability evidence lifecycle
+
+ADR 0010 makes source review and capability decisions separate trust domains:
+
+```text
+official OpenAI documentation review
+    -> bounded candidate claims outside Git
+    -> strict candidate validation and comparison
+    -> source_drift | unchanged
+    -> independent review and deliberate promotion
+
+committed reviewed registry + active profile
+    -> adapter/identity/host validation
+    -> claim/evidence/profile/registry SHA-256 validation
+    -> current | revalidation_due | expired | source_drift | invalid
+    -> supported | unsupported | unobservable
+    -> atomic decision for five protected actions
+```
+
+The active registry contains one ChatGPT adapter, one native Chat capability
+identity, and one reviewed profile. Provider-neutral data shapes do not
+inherit evidence or support. A candidate never changes the gate. The scheduled
+workflow is read-only, warns at `revalidation_due`, and fails on expired,
+invalid, or drifted evidence.
+
+C3 supersedes C2 only as the action-gate owner. C2 remains immutable historical
+evidence. C1 preparation, facade startup, Tunnel startup, and Plugin guidance
+now import C3 before C1 runtime logic. See
+[`providers/chatgpt-web-c3-evidence-lifecycle.md`](providers/chatgpt-web-c3-evidence-lifecycle.md).

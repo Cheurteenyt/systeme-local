@@ -1,0 +1,35 @@
+{
+  "adapters": [
+    {
+      "allowed_official_hosts": [
+        "developers.openai.com",
+        "learn.chatgpt.com"
+      ],
+      "capabilities": [
+        "custom_or_local_mcp_tool_invocation"
+      ],
+      "provider_id": "chatgpt",
+      "surface_mappings": [
+        {
+          "native_surface": "chat",
+          "surface_class": "conversational_chat"
+        }
+      ]
+    }
+  ],
+  "profiles": [
+    {
+      "expected_profile_sha256": "512d26961dd33429850c2599b1c970be3910e990b92bc23aa759e92784f0dc3a",
+      "identity": {
+        "capability": "custom_or_local_mcp_tool_invocation",
+        "native_surface": "chat",
+        "provider_id": "chatgpt",
+        "surface_class": "conversational_chat"
+      },
+      "profile_id": "chatgpt_chat_c3_20260727",
+      "profile_path": "governance/c3-chatgpt-chat-capability-profile.json"
+    }
+  ],
+  "registry_sha256": "9567dd0bbb9ec80d6bf24ea86048f6229f9c956731053b1191208ac6bcecdd62",
+  "version": "1"
+}

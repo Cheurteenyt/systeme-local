@@ -270,3 +270,26 @@ C2 adds only minimal provider, native-surface, surface-class, capability,
 evidence, and decision contracts. ChatGPT remains the only implemented Web
 provider. Other AI Web providers remain planned and require independent
 sources, semantics, threat models, tests, and seals.
+
+## C3 provider capability evidence lifecycle
+
+Status: `BLOCKED_BY_NO_OFFICIAL_CHAT_TOOL_INTERFACE`; lifecycle `current`.
+
+C3 is stacked on exact C2 commit
+`cf05e963ba30539f9b2c9ec2f5f71326cbba8399` and tracked by issue
+[#69](https://github.com/Cheurteenyt/systeme-local/issues/69). It separates
+official-document acquisition from deterministic decisions, adds a strict
+ChatGPT-only provider registry and adapter, binds canonical claims, evidence,
+profiles, and the registry by SHA-256, and distinguishes `current`,
+`revalidation_due`, `expired`, `source_drift`, and `invalid`.
+
+Candidate evidence is never authoritative and cannot change an action.
+Runtime-key creation, Tunnel startup, Plugin creation, browser testing, and
+any ChatGPT action are atomically denied under the current `unsupported`
+profile. The four C1 live entry points now call C3 before C1 logic.
+
+The next permissible activity is documentation-only revalidation no later than
+`2026-08-10T11:55:00Z`. A future provider remains out of scope until it has an
+independent adapter, official sources, native-surface semantics, threat model,
+tests, and seal. See
+[`providers/chatgpt-web-c3-evidence-lifecycle.md`](providers/chatgpt-web-c3-evidence-lifecycle.md).

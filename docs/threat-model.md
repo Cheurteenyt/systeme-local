@@ -381,3 +381,31 @@ Scheduled governance and fail-closed expiry bound but cannot eliminate that
 risk. An officially supported profile would remain only a necessary
 capability condition; live authorization and all C1 safety controls would
 still be required.
+
+## C3 evidence-lifecycle threats and controls
+
+C3 addresses stale-evidence promotion, candidate self-authorization, active
+profile replacement with recomputed digests, registry substitution,
+cross-provider or cross-profile evidence reuse, official-domain lookalikes,
+path traversal, time-boundary ambiguity, and partial enablement of a new
+ChatGPT-side action.
+
+Controls are separate canonical claim, conclusion, evidence-set, profile, and
+registry SHA-256 commitments; exact reviewed-builder matching; a
+registry-bound active-profile digest; strict HTTPS URL normalization; exact
+provider-owned host allowlists; repository-contained profile paths; closed
+provider, surface, capability, lifecycle, reviewer, and action enums; exact
+warning/expiry boundaries; and atomic denial of Runtime-key, Tunnel, Plugin,
+browser, and ChatGPT actions.
+
+Candidate evidence is always non-authoritative. An unchanged candidate remains
+blocked, while changed claims, sources, conclusion, or support become
+`source_drift` and require independent review. Scheduled governance has
+`contents: read`, creates no issue, and cannot mutate evidence.
+
+C3 performs no browser, ChatGPT, Work, credential, Tunnel, Plugin, listener, or
+MCP action. The C1 live entry points call C3 before their own logic. Residual
+risk is official documentation changing inside the bounded review window and
+a human reviewer misclassifying a bounded claim. Expiry, independent review,
+tests, and deliberate registry promotion limit but cannot eliminate those
+risks.
