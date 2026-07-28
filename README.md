@@ -49,9 +49,16 @@ refusées et zéro outil est exposé. Voir
 C7 sépare maintenant l’éligibilité officielle de ChatGPT Work de toute
 autorisation live. Le profil Work est supporté pour la route Plugin/MCP, mais
 la décision par défaut refuse les six effets protégés, expose zéro outil,
-conserve le blocage de Chat et exige un futur reçu opérateur C8 frais et signé.
+conserve le blocage de Chat et exige un reçu opérateur C8 frais et signé.
 Voir
 [`docs/providers/chatgpt-web-c7-work-prelive-admission.md`](docs/providers/chatgpt-web-c7-work-prelive-admission.md).
+
+C8 a utilisé ce contrat pour exécuter un unique cycle Work borné : deux
+tâches synthétiques, deux appels réels corrélés, zéro écriture, tests de rejet,
+arrêt complet, Plugin retiré et clé Runtime révoquée. Le résultat exact est
+`COMPLETE_C8_TWO_WORK_CALLS_LIVE_CORRELATED_AND_REVOKED`. Chat reste
+`BLOCKED_BY_NO_OFFICIAL_CHAT_TOOL_INTERFACE`, et ce résultat ne revendique ni
+usage régulier ni identité interne exacte du modèle.
 
 ### Scénario de validation initial
 
@@ -407,8 +414,8 @@ gates exacts du futur lot C8.
 
 Le lot
 [`C8 — ChatGPT Work bounded live validation`](docs/providers/chatgpt-web-c8-work-live-validation.md)
-implémente le grant Work révocable, exactement deux appels synthétiques,
-la corrélation d'audit locale et la preuve de révocation. Son
+a exécuté le grant Work révocable, exactement deux appels synthétiques,
+la corrélation d'audit locale et la preuve de révocation complète. Son
 [`journal de tests`](docs/providers/chatgpt-web-c8-test-evidence.md)
 sépare strictement les validations hors ligne des preuves Work réelles.
 

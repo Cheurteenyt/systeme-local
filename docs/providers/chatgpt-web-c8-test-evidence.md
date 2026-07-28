@@ -1,9 +1,9 @@
 # C8 test and evidence ledger
 
-Status: offline implementation validation in progress; live Work evidence not
-yet claimed
+Status: `COMPLETE_C8_TWO_WORK_CALLS_LIVE_CORRELATED_AND_REVOKED`; final
+repository validation and evidence seal in progress
 
-Recorded at: `2026-07-27`
+Recorded at: `2026-07-28`
 
 ## Evidence classes
 
@@ -54,8 +54,9 @@ with the separate C7-branch-only current-tree CI gate. After that correction:
 - `cargo audit` scanned 73 locked dependencies against 1,170 advisories with
   no vulnerability reported.
 
-The post-live and post-seal repository-wide reruns remain pending because C8
-has not admitted a Work cycle.
+The pre-live repository-wide run is historical. Post-live and post-seal
+results are recorded separately below so that offline quality, provider
+behavior and final repository integrity are never conflated.
 
 The pre-live implementation head
 `6b791b2e843192e0db2449cabbe51e196eb3b5a5` was then validated by
@@ -154,25 +155,135 @@ The retry procedure now stages the fresh operator-managed key and existing
 Tunnel ID before creating the five-minute Work observations. No transport is
 started by credential staging, and the live sequence remains fail-closed.
 
-## Live evidence
+## Completed live evidence
 
-No live success is recorded in this section until all of these local ignored
-artifacts exist and validate:
+The fresh retry staged the operator-managed Runtime key and existing Tunnel
+ID before opening the five-minute UI evidence window. At
+`2026-07-27T23:29:05Z`, the signed-in web UI showed:
+
+- an explicitly selected Work surface;
+- available Work entitlement and usable quota;
+- the Plugins surface;
+- the visible labels `GPT-5.6 Sol` and `Minimal`;
+- no exact internal model identifier.
+
+The grant exposed exactly one tool,
+`systeme_local_connectivity_probe`, for at most twenty minutes. The local
+probe completed at `23:29:11Z` with the four required safety values:
 
 ```text
-authorization.json
-work-surface.json
-work-quota.json
-live-cycle.json
-task-surface-a.json
-task-surface-b.json
-proof-a.json
-proof-b.json
-negative-tests.json
-revocation.json
-attestation.json
+read_only = true
+write_actions_enabled = false
+real_evidence_access = false
+protocol_v2_reachable = false
 ```
 
+The temporary Plugin was then connected through the reviewed Secure MCP
+Tunnel and displayed exactly that one read-only tool. No file, command,
+secret, write, real-evidence, high-risk or protocol-v2 capability was present.
+
+### Two bounded Work calls
+
+| Evidence | Work A | Work B |
+|---|---:|---:|
+| task observation | `2026-07-27T23:39:54Z` | `2026-07-27T23:44:11Z` |
+| live tool response | `2026-07-27T23:42:23Z` | `2026-07-27T23:45:55Z` |
+| local correlation check | `2026-07-27T23:44:10Z` | `2026-07-27T23:49:02Z` |
+| positive invocation count | 1 | 1 |
+| tool count / write count / high-risk count | `1 / 0 / 0` | `1 / 0 / 0` |
+| source | `manual_chatgpt_work` | `manual_chatgpt_work` |
+
+Both calls used distinct challenges, responses, correlations and audit
+records. The proof checker verified the active cycle, build, policy and tool
+snapshot for each call. Conversation identifiers were not read or retained.
+No pre-existing conversation was opened or used. The Plugins route rendered
+its ordinary global navigation, but no history operation occurred and no
+sidebar value entered a C8 receipt or committed artifact.
+
+### Negative and revocation results
+
+The final-cycle audit contained exactly five records:
+
+- three `completed` records: the local probe, Work A and Work B;
+- two `failed` records: same-Work replay and cross-Work replay.
+
+The unknown-field and malformed-challenge inputs were rejected by the visible
+tool schema before a new audit record could be created. Requests for files,
+commands, secrets, writes, real evidence and protocol v2 remained absent from
+the effective one-tool capability surface; unsafe requests were not forced.
+Capability expansion stayed `false`.
+
+The Tunnel and facade were stopped, ports `8765` and `8766` were closed, and
+the Plugin connection was uninstalled. The operator revoked the fresh Runtime
+key. A subsequent prompt in one of the two synthetic Work tasks returned
+exactly `unreachable_after_revocation`, produced no audit record and did not
+reconnect or reinstall anything.
+
+The signed negative receipt was created at `2026-07-27T23:59:28Z`; the
+revocation receipt followed at `23:59:30Z`. The final verifier then returned:
+
+```text
+COMPLETE_C8_TWO_WORK_CALLS_LIVE_CORRELATED_AND_REVOKED
+```
+
+Cleanup removed thirteen transient items, including both raw challenges, both
+structured responses, the HMAC audit log, logs and SQLite databases. Eleven
+typed receipts remain in the ignored local state directory. Process secrets
+were cleared and live connectivity is not recoverable from the preserved
+receipts.
+
+## Post-live repository validation
+
+After the final attestation and cleanup were recorded, the covered C8 tree
+passed the following local checks before creation of the annotated evidence
+tag:
+
+- `uv lock --check`;
+- Ruff lint plus the formatting ratchet: three changed Python files and zero
+  new formatting debt;
+- the mypy ratchet: three changed Python files and zero diagnostics;
+- Markdown links across 58 files;
+- deterministic evidence governance and the frozen Python dependency audit:
+  76 resolved packages and no known vulnerability;
+- Python, excluding only the not-yet-creatable historical C8 tag check:
+  1,128 passed, 6 intentionally skipped, 82.10% coverage;
+- all 81 tracked PowerShell modules and scripts parsed without syntax errors;
+- `cargo fmt`, `cargo check`, strict Clippy, 106 Rust tests, doctests and
+  rustdoc with warnings denied;
+- `cargo audit`: 73 locked dependencies scanned against 1,170 advisories with
+  no vulnerability reported.
+
+The four tag-independent C8 seal tests also passed before sealing. The fifth
+seal test requires the annotated tag by construction and therefore belongs
+to the final tagged-tree validation and remote CI, not to pre-seal evidence.
+The Windows pytest process emitted a non-fatal temporary-directory cleanup
+warning after reporting the successful result; it did not change the test
+status or repository tree.
+
+### Irreversible commitments
+
+| Commitment | SHA-256 |
+|---|---|
+| final attestation | `f2399d98fca34fe2c5496cc2d4e9ce3ab4d87453d1f4302b7933617878144346` |
+| authorization | `f01047666d02c7f44872f9cceab6e6661524c2f5684a1976d2f728718cd19ec0` |
+| grant | `5c925ee1a6c9daaa91d3a15e8df7498273803b282798bf7d060f8273484c29af` |
+| Work A correlation receipt | `5a739d8039d876ea0fdacb9406cbde6532d1576583a9b9fdd798724211e36961` |
+| Work B correlation receipt | `d68b62da81b6635ca958a9b60d3b0410b63ec5ab283e43be0e64d5798e91037b` |
+| negative-test receipt | `c04e90065962b736281e4697995d9995d24769dbb073b43daa2366b9723cd05c` |
+| revocation receipt | `d80080863899ec291c4326d0b122f4ccadd93304db5cf5d14c97f7be83496eca` |
+| local policy | `17a53ee929232bae5901037c26c23ad1379dbdb09998c698b1ed85c60a75700e` |
+| tool snapshot | `6d9a8e0f6dadb9f3a615abcca8c882cb37fb257944922151e97c65a8575da14b` |
+
 Runtime keys, Tunnel IDs, raw challenges, structured live responses, audit
-logs and databases are never versioned. Final documentation records only
-bounded states, counts and irreversible SHA-256 commitments.
+logs, database contents, Plugin IDs and conversation identifiers are not
+versioned.
+
+## Completion boundary
+
+This result proves one bounded, dated, two-call ChatGPT Work connectivity
+cycle with complete revocation. It does not prove native Chat support, which
+remains `BLOCKED_BY_NO_OFFICIAL_CHAT_TOOL_INTERFACE`. It does not claim
+regular-use readiness, a stable Work quota, a stable visible label, or an
+exact internal model identity. A future provider must define and test its own
+surface, authorization, transport, capability and revocation adapter rather
+than inheriting ChatGPT-specific evidence.

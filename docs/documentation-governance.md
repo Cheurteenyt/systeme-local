@@ -102,7 +102,7 @@ C7 adds a separately reviewed Work profile and pre-live policy. Documentation
 must never collapse `supported on Work` into `supported on Chat`, or
 `officially eligible` into `operator-authorized live action`. Every C7 status
 report must retain the native Chat blocker, the automatic-switch denial, six
-default action denials and zero effective tools. A future C8 receipt is a
+default action denials and zero effective tools. A C8 receipt is a
 separate evidence class and cannot be manufactured from C7 profile data.
 
 C8 documentation must keep five facts separate: current official Work
@@ -113,3 +113,11 @@ from the validated final attestation. Visible model or reasoning labels are
 presentation evidence, never internal model attribution. Historical receipts
 may remain verifiable after expiry, but expiry can never be extended to
 authorize another action.
+
+The completed C8 report records only the final attestation and receipt
+commitments, bounded counts, visible labels, negative outcomes and revocation
+facts. It excludes Runtime keys, Tunnel and Plugin identifiers, raw
+challenges, structured responses, audit-log bodies, database contents and
+conversation identifiers. The annotated C8 evidence tag binds a
+self-excluding repository seal to the exact final-attestation SHA-256; it does
+not restore live connectivity or authorize another cycle.

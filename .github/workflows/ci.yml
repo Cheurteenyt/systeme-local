@@ -157,6 +157,22 @@ jobs:
           verify
           --require-current-tree
 
+      - name: Verify historical C8 Work live evidence seal
+        run: >-
+          uv run --frozen --extra dev
+          python -m systeme_local_gateway.c8_seal
+          verify
+
+      - name: Verify current C8 pull request tree matches its seal
+        if: >-
+          github.event_name == 'pull_request' &&
+          github.head_ref == 'codex/chatgpt-work-live-c8'
+        run: >-
+          uv run --frozen --extra dev
+          python -m systeme_local_gateway.c8_seal
+          verify
+          --require-current-tree
+
       - name: Check documentation contracts
         run: uv run --frozen --extra dev pytest -q tests/test_documentation_governance.py
 

@@ -520,7 +520,7 @@ C7 adds a supported Work profile without permitting Work activity.
 | a forged operator grant is accepted | process-local audit-key HMAC is mandatory; missing, short or wrong keys deny all actions |
 | an old grant remains usable | maximum twenty-minute lifetime and strict `authorized_at <= now < expires_at` check |
 | Work is unavailable or quota is stale | explicit Work request plus visible surface, available entitlement and usable quota observations no older than five minutes |
-| browser scope expands during a future cycle | grant literals permanently deny existing chats, history, private browser state and account/security settings |
+| browser scope expands during a live cycle | grant literals permanently deny existing chats, history operations, private browser state and account/security settings |
 | tool scope expands | exactly one reviewed read-only probe and its C4 protocol digest are bound |
 | prompt content requests files, commands, secrets or writes | those capabilities remain absent; grant literals cannot enable them |
 | C7 accidentally performs the proposed C8 test | C7 has no grant creator or live script and refuses secrets, Tunnel processes and C0/C1 listeners |
@@ -541,7 +541,7 @@ separate C8 threat review and live evidence cycle.
 | a third or existing task is tested | exact labels A/B, maximum count two, separate fresh task receipts and no conversation identifiers |
 | one call is replayed as two | unique challenges, responses, audit IDs and audit-record digests are required |
 | prompt injection expands capability | registry contains one read-only probe; files, commands, secrets, writes, real evidence and protocol v2 do not exist in the surface |
-| sensitive browser state is collected | no DOM scraping, cookies, storage, private requests, history, sidebar or existing conversation access |
+| sensitive browser state is collected | browser queries remain bounded to the active Plugins and synthetic Work content; no cookies, storage, private requests, history navigation or existing-conversation content is collected |
 | a visible label is promoted to internal model identity | only optional visible labels are stored; exact internal ID and regular-use claims remain false |
 | live access survives the test | Tunnel/facade stop, listener check, Plugin removal, Runtime-key revocation, secret clearing and failed post-revocation call are all required |
 | short-lived evidence expires before finalization | chronology proves calls occurred inside the grant; HMAC-bound historical receipts remain verifiable without extending authority |
@@ -551,3 +551,11 @@ outside the observed two calls, compromised official pages and operator error
 when revoking external credentials. Independent official sources, two-call
 limits, one-tool local enforcement, short TTLs and explicit final revocation
 reduce but do not eliminate those risks.
+
+The executed C8 cycle exercised the replay, malformed-input, capability and
+revocation controls without expanding the one-tool surface. The final
+attestation commits two positive correlations, two failed replay audits,
+schema rejection and post-revocation unreachability. Raw challenges,
+responses, audit records, Plugin/Tunnel identifiers and credentials were
+removed or left unversioned; the repository seal retains only typed counts and
+irreversible commitments.

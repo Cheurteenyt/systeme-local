@@ -1,6 +1,6 @@
 # C8 ChatGPT Work bounded live validation
 
-Status: implementation and pre-live validation in progress
+Status: `COMPLETE_C8_TWO_WORK_CALLS_LIVE_CORRELATED_AND_REVOKED`
 
 Issue: [#78](https://github.com/Cheurteenyt/systeme-local/issues/78)
 
@@ -16,8 +16,8 @@ C8 may establish only this statement:
 > read-only MCP connectivity probe and each invocation matched one local audit
 > record.
 
-Until the two correlations and final revocation receipt exist, that statement
-is not true. Even after success it does not establish native Chat support,
+The two correlations and final revocation receipt now exist and validate.
+That statement still does not establish native Chat support,
 history access, existing-conversation discovery, writes, regular-use
 readiness, production readiness or a particular internal model.
 
@@ -34,6 +34,27 @@ BLOCKED_BY_NO_OFFICIAL_CHAT_TOOL_INTERFACE
 ```
 
 No automatic Chat-to-Work switch is permitted.
+
+## Executed result
+
+The bounded cycle completed on `2026-07-27T23:59:30Z`:
+
+- exactly two newly created synthetic Work tasks each invoked the reviewed
+  probe once;
+- both responses matched distinct local audit records and strict digests;
+- same-Work and cross-Work replay attempts failed;
+- unknown and malformed inputs were rejected;
+- the effective surface never expanded beyond one read-only tool;
+- the Tunnel and facade stopped, both listeners closed, the Plugin connection
+  was removed and the fresh Runtime key was revoked;
+- a post-revocation Work attempt returned
+  `unreachable_after_revocation`;
+- transient challenges, responses, logs and databases were removed.
+
+The final attestation SHA-256 is
+`f2399d98fca34fe2c5496cc2d4e9ce3ab4d87453d1f4302b7933617878144346`.
+The detailed non-sensitive commitments are in the
+[C8 evidence ledger](chatgpt-web-c8-test-evidence.md).
 
 ## Current official evidence
 
@@ -253,6 +274,24 @@ test, revocation, attestation or any unexpected state. It removes only the
 aborted local-cycle material and process secrets. It does not refresh or
 bypass stale evidence. Any operator-created Runtime key must still be revoked
 on the platform; an unused Tunnel resource may be reused by the next cycle.
+
+## Reproducible evidence seal
+
+The reviewed C8 head is committed separately from
+`governance/c8-change-seal.json`. The final one-file seal commit is pointed to
+by the annotated tag `evidence/chatgpt-work-live-c8-v1`. The seal binds:
+
+- the exact accepted C7 base and covered C8 head;
+- the strict self-covering C8 manifest;
+- the final live-attestation SHA-256;
+- a binary Git diff commitment;
+- a framed repository-tree commitment excluding only the self-referential
+  seal;
+- the exact two-call, revocation and non-readiness boundaries.
+
+`scripts/c8/Test-C8Seal.ps1` verifies the annotated tag, one-file seal commit,
+manifest, changed-file set, diff and tree without contacting ChatGPT or
+reading any live credential.
 
 ## Portability
 

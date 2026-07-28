@@ -89,8 +89,8 @@ here conflicts with a linked document, the linked document remains authoritative
 | [C6 test and evidence ledger](providers/chatgpt-web-c6-test-evidence.md) | Deterministic, mocked-transport, public-doc acquisition, PowerShell, and zero-live-action evidence. |
 | [C7 ChatGPT Work pre-live admission](providers/chatgpt-web-c7-work-prelive-admission.md) | Independent Work profile, native Chat preservation, zero-effect default and future C8 gate. |
 | [C7 test and evidence ledger](providers/chatgpt-web-c7-test-evidence.md) | Official-source, deterministic, PowerShell and no-live evidence for C7. |
-| [C8 ChatGPT Work bounded live validation](providers/chatgpt-web-c8-work-live-validation.md) | Revocable Work-only grant, exactly two synthetic calls, local audit correlation and cleanup contract. |
-| [C8 test and evidence ledger](providers/chatgpt-web-c8-test-evidence.md) | Offline, live-call, negative, revocation and final evidence for C8. |
+| [C8 ChatGPT Work bounded live validation](providers/chatgpt-web-c8-work-live-validation.md) | Completed revocable Work-only cycle: exactly two synthetic calls, local audit correlation, revocation, cleanup and reproducible seal. |
+| [C8 test and evidence ledger](providers/chatgpt-web-c8-test-evidence.md) | Offline validation, two live Work correlations, negative tests, revocation, cleanup and immutable commitments. |
 | [ChatGPT MCP deployment evidence and operator contract](providers/chatgpt-mcp-deployment.md) | Provider-specific characterization, evidence, or integration contract. |
 | [ChatGPT MCP sealed operator evidence bundle](providers/chatgpt-mcp-operator-evidence.md) | Provider-specific characterization, evidence, or integration contract. |
 | [ChatGPT provider characterization](providers/chatgpt.md) | Provider-specific characterization, evidence, or integration contract. |

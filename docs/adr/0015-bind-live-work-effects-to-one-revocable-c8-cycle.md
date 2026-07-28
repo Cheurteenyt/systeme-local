@@ -26,6 +26,23 @@ receipt to remain unexpired at final-attestation time is fragile. A valid call
 must be proved to have occurred inside its grant window; historical HMAC-bound
 evidence does not become false merely because that window later closes.
 
+## Executed outcome
+
+The decision was exercised once on `2026-07-27`. Two synthetic Work tasks each
+invoked the single probe exactly once and matched distinct local audit
+records. Same- and cross-Work replay failed, malformed schema inputs were
+rejected, and the effective capability surface never exceeded one read-only
+tool. The Tunnel and facade stopped, both listeners closed, the Plugin
+connection was removed, the fresh Runtime key was revoked, process secrets
+were cleared and the post-revocation call was unreachable.
+
+The exact result is
+`COMPLETE_C8_TWO_WORK_CALLS_LIVE_CORRELATED_AND_REVOKED`. It remains bounded
+to Work and does not alter the native Chat blocker, establish regular-use
+readiness or expose an exact internal model identity. The final attestation is
+committed only by SHA-256 and is bound into the self-excluding C8 repository
+seal.
+
 ## Decision
 
 C8 introduces one cycle-wide operator receipt, two fresh UI observations and
