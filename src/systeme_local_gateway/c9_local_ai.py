@@ -1038,7 +1038,9 @@ def _open_runtime_executable_descriptor(path: Path) -> int:
     try:
         msvcrt: Any = importlib.import_module("msvcrt")
         wintypes: Any = importlib.import_module("ctypes.wintypes")
-        kernel32: Any = ctypes.WinDLL("kernel32", use_last_error=True)
+        win_dll: Any = getattr(ctypes, "WinDLL")
+        get_last_error: Any = getattr(ctypes, "get_last_error")
+        kernel32: Any = win_dll("kernel32", use_last_error=True)
         create_file = kernel32.CreateFileW
         create_file.argtypes = (
             wintypes.LPCWSTR,
@@ -1063,7 +1065,7 @@ def _open_runtime_executable_descriptor(path: Path) -> int:
         )
         invalid_handle = ctypes.c_void_p(-1).value
         if handle in (None, invalid_handle):
-            error = ctypes.get_last_error()
+            error = int(get_last_error())
             raise OSError(error, "CreateFileW refused the runtime executable")
         try:
             return int(msvcrt.open_osfhandle(int(handle), flags))
