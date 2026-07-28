@@ -5,6 +5,7 @@ import json
 import os
 import shutil
 import subprocess
+import sys
 from pathlib import Path
 
 import pytest
@@ -345,6 +346,43 @@ def test_unversioned_native_runtime_uses_a_binary_bound_version(tmp_path: Path) 
         "product_version": f"unversioned-binary-sha256:{expected_sha256}",
         "fallback_binary_sha256": expected_sha256,
     }
+
+
+@pytest.mark.skipif(POWERSHELL is None, reason="Windows PowerShell is unavailable")
+def test_python_runtime_allowlist_contains_launcher_and_exact_base(
+    tmp_path: Path,
+) -> None:
+    sandbox = tmp_path / "python-runtime-allowlist"
+    script_root = sandbox / "scripts" / "c9"
+    script_root.mkdir(parents=True)
+    module_path = script_root / "C9.Common.psm1"
+    shutil.copy2(SCRIPT_ROOT / "C9.Common.psm1", module_path)
+    scripts = sandbox / ".venv" / "Scripts"
+    scripts.mkdir(parents=True)
+    launcher = scripts / "python.exe"
+    launcher.write_bytes(b"synthetic-c9-python-launcher")
+    base = Path(sys.base_prefix).resolve()
+    base_python = base / "python.exe"
+    assert base_python.is_file()
+    (sandbox / ".venv" / "pyvenv.cfg").write_text(
+        f"home = {base}\n",
+        encoding="utf-8",
+    )
+    command = (
+        f"$module = Import-Module {_ps_literal(module_path)} -Force -PassThru; "
+        "$paths = & $module { "
+        "function Assert-C9TrustedPathChain { "
+        "param([string]$Path,[scriptblock]$AclProvider,"
+        "[scriptblock]$LinkCountProvider) }; "
+        "@(Get-C9PythonRuntimeExecutables) }; "
+        "$paths | ConvertTo-Json -Compress"
+    )
+
+    completed = _powershell(command)
+
+    assert completed.returncode == 0, completed.stderr + completed.stdout
+    observed = {Path(value).resolve() for value in json.loads(completed.stdout)}
+    assert observed == {launcher.resolve(), base_python}
 
 
 def test_git_invocation_is_absolute_closed_and_configuration_neutralized() -> None:

@@ -436,6 +436,22 @@ def test_native_runtime_observation_is_fresh_local_and_operator_attested() -> No
     assert "Read-Host" not in script
 
 
+def test_facade_tracks_the_verified_venv_launcher_and_base_runtime() -> None:
+    start = _text("Start-C9Facade.ps1")
+    stop = _text("Stop-C9.ps1")
+    common = _text("C9.Common.psm1")
+
+    assert "function Get-C9PythonRuntimeExecutables" in common
+    assert '(Join-Path (Get-C9PythonBaseDirectory) "python.exe")' in common
+    assert "Assert-C9NotReparsePoint -Path $base" in common
+    assert "Get-C9PythonRuntimeExecutables" in start
+    assert "$matchingRuntimePaths.Count -ne 1" in start
+    assert "$metadata.ParentProcessId -ne $process.Id" in start
+    assert "-AllowedExecutablePaths $pythonRuntimeExecutables" in start
+    assert "Get-C9PythonRuntimeExecutables" in stop
+    assert "paths = $pythonRuntimeExecutables" in stop
+
+
 def test_final_evidence_scripts_are_complete_and_use_the_immutable_admission_copy() -> None:
     actual = {path.name for path in SCRIPT_ROOT.glob("*.ps1")}
     assert EVIDENCE_SCRIPTS <= actual

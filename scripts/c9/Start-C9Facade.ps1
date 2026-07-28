@@ -21,6 +21,7 @@ $git = Get-C9GitExecutable
 )
 $state = Initialize-C9StateDirectory
 $python = Get-C9Python
+$pythonRuntimeExecutables = @(Get-C9PythonRuntimeExecutables)
 $admissionPath = Assert-C9StateFile -Path (Join-Path $state "admission.json")
 if (Test-Path -LiteralPath $admissionPath) {
     throw "C9 facade startup requires zero admission and zero effective tools."
@@ -203,10 +204,17 @@ try {
     }
     $runtimePid = $listeners[0].OwningProcess
     $runtime = Get-Process -Id $runtimePid -ErrorAction Stop
-    if (
-        [System.IO.Path]::GetFullPath($runtime.Path) -ne
-        [System.IO.Path]::GetFullPath($python)
-    ) {
+    $runtimePath = [System.IO.Path]::GetFullPath($runtime.Path)
+    $matchingRuntimePaths = @(
+        $pythonRuntimeExecutables |
+            Where-Object {
+                $runtimePath.Equals(
+                    [System.IO.Path]::GetFullPath($_),
+                    [System.StringComparison]::OrdinalIgnoreCase
+                )
+            }
+    )
+    if ($matchingRuntimePaths.Count -ne 1) {
         throw "C9 facade listener is not owned by the repository Python runtime."
     }
     $metadata = Get-CimInstance Win32_Process -Filter "ProcessId = $runtimePid"
@@ -231,7 +239,9 @@ try {
         throw "C9 facade did not start with the required zero-tool registry."
     }
 } catch {
-    Stop-C9Process -Name "facade" -AllowedExecutablePaths @($python)
+    Stop-C9Process `
+        -Name "facade" `
+        -AllowedExecutablePaths $pythonRuntimeExecutables
     Stop-C9PythonLauncher
     throw
 }
