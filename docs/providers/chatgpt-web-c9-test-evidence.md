@@ -119,18 +119,19 @@ contract described above. They do not increment any live counter.
 
 | ID | Validation | Result |
 |---|---|---|
-| `C9-Q01` | exact C9 matrix: `tests/test_c9_*.py` plus `tests/test_mcp_rich_result.py` | PASS: 324 passed, 8 conditional skips, 0 failed |
-| `C9-Q02` | complete Python suite with coverage | PASS: 1,464 passed, 14 conditional skips, 84.07% coverage, exit 0 |
+| `C9-Q01` | exact C9 matrix: `tests/test_c9_*.py` plus `tests/test_mcp_rich_result.py` | PASS: 325 passed, 8 conditional skips, 0 failed |
+| `C9-Q02` | complete Python suite with coverage | PASS: 1,465 passed, 14 conditional skips, 84.07% coverage, exit 0 |
 | `C9-Q03` | Ruff lint plus worktree format ratchet | PASS: lint clean; 42 changed Python files; 0 new format-debt files |
 | `C9-Q04` | worktree mypy ratchet | PASS: 42 changed Python files; 0 new diagnostics |
 | `C9-Q05` | all 25 C9 PowerShell files parsed by the Windows PowerShell AST parser | PASS: 0 parse errors |
-| `C9-Q06` | Markdown links, documentation contracts and deterministic evidence governance | PASS: 61 Markdown files; 30 focused documentation tests; governance valid |
+| `C9-Q06` | Markdown links, documentation contracts and deterministic evidence governance | PASS: 61 Markdown files; 31 focused documentation tests; governance valid |
 | `C9-Q07` | Rust workspace check, format, Clippy with warnings denied, tests, doctests and rustdoc with warnings denied | PASS: 106 tests, 0 failed; doctests and documentation clean |
 | `C9-Q08` | locked Python and Rust dependency audits | PASS: no known Python vulnerability; 73 Rust dependencies scanned against 1,170 advisories with no vulnerability |
 | `C9-Q09` | historical C3/C4/C6/C7/C8 gates and evidence seals | PASS: prior unsupported-Chat and sealed-Work boundaries remain intact |
 | `C9-Q10` | whitespace and bounded credential-pattern review | PASS: no patch whitespace error, Runtime-key-shaped value or Tunnel-ID-shaped value; the sole assigned-secret-shaped match is an explicit synthetic cleanup fixture |
 | `C9-Q11` | post-publish Linux/Windows mypy portability correction for the Windows runtime handle | PASS: mypy with both `--platform linux` and `--platform win32`; 83 local-AI/runtime/config tests; Ruff and format checks clean |
 | `C9-Q12` | Windows CI dependency-manager version expansion | PASS: the PowerShell runner reads the pinned version through `$env:UV_VERSION`; focused documentation regression test, YAML parse, Ruff and whitespace checks clean |
+| `C9-Q13` | cross-runner security-test fixture normalization | PASS: 9 Git-boundary tests and 18 PowerShell hardening tests; synthetic POSIX executables are private before identity checks, the ACL test is isolated from an intentionally absent tunnel binary, multi-result `git.exe` discovery is scalarized, all 25 PowerShell files parse, Ruff and whitespace checks clean |
 
 One deliberately parallel full-suite attempt caused the existing
 `test_audit_anchor_cli` subprocess to return no diagnostic under concurrent

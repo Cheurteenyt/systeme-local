@@ -95,6 +95,7 @@ def test_git_helper_rejects_relative_and_hardlinked_executables(
     executable = tmp_path / ("git.exe" if os.name == "nt" else "git")
     alias = tmp_path / "git-alias.exe"
     executable.write_bytes(b"synthetic git executable")
+    executable.chmod(0o700)
     try:
         os.link(executable, alias)
     except OSError:
@@ -129,6 +130,7 @@ def test_git_helper_rejects_reparse_executable_identity(
 ) -> None:
     executable = tmp_path / ("git.exe" if os.name == "nt" else "git")
     executable.write_bytes(b"synthetic git executable")
+    executable.chmod(0o700)
     target_identity = (
         int(os.lstat(executable).st_dev),
         int(os.lstat(executable).st_ino),
