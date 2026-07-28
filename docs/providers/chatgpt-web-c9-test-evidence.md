@@ -119,8 +119,8 @@ contract described above. They do not increment any live counter.
 
 | ID | Validation | Result |
 |---|---|---|
-| `C9-Q01` | exact C9 matrix: `tests/test_c9_*.py` plus `tests/test_mcp_rich_result.py` | PASS: 325 passed, 8 conditional skips, 0 failed |
-| `C9-Q02` | complete Python suite with coverage | PASS: 1,465 passed, 14 conditional skips, 84.07% coverage, exit 0 |
+| `C9-Q01` | exact C9 matrix: `tests/test_c9_*.py` plus `tests/test_mcp_rich_result.py` | PASS: 332 passed, 8 conditional skips, 0 failed |
+| `C9-Q02` | complete Python suite with coverage | PASS: 1,472 passed, 14 conditional skips, 84.07% coverage, exit 0 |
 | `C9-Q03` | Ruff lint plus worktree format ratchet | PASS: lint clean; 42 changed Python files; 0 new format-debt files |
 | `C9-Q04` | worktree mypy ratchet | PASS: 42 changed Python files; 0 new diagnostics |
 | `C9-Q05` | all 25 C9 PowerShell files parsed by the Windows PowerShell AST parser | PASS: 0 parse errors |
@@ -131,7 +131,8 @@ contract described above. They do not increment any live counter.
 | `C9-Q10` | whitespace and bounded credential-pattern review | PASS: no patch whitespace error, Runtime-key-shaped value or Tunnel-ID-shaped value; the sole assigned-secret-shaped match is an explicit synthetic cleanup fixture |
 | `C9-Q11` | post-publish Linux/Windows mypy portability correction for the Windows runtime handle | PASS: mypy with both `--platform linux` and `--platform win32`; 83 local-AI/runtime/config tests; Ruff and format checks clean |
 | `C9-Q12` | Windows CI dependency-manager version expansion | PASS: the PowerShell runner reads the pinned version through `$env:UV_VERSION`; focused documentation regression test, YAML parse, Ruff and whitespace checks clean |
-| `C9-Q13` | cross-runner security-test fixture normalization | PASS: 9 Git-boundary tests and 18 PowerShell hardening tests; leaf-specific hardlink/reparse fixtures call the component validator directly so an unrelated untrusted CI temporary ancestor cannot mask the target assertion, synthetic POSIX executables are private, the ACL test is isolated from an intentionally absent tunnel binary, multi-result `git.exe` discovery is scalarized, all 25 PowerShell files parse, Ruff and whitespace checks clean |
+| `C9-Q13` | cross-runner security-test fixture normalization | PASS: 13 Git-boundary tests and 21 PowerShell hardening tests; leaf-specific hardlink/reparse fixtures call the component validator directly so an unrelated untrusted CI temporary ancestor cannot mask the target assertion, synthetic POSIX executables are private, the ACL test is isolated from an intentionally absent tunnel binary, multi-result `git.exe` discovery is scalarized, all 25 PowerShell files parse, Ruff and whitespace checks clean |
+| `C9-Q14` | Windows volume-root ACL parity and native host check | PASS: effective content-only rights and `InheritOnly` ACEs at a volume root cannot alter an already-protected descendant and are handled consistently by the Python and PowerShell validators; effective `Modify`, generic write, delete, ACL takeover and non-root content writes remain rejected. The focused ACL suite passed 34/34, native `C:\` admission passed, native `D:\` admission failed closed, all 25 PowerShell files parsed and the independent read-only review found no remaining security defect |
 
 One deliberately parallel full-suite attempt caused the existing
 `test_audit_anchor_cli` subprocess to return no diagnostic under concurrent
