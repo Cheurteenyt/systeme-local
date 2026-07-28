@@ -410,10 +410,19 @@ def test_provider_response_is_interactive_private_atomic_and_bounded() -> None:
 
 def test_native_runtime_observation_is_fresh_local_and_operator_attested() -> None:
     script = _text("New-C9LocalAIRuntimeObservation.ps1")
+    common = _text("C9.Common.psm1")
 
     assert "Get-NetTCPConnection -State Listen" in script
     assert '$listeners[0].LocalAddress -cne "127.0.0.1"' in script
     assert "Get-Process -Id $listeners[0].OwningProcess" in script
+    assert "Get-C9NativeRuntimeProductMetadata" in script
+    assert "$runtimeProcess.VersionInfo" not in script
+    assert "[System.Diagnostics.FileVersionInfo]::GetVersionInfo" in common
+    assert "Get-FileHash -LiteralPath $resolved -Algorithm SHA256" in common
+    assert '"unversioned-binary-sha256:$fallbackBinarySha256"' in common
+    assert "$receipt.product_name -cne $productName" in script
+    assert "$receipt.product_version -cne $productVersion" in script
+    assert "$receipt.executable_sha256 -cne" in script
     assert "commit-runtime-observation" in script
     assert "--executable-path" in script
     assert "--confirmed-native-runtime" in script

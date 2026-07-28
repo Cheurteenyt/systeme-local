@@ -1883,6 +1883,57 @@ function Get-C9Utf8Sha256 {
     }
 }
 
+function Get-C9NativeRuntimeProductMetadata {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$Path,
+        [Parameter(Mandatory = $true)]
+        [string]$FallbackName
+    )
+
+    $resolved = [System.IO.Path]::GetFullPath($Path)
+    Assert-C9NotReparsePoint -Path $resolved
+    if (-not (Test-Path -LiteralPath $resolved -PathType Leaf)) {
+        throw "The observed local-AI executable is unavailable."
+    }
+    $versionInfo = (
+        [System.Diagnostics.FileVersionInfo]::GetVersionInfo($resolved)
+    )
+    $productName = [string]$versionInfo.ProductName
+    if ([string]::IsNullOrWhiteSpace($productName)) {
+        $productName = $FallbackName
+    }
+    $productVersion = [string]$versionInfo.ProductVersion
+    if ([string]::IsNullOrWhiteSpace($productVersion)) {
+        $productVersion = [string]$versionInfo.FileVersion
+    }
+    $fallbackBinarySha256 = $null
+    if ([string]::IsNullOrWhiteSpace($productVersion)) {
+        $fallbackBinarySha256 = (
+            Get-FileHash -LiteralPath $resolved -Algorithm SHA256
+        ).Hash.ToLowerInvariant()
+        if ($fallbackBinarySha256 -notmatch "^[0-9a-f]{64}$") {
+            throw "The native local-AI binary fingerprint is unavailable."
+        }
+        $productVersion = "unversioned-binary-sha256:$fallbackBinarySha256"
+    }
+    $productName = $productName.Trim()
+    $productVersion = $productVersion.Trim()
+    if (
+        [string]::IsNullOrWhiteSpace($productName) -or
+        [string]::IsNullOrWhiteSpace($productVersion) -or
+        $productName.Length -gt 128 -or
+        $productVersion.Length -gt 128
+    ) {
+        throw "The native local-AI product metadata is outside the reviewed boundary."
+    }
+    return [pscustomobject]@{
+        product_name = $productName
+        product_version = $productVersion
+        fallback_binary_sha256 = $fallbackBinarySha256
+    }
+}
+
 function Invoke-C9LocalControl {
     param(
         [Parameter(Mandatory = $true)]
@@ -1983,6 +2034,7 @@ Export-ModuleMember -Function @(
     "Get-C9BuildCommit",
     "Get-C9GitExecutable",
     "Get-C9GitGlobalConfig",
+    "Get-C9NativeRuntimeProductMetadata",
     "Get-C9Python",
     "Get-C9RepositoryRoot",
     "Get-C9StateDirectory",

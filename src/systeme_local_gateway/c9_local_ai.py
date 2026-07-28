@@ -196,6 +196,11 @@ class C9LocalAIRuntimeObservation(_StrictModel):
             "lm-studio.exe",
         }:
             raise ValueError("LM Studio runtime observation has an unexpected executable")
+        unversioned_prefix = "unversioned-binary-sha256:"
+        if self.product_version.startswith(unversioned_prefix) and self.product_version != (
+            unversioned_prefix + self.executable_sha256
+        ):
+            raise ValueError("unversioned runtime label does not bind the executable")
         duration = self.expires_at - self.observed_at
         if (
             not timedelta(0)

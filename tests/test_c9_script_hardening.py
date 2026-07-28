@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 import json
 import os
 import shutil
@@ -320,6 +321,30 @@ def test_native_hardlink_count_detects_a_multi_link_leaf(tmp_path: Path) -> None
 
     assert completed.returncode == 0, completed.stderr + completed.stdout
     assert completed.stdout.strip() == "hardlink=detected"
+
+
+@pytest.mark.skipif(POWERSHELL is None, reason="Windows PowerShell is unavailable")
+def test_unversioned_native_runtime_uses_a_binary_bound_version(tmp_path: Path) -> None:
+    executable = tmp_path / "synthetic-unversioned-runtime.exe"
+    executable.write_bytes(b"synthetic-c9-unversioned-runtime")
+    expected_sha256 = hashlib.sha256(executable.read_bytes()).hexdigest()
+    module = _ps_literal(SCRIPT_ROOT / "C9.Common.psm1")
+    command = (
+        f"Import-Module {module} -Force; "
+        f"$metadata = Get-C9NativeRuntimeProductMetadata -Path {_ps_literal(executable)} "
+        "-FallbackName 'synthetic-runtime'; "
+        "$metadata | ConvertTo-Json -Compress"
+    )
+
+    completed = _powershell(command)
+
+    assert completed.returncode == 0, completed.stderr + completed.stdout
+    metadata = json.loads(completed.stdout)
+    assert metadata == {
+        "product_name": "synthetic-runtime",
+        "product_version": f"unversioned-binary-sha256:{expected_sha256}",
+        "fallback_binary_sha256": expected_sha256,
+    }
 
 
 def test_git_invocation_is_absolute_closed_and_configuration_neutralized() -> None:
