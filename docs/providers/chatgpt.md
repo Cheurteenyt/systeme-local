@@ -1,7 +1,10 @@
 # ChatGPT provider characterization
 
-Status: provider characterization plus deterministic lifecycle, context, attachment and ChatGPT MCP evidence foundations implemented; optional C0 live probe pending its manual ChatGPT Web gate
-Last reviewed: 2026-07-26
+Status: deterministic lifecycle, context, attachment and ChatGPT MCP evidence
+foundations implemented; C8 Work connectivity completed and revoked; C9
+Work-rich/Chat-manual attachment handoff validated offline, with all live
+proofs pending
+Last reviewed: 2026-07-28
 Cross-provider rules: [`../connectivity-model.md`](../connectivity-model.md)
 
 ## Purpose
@@ -27,7 +30,9 @@ Current UI labels, eligible plans, workspace permissions and publication steps a
 
 | Surface | Direction | Current project status | What it proves |
 |---|---|---|---|
-| ChatGPT custom MCP app | ChatGPT → local tools | Local loopback runtime and official-client smoke are implemented; remote ChatGPT connection is not implemented | ChatGPT can call approved MCP tools when an app is configured |
+| ChatGPT Work Plugin/MCP | ChatGPT → local tools | C8 proved two bounded probe calls and revoked the connection; C9 rich attachment delivery is offline-implemented and live-pending | Work can call only the locally admitted Plugin/MCP capability for the active grant |
+| normal Chat Plugin/MCP | ChatGPT → local tools | Blocked by the current official rule that Plugins are unavailable in Chat | No normal-Chat local-app claim is permitted |
+| normal Chat manual attachment handoff | user → ChatGPT Chat | Bounded private export, proof and attestation path verified offline; live proof pending | A correlated visible response may prove consumption of the exact operator-attached package, never a local app call |
 | OpenAI Responses API | local agent → OpenAI model | Not implemented; optional provider transport | Documented machine-to-machine turns, events, conversations and tools |
 | Visible ChatGPT web conversation initiated by the local agent | local agent → chatgpt.com chat | Research only; no supported contract is assumed | Nothing until a documented or explicitly supported mechanism is identified |
 | Interactive handoff | user ↔ ChatGPT web | Architecturally supported, not automated | A visible user can transfer a signed capsule |
@@ -435,9 +440,10 @@ digest, and five protected actions. Candidate profiles cannot authorize any
 action. `revalidation_due`, `expired`, `source_drift`, and `invalid` all fail
 closed independently of the support state.
 
-Current official documentation still makes Plugins unavailable in Chat, so
-custom/local MCP on native Chat remains `unsupported`. The detailed contract
-and exact future product gate are in
+The C3 evidence snapshot recorded at that phase classified custom/local MCP on
+native Chat as `unsupported`. That historical decision remains reproducible
+for C3 but must not be reported as the current product state without a new
+review. The detailed historical contract is in
 [`chatgpt-web-c3-evidence-lifecycle.md`](chatgpt-web-c3-evidence-lifecycle.md).
 
 ### Phase 15 — provider-bound runtime admission
@@ -467,10 +473,12 @@ bind the exact ChatGPT native Chat identity, C3 registry/profile digests,
 routes, anchors, normalized byte counts, fingerprints, semantic markers, and
 review dates.
 
-The first public acquisition found all four sources unchanged. It created only
-a review candidate and did not modify C3. ChatGPT Chat therefore remains
-`BLOCKED_BY_NO_OFFICIAL_CHAT_TOOL_INTERFACE`; C4 still denies all six actions
-and exposes zero tools.
+The first public acquisition found all four then-reviewed sections unchanged.
+It created only a review candidate and did not modify C3. At that C6 snapshot,
+ChatGPT Chat therefore remained
+`BLOCKED_BY_NO_OFFICIAL_CHAT_TOOL_INTERFACE`; C4 denied all six actions and
+exposed zero tools. This is historical C6 evidence, not a current C9
+availability observation.
 
 Drift, network/protocol failure, due or expired evidence, policy substitution,
 or output-path escape all fail closed. No raw document body is persisted and
@@ -522,6 +530,9 @@ Recheck these official sources before implementation because product availabilit
 - [Connect from ChatGPT](https://developers.openai.com/plugins/deploy/connect-chatgpt)
 - [Secure MCP Tunnels](https://developers.openai.com/api/docs/guides/secure-mcp-tunnels)
 - [Plugin authentication](https://developers.openai.com/plugins/build/auth)
+- [Plugin reference](https://developers.openai.com/plugins/reference)
+- [ChatGPT Plugins](https://learn.chatgpt.com/docs/plugins)
+- [Model Context Protocol](https://learn.chatgpt.com/docs/extend/mcp)
 
 ## C0 connectivity exception
 
@@ -544,10 +555,10 @@ records. They did not prove current official native Chat support, a durable
 final attestation, conversation discovery, production use, or write
 capability.
 
-C2 identified the official product-surface blocker. C3 owns the deterministic
+C2 identified the product-surface blocker in its reviewed snapshot. C3 owns the deterministic
 evidence lifecycle. C4 owns runtime admission. C5 preserved the reviewed stack
 through squash integration. C6 now retrieves bounded official sources and
-prepares review-only candidates without promotion. Current decisions deny
+prepares review-only candidates without promotion. Those historical decisions deny
 Runtime-key creation, Tunnel startup, Plugin creation, browser testing, and
 any ChatGPT action or tool-surface exposure. The historical C1 records remain
 evidence of bounded calls, not authority to bypass current official
@@ -573,9 +584,77 @@ capability, stopped both listeners, removed the Plugin connection, revoked the
 Runtime key, cleared process secrets and proved post-revocation
 unreachability.
 
-The exact verified success value is
+The exact verified historical success value is
 `COMPLETE_C8_TWO_WORK_CALLS_LIVE_CORRELATED_AND_REVOKED`.
-Native Chat stays `BLOCKED_BY_NO_OFFICIAL_CHAT_TOOL_INTERFACE`. Optional
-visible labels never prove an internal model ID, and a bounded success never
-claims regular-use readiness. See
+Its C8-native-Chat field stays
+`BLOCKED_BY_NO_OFFICIAL_CHAT_TOOL_INTERFACE`; C9 does not rewrite that sealed
+receipt and instead performs a fresh current-product test. Optional visible
+labels never prove an internal model ID, and a bounded success never claims
+regular-use readiness. See
 [`chatgpt-web-c8-work-live-validation.md`](chatgpt-web-c8-work-live-validation.md).
+
+### Phase 19 — bounded image and document handoff
+
+Status: `partial` — security, Work rich-content, private-export and asymmetric
+closeout paths passed consolidated offline validation; all three live proofs
+are pending.
+
+C9 is tracked by issue
+[#80](https://github.com/Cheurteenyt/systeme-local/issues/80) and descends from
+the immutable C8 evidence tag target
+`bb30b7989c2cbdaa688e0e9c34d8df71aea75cd5`. It verifies the accepted C8
+transport evidence without reusing its completed live grant.
+
+The exact live package is one generated synthetic PNG image plus one generated UTF-8
+text document. Each contains an independent random nonce. Explicit selection,
+sanitization and the existing canonical `AttachmentManifest` occur locally
+before a literal-loopback local AI reads the exact sanitized bytes. A fresh
+HMAC-bound observation commits the operator-declared native runtime, product,
+PID and privacy settings, the inspected executable digest and exact
+endpoint/model hashes. Its schema explicitly says that process identity and
+privacy settings are operator-attested rather than automatically verified.
+The local AI must reproduce both nonce commitments before either Web surface
+can be approved.
+
+The C9 adapter's `adapter_persistent_storage_used=false` describes only the
+adapter. Whether the local runtime logs or persists requests is a separate
+operator confirmation. An HTTP response alone cannot complete the evidence
+chain, but the signed observation does not independently prove a manual
+declaration.
+
+The qualifying Work delivery uses one reviewed read-only capability:
+`systeme_local_attachment_handoff(surface="work")`. After metadata-only local
+audit, its result expands into MCP `ImageContent` plus a text
+`EmbeddedResource`. Official schemas permit content arrays, but Work's
+interpretation of these exact blocks remains live-pending.
+
+Current official [plugin connection
+guidance](https://developers.openai.com/plugins/deploy/connect-chatgpt)
+must be read together with the current
+[Plugins](https://learn.chatgpt.com/docs/plugins) rule that Plugins are not
+available in Chat. C9 therefore never attempts or claims a normal-Chat
+Plugin/MCP call.
+
+After Work, the private short-lived export materializes the same sanitized
+package for one operator-performed file-picker handoff in one new normal Chat
+conversation. That proof may establish only visible manual transfer and
+two-nonce consumption. It cannot establish an app, MCP tool, local endpoint,
+same internal app ID or autonomous delivery. C9 uses no DOM/private API and
+forbids automatic Chat-to-Work switching.
+
+The live limit is one new synthetic Work task followed by one new synthetic
+normal Chat conversation, using only the generated PNG + TXT fixture. Both
+primary counters are currently `0/1`; installed local-runtime inference is
+also unexecuted. A completion claim requires one Work rich receipt and one
+normal-Chat manual-handoff receipt over equal package commitments, followed
+by authority cleanup, listener shutdown, Work Plugin removal, operator
+Runtime-key revocation and Work/control post-revocation unreachability.
+
+Real ChatGPT upload capability for an outbound local-agent surface remains
+`unknown`. The manual Chat handoff is operator-assisted, not an autonomous
+outbound provider adapter; neither C9 path proves regular-use readiness.
+
+See
+[`chatgpt-web-c9-attachment-handoff.md`](chatgpt-web-c9-attachment-handoff.md)
+and
+[`chatgpt-web-c9-test-evidence.md`](chatgpt-web-c9-test-evidence.md).
