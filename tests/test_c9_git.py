@@ -100,11 +100,14 @@ def test_git_helper_rejects_relative_and_hardlinked_executables(
         os.link(executable, alias)
     except OSError:
         pytest.skip("hard links are unavailable on this filesystem")
-    monkeypatch.setenv("SLG_C9_GIT_EXECUTABLE", os.fspath(executable))
     monkeypatch.setattr(c9_git, "_windows_acl_is_trusted", lambda *_args, **_kwargs: None)
 
     with pytest.raises(c9_git.C9GitError, match="singly-linked"):
-        c9_git.resolve_c9_git_executable()
+        c9_git._assert_trusted_path_component(
+            executable,
+            executable=True,
+            volume_root=False,
+        )
 
 
 @pytest.mark.skipif(os.name != "nt", reason="Git for Windows layout")
@@ -147,12 +150,15 @@ def test_git_helper_rejects_reparse_executable_identity(
             == target_identity
         )
 
-    monkeypatch.setenv("SLG_C9_GIT_EXECUTABLE", os.fspath(executable))
     monkeypatch.setattr(c9_git, "_is_reparse", mark_executable)
     monkeypatch.setattr(c9_git, "_windows_acl_is_trusted", lambda *_args, **_kwargs: None)
 
     with pytest.raises(c9_git.C9GitError, match="reparse"):
-        c9_git.resolve_c9_git_executable()
+        c9_git._assert_trusted_path_component(
+            executable,
+            executable=True,
+            volume_root=False,
+        )
 
 
 def test_windows_acl_check_rejects_untrusted_write_ace(
