@@ -12,6 +12,12 @@ Import-Module (Join-Path $PSScriptRoot "C9.Common.psm1") -Force
 $root = Get-C9RepositoryRoot
 $state = Get-C9StateDirectory
 $python = Join-Path $root ".venv\Scripts\python.exe"
+$pythonRuntimeExecutables = @($python)
+try {
+    $pythonRuntimeExecutables = @(Get-C9PythonRuntimeExecutables)
+} catch {
+    $pythonRuntimeExecutables = @($python)
+}
 $tunnel = Join-Path $root ".systeme-local\c0\bin\tunnel-client.exe"
 $hadApiKey = -not [string]::IsNullOrWhiteSpace(
     [Environment]::GetEnvironmentVariable("CONTROL_PLANE_API_KEY", "Process")
@@ -170,7 +176,7 @@ try {
         },
         [pscustomobject]@{
             name = "facade"
-            paths = @($python)
+            paths = $pythonRuntimeExecutables
         }
     )) {
         try {

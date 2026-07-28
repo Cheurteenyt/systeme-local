@@ -1347,6 +1347,23 @@ function Get-C9Python {
     return $python
 }
 
+function Get-C9PythonRuntimeExecutables {
+    $launcher = [System.IO.Path]::GetFullPath((Get-C9Python))
+    $base = [System.IO.Path]::GetFullPath(
+        (Join-Path (Get-C9PythonBaseDirectory) "python.exe")
+    )
+    if (-not (Test-Path -LiteralPath $base -PathType Leaf)) {
+        throw "The repository C9 base-Python runtime is unavailable."
+    }
+    Assert-C9NotReparsePoint -Path $base
+    $paths = New-Object "System.Collections.Generic.HashSet[string]" (
+        [System.StringComparer]::OrdinalIgnoreCase
+    )
+    [void]$paths.Add($launcher)
+    [void]$paths.Add($base)
+    return @($paths)
+}
+
 function Get-C9AdmissionDecision {
     Assert-C9AuditKeyEnvironment
     $root = Get-C9RepositoryRoot
@@ -2036,6 +2053,7 @@ Export-ModuleMember -Function @(
     "Get-C9GitGlobalConfig",
     "Get-C9NativeRuntimeProductMetadata",
     "Get-C9Python",
+    "Get-C9PythonRuntimeExecutables",
     "Get-C9RepositoryRoot",
     "Get-C9StateDirectory",
     "Get-C9Utf8Sha256",
