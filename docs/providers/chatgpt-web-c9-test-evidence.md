@@ -1,7 +1,8 @@
 # C9 test and evidence ledger
 
 Status: `partial` — the asymmetric Work-rich/Chat-manual implementation is
-aligned and consolidated offline validation passed; all live proofs are pending
+aligned, the consolidated suite and a non-qualifying installed-runtime
+preflight passed, and all cycle-bound live proofs are pending
 
 Issue: [#80](https://github.com/Cheurteenyt/systeme-local/issues/80)
 
@@ -17,6 +18,7 @@ Decision:
 |---|---|
 | `implemented` | code or an operator surface exists in the current C9 tree |
 | `offline_verified` | a named local test exercised the behavior; no provider result is implied |
+| `preflight_verified` | a real installed runtime passed a local-only readiness cycle that was then reset; it does not increment a cycle-bound success counter |
 | `live_pending` | a real installed runtime or visible ChatGPT observation is still required |
 | `blocked` | a required live capability was unavailable or an invariant failed |
 
@@ -113,26 +115,30 @@ development history only and must not be copied into the final evidence table.
 
 ## Consolidated offline validation snapshot
 
-The following local results were obtained on 2026-07-28 immediately before
-freezing the reviewed draft-PR commit. They establish only the offline
-contract described above. They do not increment any live counter.
+The following local results were obtained on 2026-07-28 from the current
+reviewed draft-PR snapshot. They establish the offline contract described
+above. The installed-runtime row is explicitly a reset preflight and does not
+increment any cycle-bound success counter.
 
 | ID | Validation | Result |
 |---|---|---|
-| `C9-Q01` | exact C9 matrix: `tests/test_c9_*.py` plus `tests/test_mcp_rich_result.py` | PASS: 332 passed, 8 conditional skips, 0 failed |
-| `C9-Q02` | complete Python suite with coverage | PASS: 1,472 passed, 14 conditional skips, 84.07% coverage, exit 0 |
-| `C9-Q03` | Ruff lint plus worktree format ratchet | PASS: lint clean; 42 changed Python files; 0 new format-debt files |
-| `C9-Q04` | worktree mypy ratchet | PASS: 42 changed Python files; 0 new diagnostics |
+| `C9-Q01` | exact C9 matrix: `tests/test_c9_*.py` plus `tests/test_mcp_rich_result.py` | PASS: 339 passed, 8 conditional skips, 0 failed |
+| `C9-Q02` | complete Python suite with coverage | PASS: 1,479 passed, 14 conditional skips, 84.10% coverage, exit 0 |
+| `C9-Q03` | Ruff lint plus worktree format ratchet | PASS: lint clean; 42 current legacy format-debt files; 2 changed Python files; 0 new debt files |
+| `C9-Q04` | worktree mypy ratchet | PASS: 2 changed Python files; 0 new diagnostics |
 | `C9-Q05` | all 25 C9 PowerShell files parsed by the Windows PowerShell AST parser | PASS: 0 parse errors |
 | `C9-Q06` | Markdown links, documentation contracts and deterministic evidence governance | PASS: 61 Markdown files; 31 focused documentation tests; governance valid |
 | `C9-Q07` | Rust workspace check, format, Clippy with warnings denied, tests, doctests and rustdoc with warnings denied | PASS: 106 tests, 0 failed; doctests and documentation clean |
 | `C9-Q08` | locked Python and Rust dependency audits | PASS: no known Python vulnerability; 73 Rust dependencies scanned against 1,170 advisories with no vulnerability |
 | `C9-Q09` | historical C3/C4/C6/C7/C8 gates and evidence seals | PASS: prior unsupported-Chat and sealed-Work boundaries remain intact |
 | `C9-Q10` | whitespace and bounded credential-pattern review | PASS: no patch whitespace error, Runtime-key-shaped value or Tunnel-ID-shaped value; the sole assigned-secret-shaped match is an explicit synthetic cleanup fixture |
-| `C9-Q11` | post-publish Linux/Windows mypy portability correction for the Windows runtime handle | PASS: mypy with both `--platform linux` and `--platform win32`; 83 local-AI/runtime/config tests; Ruff and format checks clean |
+| `C9-Q11` | post-publish Linux/Windows mypy portability correction for the Windows runtime handle | PASS: mypy with both `--platform linux` and `--platform win32`; 84 local-AI/runtime/config tests; Ruff and format checks clean |
 | `C9-Q12` | Windows CI dependency-manager version expansion | PASS: the PowerShell runner reads the pinned version through `$env:UV_VERSION`; focused documentation regression test, YAML parse, Ruff and whitespace checks clean |
-| `C9-Q13` | cross-runner security-test fixture normalization | PASS: 13 Git-boundary tests and 21 PowerShell hardening tests; leaf-specific hardlink/reparse fixtures call the component validator directly so an unrelated untrusted CI temporary ancestor cannot mask the target assertion, synthetic POSIX executables are private, the ACL test is isolated from an intentionally absent tunnel binary, multi-result `git.exe` discovery is scalarized, all 25 PowerShell files parse, Ruff and whitespace checks clean |
+| `C9-Q13` | cross-runner security-test fixture normalization | PASS: 13 Git-boundary tests and 25 PowerShell hardening tests; leaf-specific hardlink/reparse fixtures call the component validator directly so an unrelated untrusted CI temporary ancestor cannot mask the target assertion, synthetic POSIX executables are private, the ACL test is isolated from an intentionally absent tunnel binary, multi-result `git.exe` discovery is scalarized, all 25 PowerShell files parse, Ruff and whitespace checks clean |
 | `C9-Q14` | Windows volume-root ACL parity and native host check | PASS: effective content-only rights and `InheritOnly` ACEs at a volume root cannot alter an already-protected descendant and are handled consistently by the Python and PowerShell validators; effective `Modify`, generic write, delete, ACL takeover and non-root content writes remain rejected. The focused ACL suite passed 34/34, native `C:\` admission passed, native `D:\` admission failed closed, all 25 PowerShell files parsed and the independent read-only review found no remaining security defect |
+| `C9-Q15` | native Windows runtime portability and listener ownership | PASS: an unversioned `llama-server.exe` is bound by its SHA-256 fallback version, lower-case digest text cannot be mistaken for a clear C9 nonce, and the façade listener must belong to the exact verified virtual-environment launcher or its exact base-Python child |
+| `C9-Q16` | real installed multimodal local-AI preflight, followed by local-only reset | PREFLIGHT PASS: `other_reviewed_native` `llama-server` executable SHA-256 `143fd393d73813f88c53f68f7d51114bb1241b4db285e21c68f966602f6eecda`; visible model label `qwen2.5-vl-7b-instruct`; ten independent PNG/TXT nonce checks passed 10/10 with mean 2.562 s and maximum 2.750 s; the exact C9 stage then returned HTTP 200 in 2.985 s with two attachments and a bound local-AI receipt; stop closed the façade and local-only reset removed the state; no Tunnel, Plugin, Work or Chat action occurred |
+| `C9-Q17` | bounded local-control failure diagnostics | PASS: only schema-checked HTTP 400/404/409 metadata may be surfaced; unexpected content type, oversized or malformed JSON, extra fields, unsafe reasons, exception text, server errors and response-less failures remain hidden; 38 focused control-API and PowerShell-hardening tests passed |
 
 One deliberately parallel full-suite attempt caused the existing
 `test_audit_anchor_cli` subprocess to return no diagnostic under concurrent
@@ -173,14 +179,18 @@ They cannot establish:
 
 ## Live evidence status
 
-No fresh C9 browser authorization, Runtime key, Tunnel, Plugin connection,
-manual Chat export or provider action is recorded.
+No fresh cycle-bound C9 authorization receipt, Runtime key, Tunnel, Plugin
+connection, manual Chat export or provider action is recorded. The Q16
+preflight was fully stopped and reset, so it cannot be promoted into the
+required single live cycle.
 
 | Live item | Current value |
 |---|---|
 | fresh C9 authorization accepting both transport legs | absent |
-| installed-runtime observation | `0/1` |
-| real local-AI inference | `0/1` |
+| local-only installed-runtime preflight | `1/1`, reset and non-qualifying |
+| local-only real local-AI stage preflight | `1/1`, reset and non-qualifying |
+| cycle-bound installed-runtime observation | `0/1` |
+| cycle-bound real local-AI inference | `0/1` |
 | Runtime key created | `false` |
 | Tunnel started | `false` |
 | temporary Work Plugin/MCP connection created | `false` |
@@ -197,6 +207,12 @@ manual Chat export or provider action is recorded.
 | C9 final attestation | absent |
 | C9 repository seal | absent |
 | C9 success claim | absent |
+
+One non-qualifying browser reconnaissance opened ChatGPT directly before any
+C9 cycle existed. ChatGPT automatically exposed its expanded sidebar. No
+conversation was opened and no title, identifier or browser-private value was
+recorded in repository evidence, but the visit is excluded from C9 because
+the strict cycle must begin with the sidebar collapsed and history untouched.
 
 ## Required qualifying live evidence
 
@@ -329,11 +345,12 @@ Never commit:
 
 ## Current conclusion
 
-C9 currently has an aligned and offline-testable product contract, not a live
-success.
+C9 currently has an aligned and fully tested product contract plus a real
+installed-runtime preflight, not a cycle-bound live success.
 Normal Chat is a bounded manual handoff surface, not a Plugin/MCP surface.
-Work rich-host behavior, the installed local runtime and both visible
-provider consumptions remain live questions.
+Work rich-host behavior and both visible provider consumptions remain live
+questions; the installed runtime must also be observed again inside that same
+fresh cycle.
 
 The next legitimate transition is:
 

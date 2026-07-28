@@ -104,6 +104,101 @@ def test_minimal_environment_is_narrow_and_restored_without_disclosure() -> None
 
 
 @pytest.mark.skipif(POWERSHELL is None, reason="Windows PowerShell is unavailable")
+def test_local_control_http_failure_metadata_is_strictly_bounded() -> None:
+    common = _text("C9.Common.psm1")
+    module = _ps_literal(SCRIPT_ROOT / "C9.Common.psm1")
+    helper = common.split(
+        "function Get-C9SafeLocalControlHttpFailure",
+        maxsplit=1,
+    )[1].split("function Invoke-C9LocalControl", maxsplit=1)[0]
+    assert "$failure = Get-C9SafeLocalControlHttpFailure -ErrorRecord $_" in common
+    assert "$ErrorRecord.ErrorDetails.Message" in helper
+    assert "GetResponseStream" not in helper
+    assert "Exception.Message" not in helper
+    assert "$message.Length -gt 256" in helper
+    assert '$contentType -cnotmatch "^application/json' in helper
+
+    command = (
+        f"$module = Import-Module {module} -Force -PassThru; "
+        "function New-C9FailureRecord { param($Code,$ContentType,$Details,$WithResponse=$true); "
+        "$exception = [System.Exception]::new('SENTINEL_SECRET_EXCEPTION'); "
+        "if ($WithResponse) { $exception | Add-Member -NotePropertyName Response "
+        "-NotePropertyValue ([pscustomobject]@{ StatusCode=$Code; ContentType=$ContentType }) }; "
+        "$record = [System.Management.Automation.ErrorRecord]::new("
+        "$exception,'c9-test',[System.Management.Automation.ErrorCategory]::InvalidOperation,$null); "
+        "$record.ErrorDetails = [System.Management.Automation.ErrorDetails]::new($Details); "
+        "return $record }; "
+        "$longBody = 'x' * 257; "
+        "$cases = @("
+        "[pscustomobject]@{Name='safe409';Code=409;Type='application/json';"
+        'Body=\'{"status":"rejected","reason":"nonce_mismatch"}\';Response=$true},'
+        "[pscustomobject]@{Name='safe400';Code=400;Type='application/json; charset=utf-8';"
+        'Body=\'{"status":"invalid_request"}\';Response=$true},'
+        "[pscustomobject]@{Name='safe404';Code=404;Type='application/json';"
+        'Body=\'{"status":"not_found"}\';Response=$true},'
+        "[pscustomobject]@{Name='mismatch';Code=409;Type='application/json';"
+        'Body=\'{"status":"not_found","reason":"nonce_mismatch"}\';Response=$true},'
+        "[pscustomobject]@{Name='extra';Code=409;Type='application/json';"
+        'Body=\'{"status":"rejected","reason":"nonce_mismatch",'
+        '"detail":"SENTINEL_SECRET_BODY"}\';Response=$true},'
+        "[pscustomobject]@{Name='unsafe_reason';Code=409;Type='application/json';"
+        'Body=\'{"status":"rejected","reason":"C:/SENTINEL_SECRET_PATH"}\';Response=$true},'
+        "[pscustomobject]@{Name='long';Code=409;Type='application/json';"
+        "Body=$longBody;Response=$true},"
+        "[pscustomobject]@{Name='non_json';Code=409;Type='application/json';"
+        "Body='SENTINEL_SECRET_NON_JSON';Response=$true},"
+        "[pscustomobject]@{Name='wrong_type';Code=409;Type='text/plain';"
+        'Body=\'{"status":"rejected","reason":"nonce_mismatch"}\';Response=$true},'
+        "[pscustomobject]@{Name='server_error';Code=500;Type='application/json';"
+        'Body=\'{"status":"rejected","reason":"nonce_mismatch"}\';Response=$true},'
+        "[pscustomobject]@{Name='no_response';Code=0;Type='';"
+        "Body='SENTINEL_SECRET_NO_RESPONSE';Response=$false}"
+        "); "
+        "$output = [ordered]@{}; "
+        "foreach ($case in $cases) { "
+        "$record = New-C9FailureRecord $case.Code $case.Type $case.Body $case.Response; "
+        "$output[$case.Name] = & $module { param($value) "
+        "Get-C9SafeLocalControlHttpFailure -ErrorRecord $value } $record }; "
+        "$output | ConvertTo-Json -Compress -Depth 6"
+    )
+
+    completed = _powershell(command)
+
+    assert completed.returncode == 0, completed.stderr + completed.stdout
+    rendered = completed.stdout.strip()
+    assert "SENTINEL_SECRET" not in rendered
+    assert "SENTINEL_SECRET" not in completed.stderr
+    result = json.loads(rendered)
+    assert result["safe409"] == {
+        "http_status": 409,
+        "api_status": "rejected",
+        "reason": "nonce_mismatch",
+    }
+    assert result["safe400"] == {
+        "http_status": 400,
+        "api_status": "invalid_request",
+        "reason": None,
+    }
+    assert result["safe404"] == {
+        "http_status": 404,
+        "api_status": "not_found",
+        "reason": None,
+    }
+    code_only = {"http_status": 409, "api_status": None, "reason": None}
+    for name in (
+        "mismatch",
+        "extra",
+        "unsafe_reason",
+        "long",
+        "non_json",
+        "wrong_type",
+    ):
+        assert result[name] == code_only
+    assert result["server_error"] is None
+    assert result["no_response"] is None
+
+
+@pytest.mark.skipif(POWERSHELL is None, reason="Windows PowerShell is unavailable")
 def test_facade_rejects_control_plane_and_python_injection_environment() -> None:
     module = _ps_literal(SCRIPT_ROOT / "C9.Common.psm1")
     command = (
