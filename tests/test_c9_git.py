@@ -161,16 +161,30 @@ def test_git_helper_rejects_reparse_executable_identity(
         )
 
 
-def test_windows_acl_check_rejects_untrusted_write_ace(
+@pytest.mark.parametrize(
+    ("mask", "flags", "volume_root", "should_reject"),
+    (
+        (0x00000002, 0, False, True),
+        (0x00000004, 0, True, False),
+        (0x10000000, 8, True, False),
+        (0x00010000, 0, True, True),
+        (0x40000000, 0, True, True),
+    ),
+)
+def test_windows_acl_check_applies_root_and_inherit_only_semantics(
     monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,
+    mask: int,
+    flags: int,
+    volume_root: bool,
+    should_reject: bool,
 ) -> None:
     class FakeAcl:
         def GetAceCount(self) -> int:
             return 1
 
         def GetAce(self, _index: int) -> tuple[tuple[int, int], int, str]:
-            return ((0, 0), 0x00000002, "S-1-5-11")
+            return ((0, flags), mask, "S-1-5-11")
 
     class FakeDescriptor:
         def GetSecurityDescriptorOwner(self) -> str:
@@ -211,8 +225,11 @@ def test_windows_acl_check_rejects_untrusted_write_ace(
 
     monkeypatch.setattr(c9_git.importlib, "import_module", fake_import)
 
-    with pytest.raises(c9_git.C9GitError, match="ordinary Windows principal"):
-        c9_git._windows_acl_is_trusted(tmp_path, volume_root=False)
+    if should_reject:
+        with pytest.raises(c9_git.C9GitError, match="ordinary Windows principal"):
+            c9_git._windows_acl_is_trusted(tmp_path, volume_root=volume_root)
+    else:
+        c9_git._windows_acl_is_trusted(tmp_path, volume_root=volume_root)
 
 
 def test_git_helper_enforces_combined_output_limit() -> None:

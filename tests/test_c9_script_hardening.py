@@ -152,6 +152,10 @@ def test_trusted_execution_boundary_is_read_only_and_complete() -> None:
     assert "Set-Acl" not in common
     assert "icacls" not in common
     assert "another ordinary principal" in common
+    assert "takeover_write_mask" in common
+    assert "content_write_mask" in common
+    assert "GetPathRoot" in common
+    assert "PropagationFlags]::InheritOnly" in common
     assert "Assert-C9TrustedExecutionBoundary" in prerequisites
     assert "Assert-C9TrustedExecutionBoundary" in facade
     assert "Assert-C9TrustedExecutionBoundary" in tunnel
@@ -168,6 +172,7 @@ def test_trusted_execution_boundary_rejects_a_mock_writable_ordinary_sid() -> No
         "$rule = [pscustomobject]@{"
         "AccessControlType=[Security.AccessControl.AccessControlType]::Allow;"
         "FileSystemRights=[Security.AccessControl.FileSystemRights]::Modify;"
+        "PropagationFlags=[Security.AccessControl.PropagationFlags]::None;"
         "IdentityReference='S-1-1-0'}; "
         "$provider = { param($path) "
         "if ([IO.Path]::GetFullPath($path).Equals($child, "
@@ -189,6 +194,112 @@ def test_trusted_execution_boundary_rejects_a_mock_writable_ordinary_sid() -> No
 
     assert completed.returncode == 0, completed.stderr + completed.stdout
     assert completed.stdout.strip() == "ordinary_write=rejected"
+
+
+@pytest.mark.skipif(POWERSHELL is None, reason="Windows PowerShell is unavailable")
+def test_trusted_execution_volume_root_allows_append_and_ignores_inherit_only() -> None:
+    module = _ps_literal(SCRIPT_ROOT / "C9.Common.psm1")
+    command = (
+        f"$module = Import-Module {module} -Force -PassThru; "
+        "$sid = [Security.Principal.WindowsIdentity]::GetCurrent().User.Value; "
+        "$root = [IO.Path]::GetPathRoot([Environment]::SystemDirectory); "
+        "$append = [pscustomobject]@{"
+        "AccessControlType=[Security.AccessControl.AccessControlType]::Allow;"
+        "FileSystemRights=[Security.AccessControl.FileSystemRights]::AppendData;"
+        "PropagationFlags=[Security.AccessControl.PropagationFlags]::None;"
+        "IdentityReference='S-1-5-11'}; "
+        "$inheritOnly = [pscustomobject]@{"
+        "AccessControlType=[Security.AccessControl.AccessControlType]::Allow;"
+        "FileSystemRights=[Security.AccessControl.FileSystemRights]::FullControl;"
+        "PropagationFlags=[Security.AccessControl.PropagationFlags]::InheritOnly;"
+        "IdentityReference='S-1-1-0'}; "
+        "$provider = { param($path) [pscustomobject]@{"
+        "Owner=$sid;Access=@($append,$inheritOnly)} }.GetNewClosure(); "
+        "& $module { param($target,$aclProvider) "
+        "$context = Get-C9TrustedAclContext; "
+        "[void](Assert-C9TrustedExecutionObject -Path $target "
+        "-AclContext $context -AclProvider $aclProvider) "
+        "} $root $provider; "
+        "'volume_root_content_append=accepted'"
+    )
+
+    completed = _powershell(command)
+
+    assert completed.returncode == 0, completed.stderr + completed.stdout
+    assert completed.stdout.strip() == "volume_root_content_append=accepted"
+
+
+@pytest.mark.skipif(POWERSHELL is None, reason="Windows PowerShell is unavailable")
+def test_trusted_execution_volume_root_rejects_takeover_rights() -> None:
+    module = _ps_literal(SCRIPT_ROOT / "C9.Common.psm1")
+    command = (
+        f"$module = Import-Module {module} -Force -PassThru; "
+        "$sid = [Security.Principal.WindowsIdentity]::GetCurrent().User.Value; "
+        "$root = [IO.Path]::GetPathRoot([Environment]::SystemDirectory); "
+        "$rights = @("
+        "[Security.AccessControl.FileSystemRights]::Modify,"
+        "[Security.AccessControl.FileSystemRights]::TakeOwnership,"
+        "[int32]0xE0010000); "
+        "foreach ($right in $rights) { "
+        "$rule = [pscustomobject]@{"
+        "AccessControlType=[Security.AccessControl.AccessControlType]::Allow;"
+        "FileSystemRights=$right;"
+        "PropagationFlags=[Security.AccessControl.PropagationFlags]::None;"
+        "IdentityReference='S-1-5-11'}; "
+        "$provider = { param($path) [pscustomobject]@{"
+        "Owner=$sid;Access=@($rule)} }.GetNewClosure(); "
+        "$rejected = $false; "
+        "try { & $module { param($target,$aclProvider) "
+        "$context = Get-C9TrustedAclContext; "
+        "[void](Assert-C9TrustedExecutionObject -Path $target "
+        "-AclContext $context -AclProvider $aclProvider) "
+        "} $root $provider } catch { "
+        "$rejected = $true; "
+        "if ($_.Exception.Message -notlike ('*' + $root + '*')) { exit 42 } "
+        "}; "
+        "if (-not $rejected) { exit 41 } "
+        "}; "
+        "'volume_root_takeover=rejected'"
+    )
+
+    completed = _powershell(command)
+
+    assert completed.returncode == 0, completed.stderr + completed.stdout
+    assert completed.stdout.strip() == "volume_root_takeover=rejected"
+
+
+@pytest.mark.skipif(POWERSHELL is None, reason="Windows PowerShell is unavailable")
+def test_trusted_execution_non_root_rejects_content_append() -> None:
+    module = _ps_literal(SCRIPT_ROOT / "C9.Common.psm1")
+    command = (
+        f"$module = Import-Module {module} -Force -PassThru; "
+        "$sid = [Security.Principal.WindowsIdentity]::GetCurrent().User.Value; "
+        "$child = [IO.Path]::GetFullPath((Join-Path "
+        "(Get-C9RepositoryRoot) 'src\\systeme_local_gateway')); "
+        "$rule = [pscustomobject]@{"
+        "AccessControlType=[Security.AccessControl.AccessControlType]::Allow;"
+        "FileSystemRights=[Security.AccessControl.FileSystemRights]::AppendData;"
+        "PropagationFlags=[Security.AccessControl.PropagationFlags]::None;"
+        "IdentityReference='S-1-5-11'}; "
+        "$provider = { param($path) [pscustomobject]@{"
+        "Owner=$sid;Access=@($rule)} }.GetNewClosure(); "
+        "$rejected = $false; "
+        "try { & $module { param($target,$aclProvider) "
+        "$context = Get-C9TrustedAclContext; "
+        "[void](Assert-C9TrustedExecutionObject -Path $target "
+        "-AclContext $context -AclProvider $aclProvider) "
+        "} $child $provider } catch { "
+        "$rejected = $true; "
+        "if ($_.Exception.Message -notlike ('*' + $child + '*')) { exit 42 } "
+        "}; "
+        "if (-not $rejected) { exit 41 }; "
+        "'non_root_content_append=rejected'"
+    )
+
+    completed = _powershell(command)
+
+    assert completed.returncode == 0, completed.stderr + completed.stdout
+    assert completed.stdout.strip() == "non_root_content_append=rejected"
 
 
 @pytest.mark.skipif(POWERSHELL is None, reason="Windows PowerShell is unavailable")

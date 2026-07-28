@@ -926,14 +926,19 @@ function Get-C9TrustedAclContext {
     return [pscustomobject]@{
         trusted_sids = $trusted
         sid_cache = @{}
-        write_mask = (
-            [Security.AccessControl.FileSystemRights]::Write -bor
-            [Security.AccessControl.FileSystemRights]::Modify -bor
-            [Security.AccessControl.FileSystemRights]::FullControl -bor
-            [Security.AccessControl.FileSystemRights]::Delete -bor
-            [Security.AccessControl.FileSystemRights]::DeleteSubdirectoriesAndFiles -bor
-            [Security.AccessControl.FileSystemRights]::ChangePermissions -bor
-            [Security.AccessControl.FileSystemRights]::TakeOwnership
+        takeover_write_mask = (
+            [uint64][Security.AccessControl.FileSystemRights]::Delete -bor
+            [uint64][Security.AccessControl.FileSystemRights]::DeleteSubdirectoriesAndFiles -bor
+            [uint64][Security.AccessControl.FileSystemRights]::ChangePermissions -bor
+            [uint64][Security.AccessControl.FileSystemRights]::TakeOwnership -bor
+            [uint64]0x40000000 -bor
+            [uint64]0x10000000
+        )
+        content_write_mask = (
+            [uint64][Security.AccessControl.FileSystemRights]::WriteData -bor
+            [uint64][Security.AccessControl.FileSystemRights]::AppendData -bor
+            [uint64][Security.AccessControl.FileSystemRights]::WriteExtendedAttributes -bor
+            [uint64][Security.AccessControl.FileSystemRights]::WriteAttributes
         )
     }
 }
@@ -1009,11 +1014,37 @@ function Assert-C9TrustedExecutionObject {
     if (-not $AclContext.trusted_sids.Contains($ownerSid)) {
         throw "C9 execution target has an untrusted owner: $resolved"
     }
+    $volumeRoot = [System.IO.Path]::GetPathRoot($resolved)
+    $isVolumeRoot = $resolved.Equals(
+        $volumeRoot,
+        [System.StringComparison]::OrdinalIgnoreCase
+    )
+    $dangerousMask = [uint64]$AclContext.takeover_write_mask
+    if (-not $isVolumeRoot) {
+        $dangerousMask = (
+            $dangerousMask -bor
+            [uint64]$AclContext.content_write_mask
+        )
+    }
     foreach ($rule in @($acl.Access)) {
         if (
             $rule.AccessControlType -ne
-            [Security.AccessControl.AccessControlType]::Allow -or
-            (($rule.FileSystemRights -band $AclContext.write_mask) -eq 0)
+            [Security.AccessControl.AccessControlType]::Allow
+        ) {
+            continue
+        }
+        if (
+            ($rule.PropagationFlags -band
+                [Security.AccessControl.PropagationFlags]::InheritOnly) -ne 0
+        ) {
+            continue
+        }
+        $ruleRights = [uint64](
+            [int64]$rule.FileSystemRights -band
+            [int64]0xFFFFFFFFL
+        )
+        if (
+            (($ruleRights -band $dangerousMask) -eq 0)
         ) {
             continue
         }
