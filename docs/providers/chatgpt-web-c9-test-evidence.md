@@ -130,6 +130,7 @@ contract described above. They do not increment any live counter.
 | `C9-Q09` | historical C3/C4/C6/C7/C8 gates and evidence seals | PASS: prior unsupported-Chat and sealed-Work boundaries remain intact |
 | `C9-Q10` | whitespace and bounded credential-pattern review | PASS: no patch whitespace error, Runtime-key-shaped value or Tunnel-ID-shaped value; the sole assigned-secret-shaped match is an explicit synthetic cleanup fixture |
 | `C9-Q11` | post-publish Linux/Windows mypy portability correction for the Windows runtime handle | PASS: mypy with both `--platform linux` and `--platform win32`; 83 local-AI/runtime/config tests; Ruff and format checks clean |
+| `C9-Q12` | Windows CI dependency-manager version expansion | PASS: the PowerShell runner reads the pinned version through `$env:UV_VERSION`; focused documentation regression test, YAML parse, Ruff and whitespace checks clean |
 
 One deliberately parallel full-suite attempt caused the existing
 `test_audit_anchor_cli` subprocess to return no diagnostic under concurrent
