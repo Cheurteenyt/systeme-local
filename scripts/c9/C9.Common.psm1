@@ -1951,6 +1951,94 @@ function Get-C9NativeRuntimeProductMetadata {
     }
 }
 
+function Get-C9SafeLocalControlHttpFailure {
+    param(
+        [Parameter(Mandatory = $true)]
+        [System.Management.Automation.ErrorRecord]$ErrorRecord
+    )
+
+    $responseProperty = $ErrorRecord.Exception.PSObject.Properties["Response"]
+    if ($null -eq $responseProperty -or $null -eq $responseProperty.Value) {
+        return $null
+    }
+    $response = $responseProperty.Value
+    try {
+        $httpStatus = [int]$response.StatusCode
+    } catch {
+        return $null
+    }
+    if ($httpStatus -lt 400 -or $httpStatus -gt 499) {
+        return $null
+    }
+
+    $failure = [ordered]@{
+        http_status = $httpStatus
+        api_status = $null
+        reason = $null
+    }
+    $contentType = [string]$response.ContentType
+    $message = [string]$ErrorRecord.ErrorDetails.Message
+    if (
+        $contentType -cnotmatch "^application/json(?:;\s*charset=utf-8)?$" -or
+        [string]::IsNullOrWhiteSpace($message) -or
+        $message.Length -gt 256 -or
+        $message.IndexOf([char]0) -ge 0
+    ) {
+        return [pscustomobject]$failure
+    }
+
+    try {
+        $payload = $message | ConvertFrom-Json -ErrorAction Stop
+    } catch {
+        return [pscustomobject]$failure
+    }
+    if ($null -eq $payload -or $payload -is [array]) {
+        return [pscustomobject]$failure
+    }
+
+    $expectedStatus = $null
+    $expectedFields = @()
+    switch ($httpStatus) {
+        400 {
+            $expectedStatus = "invalid_request"
+            $expectedFields = @("status")
+        }
+        404 {
+            $expectedStatus = "not_found"
+            $expectedFields = @("status")
+        }
+        409 {
+            $expectedStatus = "rejected"
+            $expectedFields = @("reason", "status")
+        }
+        default {
+            return [pscustomobject]$failure
+        }
+    }
+    $actualFields = @($payload.PSObject.Properties.Name | Sort-Object)
+    if (
+        @(
+            Compare-Object `
+                -ReferenceObject $expectedFields `
+                -DifferenceObject $actualFields
+        ).Count -ne 0 -or
+        [string]$payload.status -cne $expectedStatus
+    ) {
+        return [pscustomobject]$failure
+    }
+
+    $failure.api_status = $expectedStatus
+    if ($httpStatus -eq 409) {
+        $reason = [string]$payload.reason
+        if ($reason -cnotmatch "^[A-Za-z][A-Za-z0-9_]{0,63}$") {
+            $failure.api_status = $null
+            return [pscustomobject]$failure
+        }
+        $failure.reason = $reason
+    }
+    return [pscustomobject]$failure
+}
+
 function Invoke-C9LocalControl {
     param(
         [Parameter(Mandatory = $true)]
@@ -2016,8 +2104,19 @@ function Invoke-C9LocalControl {
             -Body $bodyBytes `
             -TimeoutSec 15
     } catch {
+        $failure = Get-C9SafeLocalControlHttpFailure -ErrorRecord $_
+        $safeDetail = ""
+        if ($null -ne $failure) {
+            $safeDetail = " HTTP $($failure.http_status)."
+            if ($null -ne $failure.api_status) {
+                $safeDetail += " API status=$($failure.api_status)."
+            }
+            if ($null -ne $failure.reason) {
+                $safeDetail += " Reason=$($failure.reason)."
+            }
+        }
         throw (
-            "C9 local control operation '$Operation' failed. " +
+            "C9 local control operation '$Operation' failed.$safeDetail " +
             "Check Get-C9Status.ps1; if evidence expired, stop and start a fresh cycle."
         )
     } finally {

@@ -22,6 +22,10 @@ from systeme_local_gateway.c9_control_api import (
     _parse_work_response,
     build_c9_control_router,
 )
+from systeme_local_gateway.c9_handoff_runtime import (
+    C9HandoffError,
+    C9HandoffReason,
+)
 from systeme_local_gateway.c9_synthetic_fixtures import C9SyntheticFixtureKind
 
 TOKEN = "c9-control-api-token-that-is-long-and-independent"
@@ -293,6 +297,32 @@ def test_stage_requires_one_exact_strict_confirmation_object() -> None:
     assert accepted.status_code == 200
     assert accepted.json() == {"status": "staged"}
     assert [name for name, _ in control.calls] == ["stage"]
+
+
+def test_typed_control_failure_exposes_only_public_reason_not_exception_message() -> None:
+    class _RejectedControl(_FakeControl):
+        def stage(self, command: Any) -> BaseModel:
+            del command
+            raise C9HandoffError(
+                C9HandoffReason.RESPONSE_REJECTED,
+                "SENTINEL_SECRET_INPUT_AND_PATH",
+            )
+
+    with _client(_RejectedControl()) as client:
+        rejected = client.post(
+            "/_local/c9/stage",
+            json={
+                "confirmed_exact_synthetic_files": True,
+                "purpose": "synthetic C9 proof",
+            },
+        )
+
+    assert rejected.status_code == 409
+    assert rejected.json() == {
+        "status": "rejected",
+        "reason": "response_rejected",
+    }
+    assert "SENTINEL_SECRET" not in rejected.text
 
 
 def test_approve_requires_work_app_and_native_chat_file_picker_observation() -> None:

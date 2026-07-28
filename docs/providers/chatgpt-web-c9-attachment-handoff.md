@@ -1,7 +1,8 @@
 # C9 ChatGPT file and image handoff
 
 Status: `partial` — the asymmetric Work-rich/Chat-manual contract is
-accepted, implemented and validated offline; all three live proofs are pending
+accepted, implemented and validated; a reset installed-runtime preflight
+passed, while all three cycle-bound live proofs remain pending
 
 Issue: [#80](https://github.com/Cheurteenyt/systeme-local/issues/80)
 
@@ -30,7 +31,8 @@ C9 is designed to establish only this statement:
 That statement is **not yet established**.
 
 ```text
-real installed local-AI inferences verified: 0/1
+local-only installed local-AI preflight:      1/1 (reset; non-qualifying)
+cycle-bound installed local-AI inference:     0/1
 qualifying Work rich MCP transfers:           0/1
 qualifying normal-Chat manual handoffs:       0/1
 C9 final attestation:                         absent
@@ -145,6 +147,28 @@ An offline HTTP server validates the adapter protocol only. It is not a real
 installed-runtime inference. Public receipts retain hashes, sizes, timings and
 bounded commitments only. `adapter_persistent_storage_used=false` applies to
 the C9 adapter, not to the installed runtime.
+
+### Completed installed-runtime preflight
+
+On 2026-07-28, the reviewed Windows host ran one local-only preflight with:
+
+- provider kind `other_reviewed_native`;
+- native product `llama-server`;
+- executable SHA-256
+  `143fd393d73813f88c53f68f7d51114bb1241b4db285e21c68f966602f6eecda`;
+- visible model label `qwen2.5-vl-7b-instruct`;
+- literal-loopback endpoint commitment only;
+- runtime request logging and persistence declared disabled by the operator.
+
+Ten independently generated PNG/TXT pairs passed the strict two-nonce
+verification (`10/10`, mean `2.562 s`, maximum `2.750 s`). The exact C9 stage
+then returned HTTP 200 in `2.985 s`, with exactly one image, one text document
+and a bound local-AI receipt. The façade was stopped and the local state was
+reset. No Tunnel, Plugin, Work or Chat action occurred.
+
+This is readiness evidence, not the required cycle-bound local-AI counter.
+The runtime observation and inference must be repeated in the same fresh
+cycle as the Work and normal-Chat proofs.
 
 ## Work rich Plugin/MCP proof
 
