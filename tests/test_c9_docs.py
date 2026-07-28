@@ -103,3 +103,11 @@ def test_c9_docs_preserve_honest_live_pending_and_residual_risks() -> None:
     assert "C9 success claim | absent" in ledger
     assert "internal app identifier" in threat
     assert "manual path risks" in threat
+
+
+def test_c9_windows_ci_reads_the_uv_version_from_the_process_environment() -> None:
+    workflow = _text(".github/workflows/ci.yml")
+    windows_job = workflow.split("  c9-windows-python:", maxsplit=1)[1]
+
+    assert '"uv==$env:UV_VERSION"' in windows_job
+    assert '"uv==${UV_VERSION}"' not in windows_job
