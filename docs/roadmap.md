@@ -1,7 +1,8 @@
 # Roadmap
 
-Status: reconciled with the implementation through pull request #42 at commit
-`1c84538369eb662b61cc4f56a79131569b9ca200`.
+Status: merged foundations reconciled through pull request #42, followed by
+the sealed C8 Work evidence and the partial C9 attachment-handoff branch;
+merge and live status remain explicit per lot.
 
 The target architecture remains defined in [`blueprint-v2.md`](blueprint-v2.md). This roadmap
 tracks delivery state and gates; it does not redefine normative connectivity or security
@@ -35,6 +36,8 @@ contracts.
 | sealed operator-evidence bundle | implemented | no live evidence collection |
 | architecture, evidence and repository governance | implemented | merged in PR #40 without adding capability |
 | private provider canonicalization and compatibility oracles | implemented | merged in PR #42 without public API or digest drift |
+| bounded ChatGPT Work probe | partial | C8 live evidence complete and revoked; C8 PR not yet merged |
+| image + UTF-8 attachment handoff | partial | C9 asymmetric Work-rich/Chat-manual implementation validated offline; all live proofs pending |
 
 ## Completed consolidation
 
@@ -228,11 +231,10 @@ from 54 to 42 files.
 
 ## C1 bounded Chat-surface observability
 
-Status: `blocked` by the current official product surface contract. Plugins
-are available on ChatGPT Web only in Work and are unavailable in Chat, while
-C1 explicitly forbids Work. The live gate can resume only after official
-revalidation shows Plugin availability in Chat or a separate goal explicitly
-authorizes a compatible surface.
+Status: historically `blocked` by the product-surface evidence reviewed for
+C1. That snapshot classified Plugins as Work-only while C1 explicitly forbade
+Work. C9 does not rewrite C1 evidence; it performs a fresh current-product
+test under a new bounded contract.
 
 C1 is stacked on the unmerged C0 branch and tracked by issue
 [#66](https://github.com/Cheurteenyt/systeme-local/issues/66). It adds strict
@@ -257,8 +259,8 @@ Status: `BLOCKED_BY_NO_OFFICIAL_CHAT_TOOL_INTERFACE`.
 
 C2 is stacked on exact C1 commit
 `2aee36fdfa3d20c23acdc75eb3348bc54536ef4f`. Current official OpenAI
-documentation routes custom/local MCP use through Plugins and explicitly makes
-Plugins unavailable in Chat. C2 therefore implements a typed, expiring
+documentation at the C2 review point routed custom/local MCP use through
+Plugins and classified Plugins as unavailable in Chat. C2 therefore implements a typed, expiring
 official-capability profile and atomically blocks Runtime-key creation, Tunnel
 startup, temporary Plugin creation, and browser testing.
 
@@ -305,15 +307,15 @@ C4 is stacked on exact C3 commit
 reviewed C3 result into a typed runtime request, immutable decision, effective
 tool set, and canonical receipt before a protected effect.
 
-The production registry still contains only ChatGPT. Current native Chat
+The production registry still contains only ChatGPT. The sealed C4 native Chat
 derives zero effective tools and denies Runtime-key creation, Tunnel startup,
 Plugin creation, browser tests, ChatGPT actions, and provider tool exposure.
 Synthetic supported providers exist only in tests and make no portability
 claim.
 
-The next product gate remains official native Chat support followed by an
-independently promoted C3 profile. C4 must then admit only the exact reviewed
-read-only tool before a separately authorized live cycle can begin. See
+That C4 gate required later current-product evidence and an independently
+reviewed profile. C9 is the separate bounded experiment that now tests the
+exact read-only app path without mutating the sealed C4 result. See
 [`providers/chatgpt-web-c4-runtime-admission.md`](providers/chatgpt-web-c4-runtime-admission.md).
 
 ## C5 squash-safe C0-C4 main integration
@@ -359,8 +361,10 @@ admission. Network, protocol, policy, drift, due, and expiry failures all keep
 six actions denied and zero tools exposed.
 
 The first real public-document acquisition returned four unchanged sections.
-This does not unblock ChatGPT: Plugins remain unavailable in Chat, so the
-result is still `BLOCKED_BY_NO_OFFICIAL_CHAT_TOOL_INTERFACE`.
+At that C6 snapshot this did not unblock ChatGPT: the reviewed profile still
+classified Plugins as unavailable in Chat, so the sealed result remained
+`BLOCKED_BY_NO_OFFICIAL_CHAT_TOOL_INTERFACE`. C9 performs a fresh bounded
+current-product test rather than rewriting that historical result.
 
 The next product gate is not another C1 live cycle. It is either:
 
@@ -426,9 +430,78 @@ unreachable. The result means only
 `COMPLETE_C8_TWO_WORK_CALLS_LIVE_CORRELATED_AND_REVOKED`; it does not mean
 regular-use readiness, native Chat support or exact model attribution.
 
-After C8, the next product lot should convert the proven one-tool pathway into
-a deliberately scoped, user-facing read-only capability design with explicit
-operational lifecycle, quota and revocation policy. Support for a different
-Web AI remains a later provider-specific profile and adapter lot, not an
-inference from ChatGPT evidence. See
+After C8, C9 converts the proven one-tool pathway into a deliberately scoped
+attachment handoff with explicit package identity, local-AI verification,
+one-use delivery, cleanup and revocation. Support for a different Web AI
+remains a later provider-specific profile and adapter lot, not an inference
+from ChatGPT evidence. See
 [`providers/chatgpt-web-c8-work-live-validation.md`](providers/chatgpt-web-c8-work-live-validation.md).
+
+## C9 bounded file and image handoff
+
+Status: `partial` — security, rich-renderer, private-export, asymmetric proof
+and closeout paths are validated offline; the real native-runtime/local-AI
+proof and both Web proofs remain pending.
+
+C9 starts from the immutable C8 evidence tag target
+`bb30b7989c2cbdaa688e0e9c34d8df71aea75cd5` and is tracked by issue
+[#80](https://github.com/Cheurteenyt/systeme-local/issues/80). It verifies
+that dependency without reusing the completed C8 grant.
+
+The exact C9 live package contains one generated synthetic PNG image and one synthetic
+UTF-8 text document with distinct random proof nonces. The offline
+implementation provides:
+
+- bounded generation, sanitization and canonical
+  `AttachmentManifest` identity;
+- a fresh HMAC-bound native-runtime observation with inspected executable
+  digest and explicitly operator-attested PID/privacy fields;
+- a literal-loopback, unauthenticated OpenAI-compatible local-AI adapter that
+  must reproduce both nonce commitments;
+- one-use Work rich-delivery authority and one-use normal-Chat manual-export
+  authority over the same sanitized descriptor/content commitments;
+- one combined, atomic operator approval and a fresh C9 grant;
+- a zero-before-grant/one-after-grant MCP registry;
+- one read-only `systeme_local_attachment_handoff` tool and standard MCP
+  `ImageContent` plus text `EmbeddedResource` rendering;
+- a private, at-most-once, maximum-ten-minute picker export for the qualifying
+  manual normal-Chat transfer;
+- metadata-only receipts, replay rejection and deterministic cleanup.
+
+Current official guidance explicitly says Plugins are unavailable in normal
+Chat. The qualifying path therefore invokes the read-only tool once in Work,
+then uses an owner-only export and the public file picker to attach the same
+package once in one new normal Chat conversation. The Chat proof may qualify
+only the visible manual transfer and nonce consumption; it can never claim an
+MCP tool, app invocation, local endpoint, internal app ID or autonomous
+delivery. No path uses DOM heuristics, cookies, private endpoints, history,
+existing conversations or automatic Chat-to-Work switching.
+
+The next gates, in order, are:
+
+1. freeze the integrated facade/control/script path and refresh one
+   non-overlapping C9 validation snapshot from that exact commit;
+2. pass repository-wide Python, PowerShell, Rust, dependency, documentation
+   and secret-shape validation;
+3. configure one operator-reviewed local multimodal runtime on literal
+   loopback, create the fresh signed runtime observation and prove both nonces
+   against the exact sanitized package;
+4. observe the reviewed connection in Work and the public file picker in
+   normal Chat;
+5. after a fresh exact authorization, create exactly one synthetic Work task
+   and one synthetic normal Chat conversation;
+6. invoke the read-only tool once in Work, then claim and attach the exact
+   private export once in normal Chat;
+7. remove Work authority and the Chat export, remove the Plugin connection
+   and Tunnel, revoke the operator-managed Runtime key, clear secrets and
+   prove Work/control post-revocation unreachability;
+8. create a final attestation and reproducible C9 seal.
+
+Current live counters are `0/1` real local inference, `0/1` Work and `0/1`
+normal-Chat manual handoff. No C9 completion claim exists and arbitrary user
+files remain out of scope. The picker path retains a privileged local TOCTOU
+residual despite component, identity, hash and owner-only DACL checks; the
+final evidence must record that limitation. See
+[`providers/chatgpt-web-c9-attachment-handoff.md`](providers/chatgpt-web-c9-attachment-handoff.md)
+and
+[`providers/chatgpt-web-c9-test-evidence.md`](providers/chatgpt-web-c9-test-evidence.md).

@@ -307,6 +307,61 @@ When no supported autonomous transport exists, Système Local creates a signed t
 
 The user transfers the capsule and returns the response. An optional companion may assist only through documented browser extension or accessibility APIs, remain visible and user-controlled, and never replay private provider endpoints.
 
+## Surface-specific attachment handoff
+
+An attachment package may cross more than one provider surface only when each
+surface has its own supported delivery classification. A machine-callable
+surface, a manual picker and a visible Web conversation are not
+interchangeable transports.
+
+The provider-neutral sequence is:
+
+1. the operator selects exact local files; discovery or directory enumeration
+   is not inferred;
+2. local policy inspects and sanitizes bytes before any remote transport;
+3. one canonical ordered attachment manifest commits the sanitized identity;
+4. any required local model or approval gate consumes that exact identity;
+5. each target transport receives independent, short-lived, one-use authority
+   over the same committed descriptors;
+6. each surface produces its own typed consumption evidence;
+7. terminal cleanup releases private bytes and invalidates every unused
+   lease.
+
+A local-model receipt does not authorize a provider transfer. A provider
+eligibility fact does not replace operator approval. A manual attachment does
+not prove an automated tool interface. Successful delivery on one surface
+does not prove delivery, quota or support on another.
+
+When a local runtime is part of admission, transport validation and runtime
+identity evidence remain separate. A successful loopback HTTP response proves
+only the bounded adapter exchange. An operator-attested PID, executable,
+product or privacy setting must be labeled as such; an HMAC authenticates the
+record and its bindings, not the truth of a manual declaration. Likewise,
+`adapter_persistent_storage_used=false` says nothing about logging or
+persistence inside the local model runtime.
+
+Raw attachment bytes may enter a transport-native rich result only after the
+metadata-only local task result has passed policy and audit. Paths, nonces and
+raw bytes must not enter public lifecycle models, logs or provider-neutral
+receipts. An interactive export may reveal paths only to a local,
+authenticated picker caller, for one bounded claim and lifetime.
+
+C9 is the first concrete use of this rule. Its qualifying sequence is one
+reviewed read-only Plugin/MCP rich result in ChatGPT Work followed by one
+operator-performed, visible file-picker handoff in normal Chat. Both bind the
+same committed package but remain different transports with different proof
+claims.
+
+Current official product guidance explicitly makes Plugins unavailable in
+normal Chat. The Chat receipt can therefore prove only that the operator
+attached the exact package and that the visible response consumed it. It
+cannot prove an MCP tool, local endpoint, app invocation or internal app ID.
+The proof scope is generated synthetic PNG plus UTF-8 text only, not
+arbitrary user files. The exact two-file scope, operator-attested runtime
+observation, local-AI nonce gate and live-pending status are defined in
+[`providers/chatgpt-web-c9-attachment-handoff.md`](providers/chatgpt-web-c9-attachment-handoff.md).
+Those ChatGPT-specific facts do not become defaults for another provider.
+
 ## Switching providers without losing work
 
 A task belongs to the local ledger. Every provider reasoning step consumes a provider-neutral checkpoint and produces a typed result.
