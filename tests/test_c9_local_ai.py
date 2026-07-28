@@ -210,6 +210,22 @@ def _runtime_observation(
     )
 
 
+def test_unversioned_runtime_label_must_bind_the_executable(
+    tmp_path: Path,
+) -> None:
+    observation = _runtime_observation(tmp_path)
+    payload = observation.model_dump(mode="python")
+    prefix = "unversioned-binary-sha256:"
+    payload["product_version"] = prefix + observation.executable_sha256
+
+    accepted = c9_local_ai.C9LocalAIRuntimeObservation.model_validate(payload)
+
+    assert accepted.product_version == prefix + accepted.executable_sha256
+    payload["product_version"] = prefix + ("0" * 64)
+    with pytest.raises(ValueError, match="does not bind the executable"):
+        c9_local_ai.C9LocalAIRuntimeObservation.model_validate(payload)
+
+
 class _FakeNativeRuntimeProcess:
     def __init__(
         self,

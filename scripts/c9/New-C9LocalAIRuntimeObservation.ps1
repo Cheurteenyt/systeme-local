@@ -73,22 +73,11 @@ Assert-C9NotReparsePoint -Path $executablePath
 if (-not (Test-Path -LiteralPath $executablePath -PathType Leaf)) {
     throw "The observed local-AI executable is unavailable."
 }
-$productName = [string]$runtimeProcess.VersionInfo.ProductName
-if ([string]::IsNullOrWhiteSpace($productName)) {
-    $productName = [string]$runtimeProcess.ProcessName
-}
-$productVersion = [string]$runtimeProcess.VersionInfo.ProductVersion
-if ([string]::IsNullOrWhiteSpace($productVersion)) {
-    $productVersion = [string]$runtimeProcess.VersionInfo.FileVersion
-}
-if (
-    [string]::IsNullOrWhiteSpace($productName) -or
-    [string]::IsNullOrWhiteSpace($productVersion)
-) {
-    throw "The native local-AI product name or version is not observable."
-}
-$productName = $productName.Trim()
-$productVersion = $productVersion.Trim()
+$productMetadata = Get-C9NativeRuntimeProductMetadata `
+    -Path $executablePath `
+    -FallbackName ([string]$runtimeProcess.ProcessName)
+$productName = [string]$productMetadata.product_name
+$productVersion = [string]$productMetadata.product_version
 
 $cycleId = "c9_cycle_" + [Guid]::NewGuid().ToString("N")
 $observedAt = [DateTimeOffset]::UtcNow
@@ -123,6 +112,8 @@ try {
 }
 if (
     $receipt.cycle_id -cne $cycleId -or
+    $receipt.product_name -cne $productName -or
+    $receipt.product_version -cne $productVersion -or
     $receipt.listening_pid -ne $runtimeProcess.Id -or
     $receipt.simulated -ne $false -or
     $receipt.operator_confirmed_native_runtime -ne $true -or
@@ -131,6 +122,13 @@ if (
         "operator_attested_not_programmatically_verified"
 ) {
     throw "C9 native local-AI runtime observation crossed its reviewed boundary."
+}
+if (
+    $null -ne $productMetadata.fallback_binary_sha256 -and
+    $receipt.executable_sha256 -cne
+        [string]$productMetadata.fallback_binary_sha256
+) {
+    throw "C9 native local-AI fallback version does not bind the executable."
 }
 [void](Write-C9MetadataReceipt -Path $receiptPath -Receipt $receipt)
 [Environment]::SetEnvironmentVariable(
