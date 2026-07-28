@@ -1797,7 +1797,7 @@ function Write-C9MetadataReceipt {
         [string]::IsNullOrWhiteSpace($json) -or
         [System.Text.Encoding]::UTF8.GetByteCount($json) -gt 1048576 -or
         $json -match '"(?:paths|response_text|observed_image_nonce|observed_document_nonce|response_text_utf8_base64)"\s*:' -or
-        $json -match 'C9[0-9A-F]{32}'
+        $json -cmatch 'C9[0-9A-F]{32}'
     ) {
         throw "C9 receipt is not metadata-only."
     }

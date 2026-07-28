@@ -657,6 +657,39 @@ def test_private_response_writer_round_trips_and_rejects_replay(
     assert not tuple(response.parent.glob("*.tmp"))
 
 
+@pytest.mark.skipif(POWERSHELL is None, reason="Windows PowerShell is unavailable")
+def test_metadata_writer_distinguishes_lowercase_digest_from_raw_nonce(
+    tmp_path: Path,
+) -> None:
+    sandbox = tmp_path / "metadata-writer"
+    script_root = sandbox / "scripts" / "c9"
+    script_root.mkdir(parents=True)
+    module_path = script_root / "C9.Common.psm1"
+    shutil.copy2(SCRIPT_ROOT / "C9.Common.psm1", module_path)
+    digest = "c93f40e2f37de54732da8392e96fb77898" + ("a" * 30)
+    raw_nonce = "C9" + ("A" * 32)
+    command = (
+        f"Import-Module {_ps_literal(module_path)} -Force; "
+        "$state = Initialize-C9StateDirectory; "
+        "$accepted = Join-Path $state 'accepted.json'; "
+        f"$receipt = [pscustomobject]@{{digest='{digest}'}}; "
+        "[void](Write-C9MetadataReceipt -Path $accepted -Receipt $receipt); "
+        "$rejected = Join-Path $state 'rejected.json'; "
+        f"$unsafe = [pscustomobject]@{{synthetic_marker='{raw_nonce}'}}; "
+        "try { [void](Write-C9MetadataReceipt -Path $rejected -Receipt $unsafe); "
+        "exit 52 } catch {}; "
+        "if (Test-Path -LiteralPath $rejected) { exit 53 }; "
+        "'metadata_nonce_filter=case_exact'"
+    )
+
+    completed = _powershell(command)
+
+    assert completed.returncode == 0, completed.stderr + completed.stdout
+    assert completed.stdout.strip() == "metadata_nonce_filter=case_exact"
+    accepted = sandbox / ".systeme-local" / "c9" / "accepted.json"
+    assert json.loads(accepted.read_text(encoding="utf-8")) == {"digest": digest}
+
+
 def test_stop_is_fail_safe_before_private_response_cleanup() -> None:
     stop = _text("Stop-C9.ps1")
 
