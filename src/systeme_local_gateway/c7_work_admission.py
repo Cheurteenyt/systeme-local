@@ -22,7 +22,7 @@ C7_PROFILE_PATH = "governance/c7-chatgpt-work-capability-profile.json"
 C7_POLICY_PATH = "governance/c7-work-prelive-policy.json"
 C7_C6_POLICY_PATH = "governance/c6-revalidation-policy.json"
 C7_CHAT_PROFILE_PATH = "governance/c3-chatgpt-chat-capability-profile.json"
-C7_REVIEWED_AT = datetime(2026, 7, 27, 15, 42, 0, tzinfo=timezone.utc)
+C7_REVIEWED_AT = datetime(2026, 8, 7, 15, 42, 0, tzinfo=timezone.utc)
 C7_REVALIDATE_AFTER = C7_REVIEWED_AT + timedelta(days=14)
 C7_REVALIDATION_WARNING_DAYS = 7
 C7_MAX_LIVE_CYCLE_SECONDS = 1_200

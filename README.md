@@ -2,7 +2,15 @@
 
 Passerelle locale sécurisée permettant à un agent IA distant de demander des actions limitées sur un poste de travail, sans lui donner un accès direct au système hôte.
 
-> **État : fondation expérimentale, locale et fail-closed.** Le gateway sécurisé, le MCP loopback, le lifecycle provider, le registre de contexte, les manifests de pièces jointes et les contrats ChatGPT MCP jusqu’au bundle de preuves opérateur sont implémentés de manière déterministe. Un probe C0 optionnel et désactivé par défaut peut tester un unique outil synthétique via Secure MCP Tunnel ; aucun tunnel, client OAuth/OIDC ou app ChatGPT n’est configuré dans le dépôt et aucune connexion live n’est revendiquée.
+> **État : fondation expérimentale, locale et fail-closed.** Le gateway
+> sécurisé, le MCP loopback et les fondations provider sont implémentés.
+> L’unique cycle ChatGPT Work C8 a prouvé deux appels synthétiques puis a été
+> entièrement révoqué. C9 construit le transfert borné d’une image et d’un
+> document texte lus par une vraie IA locale, puis livrés par Plugin/MCP riche
+> en Work et par un handoff manuel visible en Chat normal. L’implémentation et
+> la validation hors ligne consolidée sont terminées ; aucune inférence locale
+> réelle ni preuve Web C9 live n’est encore revendiquée et aucune connexion
+> live ne reste configurée.
 
 ## Principes
 
@@ -41,17 +49,45 @@ Voir [`docs/providers/chatgpt-web-c5-main-integration.md`](docs/providers/chatgp
 
 C6 automatise maintenant la revalidation bornée des sources officielles sans
 promotion automatique. La dernière acquisition publique a retrouvé les quatre
-sections inchangées : ChatGPT Chat reste
+sections alors suivies inchangées : le reçu historique C6 conserve ChatGPT
+Chat en
 `BLOCKED_BY_NO_OFFICIAL_CHAT_TOOL_INTERFACE`, les six actions runtime restent
-refusées et zéro outil est exposé. Voir
+refusées et zéro outil est exposé. C9 effectue une nouvelle vérification
+bornée du produit courant sans réécrire ce reçu. Voir
 [`docs/providers/chatgpt-web-c6-official-revalidation.md`](docs/providers/chatgpt-web-c6-official-revalidation.md).
 
 C7 sépare maintenant l’éligibilité officielle de ChatGPT Work de toute
 autorisation live. Le profil Work est supporté pour la route Plugin/MCP, mais
 la décision par défaut refuse les six effets protégés, expose zéro outil,
-conserve le blocage de Chat et exige un futur reçu opérateur C8 frais et signé.
+conserve le blocage de Chat et exige un reçu opérateur C8 frais et signé.
 Voir
 [`docs/providers/chatgpt-web-c7-work-prelive-admission.md`](docs/providers/chatgpt-web-c7-work-prelive-admission.md).
+
+C8 a utilisé ce contrat pour exécuter un unique cycle Work borné : deux
+tâches synthétiques, deux appels réels corrélés, zéro écriture, tests de rejet,
+arrêt complet, Plugin retiré et clé Runtime révoquée. Le résultat exact est
+`COMPLETE_C8_TWO_WORK_CALLS_LIVE_CORRELATED_AND_REVOKED`. Chat reste
+`BLOCKED_BY_NO_OFFICIAL_CHAT_TOOL_INTERFACE` dans ce reçu C8 scellé ; C9
+teste séparément un handoff manuel visible dans Chat normal sans prétendre
+qu’un Plugin y est disponible. Le résultat C8 ne revendique ni usage régulier
+ni identité interne exacte du modèle.
+
+C9 transforme cette connectivité minimale en un transfert utilisateur
+délibérément borné : exactement une image PNG synthétique et un document
+UTF-8, assainis localement, doivent d’abord être lus par une vraie IA locale
+loopback déclarée et revue par l’opérateur. Une observation HMAC distincte lie
+le runtime déclaré, son exécutable, l’endpoint et le modèle ; le PID et les
+réglages de confidentialité restent attestés par l’opérateur, pas détectés
+automatiquement. Un outil MCP en lecture seule doit ensuite rendre ce package
+une fois dans une nouvelle tâche Work. Puis l’opérateur doit joindre le même
+package assaini, via le picker public, dans exactement une nouvelle
+conversation Chat normale. La règle officielle actuelle exclut les Plugins
+de Chat : la preuve Chat qualifie uniquement le transfert manuel visible,
+jamais un appel d’app locale. Les compteurs live restent `0/1` pour Work et
+`0/1` pour le handoff Chat. Voir
+[`docs/providers/chatgpt-web-c9-attachment-handoff.md`](docs/providers/chatgpt-web-c9-attachment-handoff.md)
+et son
+[`journal de preuves`](docs/providers/chatgpt-web-c9-test-evidence.md).
 
 ### Scénario de validation initial
 
@@ -320,9 +356,16 @@ Le projet maintient quatre canaux distincts :
 - **handoff interactif** : capsule signée transférée par l’utilisateur lorsqu’aucun contrat
   autonome fiable n’existe.
 
-Le MCP local couvre aujourd’hui le premier canal. Le lifecycle, le contexte, les attachments et
-les contrats ChatGPT MCP sont déterministes et hors ligne. Aucun transport OpenAI réel, tunnel,
-OAuth client, app ChatGPT ou automatisation du site privé n’est implémenté.
+Le MCP local couvre aujourd’hui le premier canal. Le cycle C8 a utilisé une
+connexion Plugin/Tunnel temporaire, bornée et maintenant révoquée ; aucune
+connexion permanente n’est stockée dans le dépôt. C9 ajoute un adaptateur
+d’IA locale loopback, une livraison MCP riche à usage unique en Work et un
+export privé à usage unique pour le picker public de Chat normal. Ce handoff
+Chat peut prouver le transfert visible du même package, mais jamais un appel
+Plugin/MCP ou un identifiant interne d’app. Le lot n’ajoute ni automatisation
+d’interface privée, ni accès à des fichiers utilisateur arbitraires. La
+preuve C9 v1 est limitée aux fixtures synthétiques PNG + TXT et les compteurs
+live restent à zéro.
 
 La carte descriptive des documents est disponible dans l’[`index documentaire`](docs/index.md).
 Les autorités documentaires restent :
@@ -369,7 +412,7 @@ hors ligne. Son
 ajoute un registre versionné, les états `current`, `revalidation_due`,
 `expired`, `source_drift` et `invalid`, puis refuse aussi toute action ChatGPT.
 ChatGPT reste le seul fournisseur enregistré et le verdict Chat demeure
-`BLOCKED_BY_NO_OFFICIAL_CHAT_TOOL_INTERFACE`.
+`BLOCKED_BY_NO_OFFICIAL_CHAT_TOOL_INTERFACE` dans le profil historique C3.
 
 Le lot
 [`C4 — provider-neutral runtime admission`](docs/providers/chatgpt-web-c4-runtime-admission.md)
@@ -404,6 +447,26 @@ ajoute un profil Work indépendant et une admission pré-live à zéro effet. So
 [`journal de tests`](docs/providers/chatgpt-web-c7-test-evidence.md)
 documente les preuves officielles, les tests de séparation Chat/Work et les
 gates exacts du futur lot C8.
+
+Le lot
+[`C8 — ChatGPT Work bounded live validation`](docs/providers/chatgpt-web-c8-work-live-validation.md)
+a exécuté le grant Work révocable, exactement deux appels synthétiques,
+la corrélation d'audit locale et la preuve de révocation complète. Son
+[`journal de tests`](docs/providers/chatgpt-web-c8-test-evidence.md)
+sépare strictement les validations hors ligne des preuves Work réelles.
+
+Le lot
+[`C9 — ChatGPT file and image handoff`](docs/providers/chatgpt-web-c9-attachment-handoff.md)
+réutilise uniquement le seal C8 immuable, jamais son grant. Il lie un package
+synthétique PNG + texte UTF-8 à une vraie inférence locale liée à une
+observation de runtime attestée par l’opérateur, puis à deux transports
+distincts : une livraison Plugin/MCP riche en Work, puis un handoff manuel
+visible du même package en Chat normal. Cette observation ne vérifie pas
+automatiquement le PID ou les réglages privés. La preuve Chat ne vaut jamais
+preuve d’app, de MCP ou d’endpoint local. Son
+[`journal de tests`](docs/providers/chatgpt-web-c9-test-evidence.md)
+distingue l’implémentation, la validation hors ligne et les preuves réelles
+encore en attente.
 
 ## Architecture
 

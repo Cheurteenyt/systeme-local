@@ -217,7 +217,16 @@ class McpToolRegistry:
         *,
         c0_mode: bool = False,
         effective_tool_names: frozenset[str] | None = None,
+        additional_tools: tuple[McpToolDefinition, ...] = (),
     ):
+        additional_by_name = {tool.name: tool for tool in additional_tools}
+        if len(additional_by_name) != len(additional_tools):
+            raise ValueError("additional MCP tool names must be unique")
+        if set(additional_by_name) & set(_TOOL_TEMPLATES):
+            raise ValueError("additional MCP tools cannot override built-in tools")
+        if C0_TOOL_NAME in additional_by_name:
+            raise ValueError("additional MCP tools cannot override the C0 probe")
+
         tools: list[McpToolDefinition] = []
         for capability in policy.declared_capabilities():
             if capability.decision != "allow":
@@ -238,18 +247,23 @@ class McpToolRegistry:
                     )
                 continue
             template = _TOOL_TEMPLATES.get(capability.name)
-            if template is None:
+            additional = additional_by_name.get(capability.name)
+            if template is None and additional is None:
                 continue
-            input_schema = template.schema_builder(capability)
-            if input_schema is None:
-                continue
-            tools.append(
-                McpToolDefinition.create(
-                    name=capability.name,
-                    description=template.description,
-                    input_schema=input_schema,
+            if additional is not None:
+                tools.append(additional)
+            else:
+                assert template is not None
+                input_schema = template.schema_builder(capability)
+                if input_schema is None:
+                    continue
+                tools.append(
+                    McpToolDefinition.create(
+                        name=capability.name,
+                        description=template.description,
+                        input_schema=input_schema,
+                    )
                 )
-            )
         built_tools = tuple(sorted(tools, key=lambda tool: tool.name))
         if effective_tool_names is not None:
             built_names = {tool.name for tool in built_tools}

@@ -2,9 +2,9 @@
 
 Status: `COMPLETE_C7_WORK_PROFILE_READY_FOR_BOUNDED_LIVE_VALIDATION`
 
-Reviewed at: `2026-07-27T15:42:00Z`
+Reviewed at: `2026-08-07T15:42:00Z`
 
-Revalidate after: `2026-08-10T15:42:00Z`
+Revalidate after: `2026-08-21T15:42:00Z`
 
 Issue: [#76](https://github.com/Cheurteenyt/systeme-local/issues/76)
 

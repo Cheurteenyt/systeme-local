@@ -181,7 +181,7 @@ Ambiguous acceptance never authorizes an automatic retry.
 
 ## Security boundaries
 
-The implementation:
+The provider-neutral metadata foundation:
 
 - stores no raw attachment bytes;
 - stores no local path;
@@ -222,3 +222,65 @@ The implementation:
 ## Follow-up security lot
 
 A separate security lot may add encrypted blob storage, short-lived leases, redaction decisions, approval, retention policy and verified deletion receipts. That lot must consume these immutable manifests rather than redefine attachment identity.
+
+## C9 bounded live security overlay
+
+Status: `partial` — implemented on the C9 branch with consolidated offline
+closeout validation passed; live provider validation pending.
+
+C9 consumes this provider-neutral identity without changing its public models
+or digest domains. It adds a private process-local overlay for one exact
+synthetic package:
+
+```text
+one generated PNG + one generated UTF-8 text file
+    -> C9 sanitization and private mutable buffers
+    -> existing canonical AttachmentManifest
+    -> fresh operator-attested native-runtime observation
+    -> real local-AI inference and two-nonce verification
+    -> one Work rich-delivery lease
+    -> one normal-Chat manual-export authority
+```
+
+This overlay is intentionally narrower than the formats supported by local
+inspection above. C9 v1 rejects PDF, JSON, archives, office documents and
+generic binary files. It strips non-essential PNG/JPEG metadata, normalizes
+text and re-inspects the sanitized bytes before commitment.
+
+Source paths and sanitized bytes do not enter `CommittedAttachment`,
+`AttachmentManifest`, lifecycle events, audit records or public C9 receipts.
+They remain under one private in-process authority. The authority verifies
+source identity and hashes before and after callbacks, zeros buffers at a
+terminal lease state and never creates a durable general attachment store.
+
+The local AI receives read-only views of the sanitized package and does not
+consume the delivery leases. A separate HMAC-bound observation records the
+operator-attested native runtime, PID and privacy settings plus the inspected
+executable digest and endpoint/model commitments. It is required in the final
+chain but is not independent proof of the manually declared facts. Only after
+that observation is fresh and the inference proves both synthetic nonce
+hashes does C9 create one Work rich-delivery lease and one normal-Chat
+manual-export authority. Both bind the same ordered descriptor and content
+commitments but remain non-interchangeable transport proofs.
+
+On the Work path, the read-only MCP tool uses the explicit `work` surface.
+The metadata-only task result is audited before the renderer returns one
+`ImageContent` block and one embedded UTF-8 resource. Current official
+guidance explicitly excludes Plugins from normal Chat, so that tool is not a
+Chat transport.
+
+After Work, the private maximum-ten-minute export materializes the same
+sanitized package for one visible, operator-performed normal-Chat file-picker
+handoff. Exact private POSIX modes or an applied-and-queried owner-only
+Windows DACL, path checks and hash revalidation narrow ordinary-principal and
+TOCTOU exposure but do not protect against a privileged local attacker.
+
+The Chat receipt may qualify only the visible manual transfer and nonce
+consumption. It cannot qualify an MCP call, local endpoint, app invocation,
+same-app identity or autonomous delivery.
+
+This C9 overlay does not implement the general encrypted blob-storage lot
+described above, authorize real user files, automate private ChatGPT
+interfaces or prove another provider’s upload support. Its qualifying proof
+fixture is synthetic PNG + TXT only. See
+[`providers/chatgpt-web-c9-attachment-handoff.md`](providers/chatgpt-web-c9-attachment-handoff.md).
