@@ -5,11 +5,11 @@ Status: C3 lifecycle validation complete; final-head CI is reported on the PR
 C3 is immutable historical evidence on descendants. C4 now owns runtime
 admission but continues to consume this exact sealed profile and registry.
 
-Review time: `2026-07-27T11:55:00Z`
+Review time: `2026-08-07T11:55:00Z`
 
 Revalidation due from: `2026-08-03T11:55:00Z`
 
-Expiry: `2026-08-10T11:55:00Z`
+Expiry: `2026-08-21T11:55:00Z`
 
 ## Bound baseline
 
@@ -22,8 +22,8 @@ Expiry: `2026-08-10T11:55:00Z`
 | C2 draft PR | [#68](https://github.com/Cheurteenyt/systeme-local/pull/68) |
 | C3 draft PR | [#70](https://github.com/Cheurteenyt/systeme-local/pull/70) |
 | Profile | `chatgpt_chat_c3_20260727` |
-| Profile SHA-256 | `512d26961dd33429850c2599b1c970be3910e990b92bc23aa759e92784f0dc3a` |
-| Registry SHA-256 | `9567dd0bbb9ec80d6bf24ea86048f6229f9c956731053b1191208ac6bcecdd62` |
+| Profile SHA-256 | `478d1651fa1b275d5158ff1fd56e1775b10a48fb650b3e2baef3808d36e357bd` |
+| Registry SHA-256 | `eb95d8cc359b9bca6f30ae613b294dcc6247ace292ad49fab7f116a38c79631c` |
 | Runtime credentials created | `0` |
 | Tunnels created or started | `0` |
 | Plugins created | `0` |

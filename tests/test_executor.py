@@ -107,3 +107,44 @@ def test_c0_probe_execution_does_not_touch_workspace(tmp_path: Path) -> None:
 
     assert output["write_actions_enabled"] is False
     assert list(tmp_path.iterdir()) == []
+
+
+def test_injected_capability_handler_is_explicit_and_receives_policy_config(
+    tmp_path: Path,
+) -> None:
+    calls: list[tuple[dict[str, object], dict[str, object]]] = []
+
+    def handler(
+        arguments: dict[str, object],
+        config: dict[str, object],
+    ) -> dict[str, object]:
+        calls.append((arguments, config))
+        return {"status": "handled"}
+
+    executor = CapabilityExecutor(
+        tmp_path,
+        "image",
+        {},
+        capability_handlers={"systeme_local_attachment_handoff": handler},
+    )
+
+    result = executor.execute(
+        "systeme_local_attachment_handoff",
+        {},
+        {"decision": "allow"},
+    )
+
+    assert result == {"status": "handled"}
+    assert calls == [({}, {"decision": "allow"})]
+
+
+def test_injected_capability_handler_cannot_override_built_in(
+    tmp_path: Path,
+) -> None:
+    with pytest.raises(ValueError, match="cannot override"):
+        CapabilityExecutor(
+            tmp_path,
+            "image",
+            {},
+            capability_handlers={"workspace.read_text": lambda _arguments, _config: {}},
+        )

@@ -52,6 +52,42 @@ class TaskProcessorProtocol(Protocol):
     def process(self, task: TaskEnvelope) -> TaskResult: ...
 
 
+class RenderAuditLogProtocol(Protocol):
+    def append(self, event: dict[str, object]) -> str: ...
+
+
+class McpPreparedResultProtocol(Protocol):
+    """One prepared MCP response whose private delivery is not committed yet."""
+
+    @property
+    def result(self) -> types.CallToolResult: ...
+
+    def commit(self) -> None: ...
+
+    def abort(self) -> None: ...
+
+
+class McpResultRendererProtocol(Protocol):
+    """Expand one audited metadata result into MCP-native content.
+
+    Renderers are intentionally invoked only after the transport-neutral task
+    processor has completed and persisted its metadata-only audit record. This
+    lets a narrowly admitted capability return ephemeral image or resource
+    content without placing raw attachment bytes in TaskResult or the audit log.
+    Preparation must not commit delivery state. The adapter commits only after
+    all transport metadata and rendered-size validation has completed.
+    """
+
+    def prepare(
+        self,
+        *,
+        name: str,
+        arguments: dict[str, Any],
+        output: dict[str, Any],
+        metadata: dict[str, str],
+    ) -> McpPreparedResultProtocol | None: ...
+
+
 class McpTaskAdapter:
     """Create signed local task envelopes and map their results to MCP."""
 
@@ -62,13 +98,21 @@ class McpTaskAdapter:
         task_processor: TaskProcessorProtocol,
         max_concurrency: int,
         clock: Callable[[], datetime] | None = None,
+        result_renderer: McpResultRendererProtocol | None = None,
+        render_audit_log: RenderAuditLogProtocol | None = None,
+        max_rendered_response_bytes: int = 16 * 1024 * 1024,
     ):
         if max_concurrency < 1:
             raise ValueError("max_concurrency must be positive")
+        if max_rendered_response_bytes < 1:
+            raise ValueError("rendered response byte limit must be positive")
         self._shared_secret = shared_secret
         self._task_processor = task_processor
         self._limiter = anyio.CapacityLimiter(max_concurrency)
         self._clock = clock or (lambda: datetime.now(UTC))
+        self._result_renderer = result_renderer
+        self._render_audit_log = render_audit_log
+        self._max_rendered_response_bytes = max_rendered_response_bytes
 
     def _build_task(self, name: str, arguments: dict[str, Any]) -> TaskEnvelope:
         now = self._clock()
@@ -147,6 +191,70 @@ class McpTaskAdapter:
                         "Tool response validation failed",
                         metadata=metadata,
                     )
+            renderer = self._result_renderer
+            if renderer is not None:
+                prepared: McpPreparedResultProtocol | None = None
+                try:
+                    renderer_metadata = dict(metadata)
+                    prepared = await anyio.to_thread.run_sync(
+                        lambda: renderer.prepare(
+                            name=name,
+                            arguments=arguments,
+                            output=output,
+                            metadata=renderer_metadata,
+                        ),
+                        limiter=self._limiter,
+                    )
+                    if prepared is not None:
+                        rendered = prepared.result
+                        rendered = _with_required_metadata(rendered, metadata)
+                        if _rendered_response_size(rendered) > (self._max_rendered_response_bytes):
+                            raise ValueError("rendered MCP response exceeds its byte limit")
+                except BaseException as exc:
+                    logger.error(
+                        "MCP result rendering failed with %s",
+                        type(exc).__name__,
+                    )
+                    with anyio.CancelScope(shield=True):
+                        await self._abort_render(
+                            prepared=prepared,
+                            task=task,
+                            failure_type=type(exc).__name__,
+                        )
+                    if not isinstance(exc, Exception):
+                        raise
+                    return _tool_error(
+                        "Tool response rendering failed",
+                        metadata=metadata,
+                    )
+                if prepared is not None:
+                    try:
+                        await anyio.to_thread.run_sync(
+                            prepared.commit,
+                            limiter=self._limiter,
+                        )
+                        await self._append_render_audit(
+                            task=task,
+                            status="render_completed",
+                        )
+                    except BaseException as exc:
+                        logger.error(
+                            "MCP render commit failed with %s",
+                            type(exc).__name__,
+                        )
+                        with anyio.CancelScope(shield=True):
+                            await self._abort_render(
+                                prepared=prepared,
+                                task=task,
+                                failure_type=type(exc).__name__,
+                            )
+                        if not isinstance(exc, Exception):
+                            raise
+                        return _tool_error(
+                            "Tool response rendering failed",
+                            metadata=metadata,
+                        )
+                    return rendered
             text = json.dumps(
                 output,
                 sort_keys=True,
@@ -169,6 +277,84 @@ class McpTaskAdapter:
             messages[result.status],
             metadata=metadata,
         )
+
+    async def _abort_render(
+        self,
+        *,
+        prepared: McpPreparedResultProtocol | None,
+        task: TaskEnvelope,
+        failure_type: str,
+    ) -> None:
+        if prepared is not None:
+            try:
+                await anyio.to_thread.run_sync(
+                    prepared.abort,
+                    limiter=self._limiter,
+                )
+            except BaseException as exc:
+                logger.error(
+                    "MCP render abort failed with %s",
+                    type(exc).__name__,
+                )
+        try:
+            await self._append_render_audit(
+                task=task,
+                status="render_failed",
+                failure_type=failure_type,
+            )
+        except Exception:
+            pass
+
+    async def _append_render_audit(
+        self,
+        *,
+        task: TaskEnvelope,
+        status: str,
+        failure_type: str | None = None,
+    ) -> str | None:
+        audit_log = self._render_audit_log
+        if audit_log is None:
+            return None
+        event: dict[str, object] = {
+            "task_id": task.task_id,
+            "capability": task.capability,
+            "status": status,
+            "content_recorded": False,
+        }
+        if failure_type is not None:
+            event["failure_type"] = failure_type
+        try:
+            return await anyio.to_thread.run_sync(
+                lambda: audit_log.append(event),
+                limiter=self._limiter,
+            )
+        except Exception as exc:
+            logger.error(
+                "MCP render audit failed with %s",
+                type(exc).__name__,
+            )
+            raise RuntimeError("render audit unavailable") from exc
+
+
+def _with_required_metadata(
+    result: types.CallToolResult,
+    required: dict[str, str],
+) -> types.CallToolResult:
+    existing = dict(result.meta or {})
+    for key, value in required.items():
+        if key in existing and existing[key] != value:
+            raise ValueError("renderer returned conflicting transport metadata")
+        existing[key] = value
+    return result.model_copy(update={"meta": existing}, deep=True)
+
+
+def _rendered_response_size(result: types.CallToolResult) -> int:
+    return len(
+        result.model_dump_json(
+            by_alias=True,
+            exclude_none=True,
+        ).encode("utf-8")
+    )
 
 
 class SlidingWindowRateLimiter:
@@ -216,6 +402,9 @@ class McpRuntime:
         max_request_bytes: int,
         requests_per_minute: int,
         max_concurrency: int,
+        result_renderer: McpResultRendererProtocol | None = None,
+        render_audit_log: RenderAuditLogProtocol | None = None,
+        max_rendered_response_bytes: int = 16 * 1024 * 1024,
     ):
         if len(token.encode("utf-8")) < 32:
             raise ValueError("MCP token must contain at least 32 UTF-8 bytes")
@@ -229,6 +418,9 @@ class McpRuntime:
             shared_secret=shared_secret,
             task_processor=task_processor,
             max_concurrency=max_concurrency,
+            result_renderer=result_renderer,
+            render_audit_log=render_audit_log,
+            max_rendered_response_bytes=max_rendered_response_bytes,
         )
 
         server = Server(
@@ -245,7 +437,7 @@ class McpRuntime:
             tools: list[types.Tool] = []
             for tool in registry.list_tools():
                 annotations = (
-                    types.ToolAnnotations(**tool.annotations)
+                    types.ToolAnnotations.model_validate(tool.annotations)
                     if tool.annotations is not None
                     else None
                 )

@@ -1,8 +1,11 @@
 # Architecture actuellement implémentée
 
-Status: implemented architecture through B1.6 operator-evidence logical disposition
+Status: implemented `main` architecture through B1.6, with separately labeled
+C8 sealed and C9 branch overlays
 
-This document describes the code that exists on `main`. It is not the target product
+This document describes the code that exists on `main` plus later reviewed
+branch overlays only where their section explicitly says so. A branch overlay
+is not silently promoted to `main`. This is not the target product
 architecture; that role belongs to [`blueprint-v2.md`](blueprint-v2.md).
 
 ## Documentation authority
@@ -156,8 +159,11 @@ The implemented and planned channels remain independent:
 | public remote MCP exposure | out_of_scope | direct public exposure is forbidden |
 | provider lifecycle and replay | implemented | deterministic fake ChatGPT scenarios and SQLite replay |
 | provider context registry | implemented | revisioned SQLite and Chat-first policy |
-| attachment metadata and batching | implemented | no real provider upload |
-| encrypted attachment storage and redaction | planned | separate security lot |
+| attachment metadata and batching | implemented | no provider-neutral real upload |
+| C9 private attachment leases and sanitization | partial | C9 branch only; consolidated offline validation passed; live proof pending |
+| C9 native local-AI runtime observation | partial | HMAC-bound operator attestation implemented; PID and runtime privacy settings are not programmatically verified |
+| C9 Work rich MCP renderer | partial | one read-only tool and standard rich blocks implemented offline; Work host interpretation remains live-pending |
+| encrypted general attachment storage and redaction | planned | C9 does not add a durable general blob store |
 | ChatGPT MCP deployment eligibility | implemented | expiring official-evidence profile |
 | ChatGPT MCP readiness | implemented | conflict-aware staged decision |
 | sealed operator-evidence bundle | implemented | no live evidence collection |
@@ -165,11 +171,14 @@ The implemented and planned channels remain independent:
 | operator-evidence bounded staging | implemented | capability-rooted synthetic reads; no wire operation |
 | operator-evidence logical disposition | implemented | bounded sanitized retention and logical namespace cleanup |
 | real operator-evidence collection | planned | must follow controlled staging, sanitizer and disposition gates |
-| Secure MCP Tunnel installation | planned | separate operator-approved lot |
+| Secure MCP Tunnel | partial | bounded C8 use completed and revoked; no persistent installation or reusable grant |
 | OAuth/OIDC client and token lifecycle | planned | separate secret-management lot |
-| configured ChatGPT app | planned | no current app or connection |
+| configured ChatGPT Plugin connection | partial | temporary C8 connection tested and removed; no current connection |
 | real outbound OpenAI transport | planned | no credential or network adapter |
-| visible ChatGPT web automation | blocked_by_evidence | private endpoints and DOM automation forbidden |
+| ChatGPT Work Plugin/MCP invocation | partial | C8 connectivity validated; C9 rich attachment proof pending |
+| normal Chat Plugin/MCP invocation | blocked_by_official_product_rule | current Plugins guidance explicitly says Plugins are unavailable in Chat |
+| private/DOM Chat automation | blocked_by_evidence | undocumented/private interfaces remain forbidden |
+| normal Chat manual attachment handoff | partial | private one-use export and proof/attestation path verified offline; live handoff pending |
 | A2A endpoint | planned | target architecture only |
 | desktop control application | planned | target architecture only |
 
@@ -502,10 +511,12 @@ reviewed official Work sources
     -> at most one read-only probe becomes eligible for a bounded Work cycle
 ```
 
-The overlay is deliberately outside the C3 native Chat registry. Chat remains
+The overlay is deliberately outside the C3 native Chat registry. Within the
+sealed C7 decision, Chat remains
 `BLOCKED_BY_NO_OFFICIAL_CHAT_TOOL_INTERFACE`, and no Work evidence is accepted
-for a Chat request. C7 also contains no grant-creation, credential, Tunnel,
-Plugin, browser or provider-effect path.
+for a Chat request. C9 later performs a separate fresh product test rather
+than changing that historical receipt. C7 also contains no grant-creation,
+credential, Tunnel, Plugin, browser or provider-effect path.
 
 This separation preserves three independent facts:
 
@@ -549,3 +560,108 @@ C8 repository seal binds the final attestation digest, exact changed-file
 manifest, binary diff and framed tree under the annotated evidence tag
 `evidence/chatgpt-work-live-c8-v1`. See
 [`providers/chatgpt-web-c8-work-live-validation.md`](providers/chatgpt-web-c8-work-live-validation.md).
+
+## C9 attachment-handoff branch overlay
+
+Status: `partial` on `codex/chatgpt-file-image-handoff-c9`; not yet part of
+the implemented `main` authority and not yet live-validated.
+
+C9 descends from the immutable C8 evidence-tag target
+`bb30b7989c2cbdaa688e0e9c34d8df71aea75cd5`. It uses that seal as a reviewed
+transport dependency, never as a reusable live grant.
+
+The C9 design keeps byte authority in one process:
+
+```text
+local-only control caller
+    -> generated synthetic PNG + TXT package
+    -> C9 attachment authority
+       -> sanitized buffers in private memory
+       -> canonical AttachmentManifest
+       -> fresh operator-attested native-runtime observation
+       -> real local-AI read-only inference + two nonce proofs
+    -> one combined approval
+       -> one Work rich-delivery lease + fresh C9 live grant
+       -> dynamic MCP registry: 0 tools before / exactly 1 after
+       -> Work: attachment_handoff(surface="work")
+       -> ImageContent + EmbeddedResource
+       -> correlated Work response
+    -> one private normal-Chat handoff export
+       -> at-most-once authenticated picker-path claim
+       -> operator attaches exact PNG + TXT in one new normal Chat
+       -> correlated visible Chat response
+    -> proof receipts + terminal cleanup
+```
+
+The process-local attachment authority rejects path traversal, symlink,
+reparse-point, hard-link and source-identity drift. It strips non-essential
+image metadata, normalizes strict UTF-8 text, re-inspects sanitized output and
+stores sanitized bytes only in mutable private buffers. Public models remain
+metadata-only.
+
+The local-AI adapter reads the sanitized buffers without consuming them. It
+accepts only the exact OpenAI-compatible chat-completions path on literal
+`127.0.0.1`, sends no credential, ignores proxy environment, follows no
+redirect and bounds bytes and time. Its result is valid only when two
+independent nonce hashes match the fixture commitments.
+
+A separate fresh runtime observation is required before admission. It is
+HMAC-bound to the cycle and records operator-declared product/version/PID,
+the inspected executable basename and digest, endpoint/model commitments and
+operator confirmations that runtime request logging and persistence are
+disabled. Its schema explicitly marks process identity and privacy settings as
+operator-attested, not programmatically verified or detected. The inference
+receipt's `adapter_persistent_storage_used=false` applies only to the adapter.
+An HTTP test response alone cannot satisfy the final chain, while the signed
+observation still does not independently prove the operator's declarations.
+
+After local-AI verification, the combined approval binds one Work
+rich-delivery lease and one normal-Chat manual-export authority to equal
+ordered descriptor/content commitments. Work must complete first. The Chat
+export can then be materialized and claimed once; neither proof can replay or
+substitute the other.
+
+The only C9 MCP tool is `systeme_local_attachment_handoff`. Its local
+`TaskResult` and audit record contain commitments only. The MCP runtime calls
+the C9 renderer after that transport-neutral audit step; the renderer may add
+the actual sanitized image and text resource but cannot replace mandatory
+task/audit metadata. Rendered output is size-bounded and renderer errors are
+generic.
+
+Current official product guidance explicitly says Plugins are unavailable in
+Chat. The rich renderer is therefore a Work-only C9 transport. The Plugin
+reference permits model-visible content arrays, but Work acceptance of the
+specific image/resource pair remains live-pending.
+
+The manual-export manager is the qualifying normal-Chat transfer mechanism,
+not a Chat MCP fallback. It writes the already sanitized clone below the
+ignored C9 state directory with private permissions, returns public metadata
+without paths, releases picker paths only to the authenticated loopback
+control caller once, and removes the directory after completion,
+cancellation, expiry or shutdown. POSIX directories/files require exact
+`0700`/`0600` modes. Windows removes inherited ACLs, grants only the current
+owner and verifies the resulting DACL before releasing paths.
+
+The resulting Chat receipt proves only that the operator attached the exact
+package and that the visible response reproduced both nonces. It cannot prove
+an MCP call, local endpoint reachability, same-app identity or autonomous
+delivery. Component, identity, content-hash and DACL checks narrow, but do not
+eliminate, privileged local TOCTOU or operator mis-selection risk.
+
+The C9 facade is constructed unadmitted. A stale, missing or invalid
+authorization/surface/local-AI/grant bundle leaves the registry empty and
+prevents Tunnel startup. A valid grant lasts at most twenty minutes and
+admits exactly one synthetic Work task and one Work tool. The separately
+authorized manual leg permits exactly one synthetic normal Chat conversation
+and one claim of the exact package export. Control credentials are
+process-local and distinct from MCP, audit and transport secrets.
+
+No C9 live local-model or Web effect has occurred: real installed inference
+is `0/1`, Work rich delivery is `0/1` and normal-Chat manual handoff is
+`0/1`.
+The architecture therefore establishes an offline-validated enforcement
+boundary only. Operator scripts and proof models match the official asymmetric
+product boundary; installed-runtime and provider behavior remain pending in
+[`providers/chatgpt-web-c9-attachment-handoff.md`](providers/chatgpt-web-c9-attachment-handoff.md)
+and its
+[`evidence ledger`](providers/chatgpt-web-c9-test-evidence.md).
