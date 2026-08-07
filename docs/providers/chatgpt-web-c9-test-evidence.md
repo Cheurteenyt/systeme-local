@@ -366,3 +366,41 @@ freeze one owner-only clean commit
 
 If Work rejects the rich result or the manual Chat handoff is not authorized,
 the correct outcome is `PARTIAL/BLOCKED`.
+
+## Known CI status (verified 2026-08-07)
+
+The repository currently carries open Dependabot PRs (mcp, uv, mypy, serde,
+serde_json, time, actions/checkout, actions/setup-python). Their `test` and
+`compatibility (Python 3.14)` checks show `FAILURE`, but this is a **false
+negative inherited from `main`**, not a break introduced by the dependency
+bumps:
+
+- The failing check is
+  `tests/test_c7_seal.py::test_c7_historical_seal_verifies_tag_diff_manifest_and_tree`,
+  which raises `ValueError: C7 current tree differs from the sealed tree`.
+- That test verifies `require_current_tree=True` against the C7 change seal.
+  `main` has diverged from the sealed C7 tree since the seal was cut, so any
+  branch based on `main` (including every Dependabot PR) fails this anchor
+  test. The same failure is visible on `main` itself via `gh run list`.
+- The broader matrix is healthy: that single C7 anchor test is the only
+  failure (`1 failed, 1101 passed, 2 skipped`). The dependency bumps are not
+  implicated.
+
+Consequence for review:
+
+- The C9 PR (#81, branch `codex/chatgpt-file-image-handoff-c9`) is `MERGEABLE`
+  with a **green** CI (its tree matches the sealed C7 tree locally and the
+  suite passes).
+- The Dependabot PRs should **not** be merged solely to clear the red — the
+  red is a stale C7 seal anchor, not a dependency regression. Merging them
+  would only carry the false-negative red forward.
+- The correct remediation, if we want the anchor green again, is to **re-seal
+  C7** against the current `main` tree (a proof update, not a code fix). This
+  is deferred until there is a reason to touch the C7 seal; it is intentionally
+  not done automatically because it alters a security anchor.
+
+Local note: `tests/test_c9_git_executable_resolution_is_absolute_and_fail_closed`
+fails under MSYS because `shutil.which("git")` resolves to `/mingw64/bin/git`
+(without `.exe`) and is not a singly-linked regular file to `c9_git`. This is an
+environment artifact of the MSYS shell, not a code defect; the check passes on
+the CI runner.
