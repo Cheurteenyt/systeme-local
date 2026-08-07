@@ -30,7 +30,7 @@ dev = [
   "pytest-cov>=5,<7",
   "ruff>=0.6,<1",
   "types-psutil>=6.1,<8",
-  "uv==0.11.29",
+  "uv==0.12.1",
 ]
 
 [tool.hatch.build.targets.wheel]
