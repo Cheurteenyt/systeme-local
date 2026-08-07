@@ -53,13 +53,13 @@ def test_revalidation_records_resolved_fetch_route_without_overclaim() -> None:
 
 def test_c8_governance_is_current_then_expires_closed() -> None:
     receipt, policy = verify_committed_c8_governance(ROOT, evaluated_at=NOW)
-    assert receipt.revalidate_after.isoformat() == "2026-08-10T17:33:00+00:00"
+    assert receipt.revalidate_after.isoformat() == "2026-08-21T17:33:00+00:00"
     assert policy.authorization_required is True
 
     with pytest.raises(ValueError, match="expired"):
         verify_committed_c8_governance(
             ROOT,
-            evaluated_at=datetime(2026, 8, 10, 17, 33, tzinfo=UTC),
+            evaluated_at=datetime(2026, 8, 22, 17, 33, tzinfo=UTC),
         )
 
 

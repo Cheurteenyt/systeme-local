@@ -2,7 +2,7 @@
 
 Status: local validation and repository seal complete; remote CI pending
 
-Recorded at: `2026-07-27`
+Recorded at: `2026-08-07`
 
 ## Claim under test
 

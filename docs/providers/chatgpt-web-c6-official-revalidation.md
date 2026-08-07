@@ -3,9 +3,9 @@
 Status: `implemented`; official sources `unchanged`; review-only candidate;
 runtime gate unchanged
 
-Reviewed at: `2026-07-27T14:42:00Z`
+Reviewed at: `2026-08-07T14:42:00Z`
 
-Revalidate after: `2026-08-10T14:42:00Z`
+Revalidate after: `2026-08-21T14:42:00Z`
 
 Current ChatGPT result:
 `BLOCKED_BY_NO_OFFICIAL_CHAT_TOOL_INTERFACE`
@@ -62,11 +62,11 @@ The canonical policy is
 It binds:
 
 - policy SHA-256
-  `602e4fc6313f0d7e95c3255fbaad47c77d65dc2b28c47406b6c9c323fdc4d8dd`;
+  `f0710c24b3dc2941d0c09c1bf5e360637af176a3d1eaf31dd6f208c09641597f`;
 - C3 registry SHA-256
-  `9567dd0bbb9ec80d6bf24ea86048f6229f9c956731053b1191208ac6bcecdd62`;
+  `eb95d8cc359b9bca6f30ae613b294dcc6247ace292ad49fab7f116a38c79631c`;
 - C3 profile SHA-256
-  `512d26961dd33429850c2599b1c970be3910e990b92bc23aa759e92784f0dc3a`;
+  `478d1651fa1b275d5158ff1fd56e1775b10a48fb650b3e2baef3808d36e357bd`;
 - identity `chatgpt` / `chat` / `conversational_chat` /
   `custom_or_local_mcp_tool_invocation`;
 - the fixed endpoint `https://developers.openai.com/mcp`;

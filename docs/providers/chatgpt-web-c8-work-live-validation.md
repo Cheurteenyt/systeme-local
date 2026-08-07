@@ -59,8 +59,8 @@ The detailed non-sensitive commitments are in the
 ## Current official evidence
 
 C8 revalidated the current official route at
-`2026-07-27T17:33:00Z`, with revalidation due by
-`2026-08-10T17:33:00Z`.
+`2026-08-07T17:33:00Z`, with revalidation due by
+`2026-08-21T17:33:00Z`.
 
 | Official source | Result used by C8 |
 |---|---|

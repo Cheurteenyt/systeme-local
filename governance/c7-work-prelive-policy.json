@@ -12,7 +12,7 @@
   },
   "c6_revalidation_policy": {
     "path": "governance/c6-revalidation-policy.json",
-    "sha256": "c58e4bf06123f844f28e5365cb25b9509d34b6055c83a1c091cf4f3ba09b8e3b"
+    "sha256": "e16714f156509879c9ac87a934d1c7e6c32a10ee3f060397351c866373b90f59"
   },
   "default_boundary": {
     "account_or_security_settings_allowed": false,
@@ -57,10 +57,10 @@
   "native_chat_gate_status": "BLOCKED_BY_NO_OFFICIAL_CHAT_TOOL_INTERFACE",
   "native_chat_profile": {
     "path": "governance/c3-chatgpt-chat-capability-profile.json",
-    "sha256": "5d832794b246e11a045299f80dafedb4b4af8475b13cfa7193872f16ff8dbd68"
+    "sha256": "be5bcb27da00821b4625713ffcbaafb8b92af4ad83dbee1cf34748ce7e06db9d"
   },
   "policy_id": "chatgpt_work_prelive_c7_20260727",
-  "policy_sha256": "74d79861fbd5cb78e729f39b3416ea856b9ec2f8de6b4650e16e28050383df77",
+  "policy_sha256": "d910d75ddf14f48d8002d53fab988ecee45b81aeaed67fdee983d2bbac7ad98e",
   "protected_actions": [
     "browser_test",
     "chatgpt_work_action",
@@ -72,6 +72,6 @@
   "version": "1",
   "work_profile": {
     "path": "governance/c7-chatgpt-work-capability-profile.json",
-    "sha256": "d6cca6b29ebdc8d2cb4cccedede4faf3ac06561cfbedd8159bad025b78f61ade"
+    "sha256": "94587adfde42363f918594ff0c3db696dfcc8020d78d9bd95ed989b5607b8240"
   }
 }
