@@ -24,9 +24,9 @@ def test_c3_document_records_exact_result_dates_and_base() -> None:
 
     for marker in (
         "BLOCKED_BY_NO_OFFICIAL_CHAT_TOOL_INTERFACE",
-        "2026-07-27T11:55:00Z",
-        "2026-08-03T11:55:00Z",
-        "2026-08-10T11:55:00Z",
+        "2026-08-07T11:55:00Z",
+        "2026-08-14T11:55:00Z",
+        "2026-08-21T11:55:00Z",
         "cf05e963ba30539f9b2c9ec2f5f71326cbba8399",
         "issues/69",
         "product-surface decision, not a network or implementation failure",

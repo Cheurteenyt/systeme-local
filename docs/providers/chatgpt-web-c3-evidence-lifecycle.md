@@ -6,7 +6,7 @@ Evidence lifecycle: `current`
 
 Reviewed: `2026-08-07T11:55:00Z`
 
-Revalidation due from: `2026-08-03T11:55:00Z`
+Revalidation due from: `2026-08-14T11:55:00Z`
 
 Expires: `2026-08-21T11:55:00Z`
 
