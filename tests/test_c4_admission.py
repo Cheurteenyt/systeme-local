@@ -46,7 +46,7 @@ from systeme_local_gateway.policy import PolicyEngine
 
 
 ROOT = Path(__file__).resolve().parents[1]
-NOW = datetime(2026, 7, 27, 12, 0, tzinfo=timezone.utc)
+NOW = datetime(2026, 8, 7, 12, 0, tzinfo=timezone.utc)
 SHA_A = "a" * 64
 SHA_B = "b" * 64
 SHA_C = "c" * 64
@@ -360,7 +360,7 @@ def test_cross_identity_evidence_substitution_denies() -> None:
 def test_evidence_time_substitution_denies() -> None:
     request = _request(
         RuntimeAdmissionAction.TUNNEL_START,
-        evaluated_at=datetime(2026, 7, 27, 12, 0, 1, tzinfo=timezone.utc),
+        evaluated_at=datetime(2026, 8, 7, 12, 0, 1, tzinfo=timezone.utc),
     )
     decision = evaluate_runtime_admission(request, _evidence(), _registry())
 

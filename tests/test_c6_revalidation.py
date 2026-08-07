@@ -46,7 +46,7 @@ from systeme_local_gateway.c6_revalidation import (
 ROOT = Path(__file__).resolve().parents[1]
 POLICY_PATH = ROOT / "governance/c6-revalidation-policy.json"
 C3_REGISTRY_PATH = ROOT / "governance/c3-capability-registry.json"
-NOW = datetime(2026, 7, 27, 15, 0, tzinfo=timezone.utc)
+NOW = datetime(2026, 8, 7, 15, 0, tzinfo=timezone.utc)
 
 
 def _synthetic_policy() -> tuple[C6RevalidationPolicy, dict[str, str]]:
@@ -107,7 +107,7 @@ def test_committed_policy_matches_reviewed_builder_and_denies_every_action() -> 
     assert committed == expected
     assert (
         committed.policy_sha256
-        == "602e4fc6313f0d7e95c3255fbaad47c77d65dc2b28c47406b6c9c323fdc4d8dd"
+        == "f0710c24b3dc2941d0c09c1bf5e360637af176a3d1eaf31dd6f208c09641597f"
     )
     assert len(committed.sources) == 4
     assert committed.fetched_content_can_change_gate is False
@@ -211,7 +211,7 @@ def test_policy_rejects_duplicate_routes_and_overlong_review_window() -> None:
         )
 
     payload = build_current_c6_policy().model_dump(mode="json", exclude={"policy_sha256"})
-    payload["revalidate_after"] = "2026-08-11T14:42:00Z"
+    payload["revalidate_after"] = "2026-08-22T14:42:00Z"
     with pytest.raises(ValidationError, match="14 days"):
         C6RevalidationPolicy(
             **payload,

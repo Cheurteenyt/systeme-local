@@ -135,14 +135,14 @@ The profile conclusion digest is
 The evidence-set digest is
 `89f8539212d3b2ab52cbdf2fcd449a75cfe22262533f592a883359d9debe5b36`.
 The complete profile digest is
-`512d26961dd33429850c2599b1c970be3910e990b92bc23aa759e92784f0dc3a`.
+`478d1651fa1b275d5158ff1fd56e1775b10a48fb650b3e2baef3808d36e357bd`.
 
 ## Registry and adapter contract
 
 The active registry is
 [`governance/c3-capability-registry.json`](../../governance/c3-capability-registry.json).
 Its digest is
-`9567dd0bbb9ec80d6bf24ea86048f6229f9c956731053b1191208ac6bcecdd62`.
+`eb95d8cc359b9bca6f30ae613b294dcc6247ace292ad49fab7f116a38c79631c`.
 
 It contains exactly one adapter and one profile:
 
