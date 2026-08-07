@@ -404,3 +404,21 @@ fails under MSYS because `shutil.which("git")` resolves to `/mingw64/bin/git`
 (without `.exe`) and is not a singly-linked regular file to `c9_git`. This is an
 environment artifact of the MSYS shell, not a code defect; the check passes on
 the CI runner.
+
+## Dependency vulnerability note (verified 2026-08-07)
+
+A Dependabot alert flags `cryptography` (CVE-2026-69247, HIGH: PKCS#7
+EnvelopedData Bleichenbacher oracle) on the default branch. Verification:
+
+- `cryptography` is present only as a **transitive** dependency, pinned at
+  `49.0.0` in `uv.lock`; it is not a direct dependency in `pyproject.toml`.
+- A source scan of `src/` shows **no** import of `cryptography`, and **no** use
+  of `PKCS7` / `EnvelopedData` / `enveloped_data` anywhere in the codebase.
+- The vulnerable code path (PKCS#7 EnvelopedData decryption) is therefore never
+  reached by this project.
+
+Conclusion: the alert is a transitive-surface finding with **no reachable
+exploit path** in this repository. No dependency bump is required to remediate
+it from a functional standpoint. The open Dependabot PRs do not touch
+`cryptography`, so they neither introduce nor fix this alert; they remain
+independent of it.
