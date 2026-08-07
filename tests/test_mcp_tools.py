@@ -1,8 +1,10 @@
 from pathlib import Path
 import re
 
+import pytest
+
 from systeme_local_gateway.c0_probe import C0_TOOL_NAME
-from systeme_local_gateway.mcp_tools import McpToolRegistry
+from systeme_local_gateway.mcp_tools import McpToolDefinition, McpToolRegistry
 from systeme_local_gateway.policy import PolicyEngine
 
 
@@ -240,3 +242,71 @@ capabilities:
     )
 
     assert McpToolRegistry(policy, c0_mode=True).list_tools() == ()
+
+
+def test_additional_tool_requires_exact_allowlisted_policy_capability(
+    tmp_path: Path,
+) -> None:
+    policy = _write_policy(
+        tmp_path,
+        """version: 1
+default: deny
+capabilities:
+  systeme_local_attachment_handoff:
+    decision: allow
+  custom.not_admitted:
+    decision: deny
+""",
+    )
+    admitted = McpToolDefinition.create(
+        name="systeme_local_attachment_handoff",
+        description="Return one exact approved attachment package.",
+        input_schema={
+            "type": "object",
+            "properties": {},
+            "additionalProperties": False,
+        },
+        annotations={
+            "readOnlyHint": False,
+            "destructiveHint": True,
+            "idempotentHint": False,
+            "openWorldHint": True,
+        },
+    )
+    denied = McpToolDefinition.create(
+        name="custom.not_admitted",
+        description="Must remain hidden.",
+        input_schema={"type": "object", "properties": {}, "additionalProperties": False},
+    )
+
+    tools = McpToolRegistry(
+        policy,
+        additional_tools=(admitted, denied),
+    ).protocol_tools()
+
+    assert tools == [admitted.protocol_dict()]
+
+
+def test_additional_tool_cannot_override_builtin_or_repeat_name(tmp_path: Path) -> None:
+    policy = _write_policy(
+        tmp_path,
+        """version: 1
+default: deny
+capabilities: {}
+""",
+    )
+    built_in = McpToolDefinition.create(
+        name="workspace.list",
+        description="override",
+        input_schema={"type": "object"},
+    )
+    duplicate = McpToolDefinition.create(
+        name="custom.tool",
+        description="duplicate",
+        input_schema={"type": "object"},
+    )
+
+    with pytest.raises(ValueError, match="override built-in"):
+        McpToolRegistry(policy, additional_tools=(built_in,))
+    with pytest.raises(ValueError, match="must be unique"):
+        McpToolRegistry(policy, additional_tools=(duplicate, duplicate))

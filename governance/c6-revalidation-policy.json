@@ -1,7 +1,7 @@
 {
   "automatic_promotion_supported": false,
-  "c3_profile_sha256": "512d26961dd33429850c2599b1c970be3910e990b92bc23aa759e92784f0dc3a",
-  "c3_registry_sha256": "9567dd0bbb9ec80d6bf24ea86048f6229f9c956731053b1191208ac6bcecdd62",
+  "c3_profile_sha256": "478d1651fa1b275d5158ff1fd56e1775b10a48fb650b3e2baef3808d36e357bd",
+  "c3_registry_sha256": "eb95d8cc359b9bca6f30ae613b294dcc6247ace292ad49fab7f116a38c79631c",
   "docs_mcp_endpoint": "https://developers.openai.com/mcp",
   "fetched_content_can_change_gate": false,
   "identity": {
@@ -10,11 +10,11 @@
     "provider_id": "chatgpt",
     "surface_class": "conversational_chat"
   },
-  "policy_sha256": "602e4fc6313f0d7e95c3255fbaad47c77d65dc2b28c47406b6c9c323fdc4d8dd",
+  "policy_sha256": "f0710c24b3dc2941d0c09c1bf5e360637af176a3d1eaf31dd6f208c09641597f",
   "profile_id": "chatgpt_chat_c3_20260727",
-  "revalidate_after": "2026-08-10T14:42:00Z",
+  "revalidate_after": "2026-08-21T14:42:00Z",
   "revalidation_warning_days": 7,
-  "reviewed_at": "2026-07-27T14:42:00Z",
+  "reviewed_at": "2026-08-07T14:42:00Z",
   "sources": [
     {
       "anchor": "#add-the-mcp-server",

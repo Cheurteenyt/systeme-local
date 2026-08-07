@@ -9,17 +9,17 @@
     "surface_class": "conversational_chat"
   },
   "profile_id": "chatgpt_chat_c3_20260727",
-  "profile_sha256": "512d26961dd33429850c2599b1c970be3910e990b92bc23aa759e92784f0dc3a",
-  "revalidate_after": "2026-08-10T11:55:00Z",
+  "profile_sha256": "478d1651fa1b275d5158ff1fd56e1775b10a48fb650b3e2baef3808d36e357bd",
+  "revalidate_after": "2026-08-21T11:55:00Z",
   "revalidation_warning_days": 7,
-  "reviewed_at": "2026-07-27T11:55:00Z",
+  "reviewed_at": "2026-08-07T11:55:00Z",
   "reviewer_state": "reviewed",
   "sources": [
     {
       "canonical_claim": "The official MCP evaluation route enables developer mode, registers the server under Settings > Plugins, and selects the connection in a new conversation. It does not independently establish availability on the native Chat surface.",
       "claim_sha256": "95797da82b7ba96e1d33be92f732cc60e55f092df1cf709476aa9020cfbab171",
-      "consulted_at": "2026-07-27T11:55:00Z",
-      "revalidate_after": "2026-08-10T11:55:00Z",
+      "consulted_at": "2026-08-07T11:55:00Z",
+      "revalidate_after": "2026-08-21T11:55:00Z",
       "source_id": "plugin_connection_route",
       "title": "Connect and test your plugin",
       "url": "https://developers.openai.com/plugins/deploy/connect-chatgpt"
@@ -27,8 +27,8 @@
     {
       "canonical_claim": "The official local MCP plugin workflow registers the server through Plugins and assigns plugin creation to ChatGPT Work or Codex. It does not document a custom or local MCP invocation path for Chat.",
       "claim_sha256": "352ec0338b62af87e37dc3f2cd770e67beeab82ba20a3ba31046b05b33fe39df",
-      "consulted_at": "2026-07-27T11:55:00Z",
-      "revalidate_after": "2026-08-10T11:55:00Z",
+      "consulted_at": "2026-08-07T11:55:00Z",
+      "revalidate_after": "2026-08-21T11:55:00Z",
       "source_id": "plugin_packaging_surface",
       "title": "Package your plugin",
       "url": "https://developers.openai.com/plugins/build/plugins"
@@ -36,8 +36,8 @@
     {
       "canonical_claim": "The official Plugins overview says Plugins are available with ChatGPT Work on web and desktop and are not available in Chat. Because Plugins can contain MCP servers and tools, the reviewed Plugin-based MCP path is excluded from Chat.",
       "claim_sha256": "b72e809c4a9d3efc6946cd8c3987f9b1d142c6f844795f863a5c7874175f6699",
-      "consulted_at": "2026-07-27T11:55:00Z",
-      "revalidate_after": "2026-08-10T11:55:00Z",
+      "consulted_at": "2026-08-07T11:55:00Z",
+      "revalidate_after": "2026-08-21T11:55:00Z",
       "source_id": "plugin_surface_availability",
       "title": "Plugins",
       "url": "https://learn.chatgpt.com/docs/plugins"
@@ -45,8 +45,8 @@
     {
       "canonical_claim": "Secure MCP Tunnel provides transport only to supported OpenAI product surfaces. Its ChatGPT setup creates a developer-mode app through Settings > Plugins, so tunnel availability does not override the separate exclusion of Plugins from Chat.",
       "claim_sha256": "ab639703332ff43221112dec29cd993ca9fee97727e04285393614d0d57e6e02",
-      "consulted_at": "2026-07-27T11:55:00Z",
-      "revalidate_after": "2026-08-10T11:55:00Z",
+      "consulted_at": "2026-08-07T11:55:00Z",
+      "revalidate_after": "2026-08-21T11:55:00Z",
       "source_id": "secure_mcp_tunnel_route",
       "title": "Secure MCP Tunnel",
       "url": "https://developers.openai.com/api/docs/guides/secure-mcp-tunnels"

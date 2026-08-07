@@ -1,4 +1,6 @@
+from collections.abc import Callable, Mapping
 from pathlib import Path
+from types import MappingProxyType
 from typing import Any, Protocol
 
 from .paths import resolve_inside
@@ -16,6 +18,9 @@ class SandboxRunner(Protocol):
     ) -> dict[str, object]: ...
 
 
+CapabilityHandler = Callable[[dict[str, Any], dict[str, Any]], dict[str, Any]]
+
+
 class CapabilityExecutor:
     def __init__(
         self,
@@ -25,12 +30,25 @@ class CapabilityExecutor:
         sandbox_root: Path | None = None,
         sandbox_runner: SandboxRunner | None = None,
         c0_probe: C0ConnectivityProbe | None = None,
+        capability_handlers: Mapping[str, CapabilityHandler] | None = None,
     ):
         self.workspace = workspace.resolve()
         self.workspace.mkdir(parents=True, exist_ok=True)
         self.docker_image = docker_image
         self.limits = limits
         self.c0_probe = c0_probe
+        injected_handlers = dict(capability_handlers or {})
+        reserved_capabilities = {
+            "workspace.list",
+            "workspace.read_text",
+            "workspace.write_text",
+            "sandbox.run_tests",
+            "git.diff",
+            C0_TOOL_NAME,
+        }
+        if reserved_capabilities & injected_handlers.keys():
+            raise ValueError("injected capability handler cannot override a built-in capability")
+        self._capability_handlers = MappingProxyType(injected_handlers)
         resolved_sandbox_root = (
             sandbox_root.resolve()
             if sandbox_root is not None
@@ -57,6 +75,7 @@ class CapabilityExecutor:
         }
         if self.c0_probe is not None:
             handlers[C0_TOOL_NAME] = self._run_c0_probe
+        handlers.update(self._capability_handlers)
         handler = handlers.get(capability)
         if handler is None:
             raise ValueError("capability has no executor")

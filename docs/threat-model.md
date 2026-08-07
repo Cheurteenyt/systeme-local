@@ -1,6 +1,7 @@
 # Modèle de menace
 
-Status: current through the B1.6 logical-disposition boundary
+Status: current through the sealed C8 boundary and the partial C9
+attachment-handoff threat overlay
 
 ## Actifs à protéger
 
@@ -8,6 +9,7 @@ Status: current through the B1.6 logical-disposition boundary
 - secrets, clés API, cookies, jetons Git et futurs credentials provider ;
 - intégrité du système hôte et des workspaces ;
 - confidentialité des prompts, modèles, pièces jointes et preuves opérateur ;
+- octets assainis temporaires, nonces synthétiques et exports de picker C9 ;
 - budget GPU/CPU, API, stockage et tokens ;
 - dépôts Git et chaîne de publication ;
 - identité locale canonique des agents, tâches, projets et conversations ;
@@ -24,7 +26,9 @@ Aucune des surfaces suivantes n’est une autorité locale :
 - export UI brut ;
 - document OAuth/OIDC ou métadonnée distante ;
 - tunnel, endpoint TLS ou scan d’outils non attesté ;
-- résultat de CI après expiration des preuves officielles.
+- résultat de CI après expiration des preuves officielles ;
+- réponse d’une IA locale, même reçue depuis loopback ;
+- apparence d’une pièce jointe dans Work ou Chat sans preuve des deux nonces.
 
 Le gateway local, la politique locale, les approbations, les stores transactionnels et les
 vérificateurs déterministes restent les autorités.
@@ -520,7 +524,7 @@ C7 adds a supported Work profile without permitting Work activity.
 | a forged operator grant is accepted | process-local audit-key HMAC is mandatory; missing, short or wrong keys deny all actions |
 | an old grant remains usable | maximum twenty-minute lifetime and strict `authorized_at <= now < expires_at` check |
 | Work is unavailable or quota is stale | explicit Work request plus visible surface, available entitlement and usable quota observations no older than five minutes |
-| browser scope expands during a future cycle | grant literals permanently deny existing chats, history, private browser state and account/security settings |
+| browser scope expands during a live cycle | grant literals permanently deny existing chats, history operations, private browser state and account/security settings |
 | tool scope expands | exactly one reviewed read-only probe and its C4 protocol digest are bound |
 | prompt content requests files, commands, secrets or writes | those capabilities remain absent; grant literals cannot enable them |
 | C7 accidentally performs the proposed C8 test | C7 has no grant creator or live script and refuses secrets, Tunnel processes and C0/C1 listeners |
@@ -528,3 +532,112 @@ C7 adds a supported Work profile without permitting Work activity.
 C7 cannot prove a live Work invocation, current account entitlement, usable
 quota, model routing or regular-use readiness. Those residual risks require a
 separate C8 threat review and live evidence cycle.
+
+## C8 bounded Work live-cycle threats
+
+| Threat | Control |
+|---|---|
+| a broad assent is interpreted as Work authority | exact cycle-wide scope is committed and HMAC-authenticated; every excluded surface/capability is a literal false field |
+| Work is selected implicitly from Chat | explicit visible Work selection is required; automatic switching and native Chat are immutable false |
+| a different account/surface or stale quota is used | Work, entitlement and quota observations are visible, cycle-bound and no older than five minutes at grant/startup |
+| the ignored grant file is substituted | exact cycle, profile, policy and observation digests plus HMAC; file must stay below `.systeme-local/c8` |
+| provider mode bypasses admission | `main.py` revalidates committed C7/C8 governance and the live bundle before registry construction |
+| a third or existing task is tested | exact labels A/B, maximum count two, separate fresh task receipts and no conversation identifiers |
+| one call is replayed as two | unique challenges, responses, audit IDs and audit-record digests are required |
+| prompt injection expands capability | registry contains one read-only probe; files, commands, secrets, writes, real evidence and protocol v2 do not exist in the surface |
+| sensitive browser state is collected | browser queries remain bounded to the active Plugins and synthetic Work content; no cookies, storage, private requests, history navigation or existing-conversation content is collected |
+| a visible label is promoted to internal model identity | only optional visible labels are stored; exact internal ID and regular-use claims remain false |
+| live access survives the test | Tunnel/facade stop, listener check, Plugin removal, Runtime-key revocation, secret clearing and failed post-revocation call are all required |
+| short-lived evidence expires before finalization | chronology proves calls occurred inside the grant; HMAC-bound historical receipts remain verifiable without extending authority |
+
+Residual risks are a misleading visible product label, provider-side behavior
+outside the observed two calls, compromised official pages and operator error
+when revoking external credentials. Independent official sources, two-call
+limits, one-tool local enforcement, short TTLs and explicit final revocation
+reduce but do not eliminate those risks.
+
+The executed C8 cycle exercised the replay, malformed-input, capability and
+revocation controls without expanding the one-tool surface. The final
+attestation commits two positive correlations, two failed replay audits,
+schema rejection and post-revocation unreachability. Raw challenges,
+responses, audit records, Plugin/Tunnel identifiers and credentials were
+removed or left unversioned; the repository seal retains only typed counts and
+irreversible commitments.
+
+## C9 file, image and local-AI handoff threats
+
+C9 adds a temporary raw-byte boundary that C8 did not have. Its live proof is
+limited to one synthetic image and one synthetic UTF-8 document, one Work
+task invoking one read-only MCP tool, and one normal Chat conversation
+receiving the same package through a visible operator-performed file-picker
+handoff. No C9 live action has yet occurred.
+
+| Threat | Control |
+|---|---|
+| an arbitrary user file is substituted for the synthetic fixture | the live generator accepts no user paths; exact PNG-plus-TXT set, fixture commitments and independent random nonce hashes |
+| traversal, symlink, reparse point or hard link escapes the selected object | absolute regular-file validation, safe component checks, link/reparse rejection, single-link requirement and fail-closed filesystem errors |
+| a file changes between selection, local-AI inspection and delivery | opened-object fingerprint plus source/sanitized digest checks before and after every private callback; mutation terminates and cleans the lease |
+| image metadata leaks location, device or unrelated context | C9 strips non-essential PNG and JPEG metadata and commits the sanitized bytes, never the source bytes, for delivery |
+| malformed or compressed image exhausts resources | byte, dimension, pixel, decoded-byte, chunk and segment ceilings; bounded structural validation; unsupported type rejected |
+| text carries invalid encoding, NULs or uncontrolled line structure | strict UTF-8 validation, normalization and byte/line ceilings |
+| PDF or active document content reaches the first live transfer | the C9 live fixture is PNG plus `text/plain`; PDF, archives and generic binary inputs fail closed |
+| attachment text or pixels prompt-inject the local AI | both inputs are explicitly delimited as untrusted data; the local model may return only the strict two-nonce JSON shape |
+| a remote or DNS-rebound “local AI” receives bytes | endpoint requires exact host `127.0.0.1`, an explicit port and the exact path; hostnames, other loopback literals, user info, TLS URLs and non-loopback addresses are rejected |
+| proxy, redirect or credential handling leaks local-AI traffic | proxy environment disabled, redirects disabled and authentication fixed to `none` |
+| local-AI response smuggles extra content or false proof | response-size bound, duplicate-key and extra-field rejection, distinct nonce syntax and constant-time match against both expected hashes |
+| a controlled HTTP response is reported as installed-runtime proof | final admission requires a separate fresh HMAC-bound runtime observation, inspected executable digest and endpoint/model commitments; the observation labels PID/process identity and privacy settings as operator-attested rather than automatically verified |
+| adapter storage behavior is mistaken for runtime privacy | `adapter_persistent_storage_used=false` is scoped only to C9; runtime request logging and persistence are separate explicit operator confirmations |
+| public models, logs or exceptions leak bytes, paths or nonces | public receipts are hash/size/time metadata only; raw output is private; safe generic errors; secret-free model validators |
+| Work authority is counted as Chat authority | separate Work rich lease and Chat manual-export claim over equal package commitments; transport-specific receipt types |
+| a successful or failed transfer is replayed | one-use Work lease, at-most-once picker claim, independent task/conversation identities and response nonce proofs |
+| one transport is approved while the other is silently changed | one combined atomic approval binds the Work manifest, Chat manual manifest, exact authorities, local-AI receipt and cycle |
+| a stale or forged approval/grant enables the tool | HMAC-bound evidence, strict maximum windows, digest revalidation, exact C8 ancestry and zero-tool default |
+| the completed C8 grant is revived | C9 binds the immutable C8 evidence tag and records `c8_live_cycle_grant_reused=false`; it issues a fresh C9 grant |
+| rich MCP rendering bypasses local policy or audit | executor returns metadata first; audit occurs before transport rendering; renderer receives only an approved delivery token and cannot replace mandatory metadata |
+| a renderer returns excessive or malformed rich content | exact image/resource type validation, total response ceiling and generic failure without raw exception details |
+| normal Chat is silently routed through Work or a private interface | the Chat leg permits only the public file picker; automatic switching, DOM heuristics, cookies and private endpoints are forbidden |
+| a generic “new conversation” instruction is mistaken for Chat Plugin support | the explicit current rule “Plugins are not available in Chat” controls; Chat MCP exposure is denied |
+| a successful Work call is counted as Chat | separate Work rich receipt and Chat manual-export/response receipt are mandatory |
+| the manual Chat receipt is promoted to MCP/app/local-endpoint evidence | the typed Chat receipt denies all such claims; final attestation rejects their promotion |
+| a visible app label is reported as an internal app ID | the Work receipt records only operator-visible selection plus endpoint/tool/cycle correlation and marks internal ID unverified |
+| picker paths escape to a remote receipt | export metadata contains no path; paths are returned once only through the distinct authenticated loopback control plane |
+| another ordinary local principal reads the Chat export | exact `0700`/`0600` POSIX modes; on Windows, inherited ACL removal plus an owner-only DACL query for the export root, handoff directory and files; permission failure denies materialization |
+| a Chat export persists after use or crash | private state root, maximum ten-minute TTL, startup orphan cleanup, identity revalidation and cleanup on completion, cancellation, expiry and close |
+| Chat export cleanup deletes an attacker-substituted target | root and file identity checks, link/hard-link drift detection and confined removal; unexpected objects fail closed |
+| a third task/conversation expands scope | grant literals allow exactly one Work task and one normal Chat conversation; dynamic registry has at most one tool |
+| provider prompt injection requests files, writes, commands, secrets or protocol v2 | those capabilities are absent from `policy.c9.yaml`, admission and the MCP registry |
+| Runtime key or Work Plugin connection survives the proof | facade/Tunnel stop, listener checks, Work Plugin removal, operator key revocation, process-secret clearing and Work/control post-revocation unreachability are mandatory before final attestation |
+
+Residual risks include:
+
+- the runtime observation authenticates the recorded declaration and its
+  bindings, but does not independently verify the operator-declared listening
+  PID, product metadata or runtime privacy settings;
+- an installed local model may behave differently outside the single bounded
+  inference;
+- ChatGPT may display or interpret a valid attachment differently from the
+  observed nonce proof;
+- operating-system ACL or deletion behavior cannot prove physical media
+  erasure;
+- the operating-system picker consumes path names, so a privileged local
+  process can still race the last
+  component-by-component and content-hash revalidation before selection;
+- on Windows, private-state mutations use guarded path-based fallbacks where
+  Python handle-relative operations are unavailable; component, identity and
+  DACL checks narrow but do not eliminate a privileged check/use race;
+- an owner-only DACL protects against ordinary principals, not an
+  administrator, kernel compromise or offline disk access;
+- provider-side copies may remain subject to the provider’s own retention
+  rules after a successful transfer;
+- an operator may select the wrong visible control or fail to revoke an
+  external credential;
+- the operator-visible Work app label is not an independently verified
+  internal app identifier;
+- an operating-system or process compromise can read in-memory bytes while
+  the bounded cycle is active.
+
+The exact-package scope, transport-specific nonce proofs, short TTLs, one-use
+authority, minimal Work rich-content surface and explicit cleanup reduce
+these risks but do not establish regular-use readiness. The manual path risks
+must remain explicit even if the bounded Chat proof succeeds. See
+[`providers/chatgpt-web-c9-attachment-handoff.md`](providers/chatgpt-web-c9-attachment-handoff.md).

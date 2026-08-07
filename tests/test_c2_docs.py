@@ -25,8 +25,8 @@ def test_c2_document_records_exact_question_result_and_freshness() -> None:
         "Can any officially documented ChatGPT Chat surface invoke a custom or local",
         "without using ChatGPT Work?",
         "BLOCKED_BY_NO_OFFICIAL_CHAT_TOOL_INTERFACE",
-        "2026-07-27T01:40:00Z",
-        "2026-08-10T01:40:00Z",
+        "2026-08-07T01:40:00Z",
+        "2026-08-21T01:40:00Z",
         "This is a capability result, not a tunnel failure.",
         "No reviewed public interface provides an alternative",
     ):
@@ -133,8 +133,8 @@ def test_c2_evidence_governance_profile_is_registered() -> None:
         'document = "docs/providers/chatgpt-web-c2-capability-gating.md"',
         'reviewed_assignment = "C2_REVIEWED_AT"',
         'revalidate_assignment = "C2_REVALIDATE_AFTER"',
-        'reviewed_at = "2026-07-27T01:40:00Z"',
-        'revalidate_after = "2026-08-10T01:40:00Z"',
+        'reviewed_at = "2026-08-07T01:40:00Z"',
+        'revalidate_after = "2026-08-21T01:40:00Z"',
     ):
         assert marker in manifest
 
