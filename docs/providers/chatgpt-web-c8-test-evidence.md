@@ -72,7 +72,7 @@ evidence of a ChatGPT Work invocation.
 
 ## Pre-live visible and official refresh
 
-At `2026-07-27T17:33:00Z`, C8 fetched the six previously reviewed official
+At `2026-08-07T17:33:00Z`, C8 fetched the six previously reviewed official
 guides again and inspected the official ChatGPT Work product page:
 
 - the MCP guide now directly states that ChatGPT web can use remote

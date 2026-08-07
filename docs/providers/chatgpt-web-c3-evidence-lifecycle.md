@@ -4,11 +4,11 @@ Status: `BLOCKED_BY_NO_OFFICIAL_CHAT_TOOL_INTERFACE`
 
 Evidence lifecycle: `current`
 
-Reviewed: `2026-07-27T11:55:00Z`
+Reviewed: `2026-08-07T11:55:00Z`
 
 Revalidation due from: `2026-08-03T11:55:00Z`
 
-Expires: `2026-08-10T11:55:00Z`
+Expires: `2026-08-21T11:55:00Z`
 
 Stacked base: exact C2 commit
 `cf05e963ba30539f9b2c9ec2f5f71326cbba8399` from draft
@@ -195,7 +195,7 @@ Exact gate statuses are:
 | invalid schema, digest, identity, path, URL, registry, or time | `BLOCKED_BY_SECURITY_INVARIANT` |
 
 The deadline is exclusive: evidence is `expired` exactly at
-`2026-08-10T11:55:00Z`. The warning boundary is inclusive:
+`2026-08-21T11:55:00Z`. The warning boundary is inclusive:
 `revalidation_due` begins exactly at `2026-08-03T11:55:00Z`.
 
 ## Fail-closed action matrix

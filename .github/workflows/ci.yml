@@ -83,7 +83,7 @@ jobs:
           uv run --frozen --extra dev
           python -m systeme_local_gateway.c3_evidence
           governance
-          --as-of 2026-07-27T12:00:00Z
+          --as-of 2026-08-10T12:00:00Z
           --github-annotations
 
       - name: Check C4 runtime admission remains fail closed
@@ -94,7 +94,7 @@ jobs:
           --root .
           --c3-registry governance/c3-capability-registry.json
           --c4-registry governance/c4-runtime-adapters.json
-          --as-of 2026-07-27T12:00:00Z
+          --as-of 2026-08-10T12:00:00Z
           --expect-all-denied
 
       - name: Check C5 squash integration tree and ancestry
