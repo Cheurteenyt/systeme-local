@@ -7,9 +7,9 @@ snapshot. See the
 [C3 evidence lifecycle](chatgpt-web-c3-evidence-lifecycle.md) for the active
 registry, candidate comparison, lifecycle states, and five-action gate.
 
-Reviewed: `2026-07-27T01:40:00Z`
+Reviewed: `2026-08-07T01:40:00Z`
 
-Revalidate no later than: `2026-08-10T01:40:00Z`
+Revalidate no later than: `2026-08-21T01:40:00Z`
 
 Stacked base: exact C1 commit
 `2aee36fdfa3d20c23acdc75eb3348bc54536ef4f` from draft
@@ -50,8 +50,8 @@ Its SHA-256 is
 | Provider-neutral surface class | `conversational_chat` |
 | Capability | `custom_or_local_mcp_tool_invocation` |
 | State | `unsupported` |
-| Consultation | `2026-07-27T01:40:00Z` |
-| Revalidation deadline | `2026-08-10T01:40:00Z` |
+| Consultation | `2026-08-07T01:40:00Z` |
+| Revalidation deadline | `2026-08-21T01:40:00Z` |
 
 The surface class is taxonomy, not capability inheritance. It allows future
 profiles to describe comparable interaction shapes without inheriting

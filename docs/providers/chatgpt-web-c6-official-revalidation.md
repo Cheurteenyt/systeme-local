@@ -3,9 +3,9 @@
 Status: `implemented`; official sources `unchanged`; review-only candidate;
 runtime gate unchanged
 
-Reviewed at: `2026-07-27T14:42:00Z`
+Reviewed at: `2026-08-07T14:42:00Z`
 
-Revalidate after: `2026-08-10T14:42:00Z`
+Revalidate after: `2026-08-21T14:42:00Z`
 
 Current ChatGPT result:
 `BLOCKED_BY_NO_OFFICIAL_CHAT_TOOL_INTERFACE`

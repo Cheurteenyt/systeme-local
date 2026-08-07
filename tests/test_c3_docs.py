@@ -163,13 +163,13 @@ def test_c3_governance_and_ci_are_read_only_and_deterministic() -> None:
         'id = "chatgpt_chat_c3_official_capability_profile"',
         'source = "src/systeme_local_gateway/c3_evidence.py"',
         'document = "docs/providers/chatgpt-web-c3-evidence-lifecycle.md"',
-        'reviewed_at = "2026-07-27T11:55:00Z"',
-        'revalidate_after = "2026-08-10T11:55:00Z"',
+        'reviewed_at = "2026-08-07T11:55:00Z"',
+        'revalidate_after = "2026-08-21T11:55:00Z"',
     ):
         assert marker in manifest
     assert "permissions:\n  contents: read" in scheduled
     assert "c3_evidence\n          governance\n          --github-annotations" in scheduled
-    assert "--as-of 2026-07-27T12:00:00Z" in ci
+    assert "--as-of 2026-08-10T12:00:00Z" in ci
     assert "issues: write" not in scheduled
     assert "contents: write" not in scheduled
 

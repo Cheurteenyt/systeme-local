@@ -2,9 +2,9 @@
 
 Status: `BLOCKED_BY_NO_OFFICIAL_CHAT_TOOL_INTERFACE`
 
-Review time: `2026-07-27T01:40:00Z`
+Review time: `2026-08-07T01:40:00Z`
 
-Revalidation deadline: `2026-08-10T01:40:00Z`
+Revalidation deadline: `2026-08-21T01:40:00Z`
 
 This ledger separates official-document review, local deterministic tests,
 repository quality checks, and live actions. A command is `PASS` only from its
