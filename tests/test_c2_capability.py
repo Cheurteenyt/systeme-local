@@ -52,7 +52,7 @@ def test_committed_c2_profile_matches_builder_byte_for_byte() -> None:
 
     assert committed == current.model_dump(mode="json")
     assert (
-        current.profile_sha256 == "fa6f144d6867c00e995c791182cc78e7aabcc781ff6462bf885be26faa706305"
+        current.profile_sha256 == "10e6780e18224bd292130ff3f2350713d06445786975afc2ac7322f64ce1742b"
     )
 
 
@@ -192,7 +192,7 @@ def test_cli_preflight_emits_blocked_decision_without_live_side_effects() -> Non
             "--profile",
             str(PROFILE_PATH),
             "--as-of",
-            "2026-07-27T01:41:00Z",
+            "2026-08-10T01:41:00Z",
         ],
         cwd=ROOT,
         check=True,
@@ -220,7 +220,7 @@ def test_cli_require_action_returns_denial_exit_code() -> None:
             "--action",
             C2LiveAction.TUNNEL_START.value,
             "--as-of",
-            "2026-07-27T01:41:00Z",
+            "2026-08-10T01:41:00Z",
         ],
         cwd=ROOT,
         check=False,
@@ -246,7 +246,7 @@ def test_cli_malformed_profile_fails_closed_without_echoing_input(tmp_path: Path
             "--profile",
             str(malformed),
             "--as-of",
-            "2026-07-27T01:41:00Z",
+            "2026-08-10T01:41:00Z",
         ],
         cwd=ROOT,
         check=False,
@@ -277,7 +277,7 @@ def test_cli_rejects_valid_but_substituted_profile(tmp_path: Path) -> None:
             "--profile",
             str(substituted),
             "--as-of",
-            "2026-07-27T01:41:00Z",
+            "2026-08-10T01:41:00Z",
         ],
         cwd=ROOT,
         check=False,

@@ -135,7 +135,7 @@ def test_committed_profile_and_registry_match_reviewed_builders() -> None:
     assert committed_profile == profile.model_dump(mode="json")
     assert committed_registry == registry.model_dump(mode="json")
     assert (
-        profile.profile_sha256 == "512d26961dd33429850c2599b1c970be3910e990b92bc23aa759e92784f0dc3a"
+        profile.profile_sha256 == "478d1651fa1b275d5158ff1fd56e1775b10a48fb650b3e2baef3808d36e357bd"
     )
     assert (
         profile.evidence_sha256
@@ -143,7 +143,7 @@ def test_committed_profile_and_registry_match_reviewed_builders() -> None:
     )
     assert (
         registry.registry_sha256
-        == "9567dd0bbb9ec80d6bf24ea86048f6229f9c956731053b1191208ac6bcecdd62"
+        == "eb95d8cc359b9bca6f30ae613b294dcc6247ace292ad49fab7f116a38c79631c"
     )
 
 
@@ -604,7 +604,7 @@ def test_cli_preflight_and_every_require_action_fail_closed() -> None:
             "systeme_local_gateway.c3_evidence",
             "preflight",
             "--as-of",
-            "2026-07-27T12:00:00Z",
+            "2026-08-10T12:00:00Z",
         ],
         cwd=ROOT,
         env=env,
@@ -628,7 +628,7 @@ def test_cli_preflight_and_every_require_action_fail_closed() -> None:
                 "--action",
                 action.value,
                 "--as-of",
-                "2026-07-27T12:00:00Z",
+                "2026-08-10T12:00:00Z",
             ],
             cwd=ROOT,
             env=env,
@@ -649,7 +649,7 @@ def test_cli_governance_reports_due_and_fails_expired_distinctly() -> None:
             "systeme_local_gateway.c3_evidence",
             "governance",
             "--as-of",
-            "2026-08-03T11:55:00Z",
+            "2026-08-15T11:55:00Z",
             "--github-annotations",
         ],
         cwd=ROOT,
@@ -669,7 +669,7 @@ def test_cli_governance_reports_due_and_fails_expired_distinctly() -> None:
             "systeme_local_gateway.c3_evidence",
             "governance",
             "--as-of",
-            "2026-08-10T11:55:00Z",
+            "2026-08-22T11:55:00Z",
             "--github-annotations",
         ],
         cwd=ROOT,
@@ -692,9 +692,9 @@ def test_cli_candidate_draft_and_sealing_are_deterministic(tmp_path: Path) -> No
             "systeme_local_gateway.c3_evidence",
             "new-candidate-draft",
             "--reviewed-at",
-            "2026-07-28T11:55:00Z",
+            "2026-08-08T11:55:00Z",
             "--revalidate-after",
-            "2026-08-11T11:55:00Z",
+            "2026-08-22T11:55:00Z",
         ],
         cwd=ROOT,
         env=env,
@@ -718,7 +718,7 @@ def test_cli_candidate_draft_and_sealing_are_deterministic(tmp_path: Path) -> No
             "--draft",
             str(draft_path),
             "--as-of",
-            "2026-07-28T12:00:00Z",
+            "2026-08-08T12:00:00Z",
         ],
         cwd=ROOT,
         env=env,
@@ -745,7 +745,7 @@ def test_cli_invalid_registry_does_not_echo_input(tmp_path: Path) -> None:
             "--registry",
             str(registry),
             "--as-of",
-            "2026-07-27T12:00:00Z",
+            "2026-08-10T12:00:00Z",
         ],
         cwd=ROOT,
         env={"PYTHONPATH": str(ROOT / "src")},

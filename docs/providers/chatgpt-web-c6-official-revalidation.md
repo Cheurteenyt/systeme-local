@@ -64,7 +64,7 @@ It binds:
 - policy SHA-256
   `602e4fc6313f0d7e95c3255fbaad47c77d65dc2b28c47406b6c9c323fdc4d8dd`;
 - C3 registry SHA-256
-  `9567dd0bbb9ec80d6bf24ea86048f6229f9c956731053b1191208ac6bcecdd62`;
+  `eb95d8cc359b9bca6f30ae613b294dcc6247ace292ad49fab7f116a38c79631c`;
 - C3 profile SHA-256
   `512d26961dd33429850c2599b1c970be3910e990b92bc23aa759e92784f0dc3a`;
 - identity `chatgpt` / `chat` / `conversational_chat` /
