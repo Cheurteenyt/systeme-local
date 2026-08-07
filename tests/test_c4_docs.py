@@ -187,7 +187,7 @@ def test_c4_ci_is_fixed_time_and_scheduled_check_derives_from_c3() -> None:
         assert "systeme_local_gateway.c4_admission" in text
         assert "--expect-all-denied" in text
         assert "governance/c4-runtime-adapters.json" in text
-    assert "--as-of 2026-07-27T12:00:00Z" in ci
+    assert "--as-of 2026-08-10T12:00:00Z" in ci
     assert "permissions:\n  contents: read" in scheduled
     assert scheduled.index("Evaluate C3 capability evidence lifecycle") < scheduled.index(
         "Verify derived C4 runtime admission remains denied"
