@@ -66,7 +66,7 @@ It binds:
 - C3 registry SHA-256
   `eb95d8cc359b9bca6f30ae613b294dcc6247ace292ad49fab7f116a38c79631c`;
 - C3 profile SHA-256
-  `512d26961dd33429850c2599b1c970be3910e990b92bc23aa759e92784f0dc3a`;
+  `478d1651fa1b275d5158ff1fd56e1775b10a48fb650b3e2baef3808d36e357bd`;
 - identity `chatgpt` / `chat` / `conversational_chat` /
   `custom_or_local_mcp_tool_invocation`;
 - the fixed endpoint `https://developers.openai.com/mcp`;
