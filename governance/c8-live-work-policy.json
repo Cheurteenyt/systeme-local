@@ -1,0 +1,40 @@
+{
+  "accepted_c7_commit": "e0a1dccfa13c95a1ce077d2b6f9ef4f1ed70231f",
+  "authorization_required": true,
+  "c7_policy": {
+    "path": "governance/c7-work-prelive-policy.json",
+    "sha256": "af86671e42a6af0fab96683ba6967483fc509e5ad4682869be8b8ace9fde449e"
+  },
+  "c7_profile": {
+    "path": "governance/c7-chatgpt-work-capability-profile.json",
+    "sha256": "a7ed1a1824938a46c3735cdb55965f155c3a42720f583154a24ed3ee51153b38"
+  },
+  "c8_official_revalidation": {
+    "path": "governance/c8-official-work-revalidation.json",
+    "sha256": "36a6c801984d367387be19199a87a0dd9e68efae03c8c48d4f468e06583225ce"
+  },
+  "default_live_actions_allowed": false,
+  "entitlement_required": "available",
+  "existing_conversations_allowed": false,
+  "identity": {
+    "capability": "custom_or_local_mcp_tool_invocation",
+    "native_surface": "work",
+    "provider_id": "chatgpt",
+    "surface_class": "agentic_work"
+  },
+  "max_live_cycle_seconds": 1200,
+  "max_new_synthetic_work_tasks": 2,
+  "max_observation_age_seconds": 300,
+  "native_chat_gate_status": "BLOCKED_BY_NO_OFFICIAL_CHAT_TOOL_INTERFACE",
+  "only_eligible_tool": "systeme_local_connectivity_probe",
+  "policy_id": "chatgpt_work_live_c8_20260727",
+  "policy_sha256": "027780cf425a392932db41d2e12665929140155c7de930b94c5f62df93c4d3a2",
+  "private_browser_state_allowed": false,
+  "protocol_v2_allowed": false,
+  "quota_required": "usable",
+  "real_evidence_access_allowed": false,
+  "tool_protocol_sha256": "de0389f0a2329daa8afa3ad8126eb6e3e80aba1b77ed2e0f29998c37c383c65b",
+  "version": "1",
+  "work_surface_required": true,
+  "write_actions_allowed": false
+}
