@@ -26,8 +26,8 @@ source = "src/systeme_local_gateway/c7_work_admission.py"
 document = "docs/providers/chatgpt-web-c7-work-prelive-admission.md"
 reviewed_assignment = "C7_REVIEWED_AT"
 revalidate_assignment = "C7_REVALIDATE_AFTER"
-reviewed_at = "2026-07-27T15:42:00Z"
-revalidate_after = "2026-08-10T15:42:00Z"
+reviewed_at = "2026-08-07T15:42:00Z"
+revalidate_after = "2026-08-21T15:42:00Z"
 warning_days = 7
 
 [[profiles]]
@@ -36,8 +36,8 @@ source = "src/systeme_local_gateway/c8_governance.py"
 document = "docs/providers/chatgpt-web-c8-work-live-validation.md"
 reviewed_assignment = "C8_REVIEWED_AT"
 revalidate_assignment = "C8_REVALIDATE_AFTER"
-reviewed_at = "2026-07-27T17:33:00Z"
-revalidate_after = "2026-08-10T17:33:00Z"
+reviewed_at = "2026-08-07T17:33:00Z"
+revalidate_after = "2026-08-21T17:33:00Z"
 warning_days = 7
 
 [[profiles]]
@@ -46,8 +46,8 @@ source = "src/systeme_local_gateway/c2_capability.py"
 document = "docs/providers/chatgpt-web-c2-capability-gating.md"
 reviewed_assignment = "C2_REVIEWED_AT"
 revalidate_assignment = "C2_REVALIDATE_AFTER"
-reviewed_at = "2026-07-27T01:40:00Z"
-revalidate_after = "2026-08-10T01:40:00Z"
+reviewed_at = "2026-08-07T01:40:00Z"
+revalidate_after = "2026-08-21T01:40:00Z"
 warning_days = 7
 
 [[profiles]]
@@ -56,8 +56,8 @@ source = "src/systeme_local_gateway/c3_evidence.py"
 document = "docs/providers/chatgpt-web-c3-evidence-lifecycle.md"
 reviewed_assignment = "C3_REVIEWED_AT"
 revalidate_assignment = "C3_REVALIDATE_AFTER"
-reviewed_at = "2026-07-27T11:55:00Z"
-revalidate_after = "2026-08-10T11:55:00Z"
+reviewed_at = "2026-08-07T11:55:00Z"
+revalidate_after = "2026-08-21T11:55:00Z"
 warning_days = 7
 
 [[profiles]]
@@ -66,6 +66,6 @@ source = "src/systeme_local_gateway/c6_revalidation.py"
 document = "docs/providers/chatgpt-web-c6-official-revalidation.md"
 reviewed_assignment = "C6_REVIEWED_AT"
 revalidate_assignment = "C6_REVALIDATE_AFTER"
-reviewed_at = "2026-07-27T14:42:00Z"
-revalidate_after = "2026-08-10T14:42:00Z"
+reviewed_at = "2026-08-07T14:42:00Z"
+revalidate_after = "2026-08-21T14:42:00Z"
 warning_days = 7
