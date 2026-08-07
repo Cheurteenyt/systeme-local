@@ -10,6 +10,7 @@ regenerating ``governance/c7-chatgpt-work-capability-profile.json``:
 
     python scripts/regen_c8_governance_local.py
 """
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -26,9 +27,7 @@ def main() -> int:
     revalidation_path = ROOT / c8.C8_REVALIDATION_PATH
     policy_path = ROOT / c8.C8_POLICY_PATH
 
-    revalidation_path.write_text(
-        c8.rendered_json(revalidation), encoding="utf-8", newline="\n"
-    )
+    revalidation_path.write_text(c8.rendered_json(revalidation), encoding="utf-8", newline="\n")
     policy_path.write_text(c8.rendered_json(policy), encoding="utf-8", newline="\n")
 
     print(f"wrote {revalidation_path}")
