@@ -21,7 +21,7 @@ never fabricated live evidence.
 | C1 draft PR | [#67](https://github.com/Cheurteenyt/systeme-local/pull/67) |
 | C1 CI at C2 start | four jobs successful |
 | Capability profile | `chatgpt_chat_c2_20260727` |
-| Profile SHA-256 | `fa6f144d6867c00e995c791182cc78e7aabcc781ff6462bf885be26faa706305` |
+| Profile SHA-256 | `10e6780e18224bd292130ff3f2350713d06445786975afc2ac7322f64ce1742b` |
 | C2 live credential count | `0` |
 | C2 tunnel start count | `0` |
 | C2 Plugin creation count | `0` |

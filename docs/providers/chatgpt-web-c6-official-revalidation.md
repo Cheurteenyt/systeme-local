@@ -62,7 +62,7 @@ The canonical policy is
 It binds:
 
 - policy SHA-256
-  `602e4fc6313f0d7e95c3255fbaad47c77d65dc2b28c47406b6c9c323fdc4d8dd`;
+  `f0710c24b3dc2941d0c09c1bf5e360637af176a3d1eaf31dd6f208c09641597f`;
 - C3 registry SHA-256
   `eb95d8cc359b9bca6f30ae613b294dcc6247ace292ad49fab7f116a38c79631c`;
 - C3 profile SHA-256
