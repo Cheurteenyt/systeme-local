@@ -44,8 +44,9 @@ class Settings(BaseSettings):
         default=None,
         pattern=r"^[0-9a-f]{40}$",
     )
-    provider_runtime_mode: Literal["chatgpt_chat_c4"] | None = None
+    provider_runtime_mode: Literal["chatgpt_chat_c4", "chatgpt_work_c8"] | None = None
     provider_runtime_root: Path | None = None
+    c8_live_cycle_file: Path | None = None
     mcp_max_request_bytes: int = Field(
         default=1_048_576,
         ge=1_024,
@@ -125,10 +126,22 @@ class Settings(BaseSettings):
             )
         if provider_mode_configured:
             if not self.mcp_enabled or not self.c0_enabled:
-                raise ValueError("C4 provider runtime requires SLG_MCP_ENABLED and SLG_C0_ENABLED")
+                raise ValueError("provider runtime requires SLG_MCP_ENABLED and SLG_C0_ENABLED")
             assert self.provider_runtime_root is not None
             if not self.provider_runtime_root.is_absolute():
                 raise ValueError("SLG_PROVIDER_RUNTIME_ROOT must be an absolute path")
+        if self.provider_runtime_mode == "chatgpt_work_c8":
+            if self.c8_live_cycle_file is None:
+                raise ValueError("SLG_C8_LIVE_CYCLE_FILE is required for the C8 Work runtime")
+            if not self.c8_live_cycle_file.is_absolute():
+                raise ValueError("SLG_C8_LIVE_CYCLE_FILE must be an absolute path")
+            assert self.provider_runtime_root is not None
+            expected_root = _normalized_path(self.provider_runtime_root / ".systeme-local" / "c8")
+            cycle_path = _normalized_path(self.c8_live_cycle_file)
+            if cycle_path != expected_root and not cycle_path.startswith(expected_root + os.sep):
+                raise ValueError("SLG_C8_LIVE_CYCLE_FILE must remain inside .systeme-local/c8")
+        elif self.c8_live_cycle_file is not None:
+            raise ValueError("SLG_C8_LIVE_CYCLE_FILE is only valid with chatgpt_work_c8")
 
         if self.mcp_token is not None:
             secrets_to_compare = {

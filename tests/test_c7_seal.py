@@ -71,11 +71,11 @@ def test_c7_tree_commitment_is_content_framed_and_deterministic() -> None:
     assert first.blob_bytes > 3_000_000
 
 
-def test_c7_final_seal_verifies_tag_diff_manifest_and_tree() -> None:
-    result = verify_c7_seal(ROOT, require_current_tree=True)
+def test_c7_historical_seal_verifies_tag_diff_manifest_and_tree() -> None:
+    result = verify_c7_seal(ROOT)
     assert result.status == "verified"
     assert result.base_commit == C7_BASE_COMMIT
-    assert result.current_tree_required is True
+    assert result.current_tree_required is False
     assert result.covered_changed_file_count > 15
     assert result.tree_file_count > 300
     assert result.tree_blob_bytes > 3_000_000

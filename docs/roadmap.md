@@ -343,9 +343,8 @@ changes do not rewrite historical evidence. See
 
 ## C6 official capability revalidation
 
-Status: `implemented` on the C6 branch; local public-source validation is
-green, while the draft pull request, final-head CI, and manual governance
-closeout remain pending.
+Status: `implemented` and accepted on `main`; the public-source validation,
+annotated evidence seal, remote CI and governance closeout are complete.
 
 C6 starts from exact accepted C5 `main`
 `418112758d8675326835d9947ccce3a1b12f6f25`. It adds a provider-neutral,
@@ -375,8 +374,8 @@ See
 
 ## C7 ChatGPT Work pre-live admission
 
-Status: `COMPLETE_C7_WORK_PROFILE_READY_FOR_BOUNDED_LIVE_VALIDATION` pending
-final seal and remote CI.
+Status: `COMPLETE_C7_WORK_PROFILE_READY_FOR_BOUNDED_LIVE_VALIDATION`;
+accepted on `main` with its annotated evidence seal and green remote CI.
 
 C7 starts from accepted C6 `main`
 `81bed9b81f266709fab0ea4178f98f0607c3da44` and is tracked by issue
@@ -392,12 +391,44 @@ historical C3/C4/C6 artifacts instead of rewriting their evidence.
 Official Work support is an eligibility fact, not live authorization. The
 default policy denies Runtime-key creation, Tunnel startup, Plugin creation,
 browser testing, ChatGPT Work actions and tool exposure. It exposes zero tools.
-A future C8 cycle requires a fresh HMAC-authenticated operator grant bound to
+A C8 cycle requires a fresh HMAC-authenticated operator grant bound to
 the exact profile/policy, Work-only surface, maximum twenty-minute lifetime
 and at most two new synthetic Work chats. It must include an explicit Work
 request plus fresh visible-surface, entitlement and usable-quota observations.
 
-C7 performs no browser, credential, Tunnel, Plugin, chat or provider action.
-The next gate after a green C7 seal is a separately authorized C8 Work-only
-live validation. See
+C7 performed no browser, credential, Tunnel, Plugin, chat or provider action.
+Its green seal enabled the separately authorized C8 Work-only live
+validation. See
 [`providers/chatgpt-web-c7-work-prelive-admission.md`](providers/chatgpt-web-c7-work-prelive-admission.md).
+
+## C8 bounded ChatGPT Work live validation
+
+Status: `COMPLETE_C8_TWO_WORK_CALLS_LIVE_CORRELATED_AND_REVOKED`; the bounded
+provider cycle, negative tests, revocation and cleanup are complete.
+
+C8 starts from accepted C7 `main`
+`e0a1dccfa13c95a1ce077d2b6f9ef4f1ed70231f` and is tracked by issue
+[#78](https://github.com/Cheurteenyt/systeme-local/issues/78). It does not
+reopen native Chat. It implements the fresh C7 grant contract for one explicit
+Work-only cycle, at most twenty minutes and exactly two new synthetic tasks.
+
+The runtime required a durable HMAC-bound operator scope plus fresh visible
+Work, entitlement and quota evidence. It exposes only the reviewed read-only
+probe, correlates each result to local audit, then requires bounded negatives,
+Plugin removal, Runtime-key revocation, closed listeners and post-revocation
+unreachability.
+
+The executed cycle created exactly two synthetic Work tasks and correlated
+exactly one probe call from each. Replays and malformed inputs were rejected,
+the capability surface did not expand, the Plugin connection and Runtime key
+were removed, both listeners closed, and a post-revocation call was
+unreachable. The result means only
+`COMPLETE_C8_TWO_WORK_CALLS_LIVE_CORRELATED_AND_REVOKED`; it does not mean
+regular-use readiness, native Chat support or exact model attribution.
+
+After C8, the next product lot should convert the proven one-tool pathway into
+a deliberately scoped, user-facing read-only capability design with explicit
+operational lifecycle, quota and revocation policy. Support for a different
+Web AI remains a later provider-specific profile and adapter lot, not an
+inference from ChatGPT evidence. See
+[`providers/chatgpt-web-c8-work-live-validation.md`](providers/chatgpt-web-c8-work-live-validation.md).

@@ -480,8 +480,8 @@ conversation, or account setting is used. See
 
 ### Phase 17 — ChatGPT Work pre-live admission
 
-Status: `COMPLETE_C7_WORK_PROFILE_READY_FOR_BOUNDED_LIVE_VALIDATION` pending
-final seal and remote CI.
+Status: `COMPLETE_C7_WORK_PROFILE_READY_FOR_BOUNDED_LIVE_VALIDATION`;
+accepted on `main` with its annotated evidence seal and green remote CI.
 
 C7 models Work independently as
 `chatgpt:work:agentic_work:custom_or_local_mcp_tool_invocation`. Six reviewed
@@ -489,7 +489,7 @@ official sources support the Plugin-mediated MCP route on Work. The existing
 native Chat profile remains unsupported and no Work evidence can satisfy it.
 
 The C7 default decision denies all six protected effects and exposes zero
-tools. It requires a fresh future C8 operator grant, authenticated by a
+tools. It requires a fresh C8 operator grant, authenticated by a
 process-local audit key and bound to a Work-only, two-new-chat, twenty-minute
 maximum cycle with fresh surface, entitlement and usable-quota observations.
 C7 itself creates no grant and performs no ChatGPT, browser,
@@ -536,7 +536,7 @@ C0 formats only its touched Python surface, reducing the current Ruff formatting
 baseline from 54 to 42 files while leaving the historical phase-8 measurement
 unchanged.
 
-## C1 through C7 interpretation
+## C1 through C8 interpretation
 
 Historical C1 receipts proved short-lived correlation between two manually
 created synthetic test chats, the single read-only probe, and local audit
@@ -554,5 +554,28 @@ evidence of bounded calls, not authority to bypass current official
 documentation or C4 admission.
 
 C7 adds a separate Work eligibility and pre-live policy overlay. It does not
-change native Chat, repeat C1 or claim a live Work result. Its successful
-status authorizes only the design of a separately approved C8 validation.
+change native Chat or repeat C1. Its successful status authorized only the
+design of the separately approved C8 validation.
+
+### Phase 18 — bounded ChatGPT Work live validation
+
+Status: `COMPLETE_C8_TWO_WORK_CALLS_LIVE_CORRELATED_AND_REVOKED`
+
+C8 consumed the accepted C7 Work profile only through a fresh, revocable
+operator grant. The grant is bound to visible Work, available entitlement,
+usable quota, two new synthetic tasks, one read-only tool and a twenty-minute
+maximum. `chatgpt_work_c8` is enforced during Python runtime construction;
+PowerShell cannot independently authorize the tool surface.
+
+The completed cycle produced two distinct Work correlations, rejected same-
+and cross-Work replay, rejected malformed schema inputs, exposed no additional
+capability, stopped both listeners, removed the Plugin connection, revoked the
+Runtime key, cleared process secrets and proved post-revocation
+unreachability.
+
+The exact verified success value is
+`COMPLETE_C8_TWO_WORK_CALLS_LIVE_CORRELATED_AND_REVOKED`.
+Native Chat stays `BLOCKED_BY_NO_OFFICIAL_CHAT_TOOL_INTERFACE`. Optional
+visible labels never prove an internal model ID, and a bounded success never
+claims regular-use readiness. See
+[`chatgpt-web-c8-work-live-validation.md`](chatgpt-web-c8-work-live-validation.md).

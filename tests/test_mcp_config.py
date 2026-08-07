@@ -127,3 +127,33 @@ def test_provider_runtime_configuration_is_paired_bounded_and_absolute() -> None
     assert settings.provider_runtime_mode == "chatgpt_chat_c4"
     assert settings.provider_runtime_root is not None
     assert settings.provider_runtime_root.is_absolute()
+
+
+def test_c8_runtime_requires_a_cycle_file_inside_ignored_c8_state() -> None:
+    absolute_root = Path.cwd().resolve() / "reviewed"
+    base = {
+        "mcp_enabled": True,
+        "mcp_token": "t" * 48,
+        "c0_enabled": True,
+        "c0_server_build_commit": "a" * 40,
+        "provider_runtime_mode": "chatgpt_work_c8",
+        "provider_runtime_root": absolute_root,
+    }
+    with pytest.raises(ValidationError, match="SLG_C8_LIVE_CYCLE_FILE"):
+        _settings(**base)
+    with pytest.raises(ValidationError, match="inside .systeme-local/c8"):
+        _settings(
+            **base,
+            c8_live_cycle_file=absolute_root / "outside.json",
+        )
+
+    cycle_file = absolute_root / ".systeme-local" / "c8" / "live-cycle.json"
+    settings = _settings(**base, c8_live_cycle_file=cycle_file)
+    assert settings.provider_runtime_mode == "chatgpt_work_c8"
+    assert settings.c8_live_cycle_file == cycle_file
+
+
+def test_c8_cycle_file_is_rejected_without_c8_runtime_mode() -> None:
+    absolute_root = Path.cwd().resolve() / "reviewed"
+    with pytest.raises(ValidationError, match="only valid"):
+        _settings(c8_live_cycle_file=(absolute_root / ".systeme-local" / "c8" / "live-cycle.json"))

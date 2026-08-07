@@ -1,0 +1,41 @@
+{
+  "base_commit": "e0a1dccfa13c95a1ce077d2b6f9ef4f1ed70231f",
+  "branch": "codex/chatgpt-work-live-c8",
+  "browser_actions_performed": true,
+  "covered_changed_file_count": 48,
+  "covered_head": "7701a922fd034548da1c5e43217932cef3a47bae",
+  "credentials_created": true,
+  "diff": {
+    "algorithm": "sha256-git-binary-diff-v1",
+    "bytes": 285273,
+    "excluded_paths": [
+      "governance/c8-change-seal.json"
+    ],
+    "sha256": "7adf5a209cabcf25d80b1190cc4319cb28c48e4740ba6d6a2087ee2289d347e8"
+  },
+  "effective_tool_count": 1,
+  "evidence_tag": "evidence/chatgpt-work-live-c8-v1",
+  "final_attestation_sha256": "f2399d98fca34fe2c5496cc2d4e9ce3ab4d87453d1f4302b7933617878144346",
+  "manifest_sha256": "ad78956364d3e9854466498da662f5ac7c10b88b4702ee4da3edcb58120f4078",
+  "native_chat_tested": false,
+  "official_docs_review_performed": true,
+  "plugin_connection_created": true,
+  "provider_live_actions_performed": true,
+  "regular_use_readiness_claimed": false,
+  "repository": "Cheurteenyt/systeme-local",
+  "reviewed_outcome": "COMPLETE_C8_TWO_WORK_CALLS_LIVE_CORRELATED_AND_REVOKED",
+  "revocation_verified": true,
+  "tree": {
+    "algorithm": "sha256-framed-tree-v1",
+    "blob_bytes": 3851511,
+    "excluded_paths": [
+      "governance/c8-change-seal.json"
+    ],
+    "file_count": 389,
+    "sha256": "7e6a34cad18a2648ffb91dd0f6e87393dd7f987c6d483912f0dd5d1e55c09d2e"
+  },
+  "tunnel_started": true,
+  "validation_status": "C8_WORK_LIVE_EVIDENCE_SEALED",
+  "version": "1",
+  "work_call_count": 2
+}

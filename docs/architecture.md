@@ -498,7 +498,7 @@ reviewed official Work sources
     -> exact Work capability profile
     -> C7 policy binds Chat blocker + C6 policy + C4 probe protocol
     -> default decision: six denials, zero tools
-    -> future HMAC-bound C8 operator grant
+    -> fresh HMAC-bound C8 operator grant
     -> at most one read-only probe becomes eligible for a bounded Work cycle
 ```
 
@@ -513,5 +513,39 @@ This separation preserves three independent facts:
 2. local deterministic admission;
 3. fresh operator authorization for a live cycle.
 
-Only all three may be combined by the future C8 implementation. See
+Only all three may be combined by the C8 implementation. See
 [`providers/chatgpt-web-c7-work-prelive-admission.md`](providers/chatgpt-web-c7-work-prelive-admission.md).
+
+## C8 revocable Work live-cycle runtime
+
+ADR 0015 implements the separate C8 authority path:
+
+```text
+current official C8 revalidation + exact C7 policy/profile
+    + durable explicit operator scope
+    + visible Work/entitlement/quota observations <= 5 minutes
+    -> HMAC-bound grant <= 20 minutes
+    -> chatgpt_work_c8 startup re-verifies every commitment
+    -> one loopback probe / one concurrent request
+    -> Work A proof + Work B proof
+    -> negative receipt + Plugin/key/Tunnel revocation
+    -> historical final attestation
+```
+
+The provider runtime mode is part of server construction, not a PowerShell-only
+convention. A missing or stale live-cycle file prevents the MCP registry from
+being created. Each Work proof binds a separate visible task observation to a
+structured response and one local audit record. No conversation identifier is
+collected.
+
+Finalization checks that both calls occurred while the grant was active, then
+requires revocation. It deliberately does not reopen or extend the grant to
+verify historical evidence.
+
+The executed cycle completed with two Work correlations, two failed replay
+audits, schema rejection, zero capability expansion and verified Plugin,
+Tunnel, listener, Runtime-key and process-secret revocation. A self-excluding
+C8 repository seal binds the final attestation digest, exact changed-file
+manifest, binary diff and framed tree under the annotated evidence tag
+`evidence/chatgpt-work-live-c8-v1`. See
+[`providers/chatgpt-web-c8-work-live-validation.md`](providers/chatgpt-web-c8-work-live-validation.md).
