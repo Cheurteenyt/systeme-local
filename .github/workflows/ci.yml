@@ -173,6 +173,13 @@ jobs:
           verify
           --require-current-tree
 
+      - name: Verify C7 historical seal matches main
+        if: github.ref == 'refs/heads/main'
+        run: >-
+          uv run --frozen --extra dev
+          python -m pytest -q
+          tests/test_c7_seal.py::test_c7_historical_seal_verifies_tag_diff_manifest_and_tree
+
       - name: Check C9 attachment handoff remains bounded offline
         run: >-
           uv run --frozen --extra dev
@@ -192,6 +199,7 @@ jobs:
         run: >-
           uv run --frozen --extra dev
           python -m pytest
+          -k "not test_c7_historical_seal_verifies_tag_diff_manifest_and_tree"
           --cov=systeme_local_gateway
           --cov-report=term-missing
           --cov-fail-under=60
@@ -222,7 +230,7 @@ jobs:
         run: uv sync --frozen --extra dev --python python
 
       - name: Run tests
-        run: uv run --frozen --extra dev python -m pytest -q
+        run: uv run --frozen --extra dev python -m pytest -q -k "not test_c7_historical_seal_verifies_tag_diff_manifest_and_tree"
 
   c9-windows-python:
     name: C9 Windows security and operator scripts
