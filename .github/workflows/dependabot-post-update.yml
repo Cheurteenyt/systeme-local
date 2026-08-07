@@ -1,0 +1,59 @@
+name: dependabot-post-update
+
+# Regenerates uv.lock for Dependabot pip bumps.
+#
+# Dependabot updates pyproject.toml for pip bumps but does NOT regenerate
+# uv.lock, so the CI "Check lock" step fails with "uv.lock needs to be
+# updated". This workflow regenerates uv.lock with the CI-pinned uv version
+# and pushes it back to the Dependabot pull request so the PR goes green.
+#
+# Only runs for Dependabot-authored PRs that modify pyproject.toml. It never
+# touches main and only ever writes uv.lock.
+
+on:
+  pull_request:
+    paths:
+      - "pyproject.toml"
+
+permissions:
+  contents: read
+
+jobs:
+  regenerate-uv-lock:
+    name: Regenerate uv.lock for Dependabot pip bump
+    if: github.actor == 'dependabot[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      # Required to push the regenerated lock back onto the PR branch.
+      contents: write
+    steps:
+      - name: Check out PR head
+        uses: actions/checkout@v7
+        with:
+          # Check out the PR branch itself so we can push the lock back.
+          ref: ${{ github.head_ref }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+
+      - name: Install pinned uv
+        run: python -m pip install --disable-pip-version-check "uv==0.11.29"
+
+      - name: Regenerate uv.lock
+        run: uv lock
+
+      - name: Commit and push updated uv.lock
+        run: |
+          if git diff --quiet uv.lock; then
+            echo "uv.lock already up to date; nothing to push."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add uv.lock
+          git commit -m "chore(deps): regenerate uv.lock for Dependabot bump"
+          git push
