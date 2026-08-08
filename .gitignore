@@ -11,5 +11,8 @@ workspace/*
 !workspace/.gitkeep
 
 .systeme-local/
+.uvlock_venv/
+.uv011_venv/
+.ruff016_venv/
 /target/
 .uv011_venv/
