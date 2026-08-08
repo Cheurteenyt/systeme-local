@@ -63,6 +63,24 @@ déterministes.
 4. Décrivez les permissions, effets de bord, données temporaires, preuves et risques.
 5. Attendez tous les checks, puis utilisez le cleanup contrôlé du lot.
 
+### Règle de discipline des branches et PR
+
+- **Une seule PR à la fois.** On n'ouvre jamais plusieurs PR en parallèle pour le même lot de
+  travail. On ouvre, on fait passer la CI, on merge, puis — et seulement alors — on passe à la
+  suivante.
+- **Toute modification passe par une PR.** Aucun push direct sur `main`. Mettre à jour le projet
+  (dépendances, docs, config) se fait toujours via une PR reviewable et verte, jamais en écriture
+  directe sur la branche protégée.
+- **Branches éphémères.** Une branche sert une PR et est supprimée après le merge. On ne laisse pas
+  de branches orphelines traîner (anciennes branches de travail, branches de test, doublons
+  Dependabot). Objectif : au plus `main` + une branche de travail active.
+- **Nettoyage contrôlé.** Après un merge, la branche locale et distante correspondante est retirée.
+  Le sprawl (trop de branches / trop de PR) est traité comme une régression de maintenance : on le
+  résorbe avant d'ajouter du nouveau travail.
+- **Dépendances Dependabot.** Chaque PR Dependabot est traitée individuellement. Une PR rouge
+  (CI en échec, conflit de version, nouveau lint) n'est jamais mergée : on la corrige ou on la ferme
+  avec justification, sans forcer le passage.
+
 ## Autorité documentaire
 
 Consultez [`docs/documentation-governance.md`](docs/documentation-governance.md). Une modification
