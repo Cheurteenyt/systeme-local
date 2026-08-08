@@ -4,7 +4,7 @@ import argparse
 import json
 import re
 import threading
-from datetime import datetime, timezone
+from datetime import UTC, datetime, timezone
 from enum import StrEnum
 from hashlib import sha256
 from pathlib import Path
@@ -59,7 +59,7 @@ def canonical_sha256(value: Any) -> str:
 def _require_aware(value: datetime) -> datetime:
     if value.tzinfo is None or value.utcoffset() is None:
         raise ValueError("C4 timestamps must include an explicit UTC offset")
-    normalized = value.astimezone(timezone.utc)
+    normalized = value.astimezone(UTC)
     if normalized != value:
         raise ValueError("C4 timestamps must be normalized to UTC")
     return normalized
@@ -876,7 +876,7 @@ def _approved_request_tools(
 
 
 def _correlation_for(action: RuntimeAdmissionAction, evaluated_at: datetime) -> str:
-    seed = f"{action.value}:{evaluated_at.isoformat()}".encode("utf-8")
+    seed = f"{action.value}:{evaluated_at.isoformat()}".encode()
     return "c4_" + sha256(seed).hexdigest()[:32]
 
 

@@ -17,7 +17,6 @@ from systeme_local_gateway.c5_integration import (
     verify_integration,
 )
 
-
 ROOT = Path(__file__).resolve().parents[1]
 MANIFEST_PATH = ROOT / "governance/c5-integration-manifest.json"
 SEAL_PATH = ROOT / "governance/c5-change-seal.json"

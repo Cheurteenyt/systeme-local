@@ -1,4 +1,4 @@
-from datetime import UTC, datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 import pytest
 from pydantic import ValidationError
@@ -7,7 +7,7 @@ from systeme_local_gateway.models import AgentIdentity, TaskEnvelope
 
 
 def task_data() -> dict:
-    now = datetime.now(UTC)
+    now = datetime.now(timezone.utc)
     return {
         "task_id": "task-12345678",
         "issued_at": now,

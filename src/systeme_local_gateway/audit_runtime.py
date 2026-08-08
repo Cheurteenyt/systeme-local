@@ -33,9 +33,7 @@ def create_configured_audit_log(
     anchor_path_configured = settings.audit_anchor_log is not None
     anchor_key_configured = settings.audit_anchor_key is not None
     if anchor_path_configured != anchor_key_configured:
-        raise ValueError(
-            "audit anchor path and key must be configured together"
-        )
+        raise ValueError("audit anchor path and key must be configured together")
 
     anchor = None
     if settings.audit_anchor_log is not None:
@@ -49,9 +47,7 @@ def create_configured_audit_log(
             settings.audit_anchor_key,
             settings.audit_key,
         ):
-            raise ValueError(
-                "audit anchor key must be independent from runtime secrets"
-            )
+            raise ValueError("audit anchor key must be independent from runtime secrets")
 
         audit_paths = {
             _normalized_path(settings.audit_log),
@@ -62,9 +58,7 @@ def create_configured_audit_log(
             _normalized_path(_lock_path(settings.audit_anchor_log)),
         }
         if audit_paths & anchor_paths:
-            raise ValueError(
-                "audit log, audit anchor, and lock paths must not overlap"
-            )
+            raise ValueError("audit log, audit anchor, and lock paths must not overlap")
 
         anchor = FileAuditAnchor(
             settings.audit_anchor_log,

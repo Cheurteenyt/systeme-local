@@ -16,7 +16,6 @@ from systeme_local_gateway.c6_seal import (
     verify_c6_seal,
 )
 
-
 ROOT = Path(__file__).resolve().parents[1]
 MANIFEST_PATH = ROOT / C6_MANIFEST_PATH
 

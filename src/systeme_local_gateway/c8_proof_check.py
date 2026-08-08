@@ -7,7 +7,7 @@ import os
 import re
 import subprocess
 import sys
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
 
@@ -102,7 +102,7 @@ def main(argv: list[str] | None = None) -> int:
         challenge_created_at = datetime.fromtimestamp(args.challenge.stat().st_mtime, UTC)
 
         response = C0ConnectivityProbeResponse.model_validate(_load_object(args.response))
-        checked_at = datetime.now(UTC)
+        checked_at = datetime.now(timezone.utc)
         if checked_at - challenge_created_at > timedelta(minutes=30):
             raise ValueError("C8 challenge is stale")
         if response.observed_at < challenge_created_at - timedelta(seconds=5):

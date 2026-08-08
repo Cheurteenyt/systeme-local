@@ -197,8 +197,7 @@ def test_cli_preflight_emits_blocked_decision_without_live_side_effects() -> Non
         cwd=ROOT,
         check=True,
         text=True,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
+        capture_output=True,
     )
     result = json.loads(completed.stdout)
 
@@ -225,8 +224,7 @@ def test_cli_require_action_returns_denial_exit_code() -> None:
         cwd=ROOT,
         check=False,
         text=True,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
+        capture_output=True,
     )
 
     assert completed.returncode == 3
@@ -251,8 +249,7 @@ def test_cli_malformed_profile_fails_closed_without_echoing_input(tmp_path: Path
         cwd=ROOT,
         check=False,
         text=True,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
+        capture_output=True,
     )
 
     assert completed.returncode == 4
@@ -282,8 +279,7 @@ def test_cli_rejects_valid_but_substituted_profile(tmp_path: Path) -> None:
         cwd=ROOT,
         check=False,
         text=True,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
+        capture_output=True,
     )
 
     assert completed.returncode == 4

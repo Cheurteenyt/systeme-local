@@ -66,14 +66,8 @@ def test_checkpoints_are_monotonic_and_chained(tmp_path: Path) -> None:
     assert first.checkpoints == 1
     assert second.checkpoints == 2
     assert second.records == 3
-    records = [
-        json.loads(line)
-        for line in path.read_text(encoding="utf-8").splitlines()
-    ]
-    assert (
-        records[1]["previous_checkpoint_hmac"]
-        == records[0]["checkpoint_hmac"]
-    )
+    records = [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines()]
+    assert records[1]["previous_checkpoint_hmac"] == records[0]["checkpoint_hmac"]
 
     with pytest.raises(
         AuditAnchorIntegrityError,
@@ -196,9 +190,7 @@ def test_lock_timeout_fails_closed(tmp_path: Path) -> None:
         while not ready_path.exists():
             if process.poll() is not None:
                 stdout, stderr = process.communicate()
-                pytest.fail(
-                    stderr or stdout or "lock holder stopped unexpectedly"
-                )
+                pytest.fail(stderr or stdout or "lock holder stopped unexpectedly")
             if time.monotonic() >= deadline:
                 pytest.fail("lock holder did not become ready")
             time.sleep(0.05)

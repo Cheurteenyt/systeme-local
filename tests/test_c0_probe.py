@@ -1,4 +1,4 @@
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from hashlib import sha256
 
 import pytest
@@ -18,7 +18,7 @@ BUILD_COMMIT = "a" * 40
 POLICY_SHA256 = "b" * 64
 TOOL_SHA256 = "c" * 64
 AUDIT_ID = "12345678-1234-4123-8123-123456789abc"
-OBSERVED_AT = datetime(2026, 7, 26, 12, 30, tzinfo=UTC)
+OBSERVED_AT = datetime(2026, 7, 26, 12, 30, tzinfo=timezone.utc)
 
 
 def _probe() -> C0ConnectivityProbe:

@@ -5,7 +5,6 @@ import json
 import subprocess
 from pathlib import Path
 
-
 ROOT = Path(__file__).resolve().parents[1]
 C4_DOC = ROOT / "docs/providers/chatgpt-web-c4-runtime-admission.md"
 C4_LEDGER = ROOT / "docs/providers/chatgpt-web-c4-test-evidence.md"

@@ -79,17 +79,11 @@ def test_account_is_strict_and_timezone_safe() -> None:
         account(created_at=NOW.replace(tzinfo=None))
 
 
-
-
 def test_context_discovery_capabilities_remain_explicitly_unknown() -> None:
     profile = account()
+    assert profile.context_capabilities.can_enumerate_projects.state is CapabilitySupport.UNKNOWN
     assert (
-        profile.context_capabilities.can_enumerate_projects.state
-        is CapabilitySupport.UNKNOWN
-    )
-    assert (
-        profile.context_capabilities.can_enumerate_conversations.evidence
-        is CapabilityEvidence.NONE
+        profile.context_capabilities.can_enumerate_conversations.evidence is CapabilityEvidence.NONE
     )
 
 

@@ -5,7 +5,7 @@ import hmac
 import json
 import subprocess
 import sys
-from datetime import UTC, datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
 
@@ -33,7 +33,7 @@ from systeme_local_gateway.c7_work_admission import (
 )
 
 ROOT = Path(__file__).resolve().parents[1]
-NOW = datetime(2026, 7, 27, 16, 0, tzinfo=UTC)
+NOW = datetime(2026, 7, 27, 16, 0, tzinfo=timezone.utc)
 AUDIT_KEY = b"c7-test-audit-key-is-at-least-thirty-two-bytes"
 
 
@@ -367,8 +367,11 @@ def test_revalidation_due_and_expired_profiles_block_every_action() -> None:
     profile = build_current_c7_profile()
     policy = build_current_c7_policy(ROOT)
     for instant, lifecycle in (
-        (datetime(2026, 8, 14, 15, 42, tzinfo=UTC), WorkEvidenceLifecycle.REVALIDATION_DUE),
-        (datetime(2026, 8, 21, 15, 42, tzinfo=UTC), WorkEvidenceLifecycle.EXPIRED),
+        (
+            datetime(2026, 8, 14, 15, 42, tzinfo=timezone.utc),
+            WorkEvidenceLifecycle.REVALIDATION_DUE,
+        ),
+        (datetime(2026, 8, 21, 15, 42, tzinfo=timezone.utc), WorkEvidenceLifecycle.EXPIRED),
     ):
         decision = evaluate_c7_prelive(
             profile=profile,

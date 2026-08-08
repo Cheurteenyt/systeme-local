@@ -6,7 +6,7 @@ import json
 import os
 import subprocess
 import sys
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
 
@@ -14,9 +14,9 @@ from .audit import AuditLog
 from .c0_probe import C0_CHALLENGE_PATTERN, C0_TOOL_NAME, C0ConnectivityProbeResponse
 from .c0_proof_check import canonical_c0_audit_record_sha256, canonical_c0_response_sha256
 from .c1_observability import (
-    C1ChatProofBundle,
     C1_MANUAL_EVIDENCE_TTL,
     C1_SURFACE_TO_RESPONSE_MAX_AGE,
+    C1ChatProofBundle,
     C1Surface,
     C1SurfaceObservation,
     C1TestChatLabel,
@@ -92,7 +92,7 @@ def main(argv: list[str] | None = None) -> int:
         challenge_created_at = datetime.fromtimestamp(args.challenge.stat().st_mtime, UTC)
 
         response = C0ConnectivityProbeResponse.model_validate(_load_object(args.response))
-        checked_at = datetime.now(UTC)
+        checked_at = datetime.now(timezone.utc)
         if checked_at - challenge_created_at > timedelta(minutes=30):
             raise ValueError("C1 challenge is stale")
         if response.observed_at < challenge_created_at - timedelta(seconds=5):
