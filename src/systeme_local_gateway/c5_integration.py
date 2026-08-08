@@ -13,7 +13,6 @@ from typing import Any, Final, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
-
 C5_MANIFEST_PATH = "governance/c5-integration-manifest.json"
 C5_SEAL_PATH: Final[Literal["governance/c5-change-seal.json"]] = "governance/c5-change-seal.json"
 C5_EVIDENCE_TAG = "evidence/c0-c4-main-integration-v2"
@@ -186,8 +185,7 @@ def _git(root: Path, *args: str) -> bytes:
     completed = subprocess.run(
         ("git", "-c", "core.quotePath=false", "-C", os.fspath(root), *args),
         check=True,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
+        capture_output=True,
     )
     return completed.stdout
 
@@ -253,8 +251,7 @@ def _read_blobs(root: Path, object_ids: tuple[bytes, ...]) -> dict[bytes, bytes]
         ),
         input=b"\n".join(unique_ids) + b"\n",
         check=True,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
+        capture_output=True,
     )
     output = completed.stdout
     offset = 0

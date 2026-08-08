@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import json
 import threading
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from hashlib import sha256
 from pathlib import Path
 from types import SimpleNamespace
@@ -238,7 +238,7 @@ def _unit_control(
     control = object.__new__(C9LocalControlPlane)
     untyped_control = cast(Any, control)
     untyped_control._coordinator = coordinator
-    untyped_control._clock = lambda: datetime(2026, 7, 28, tzinfo=UTC)
+    untyped_control._clock = lambda: datetime(2026, 7, 28, tzinfo=timezone.utc)
     untyped_control._lock = threading.RLock()
     untyped_control._staged = staged
     untyped_control._native_chat_handoff_id = handoff_id

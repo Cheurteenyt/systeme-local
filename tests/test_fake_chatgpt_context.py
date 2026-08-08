@@ -108,9 +108,9 @@ def test_auto_request_stays_chat_even_when_work_is_available() -> None:
 
 
 def test_fake_module_contains_no_network_or_browser_imports() -> None:
-    source = Path(
-        "src/systeme_local_gateway/providers/fake_chatgpt_context.py"
-    ).read_text(encoding="utf-8")
+    source = Path("src/systeme_local_gateway/providers/fake_chatgpt_context.py").read_text(
+        encoding="utf-8"
+    )
     forbidden = (
         "openai",
         "httpx",

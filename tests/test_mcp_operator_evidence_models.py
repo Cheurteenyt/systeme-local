@@ -65,49 +65,31 @@ SOURCE_BY_CHECK = {
     ),
     McpReadinessCheckId.DEVELOPER_MODE: McpOperatorEvidenceSource.OPERATOR_ATTESTATION,
     McpReadinessCheckId.LOCAL_POLICY: McpOperatorEvidenceSource.LOCAL_POLICY_SNAPSHOT,
-    McpReadinessCheckId.PLAN_ROLE_OBSERVATION: (
-        McpOperatorEvidenceSource.OPERATOR_ATTESTATION
-    ),
-    McpReadinessCheckId.REFRESH_TOKEN: (
-        McpOperatorEvidenceSource.SANITIZED_METADATA_DIGEST
-    ),
+    McpReadinessCheckId.PLAN_ROLE_OBSERVATION: (McpOperatorEvidenceSource.OPERATOR_ATTESTATION),
+    McpReadinessCheckId.REFRESH_TOKEN: (McpOperatorEvidenceSource.SANITIZED_METADATA_DIGEST),
     McpReadinessCheckId.TOOL_SNAPSHOT: McpOperatorEvidenceSource.TOOL_SCAN_SNAPSHOT,
     McpReadinessCheckId.TRANSPORT: McpOperatorEvidenceSource.SECURE_TUNNEL_ATTESTATION,
     McpReadinessCheckId.WEB_CLIENT: McpOperatorEvidenceSource.OPERATOR_ATTESTATION,
-    McpReadinessCheckId.WORKSPACE_ACCESS: (
-        McpOperatorEvidenceSource.WORKSPACE_ADMIN_ATTESTATION
-    ),
+    McpReadinessCheckId.WORKSPACE_ACCESS: (McpOperatorEvidenceSource.WORKSPACE_ADMIN_ATTESTATION),
 }
 
 FAILURE_BY_CHECK = {
-    McpReadinessCheckId.ACTION_REVIEW: (
-        McpOperatorEvidenceFailureCode.ACTION_REVIEW_INCOMPLETE
-    ),
+    McpReadinessCheckId.ACTION_REVIEW: (McpOperatorEvidenceFailureCode.ACTION_REVIEW_INCOMPLETE),
     McpReadinessCheckId.APP_CONFIGURATION: McpOperatorEvidenceFailureCode.APP_NOT_CONFIGURED,
     McpReadinessCheckId.AUTHENTICATION_METADATA: (
         McpOperatorEvidenceFailureCode.AUTHENTICATION_METADATA_INVALID
     ),
-    McpReadinessCheckId.DEVELOPER_MODE: (
-        McpOperatorEvidenceFailureCode.DEVELOPER_MODE_DISABLED
-    ),
-    McpReadinessCheckId.LOCAL_POLICY: (
-        McpOperatorEvidenceFailureCode.LOCAL_POLICY_DIGEST_MISMATCH
-    ),
+    McpReadinessCheckId.DEVELOPER_MODE: (McpOperatorEvidenceFailureCode.DEVELOPER_MODE_DISABLED),
+    McpReadinessCheckId.LOCAL_POLICY: (McpOperatorEvidenceFailureCode.LOCAL_POLICY_DIGEST_MISMATCH),
     McpReadinessCheckId.PLAN_ROLE_OBSERVATION: (
         McpOperatorEvidenceFailureCode.PLAN_ROLE_NOT_CONFIRMED
     ),
     McpReadinessCheckId.REFRESH_TOKEN: (
         McpOperatorEvidenceFailureCode.REFRESH_TOKEN_CAPABILITY_MISSING
     ),
-    McpReadinessCheckId.TOOL_SNAPSHOT: (
-        McpOperatorEvidenceFailureCode.TOOL_SNAPSHOT_NOT_REVIEWED
-    ),
-    McpReadinessCheckId.TRANSPORT: (
-        McpOperatorEvidenceFailureCode.TRANSPORT_ATTESTATION_FAILED
-    ),
-    McpReadinessCheckId.WEB_CLIENT: (
-        McpOperatorEvidenceFailureCode.WEB_CLIENT_UNAVAILABLE
-    ),
+    McpReadinessCheckId.TOOL_SNAPSHOT: (McpOperatorEvidenceFailureCode.TOOL_SNAPSHOT_NOT_REVIEWED),
+    McpReadinessCheckId.TRANSPORT: (McpOperatorEvidenceFailureCode.TRANSPORT_ATTESTATION_FAILED),
+    McpReadinessCheckId.WEB_CLIENT: (McpOperatorEvidenceFailureCode.WEB_CLIENT_UNAVAILABLE),
     McpReadinessCheckId.WORKSPACE_ACCESS: (
         McpOperatorEvidenceFailureCode.WORKSPACE_ACCESS_NOT_GRANTED
     ),
@@ -205,9 +187,7 @@ def records(
                 source=source,
                 evidence_sha256=evidence,
                 failure_code=(
-                    FAILURE_BY_CHECK[check_id]
-                    if state is McpReadinessCheckState.FAILED
-                    else None
+                    FAILURE_BY_CHECK[check_id] if state is McpReadinessCheckState.FAILED else None
                 ),
                 collector_id="operator_primary",
                 collection_session_id="collection_primary",
@@ -317,9 +297,7 @@ def test_unknown_and_not_applicable_records_reject_evidence(state) -> None:
 @pytest.mark.parametrize("check_id", tuple(McpReadinessCheckId))
 def test_failed_records_require_exact_failure_code(check_id: McpReadinessCheckId) -> None:
     wrong = next(
-        code
-        for code in McpOperatorEvidenceFailureCode
-        if code is not FAILURE_BY_CHECK[check_id]
+        code for code in McpOperatorEvidenceFailureCode if code is not FAILURE_BY_CHECK[check_id]
     )
     with pytest.raises(ValidationError, match="exact typed failure"):
         commit_mcp_operator_evidence_record(
@@ -536,11 +514,14 @@ def test_nonpersistent_request_requires_refresh_not_applicable() -> None:
         ),
         states=states,
     )
-    assert next(
-        record
-        for record in item.records
-        if record.check_id is McpReadinessCheckId.REFRESH_TOKEN
-    ).state is McpReadinessCheckState.NOT_APPLICABLE
+    assert (
+        next(
+            record
+            for record in item.records
+            if record.check_id is McpReadinessCheckId.REFRESH_TOKEN
+        ).state
+        is McpReadinessCheckState.NOT_APPLICABLE
+    )
 
 
 def test_verified_refresh_requires_issued_request_and_summary() -> None:
@@ -566,11 +547,12 @@ def test_unverified_tool_records_reject_summary() -> None:
 
 def test_verified_local_policy_binds_exact_digest() -> None:
     item = bundle()
-    assert next(
-        record
-        for record in item.records
-        if record.check_id is McpReadinessCheckId.LOCAL_POLICY
-    ).evidence_sha256 == item.local_policy_sha256
+    assert (
+        next(
+            record for record in item.records if record.check_id is McpReadinessCheckId.LOCAL_POLICY
+        ).evidence_sha256
+        == item.local_policy_sha256
+    )
 
 
 def test_bundle_public_schema_has_no_secret_or_raw_value_fields() -> None:

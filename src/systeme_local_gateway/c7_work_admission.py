@@ -69,7 +69,7 @@ def _require_utc(value: datetime) -> datetime:
 
 def _parse_timestamp(value: str | None) -> datetime:
     if value is None:
-        return datetime.now(tz=UTC)
+        return datetime.now(tz=timezone.utc)
     normalized = value[:-1] + "+00:00" if value.endswith("Z") else value
     return _require_utc(datetime.fromisoformat(normalized))
 

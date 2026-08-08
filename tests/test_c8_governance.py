@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import json
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from pathlib import Path
 
 import pytest
@@ -19,7 +19,7 @@ from systeme_local_gateway.c8_governance import (
 )
 
 ROOT = Path(__file__).resolve().parents[1]
-NOW = datetime(2026, 7, 27, 17, 0, tzinfo=UTC)
+NOW = datetime(2026, 7, 27, 17, 0, tzinfo=timezone.utc)
 
 
 def _json(path: str):
@@ -59,7 +59,7 @@ def test_c8_governance_is_current_then_expires_closed() -> None:
     with pytest.raises(ValueError, match="expired"):
         verify_committed_c8_governance(
             ROOT,
-            evaluated_at=datetime(2026, 8, 22, 17, 33, tzinfo=UTC),
+            evaluated_at=datetime(2026, 8, 22, 17, 33, tzinfo=timezone.utc),
         )
 
 

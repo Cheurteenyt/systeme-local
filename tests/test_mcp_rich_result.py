@@ -2,8 +2,8 @@ from __future__ import annotations
 
 from typing import Any
 
-import mcp.types as types
 import pytest
+from mcp import types
 
 from systeme_local_gateway.mcp_runtime import McpTaskAdapter
 from systeme_local_gateway.models import TaskResult
@@ -16,7 +16,7 @@ def anyio_backend() -> str:
 
 class _MetadataOnlyProcessor:
     def process(self, task: object) -> TaskResult:
-        task_id = str(getattr(task, "task_id"))
+        task_id = str(task.task_id)
         return TaskResult(
             task_id=task_id,
             status="completed",

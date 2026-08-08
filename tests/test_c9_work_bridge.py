@@ -10,6 +10,7 @@ from pathlib import Path
 
 import pytest
 from _pytest.tmpdir import TempPathFactory
+from conftest import NOW, png_chunk
 from pydantic import ValidationError
 
 from systeme_local_gateway.c9_attachment_security import (
@@ -35,8 +36,6 @@ from systeme_local_gateway.c9_work_bridge import (
     evaluate_work_bridge,
     promote_mcp_host_capabilities_after_live_proof,
 )
-
-from conftest import NOW, png_chunk
 
 ACCEPTED_C8_COMMIT = "e0a1dccfa13c95a1ce077d2b6f9ef4f1ed70231f"
 C9_CYCLE_ID = "c9_cycle_" + "a" * 32

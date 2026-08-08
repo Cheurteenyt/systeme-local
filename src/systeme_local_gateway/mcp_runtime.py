@@ -10,13 +10,13 @@ import time
 from collections import deque
 from collections.abc import AsyncIterator, Callable
 from contextlib import asynccontextmanager
-from datetime import UTC, datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Any, Protocol
 from uuid import uuid4
 
 import anyio
-import mcp.types as types
 from fastapi import Request, Response
+from mcp import types
 from mcp.server.lowlevel import Server
 from mcp.server.streamable_http_manager import StreamableHTTPSessionManager
 from mcp.server.transport_security import TransportSecuritySettings
@@ -109,7 +109,7 @@ class McpTaskAdapter:
         self._shared_secret = shared_secret
         self._task_processor = task_processor
         self._limiter = anyio.CapacityLimiter(max_concurrency)
-        self._clock = clock or (lambda: datetime.now(UTC))
+        self._clock = clock or (lambda: datetime.now(timezone.utc))
         self._result_renderer = result_renderer
         self._render_audit_log = render_audit_log
         self._max_rendered_response_bytes = max_rendered_response_bytes

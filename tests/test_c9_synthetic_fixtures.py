@@ -4,7 +4,7 @@ import json
 import os
 import struct
 import zlib
-from datetime import UTC, datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from hashlib import sha256
 from pathlib import Path
 
@@ -23,7 +23,7 @@ from systeme_local_gateway.c9_synthetic_fixtures import (
 from systeme_local_gateway.providers.attachment_commit import inspect_attachment_bytes
 from systeme_local_gateway.providers.attachment_models import AttachmentMediaType
 
-NOW = datetime(2026, 7, 28, 1, 2, 3, tzinfo=UTC)
+NOW = datetime(2026, 7, 28, 1, 2, 3, tzinfo=timezone.utc)
 PNG_NONCE = "C9" + "0123456789ABCDEF" * 2
 TEXT_NONCE = "C9" + "FEDCBA9876543210" * 2
 

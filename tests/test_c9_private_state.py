@@ -10,9 +10,9 @@ from types import SimpleNamespace
 import pytest
 
 from systeme_local_gateway.c9_private_state import (
+    C9PrivatePermissions,
     C9PrivateStateError,
     C9PrivateStateGuard,
-    C9PrivatePermissions,
     C9PrivateStateReason,
     is_c9_reparse_point,
     reject_c9_reparse_prefix,

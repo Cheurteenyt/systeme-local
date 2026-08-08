@@ -5,6 +5,7 @@ import struct
 from datetime import timedelta
 
 import pytest
+from conftest import NOW, make_jpeg, make_pdf, make_png, png_chunk
 from pydantic import ValidationError
 
 from systeme_local_gateway.providers.attachment_commit import (
@@ -25,8 +26,6 @@ from systeme_local_gateway.providers.attachment_models import (
     AttachmentSource,
 )
 from systeme_local_gateway.providers.models import commit_text_turn
-
-from conftest import NOW, make_jpeg, make_pdf, make_png, png_chunk
 
 
 @pytest.mark.parametrize(
@@ -317,7 +316,9 @@ def test_verify_attachment_detects_same_size_digest_change(attachment_turn):
 def test_manifest_preserves_order_and_totals(attachment_manifest, attachment_committed_items):
     assert attachment_manifest.attachment_count == 3
     assert attachment_manifest.attachments == attachment_committed_items
-    assert attachment_manifest.total_bytes == sum(item.inspection.byte_size for item in attachment_committed_items)
+    assert attachment_manifest.total_bytes == sum(
+        item.inspection.byte_size for item in attachment_committed_items
+    )
     assert len(attachment_manifest.manifest_sha256) == 64
 
 
@@ -380,7 +381,9 @@ def test_manifest_rejects_non_contiguous_ordinals(attachment_turn, attachment_co
         )
 
 
-def test_verify_attachment_manifest_detects_other_turn(attachment_turn, attachment_manifest, attachment_principal):
+def test_verify_attachment_manifest_detects_other_turn(
+    attachment_turn, attachment_manifest, attachment_principal
+):
     other = commit_text_turn(
         conversation_id="conv_other",
         turn_id="turn_other",

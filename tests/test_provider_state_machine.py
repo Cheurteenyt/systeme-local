@@ -315,16 +315,12 @@ def test_event_cannot_precede_run_or_move_backwards() -> None:
     with pytest.raises(InvalidLifecycleTransition, match="precede"):
         apply_lifecycle_event(
             initial_run_state(run),
-            started(run).model_copy(
-                update={"observed_at": NOW - timedelta(seconds=1)}
-            ),
+            started(run).model_copy(update={"observed_at": NOW - timedelta(seconds=1)}),
         )
 
     state = apply_lifecycle_event(
         initial_run_state(run),
-        started(run).model_copy(
-            update={"observed_at": NOW + timedelta(seconds=1)}
-        ),
+        started(run).model_copy(update={"observed_at": NOW + timedelta(seconds=1)}),
     )
     with pytest.raises(InvalidLifecycleTransition, match="backwards"):
         apply_lifecycle_event(

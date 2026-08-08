@@ -17,11 +17,7 @@ def _environment(
     *,
     anchored: bool,
 ) -> dict[str, str]:
-    environment = {
-        key: value
-        for key, value in os.environ.items()
-        if not key.startswith("SLG_")
-    }
+    environment = {key: value for key, value in os.environ.items() if not key.startswith("SLG_")}
     environment["PYTHONPATH"] = str(ROOT / "src")
     environment["SLG_SHARED_SECRET"] = "shared-activation-" + ("s" * 64)
     environment["SLG_AUDIT_KEY"] = AUDIT_KEY
@@ -32,9 +28,7 @@ def _environment(
     environment["SLG_APPROVAL_DB"] = str(tmp_path / "approvals.sqlite3")
     environment["SLG_SANDBOX_ROOT"] = str(tmp_path / "sandboxes")
     if anchored:
-        environment["SLG_AUDIT_ANCHOR_LOG"] = str(
-            tmp_path / "external" / "audit-anchor.jsonl"
-        )
+        environment["SLG_AUDIT_ANCHOR_LOG"] = str(tmp_path / "external" / "audit-anchor.jsonl")
         environment["SLG_AUDIT_ANCHOR_KEY"] = ANCHOR_KEY
     return environment
 
@@ -60,9 +54,7 @@ def test_gateway_and_approval_cli_fail_closed_until_bootstrap(
 ) -> None:
     environment = _environment(tmp_path, anchored=True)
     log_path = Path(environment["SLG_AUDIT_LOG"])
-    AuditLog(log_path, AUDIT_KEY).append(
-        {"task_id": "existing", "status": "completed"}
-    )
+    AuditLog(log_path, AUDIT_KEY).append({"task_id": "existing", "status": "completed"})
 
     gateway_before = _run(
         tmp_path,
