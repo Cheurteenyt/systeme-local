@@ -14,7 +14,7 @@ import time
 from collections.abc import Iterator, Mapping, Sequence
 from contextlib import contextmanager
 from dataclasses import dataclass
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 from uuid import uuid4
@@ -45,9 +45,7 @@ _PRIVATE_KEY_PATTERN = re.compile(
     re.IGNORECASE | re.DOTALL,
 )
 _BEARER_PATTERN = re.compile(r"(?i)\bBearer\s+[A-Za-z0-9._~+/=-]+")
-_URI_CREDENTIAL_PATTERN = re.compile(
-    r"(?i)\b([a-z][a-z0-9+.-]*://)[^/\s:@]+:[^@\s/]+@"
-)
+_URI_CREDENTIAL_PATTERN = re.compile(r"(?i)\b([a-z][a-z0-9+.-]*://)[^/\s:@]+:[^@\s/]+@")
 _KEY_VALUE_SECRET_PATTERN = re.compile(
     r"(?i)\b(password|passwd|secret|token|api[_-]?key|authorization|cookie|"
     r"signature|private[_-]?key|client[_-]?secret)\b(\s*[:=]\s*)([^\s,;]+)"
@@ -60,6 +58,7 @@ class AuditIntegrityError(RuntimeError):
 
 class AuditLockError(RuntimeError):
     """Raised when the audit log cannot be locked safely."""
+
 
 @dataclass(frozen=True)
 class AuditVerification:
@@ -131,9 +130,7 @@ def summarize_payload(value: object, key: bytes) -> dict[str, object]:
                 metadata[key] = candidate
 
         command = value.get("command")
-        if isinstance(command, Sequence) and not isinstance(
-            command, (str, bytes, bytearray)
-        ):
+        if isinstance(command, Sequence) and not isinstance(command, (str, bytes, bytearray)):
             metadata["command_argv_items"] = len(command)
 
         changes = value.get("workspace_changes")
@@ -185,9 +182,7 @@ def project_audit_event(event: Mapping[str, object], key: bytes) -> dict[str, ob
             projected_agent["model"] = _safe_text(agent["model"], limit=128)
         if agent.get("session_id") is not None:
             session_id = str(agent["session_id"]).encode("utf-8")
-            projected_agent["session_id_hmac"] = _keyed_digest(
-                key, b"audit-session-v1", session_id
-            )
+            projected_agent["session_id_hmac"] = _keyed_digest(key, b"audit-session-v1", session_id)
         if projected_agent:
             projected["agent"] = projected_agent
 
@@ -242,75 +237,63 @@ class AuditLog:
         self._lock_timeout_seconds = lock_timeout_seconds
 
     def verify(self) -> AuditVerification:
-        with _LOCK:
-            with self._process_lock():
-                if self._anchor is None:
-                    return self._verify_unlocked()
-                with self._anchor.transaction() as anchor:
-                    return self._verify_anchored_unlocked(anchor)
+        with _LOCK, self._process_lock():
+            if self._anchor is None:
+                return self._verify_unlocked()
+            with self._anchor.transaction() as anchor:
+                return self._verify_anchored_unlocked(anchor)
 
     def bootstrap_anchor(self) -> AuditVerification:
         if self._anchor is None:
             raise ValueError("audit anchoring is not configured")
-        with _LOCK:
-            with self._process_lock():
-                with self._anchor.transaction() as anchor:
-                    verification = self._verify_unlocked()
-                    anchor_verification = anchor.bootstrap(
-                        verification.records,
-                        verification.last_hmac,
-                    )
-                    return AuditVerification(
-                        records=verification.records,
-                        last_hmac=verification.last_hmac,
-                        anchor_checkpoints=anchor_verification.checkpoints,
-                    )
+        with _LOCK, self._process_lock(), self._anchor.transaction() as anchor:
+            verification = self._verify_unlocked()
+            anchor_verification = anchor.bootstrap(
+                verification.records,
+                verification.last_hmac,
+            )
+            return AuditVerification(
+                records=verification.records,
+                last_hmac=verification.last_hmac,
+                anchor_checkpoints=anchor_verification.checkpoints,
+            )
 
     def append(self, event: Mapping[str, object]) -> str:
-        with _LOCK:
-            with self._process_lock():
-                if self._anchor is None:
-                    verification = self._verify_unlocked()
-                    audit_id, _ = self._append_verified_unlocked(
-                        event,
-                        verification,
-                    )
-                    return audit_id
+        with _LOCK, self._process_lock():
+            if self._anchor is None:
+                verification = self._verify_unlocked()
+                audit_id, _ = self._append_verified_unlocked(
+                    event,
+                    verification,
+                )
+                return audit_id
 
-                with self._anchor.transaction() as anchor:
-                    verification = self._verify_anchored_unlocked(anchor)
-                    audit_id, next_verification = (
-                        self._append_verified_unlocked(
-                            event,
-                            verification,
-                        )
-                    )
-                    anchor.append(
-                        next_verification.records,
-                        next_verification.last_hmac,
-                    )
-                    return audit_id
+            with self._anchor.transaction() as anchor:
+                verification = self._verify_anchored_unlocked(anchor)
+                audit_id, next_verification = self._append_verified_unlocked(
+                    event,
+                    verification,
+                )
+                anchor.append(
+                    next_verification.records,
+                    next_verification.last_hmac,
+                )
+                return audit_id
 
     def _verify_anchored_unlocked(
         self,
         anchor: AuditAnchorTransaction,
     ) -> AuditVerification:
         anchor_verification = anchor.verify()
-        verification, anchored_hmac = self._scan_unlocked(
-            anchor_verification.records
-        )
+        verification, anchored_hmac = self._scan_unlocked(anchor_verification.records)
 
         if anchor_verification.records > verification.records:
-            raise AuditIntegrityError(
-                "audit log rollback detected against external anchor"
-            )
+            raise AuditIntegrityError("audit log rollback detected against external anchor")
         if anchored_hmac is None or not hmac.compare_digest(
             anchored_hmac,
             anchor_verification.last_hmac,
         ):
-            raise AuditIntegrityError(
-                "audit log diverges from external anchor"
-            )
+            raise AuditIntegrityError("audit log diverges from external anchor")
 
         if verification.records > anchor_verification.records:
             anchor_verification = anchor.append(
@@ -333,7 +316,7 @@ class AuditLog:
         record: dict[str, object] = {
             "version": _RECORD_VERSION,
             "audit_id": audit_id,
-            "timestamp": datetime.now(UTC).isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             "previous_hmac": verification.last_hmac,
             **project_audit_event(event, self._key),
         }
@@ -408,9 +391,7 @@ class AuditLog:
                         raise AuditLockError("audit lock acquisition failed") from exc
                     remaining = deadline - time.monotonic()
                     if remaining <= 0:
-                        raise AuditLockError(
-                            "audit lock acquisition timed out"
-                        ) from exc
+                        raise AuditLockError("audit lock acquisition timed out") from exc
                     time.sleep(min(_LOCK_POLL_INTERVAL_SECONDS, remaining))
 
             self._verify_lock_file_identity(os.fstat(descriptor))
@@ -476,9 +457,7 @@ class AuditLog:
         self,
         checkpoint_records: int | None = None,
     ) -> tuple[AuditVerification, str | None]:
-        checkpoint_hmac = (
-            _GENESIS_HMAC if checkpoint_records == 0 else None
-        )
+        checkpoint_hmac = _GENESIS_HMAC if checkpoint_records == 0 else None
         if not self.log_path.exists():
             return (
                 AuditVerification(
@@ -488,9 +467,7 @@ class AuditLog:
                 checkpoint_hmac,
             )
         if not self.log_path.is_file():
-            raise AuditIntegrityError(
-                "audit log path is not a regular file"
-            )
+            raise AuditIntegrityError("audit log path is not a regular file")
         if self.log_path.stat().st_size == 0:
             return (
                 AuditVerification(
@@ -503,9 +480,7 @@ class AuditLog:
         with self.log_path.open("rb") as raw_handle:
             raw_handle.seek(-1, os.SEEK_END)
             if raw_handle.read(1) != b"\n":
-                raise AuditIntegrityError(
-                    "audit log must end with a newline"
-                )
+                raise AuditIntegrityError("audit log must end with a newline")
 
         previous_hmac = _GENESIS_HMAC
         records = 0
@@ -515,9 +490,7 @@ class AuditLog:
             for line_number, raw_line in enumerate(handle, start=1):
                 line = raw_line.rstrip("\n")
                 if not line:
-                    raise AuditIntegrityError(
-                        f"blank audit record at line {line_number}"
-                    )
+                    raise AuditIntegrityError(f"blank audit record at line {line_number}")
                 try:
                     record = json.loads(line)
                 except json.JSONDecodeError as exc:
@@ -533,22 +506,16 @@ class AuditLog:
                         f"unsupported audit record version at line {line_number}"
                     )
                 if record.get("previous_hmac") != previous_hmac:
-                    raise AuditIntegrityError(
-                        f"broken audit chain at line {line_number}"
-                    )
+                    raise AuditIntegrityError(f"broken audit chain at line {line_number}")
 
                 entry_hmac = record.get("entry_hmac")
                 if not isinstance(entry_hmac, str):
-                    raise AuditIntegrityError(
-                        f"missing audit HMAC at line {line_number}"
-                    )
+                    raise AuditIntegrityError(f"missing audit HMAC at line {line_number}")
                 unsigned = dict(record)
                 unsigned.pop("entry_hmac", None)
                 expected_hmac = _entry_hmac(self._key, unsigned)
                 if not hmac.compare_digest(entry_hmac, expected_hmac):
-                    raise AuditIntegrityError(
-                        f"invalid audit HMAC at line {line_number}"
-                    )
+                    raise AuditIntegrityError(f"invalid audit HMAC at line {line_number}")
 
                 audit_id = record.get("audit_id")
                 if not isinstance(audit_id, str) or audit_id in audit_ids:
@@ -606,12 +573,9 @@ def main(argv: list[str] | None = None) -> int:
         if (
             args.log is not None
             and settings.audit_anchor_log is not None
-            and _normalized_path(args.log)
-            != _normalized_path(settings.audit_log)
+            and _normalized_path(args.log) != _normalized_path(settings.audit_log)
         ):
-            raise ValueError(
-                "--log cannot be overridden while audit anchoring is configured"
-            )
+            raise ValueError("--log cannot be overridden while audit anchoring is configured")
 
         anchor = None
         if settings.audit_anchor_log is not None:
@@ -640,9 +604,7 @@ def main(argv: list[str] | None = None) -> int:
             "last_hmac": verification.last_hmac,
         }
         if verification.anchor_checkpoints is not None:
-            payload["anchor_checkpoints"] = (
-                verification.anchor_checkpoints
-            )
+            payload["anchor_checkpoints"] = verification.anchor_checkpoints
         print(json.dumps(payload, sort_keys=True))
         return 0
     except (

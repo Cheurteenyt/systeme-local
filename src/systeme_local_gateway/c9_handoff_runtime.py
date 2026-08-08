@@ -7,8 +7,9 @@ import re
 import secrets
 import threading
 from collections.abc import Callable, Mapping
-from dataclasses import dataclass, field as dataclass_field
-from datetime import UTC, datetime, timedelta
+from dataclasses import dataclass
+from dataclasses import field as dataclass_field
+from datetime import UTC, datetime, timedelta, timezone
 from enum import StrEnum
 from hashlib import sha256
 from pathlib import Path
@@ -32,8 +33,8 @@ from .c9_local_ai import (
     C9LocalAIReceipt,
     C9LocalAIRuntimeContinuitySnapshot,
     C9LocalAIRuntimeObservation,
-    capture_c9_local_ai_runtime_continuity,
     c9_local_ai_runtime_observation_sha256,
+    capture_c9_local_ai_runtime_continuity,
     run_c9_local_ai_inference,
     verify_c9_local_ai_runtime_continuity_pair,
     verify_c9_local_ai_runtime_observation,
@@ -776,7 +777,7 @@ class C9HandoffCoordinator:
         if len(audit_key.encode("utf-8") if isinstance(audit_key, str) else audit_key) < 32:
             raise ValueError("C9 audit key must contain at least 32 bytes")
         self._audit_key = audit_key
-        self._clock = clock or (lambda: datetime.now(UTC))
+        self._clock = clock or (lambda: datetime.now(timezone.utc))
         self._security = security
         self._local_ai_config = C9LocalAIConfig.model_validate(
             local_ai_config.model_dump(mode="python")
@@ -2428,7 +2429,7 @@ class C9HandoffRenderer:
         clock: Callable[[], datetime] | None = None,
     ) -> None:
         self._coordinator = coordinator
-        self._clock = clock or (lambda: datetime.now(UTC))
+        self._clock = clock or (lambda: datetime.now(timezone.utc))
 
     def prepare(
         self,

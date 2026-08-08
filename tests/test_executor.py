@@ -3,9 +3,9 @@ from pathlib import Path
 import pytest
 
 from systeme_local_gateway.c0_probe import (
+    C0_TOOL_NAME,
     C0ConnectivityProbe,
     C0ProbeContext,
-    C0_TOOL_NAME,
 )
 from systeme_local_gateway.executor import CapabilityExecutor
 

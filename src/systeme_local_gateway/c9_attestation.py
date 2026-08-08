@@ -11,7 +11,7 @@ import stat
 import subprocess
 import sys
 import tempfile
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timezone
 from enum import StrEnum
 from pathlib import Path
 from typing import Any, Literal, NoReturn, TypeVar
@@ -28,7 +28,7 @@ from .c9_handoff_runtime import (
     C9HandoffStageReceipt,
     C9RichExecutionDescriptor,
 )
-from .c9_live_cycle import C9AdmissionStatus, C9_TOOL_NAME
+from .c9_live_cycle import C9_TOOL_NAME, C9AdmissionStatus
 from .c9_local_ai import (
     C9LocalAIRuntimeObservation,
     c9_local_ai_runtime_observation_sha256,
@@ -79,7 +79,7 @@ def _timestamp(value: datetime) -> str:
 
 def _parse_timestamp(value: str | None) -> datetime:
     if value is None:
-        return datetime.now(UTC)
+        return datetime.now(timezone.utc)
     normalized = value[:-1] + "+00:00" if value.endswith("Z") else value
     return _utc(datetime.fromisoformat(normalized))
 

@@ -41,11 +41,7 @@ def test_read_token_requires_runtime_secret() -> None:
 
     with pytest.raises(mcp_smoke.McpSmokeInputError, match="placeholder"):
         mcp_smoke._read_token(
-            {
-                "SLG_MCP_TOKEN": (
-                    "replace-with-fourth-independent-at-least-32-random-characters"
-                )
-            }
+            {"SLG_MCP_TOKEN": ("replace-with-fourth-independent-at-least-32-random-characters")}
         )
 
 
@@ -109,6 +105,7 @@ def test_main_redacts_unexpected_client_errors(monkeypatch, capsys) -> None:
         "error": "MCP smoke check failed",
     }
     assert token not in captured.err
+
 
 def test_parser_description_preserves_utf8_project_name() -> None:
     description = mcp_smoke._build_parser().description

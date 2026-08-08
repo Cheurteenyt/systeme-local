@@ -120,9 +120,7 @@ def test_audit_log_rejects_tampering_before_append(tmp_path: Path) -> None:
 
 def test_audit_log_rejects_wrong_key_and_legacy_records(tmp_path: Path) -> None:
     log_path = tmp_path / "audit.jsonl"
-    AuditLog(log_path, AUDIT_KEY).append(
-        {"task_id": "task-12345678", "status": "completed"}
-    )
+    AuditLog(log_path, AUDIT_KEY).append({"task_id": "task-12345678", "status": "completed"})
 
     with pytest.raises(AuditIntegrityError, match="invalid audit HMAC"):
         AuditLog(log_path, OTHER_KEY).verify()

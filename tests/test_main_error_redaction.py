@@ -4,7 +4,7 @@ import importlib
 import json
 import sys
 import types
-from datetime import UTC, datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -12,7 +12,7 @@ from systeme_local_gateway.models import AgentIdentity, TaskEnvelope
 
 
 def _task() -> TaskEnvelope:
-    now = datetime.now(UTC)
+    now = datetime.now(timezone.utc)
     return TaskEnvelope(
         task_id="error-redaction-task-12345678",
         issued_at=now,

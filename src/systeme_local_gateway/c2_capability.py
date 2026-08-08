@@ -403,7 +403,7 @@ def load_official_capability_profile(path: Path) -> OfficialCapabilityProfile:
 
 def _parse_timestamp(value: str | None) -> datetime:
     if value is None:
-        return datetime.now(tz=UTC)
+        return datetime.now(tz=timezone.utc)
     normalized = value[:-1] + "+00:00" if value.endswith("Z") else value
     return _require_aware(datetime.fromisoformat(normalized))
 

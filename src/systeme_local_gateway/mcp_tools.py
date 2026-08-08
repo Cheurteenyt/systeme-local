@@ -1,18 +1,18 @@
 from __future__ import annotations
 
 import json
-from hashlib import sha256
 from collections.abc import Callable
 from dataclasses import dataclass, field
+from hashlib import sha256
 from typing import Any, Protocol
 
-from .policy import DeclaredCapability
 from .c0_probe import (
     C0_TOOL_NAME,
     c0_annotations,
     c0_input_schema,
     c0_output_schema,
 )
+from .policy import DeclaredCapability
 
 InputSchema = dict[str, Any]
 OutputSchema = dict[str, Any]

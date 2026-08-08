@@ -5,7 +5,7 @@ import json
 import os
 import sys
 import threading
-from datetime import UTC, datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from hashlib import sha256
 from pathlib import Path
 from typing import Any, cast
@@ -76,7 +76,7 @@ from systeme_local_gateway.models import TaskEnvelope
 from systeme_local_gateway.policy import PolicyEngine
 from systeme_local_gateway.task_processor import TaskProcessor
 
-NOW = datetime(2026, 7, 28, 12, 0, tzinfo=UTC)
+NOW = datetime(2026, 7, 28, 12, 0, tzinfo=timezone.utc)
 IMAGE_NONCE = "C9" + "A" * 32
 DOCUMENT_NONCE = "C9" + "B" * 32
 AUDIT_KEY = "c9-runtime-audit-key-" + "x" * 40

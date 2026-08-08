@@ -8,7 +8,7 @@ import sqlite3
 import threading
 from concurrent.futures import ThreadPoolExecutor
 from contextlib import closing
-from datetime import UTC, datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 import pytest
@@ -20,8 +20,10 @@ from systeme_local_gateway.approvals import (
     ApprovalPendingError,
     ApprovalStore,
     ApprovalStoreUnavailableError,
-    main as approvals_main,
     verify_approval_task,
+)
+from systeme_local_gateway.approvals import (
+    main as approvals_main,
 )
 from systeme_local_gateway.auth import canonical_payload
 from systeme_local_gateway.models import AgentIdentity, TaskEnvelope
@@ -66,7 +68,7 @@ def _sign_task(task: TaskEnvelope, secret: str = KEY) -> TaskEnvelope:
 
 def test_approval_is_local_single_use_and_bound_to_action(tmp_path: Path) -> None:
     database = tmp_path / "approvals.sqlite3"
-    now = datetime(2026, 1, 1, tzinfo=UTC)
+    now = datetime(2026, 1, 1, tzinfo=timezone.utc)
     store = ApprovalStore(database, KEY, clock=lambda: now)
 
     original = _task(now)
@@ -89,7 +91,7 @@ def test_approval_is_local_single_use_and_bound_to_action(tmp_path: Path) -> Non
 
 
 def test_pending_and_denied_requests_cannot_be_consumed(tmp_path: Path) -> None:
-    now = datetime(2026, 1, 1, tzinfo=UTC)
+    now = datetime(2026, 1, 1, tzinfo=timezone.utc)
     store = ApprovalStore(tmp_path / "approvals.sqlite3", KEY, clock=lambda: now)
 
     pending = store.create(_task(now))
@@ -102,7 +104,7 @@ def test_pending_and_denied_requests_cannot_be_consumed(tmp_path: Path) -> None:
 
 
 def test_modified_action_does_not_match_approval(tmp_path: Path) -> None:
-    now = datetime(2026, 1, 1, tzinfo=UTC)
+    now = datetime(2026, 1, 1, tzinfo=timezone.utc)
     store = ApprovalStore(tmp_path / "approvals.sqlite3", KEY, clock=lambda: now)
     original = _task(now)
     pending = store.create(original)
@@ -122,7 +124,7 @@ def test_modified_action_does_not_match_approval(tmp_path: Path) -> None:
 
 def test_database_contains_no_raw_arguments_or_session_id(tmp_path: Path) -> None:
     database = tmp_path / "approvals.sqlite3"
-    now = datetime(2026, 1, 1, tzinfo=UTC)
+    now = datetime(2026, 1, 1, tzinfo=timezone.utc)
     store = ApprovalStore(database, KEY, clock=lambda: now)
     store.create(_task(now))
 
@@ -133,7 +135,7 @@ def test_database_contains_no_raw_arguments_or_session_id(tmp_path: Path) -> Non
 
 
 def test_duplicate_active_request_reuses_identifier(tmp_path: Path) -> None:
-    now = datetime(2026, 1, 1, tzinfo=UTC)
+    now = datetime(2026, 1, 1, tzinfo=timezone.utc)
     store = ApprovalStore(tmp_path / "approvals.sqlite3", KEY, clock=lambda: now)
 
     first = store.create(_task(now))
@@ -147,7 +149,7 @@ def test_duplicate_active_request_reuses_identifier(tmp_path: Path) -> None:
 
 
 def test_expired_request_is_pruned_before_capacity_check(tmp_path: Path) -> None:
-    clock_value = [datetime(2026, 1, 1, tzinfo=UTC)]
+    clock_value = [datetime(2026, 1, 1, tzinfo=timezone.utc)]
     store = ApprovalStore(
         tmp_path / "approvals.sqlite3",
         KEY,
@@ -158,14 +160,12 @@ def test_expired_request_is_pruned_before_capacity_check(tmp_path: Path) -> None
 
     first = store.create(_task(clock_value[0]))
     clock_value[0] += timedelta(seconds=31)
-    second = store.create(
-        _task(clock_value[0], task_id="approval-task-87654321", nonce="m" * 24)
-    )
+    second = store.create(_task(clock_value[0], task_id="approval-task-87654321", nonce="m" * 24))
     assert second.approval_id != first.approval_id
 
 
 def test_capacity_exhaustion_fails_closed(tmp_path: Path) -> None:
-    now = datetime(2026, 1, 1, tzinfo=UTC)
+    now = datetime(2026, 1, 1, tzinfo=timezone.utc)
     store = ApprovalStore(
         tmp_path / "approvals.sqlite3",
         KEY,
@@ -175,14 +175,12 @@ def test_capacity_exhaustion_fails_closed(tmp_path: Path) -> None:
     store.create(_task(now))
 
     with pytest.raises(ApprovalStoreUnavailableError, match="capacity"):
-        store.create(
-            _task(now, task_id="approval-task-87654321", nonce="m" * 24)
-        )
+        store.create(_task(now, task_id="approval-task-87654321", nonce="m" * 24))
 
 
 def test_concurrent_consumption_succeeds_only_once(tmp_path: Path) -> None:
     database = tmp_path / "approvals.sqlite3"
-    now = datetime(2026, 1, 1, tzinfo=UTC)
+    now = datetime(2026, 1, 1, tzinfo=timezone.utc)
     store = ApprovalStore(database, KEY, clock=lambda: now)
     original = _task(now)
     pending = store.create(original)
@@ -211,14 +209,13 @@ def test_concurrent_consumption_succeeds_only_once(tmp_path: Path) -> None:
 
 def test_tampered_row_is_rejected(tmp_path: Path) -> None:
     database = tmp_path / "approvals.sqlite3"
-    now = datetime(2026, 1, 1, tzinfo=UTC)
+    now = datetime(2026, 1, 1, tzinfo=timezone.utc)
     store = ApprovalStore(database, KEY, clock=lambda: now)
     pending = store.create(_task(now))
 
     with closing(sqlite3.connect(database)) as connection:
         connection.execute(
-            "UPDATE approvals SET capability = 'workspace.read_text' "
-            "WHERE approval_id = ?",
+            "UPDATE approvals SET capability = 'workspace.read_text' WHERE approval_id = ?",
             (pending.approval_id,),
         )
         connection.commit()
@@ -248,7 +245,7 @@ def test_connections_are_closed(monkeypatch: pytest.MonkeyPatch, tmp_path: Path)
         "systeme_local_gateway.approvals.sqlite3.connect",
         tracked_connect,
     )
-    now = datetime(2026, 1, 1, tzinfo=UTC)
+    now = datetime(2026, 1, 1, tzinfo=timezone.utc)
     store = ApprovalStore(tmp_path / "approvals.sqlite3", KEY, clock=lambda: now)
     original = _task(now)
     pending = store.create(original)
@@ -262,7 +259,7 @@ def test_connections_are_closed(monkeypatch: pytest.MonkeyPatch, tmp_path: Path)
 
 
 def test_signature_is_verified_before_local_approval() -> None:
-    now = datetime(2026, 1, 1, tzinfo=UTC)
+    now = datetime(2026, 1, 1, tzinfo=timezone.utc)
     task = _sign_task(_task(now))
     verify_approval_task(task, KEY)
 
@@ -270,20 +267,16 @@ def test_signature_is_verified_before_local_approval() -> None:
     with pytest.raises(ValueError, match="signature"):
         verify_approval_task(task, KEY)
 
-    approved_envelope = _sign_task(
-        _task(now, approval_id="approval-id-1234567890")
-    )
+    approved_envelope = _sign_task(_task(now, approval_id="approval-id-1234567890"))
     with pytest.raises(ValueError, match="original request"):
         verify_approval_task(approved_envelope, KEY)
-
-
 
 
 def test_generated_approval_id_is_cli_safe(
     monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,
 ) -> None:
-    now = datetime(2026, 1, 1, tzinfo=UTC)
+    now = datetime(2026, 1, 1, tzinfo=timezone.utc)
     raw_token = "-" + ("a" * 31)
     monkeypatch.setattr(
         "systeme_local_gateway.approvals.secrets.token_urlsafe",
@@ -302,7 +295,7 @@ def test_cli_accepts_legacy_leading_dash_approval_id(
     tmp_path: Path,
     capsys: pytest.CaptureFixture[str],
 ) -> None:
-    now = datetime(2026, 1, 1, tzinfo=UTC)
+    now = datetime(2026, 1, 1, tzinfo=timezone.utc)
     task = _sign_task(_task(now))
     task_file = tmp_path / "legacy-task.json"
     task_file.write_text(task.model_dump_json(), encoding="utf-8")
@@ -350,7 +343,7 @@ def test_cli_approval_requires_and_displays_exact_signed_task(
     tmp_path: Path,
     capsys: pytest.CaptureFixture[str],
 ) -> None:
-    now = datetime(2026, 1, 1, tzinfo=UTC)
+    now = datetime(2026, 1, 1, tzinfo=timezone.utc)
     task = _sign_task(_task(now))
     task_file = tmp_path / "task.json"
     task_file.write_text(task.model_dump_json(), encoding="utf-8")

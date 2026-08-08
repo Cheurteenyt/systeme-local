@@ -551,7 +551,7 @@ def test_blocked_decision_never_selects_transport() -> None:
 
 
 def test_provider_package_exports_readiness_contract() -> None:
-    import systeme_local_gateway.providers as providers
+    from systeme_local_gateway import providers
 
     for name in (
         "ChatGptMcpEvidenceReconciliationProfile",

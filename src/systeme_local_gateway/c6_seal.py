@@ -13,12 +13,11 @@ from typing import Any, Final, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
-
 C6_BASE_COMMIT = "418112758d8675326835d9947ccce3a1b12f6f25"
 C6_BRANCH = "codex/chatgpt-official-revalidation-c6"
 C6_EVIDENCE_TAG = "evidence/chatgpt-official-revalidation-c6-v1"
 C6_MANIFEST_PATH = "governance/c6-change-manifest.json"
-C6_SEAL_PATH: Final[Literal["governance/c6-change-seal.json"]] = "governance/c6-change-seal.json"
+C6_SEAL_PATH: Final = "governance/c6-change-seal.json"
 
 _COMMIT_PATTERN = r"^[0-9a-f]{40}$"
 _SHA256_PATTERN = r"^[0-9a-f]{64}$"
@@ -180,8 +179,7 @@ def _git(root: Path, *args: str, input_bytes: bytes | None = None) -> bytes:
         ),
         input=input_bytes,
         check=True,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
+        capture_output=True,
     )
     return completed.stdout
 

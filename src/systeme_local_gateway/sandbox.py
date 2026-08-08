@@ -7,9 +7,10 @@ import stat
 import subprocess
 import tempfile
 import threading
+from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Callable
+from typing import Self
 from uuid import uuid4
 
 
@@ -65,9 +66,7 @@ def _same_file_version(first: os.stat_result, second: os.stat_result) -> bool:
         )
     if first.st_dev and second.st_dev and first.st_dev != second.st_dev:
         return False
-    if first.st_ino and second.st_ino and first.st_ino != second.st_ino:
-        return False
-    return True
+    return not (first.st_ino and second.st_ino and first.st_ino != second.st_ino)
 
 
 class _BoundedBuffer:
@@ -140,7 +139,7 @@ class WorkspaceSnapshot:
         self._file_count = 0
         self._byte_count = 0
 
-    def __enter__(self) -> WorkspaceSnapshot:
+    def __enter__(self) -> Self:
         if not self.source.is_dir():
             raise SnapshotViolation("workspace source is not a directory")
         if self.sandbox_root == self.source or self.source in self.sandbox_root.parents:
@@ -266,10 +265,15 @@ class WorkspaceSnapshot:
             return True
         if not is_directory and name in self._EXCLUDED_FILE_NAMES:
             return True
-        if not is_directory and name.startswith(".env.") and name not in {
-            ".env.example",
-            ".env.sample",
-        }:
+        if (
+            not is_directory
+            and name.startswith(".env.")
+            and name
+            not in {
+                ".env.example",
+                ".env.sample",
+            }
+        ):
             return True
         if ".git" in parts and parts[0] != ".git":
             return True

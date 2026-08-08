@@ -7,7 +7,7 @@ import sqlite3
 import threading
 from concurrent.futures import ThreadPoolExecutor
 from contextlib import closing
-from datetime import UTC, datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 import pytest
@@ -19,7 +19,6 @@ from systeme_local_gateway.auth import (
     verify_task,
 )
 from systeme_local_gateway.models import AgentIdentity, TaskEnvelope
-
 
 SECRET = "s" * 48
 
@@ -42,7 +41,7 @@ def _signed_task(nonce: str, now: datetime) -> TaskEnvelope:
 
 def test_replay_is_rejected_after_guard_restart(tmp_path: Path) -> None:
     database = tmp_path / "replay.sqlite3"
-    now = datetime.now(UTC)
+    now = datetime.now(timezone.utc)
     task = _signed_task("persistent-nonce-" + "n" * 16, now)
 
     first_guard = SQLiteReplayGuard(database, SECRET, max_entries=10)
@@ -58,7 +57,7 @@ def test_replay_is_rejected_after_guard_restart(tmp_path: Path) -> None:
 
 def test_invalid_signature_does_not_consume_nonce(tmp_path: Path) -> None:
     database = tmp_path / "replay.sqlite3"
-    now = datetime.now(UTC)
+    now = datetime.now(timezone.utc)
     task = _signed_task("invalid-signature-" + "n" * 16, now)
     valid_signature = task.signature
     task.signature = "z" * len(task.signature)
@@ -73,7 +72,7 @@ def test_invalid_signature_does_not_consume_nonce(tmp_path: Path) -> None:
 
 def test_expired_entries_are_pruned_before_capacity_check(tmp_path: Path) -> None:
     database = tmp_path / "replay.sqlite3"
-    clock_value = [datetime(2026, 1, 1, tzinfo=UTC)]
+    clock_value = [datetime(2026, 1, 1, tzinfo=timezone.utc)]
     guard = SQLiteReplayGuard(
         database,
         SECRET,
@@ -86,15 +85,13 @@ def test_expired_entries_are_pruned_before_capacity_check(tmp_path: Path) -> Non
     guard.check_and_mark("second-" + "n" * 16, clock_value[0] + timedelta(seconds=30))
 
     with closing(sqlite3.connect(database)) as connection:
-        rows = connection.execute(
-            "SELECT nonce_hmac, expires_at_us FROM seen_nonces"
-        ).fetchall()
+        rows = connection.execute("SELECT nonce_hmac, expires_at_us FROM seen_nonces").fetchall()
     assert len(rows) == 1
 
 
 def test_capacity_exhaustion_fails_closed(tmp_path: Path) -> None:
     database = tmp_path / "replay.sqlite3"
-    now = datetime(2026, 1, 1, tzinfo=UTC)
+    now = datetime(2026, 1, 1, tzinfo=timezone.utc)
     guard = SQLiteReplayGuard(
         database,
         SECRET,
@@ -109,7 +106,7 @@ def test_capacity_exhaustion_fails_closed(tmp_path: Path) -> None:
 
 def test_concurrent_duplicate_is_accepted_only_once(tmp_path: Path) -> None:
     database = tmp_path / "replay.sqlite3"
-    now = datetime(2026, 1, 1, tzinfo=UTC)
+    now = datetime(2026, 1, 1, tzinfo=timezone.utc)
     barrier = threading.Barrier(2)
 
     def attempt() -> str:
@@ -145,7 +142,7 @@ class _TrackingConnection(sqlite3.Connection):
 
 def test_every_sqlite_connection_is_closed(tmp_path: Path, monkeypatch) -> None:
     database = tmp_path / "replay.sqlite3"
-    now = datetime(2026, 1, 1, tzinfo=UTC)
+    now = datetime(2026, 1, 1, tzinfo=timezone.utc)
     connections: list[_TrackingConnection] = []
     real_connect = sqlite3.connect
 

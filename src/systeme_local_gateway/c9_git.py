@@ -6,9 +6,10 @@ import stat
 import subprocess
 import threading
 import time
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Final, Mapping, NoReturn, Sequence
+from typing import Any, Final, NoReturn
 
 _GIT_EXECUTABLE_ENV: Final = "SLG_C9_GIT_EXECUTABLE"
 _DEFAULT_TIMEOUT_SECONDS: Final = 15.0

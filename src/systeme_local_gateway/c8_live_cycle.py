@@ -7,7 +7,7 @@ import json
 import os
 import secrets
 import sys
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, datetime, timedelta, timezone
 from enum import StrEnum
 from pathlib import Path
 from typing import Any, Literal
@@ -21,8 +21,8 @@ from .c0_probe import (
 )
 from .c7_work_admission import (
     C7_MAX_WORK_OBSERVATION_AGE_SECONDS,
-    C7_PROFILE_PATH,
     C7_POLICY_PATH,
+    C7_PROFILE_PATH,
     C7ProtectedAction,
     C7WorkPrelivePolicy,
     C8LiveCycleGrant,
@@ -71,7 +71,7 @@ def _require_utc(value: datetime) -> datetime:
 
 def _parse_timestamp(value: str | None) -> datetime:
     if value is None:
-        return datetime.now(UTC)
+        return datetime.now(timezone.utc)
     normalized = value[:-1] + "+00:00" if value.endswith("Z") else value
     return _require_utc(datetime.fromisoformat(normalized))
 

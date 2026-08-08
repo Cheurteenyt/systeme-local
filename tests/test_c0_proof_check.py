@@ -1,4 +1,4 @@
-from datetime import UTC, datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 import pytest
 from pydantic import ValidationError
@@ -12,7 +12,7 @@ from systeme_local_gateway.c0_proof_check import (
     verify_c0_pending_live_proof_receipt,
 )
 
-CREATED_AT = datetime(2026, 7, 26, 12, 0, tzinfo=UTC)
+CREATED_AT = datetime(2026, 7, 26, 12, 0, tzinfo=timezone.utc)
 CHECKED_AT = CREATED_AT + timedelta(minutes=5)
 AUDIT_KEY = "audit-key-that-is-long-enough-for-c0-tests"
 AUDIT_ID = "12345678-1234-4123-8123-123456789abc"
