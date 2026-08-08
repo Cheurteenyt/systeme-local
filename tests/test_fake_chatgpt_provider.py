@@ -100,7 +100,10 @@ def test_continued_conversation_preserves_provider_mapping() -> None:
         scenario=FakeChatGptScenario.COMPLETED,
     )
 
-    assert continued.conversation.provider_conversation_id == first.conversation.provider_conversation_id
+    assert (
+        continued.conversation.provider_conversation_id
+        == first.conversation.provider_conversation_id
+    )
     assert continued.run.run_id != first.run.run_id
 
 
@@ -202,9 +205,7 @@ def test_fake_adapter_rejects_surface_and_principal_mismatch() -> None:
 
     with pytest.raises(ValueError, match="surface"):
         adapter.start_run(
-            conversation=make_conversation().model_copy(
-                update={"surface": "openai_responses_api"}
-            ),
+            conversation=make_conversation().model_copy(update={"surface": "openai_responses_api"}),
             turn=turn,
             scenario=FakeChatGptScenario.COMPLETED,
         )
@@ -251,10 +252,8 @@ def test_distinct_local_conversations_get_distinct_provider_mappings() -> None:
     )
 
     assert (
-        first.conversation.provider_conversation_id
-        != second.conversation.provider_conversation_id
+        first.conversation.provider_conversation_id != second.conversation.provider_conversation_id
     )
-
 
 
 def test_tool_call_scenario_recovers_from_sqlite_replay(tmp_path) -> None:
@@ -267,10 +266,7 @@ def test_tool_call_scenario_recovers_from_sqlite_replay(tmp_path) -> None:
     )
     path = tmp_path / "lifecycle.sqlite3"
     first_process = LifecycleEventStore(path)
-    assert (
-        first_process.register_conversation(plan.conversation)
-        is AppendResult.APPENDED
-    )
+    assert first_process.register_conversation(plan.conversation) is AppendResult.APPENDED
     assert first_process.register_turn(turn) is AppendResult.APPENDED
     assert first_process.register_run(plan.run) is AppendResult.APPENDED
     for event in plan.provider_events:

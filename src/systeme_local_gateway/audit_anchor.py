@@ -135,13 +135,8 @@ class AuditAnchorTransaction:
         self._require_active()
         self._anchor._validate_state(records, last_hmac)
         self._anchor._assert_safe_anchor_path()
-        if (
-            self._anchor.path.exists()
-            and self._anchor.path.stat().st_size != 0
-        ):
-            raise AuditAnchorIntegrityError(
-                "audit anchor is already initialized"
-            )
+        if self._anchor.path.exists() and self._anchor.path.stat().st_size != 0:
+            raise AuditAnchorIntegrityError("audit anchor is already initialized")
         self._anchor._append_checkpoint_unlocked(
             records=records,
             last_hmac=last_hmac,
@@ -158,9 +153,7 @@ class AuditAnchorTransaction:
         self._anchor._validate_state(records, last_hmac)
         verification = self._anchor._verify_unlocked()
         if records <= verification.records:
-            raise AuditAnchorIntegrityError(
-                "audit anchor record count must increase"
-            )
+            raise AuditAnchorIntegrityError("audit anchor record count must increase")
         self._anchor._append_checkpoint_unlocked(
             records=records,
             last_hmac=last_hmac,
@@ -173,9 +166,7 @@ class AuditAnchorTransaction:
 
     def _require_active(self) -> None:
         if not self._active:
-            raise AuditAnchorError(
-                "audit anchor transaction is no longer active"
-            )
+            raise AuditAnchorError("audit anchor transaction is no longer active")
 
 
 class FileAuditAnchor:
@@ -238,9 +229,7 @@ class FileAuditAnchor:
         with self.path.open("rb") as raw_handle:
             raw_handle.seek(-1, os.SEEK_END)
             if raw_handle.read(1) != b"\n":
-                raise AuditAnchorIntegrityError(
-                    "audit anchor must end with a newline"
-                )
+                raise AuditAnchorIntegrityError("audit anchor must end with a newline")
 
         previous_checkpoint_hmac = _ANCHOR_GENESIS_HMAC
         previous_records = -1
@@ -259,14 +248,8 @@ class FileAuditAnchor:
                 checkpoint_ids.add(checkpoint_id)
 
                 records = checkpoint["records"]
-                if (
-                    not isinstance(records, int)
-                    or isinstance(records, bool)
-                    or records < 0
-                ):
-                    raise AuditAnchorIntegrityError(
-                        f"invalid record count at line {line_number}"
-                    )
+                if not isinstance(records, int) or isinstance(records, bool) or records < 0:
+                    raise AuditAnchorIntegrityError(f"invalid record count at line {line_number}")
                 if records <= previous_records:
                     raise AuditAnchorIntegrityError(
                         f"non-monotonic record count at line {line_number}"
@@ -280,10 +263,7 @@ class FileAuditAnchor:
                     raise AuditAnchorIntegrityError(
                         "zero-record checkpoint must use the audit genesis HMAC"
                     )
-                if (
-                    checkpoint["previous_checkpoint_hmac"]
-                    != previous_checkpoint_hmac
-                ):
+                if checkpoint["previous_checkpoint_hmac"] != previous_checkpoint_hmac:
                     raise AuditAnchorIntegrityError(
                         f"broken audit anchor chain at line {line_number}"
                     )
@@ -323,9 +303,7 @@ class FileAuditAnchor:
     ) -> dict[str, object]:
         line = raw_line.rstrip("\n")
         if not line:
-            raise AuditAnchorIntegrityError(
-                f"blank audit anchor checkpoint at line {line_number}"
-            )
+            raise AuditAnchorIntegrityError(f"blank audit anchor checkpoint at line {line_number}")
         try:
             checkpoint = json.loads(line)
         except json.JSONDecodeError as exc:
@@ -337,9 +315,7 @@ class FileAuditAnchor:
                 f"audit anchor checkpoint at line {line_number} must be an object"
             )
         if set(checkpoint) != _EXPECTED_KEYS:
-            raise AuditAnchorIntegrityError(
-                f"unexpected audit anchor schema at line {line_number}"
-            )
+            raise AuditAnchorIntegrityError(f"unexpected audit anchor schema at line {line_number}")
         if checkpoint["version"] != _ANCHOR_VERSION:
             raise AuditAnchorIntegrityError(
                 f"unsupported audit anchor version at line {line_number}"
@@ -354,40 +330,24 @@ class FileAuditAnchor:
     ) -> str:
         checkpoint_id = checkpoint["checkpoint_id"]
         if not isinstance(checkpoint_id, str):
-            raise AuditAnchorIntegrityError(
-                f"invalid checkpoint ID at line {line_number}"
-            )
+            raise AuditAnchorIntegrityError(f"invalid checkpoint ID at line {line_number}")
         try:
             UUID(checkpoint_id)
         except ValueError as exc:
-            raise AuditAnchorIntegrityError(
-                f"invalid checkpoint ID at line {line_number}"
-            ) from exc
+            raise AuditAnchorIntegrityError(f"invalid checkpoint ID at line {line_number}") from exc
         if checkpoint_id in checkpoint_ids:
-            raise AuditAnchorIntegrityError(
-                f"duplicate checkpoint ID at line {line_number}"
-            )
+            raise AuditAnchorIntegrityError(f"duplicate checkpoint ID at line {line_number}")
         _validate_timestamp(checkpoint["timestamp"])
         if checkpoint["audit_log_id"] != self._audit_log_id:
-            raise AuditAnchorIntegrityError(
-                f"audit log ID mismatch at line {line_number}"
-            )
+            raise AuditAnchorIntegrityError(f"audit log ID mismatch at line {line_number}")
         return checkpoint_id
 
     def _validate_state(self, records: int, last_hmac: str) -> None:
-        if (
-            not isinstance(records, int)
-            or isinstance(records, bool)
-            or records < 0
-        ):
-            raise ValueError(
-                "anchor record count must be a non-negative integer"
-            )
+        if not isinstance(records, int) or isinstance(records, bool) or records < 0:
+            raise ValueError("anchor record count must be a non-negative integer")
         _validate_hex_digest(last_hmac, field="last audit HMAC")
         if records == 0 and last_hmac != _ANCHOR_GENESIS_HMAC:
-            raise ValueError(
-                "zero-record checkpoint must use the audit genesis HMAC"
-            )
+            raise ValueError("zero-record checkpoint must use the audit genesis HMAC")
 
     def _append_checkpoint_unlocked(
         self,
@@ -415,9 +375,7 @@ class FileAuditAnchor:
         try:
             self.path.parent.mkdir(parents=True, exist_ok=True)
         except OSError as exc:
-            raise AuditAnchorIntegrityError(
-                "audit anchor directory is unavailable"
-            ) from exc
+            raise AuditAnchorIntegrityError("audit anchor directory is unavailable") from exc
         self._assert_safe_anchor_path()
 
         flags = os.O_WRONLY | os.O_CREAT | os.O_APPEND
@@ -425,34 +383,24 @@ class FileAuditAnchor:
         try:
             descriptor = os.open(self.path, flags, 0o600)
         except OSError as exc:
-            raise AuditAnchorIntegrityError(
-                "audit anchor is unavailable"
-            ) from exc
+            raise AuditAnchorIntegrityError("audit anchor is unavailable") from exc
 
         try:
             descriptor_stat = os.fstat(descriptor)
             if not stat.S_ISREG(descriptor_stat.st_mode):
-                raise AuditAnchorIntegrityError(
-                    "audit anchor path is not a regular file"
-                )
+                raise AuditAnchorIntegrityError("audit anchor path is not a regular file")
             path_stat = self.path.lstat()
             if stat.S_ISLNK(path_stat.st_mode):
-                raise AuditAnchorIntegrityError(
-                    "audit anchor cannot be a symbolic link"
-                )
+                raise AuditAnchorIntegrityError("audit anchor cannot be a symbolic link")
             if (path_stat.st_dev, path_stat.st_ino) != (
                 descriptor_stat.st_dev,
                 descriptor_stat.st_ino,
             ):
-                raise AuditAnchorIntegrityError(
-                    "audit anchor changed during open"
-                )
+                raise AuditAnchorIntegrityError("audit anchor changed during open")
             os.write(descriptor, encoded)
             os.fsync(descriptor)
         except OSError as exc:
-            raise AuditAnchorIntegrityError(
-                "audit anchor write failed"
-            ) from exc
+            raise AuditAnchorIntegrityError("audit anchor write failed") from exc
         finally:
             os.close(descriptor)
 
@@ -466,18 +414,14 @@ class FileAuditAnchor:
         try:
             self.lock_path.parent.mkdir(parents=True, exist_ok=True)
         except OSError as exc:
-            raise AuditAnchorLockError(
-                "audit anchor lock directory is unavailable"
-            ) from exc
+            raise AuditAnchorLockError("audit anchor lock directory is unavailable") from exc
 
         self._assert_safe_lock_path()
         flags = os.O_RDWR | os.O_CREAT | getattr(os, "O_NOFOLLOW", 0)
         try:
             descriptor = os.open(self.lock_path, flags, 0o600)
         except OSError as exc:
-            raise AuditAnchorLockError(
-                "audit anchor lock file is unavailable"
-            ) from exc
+            raise AuditAnchorLockError("audit anchor lock file is unavailable") from exc
 
         acquired = False
         try:
@@ -502,26 +446,20 @@ class FileAuditAnchor:
                     break
                 except OSError as exc:
                     if not _is_lock_contention_error(exc):
-                        raise AuditAnchorLockError(
-                            "audit anchor lock acquisition failed"
-                        ) from exc
+                        raise AuditAnchorLockError("audit anchor lock acquisition failed") from exc
                     remaining = deadline - time.monotonic()
                     if remaining <= 0:
                         raise AuditAnchorLockError(
                             "audit anchor lock acquisition timed out"
                         ) from exc
-                    time.sleep(
-                        min(_LOCK_POLL_INTERVAL_SECONDS, remaining)
-                    )
+                    time.sleep(min(_LOCK_POLL_INTERVAL_SECONDS, remaining))
 
             self._verify_lock_file_identity(os.fstat(descriptor))
             yield
         except AuditAnchorLockError:
             raise
         except OSError as exc:
-            raise AuditAnchorLockError(
-                "audit anchor lock is unavailable"
-            ) from exc
+            raise AuditAnchorLockError("audit anchor lock is unavailable") from exc
         finally:
             try:
                 if acquired:
@@ -537,47 +475,33 @@ class FileAuditAnchor:
             return
         file_stat = self.path.lstat()
         if stat.S_ISLNK(file_stat.st_mode):
-            raise AuditAnchorIntegrityError(
-                "audit anchor cannot be a symbolic link"
-            )
+            raise AuditAnchorIntegrityError("audit anchor cannot be a symbolic link")
         if not stat.S_ISREG(file_stat.st_mode):
-            raise AuditAnchorIntegrityError(
-                "audit anchor path is not a regular file"
-            )
+            raise AuditAnchorIntegrityError("audit anchor path is not a regular file")
 
     def _assert_safe_lock_path(self) -> None:
         if not self.lock_path.exists() and not self.lock_path.is_symlink():
             return
         file_stat = self.lock_path.lstat()
         if stat.S_ISLNK(file_stat.st_mode):
-            raise AuditAnchorLockError(
-                "audit anchor lock file cannot be a symbolic link"
-            )
+            raise AuditAnchorLockError("audit anchor lock file cannot be a symbolic link")
         if not stat.S_ISREG(file_stat.st_mode):
-            raise AuditAnchorLockError(
-                "audit anchor lock path is not a regular file"
-            )
+            raise AuditAnchorLockError("audit anchor lock path is not a regular file")
 
     def _verify_lock_file_identity(
         self,
         descriptor_stat: os.stat_result,
     ) -> None:
         if not stat.S_ISREG(descriptor_stat.st_mode):
-            raise AuditAnchorLockError(
-                "audit anchor lock path is not a regular file"
-            )
+            raise AuditAnchorLockError("audit anchor lock path is not a regular file")
         path_stat = self.lock_path.lstat()
         if stat.S_ISLNK(path_stat.st_mode):
-            raise AuditAnchorLockError(
-                "audit anchor lock file cannot be a symbolic link"
-            )
+            raise AuditAnchorLockError("audit anchor lock file cannot be a symbolic link")
         if (path_stat.st_dev, path_stat.st_ino) != (
             descriptor_stat.st_dev,
             descriptor_stat.st_ino,
         ):
-            raise AuditAnchorLockError(
-                "audit anchor lock file changed during open"
-            )
+            raise AuditAnchorLockError("audit anchor lock file changed during open")
 
     @staticmethod
     def _try_acquire_process_lock(descriptor: int) -> None:

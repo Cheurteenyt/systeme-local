@@ -202,8 +202,6 @@ def test_replacement_requires_sequential_revision_and_immutable_identity(tmp_pat
         )
 
 
-
-
 def test_replacement_rejects_mapping_changes_and_timestamp_regression(tmp_path: Path) -> None:
     store = ProviderContextStore(tmp_path / "context.sqlite3")
     store.register_account(account())
@@ -311,9 +309,7 @@ def test_project_provider_mapping_is_unique(tmp_path: Path) -> None:
     store.register_account(account())
     store.register_project(project())
     with pytest.raises(ContextStoreConflictError, match="mapping"):
-        store.register_project(
-            project(project_id="proj_other", display_name="Other")
-        )
+        store.register_project(project(project_id="proj_other", display_name="Other"))
 
 
 def test_conversation_requires_project_and_matching_surface(tmp_path: Path) -> None:
@@ -338,10 +334,7 @@ def test_conversation_registration_and_revision(tmp_path: Path) -> None:
         state=BindingState.ARCHIVED,
         updated_at=NOW + timedelta(minutes=1),
     )
-    assert (
-        store.replace_conversation(revised, expected_revision=1)
-        is ContextWriteResult.WRITTEN
-    )
+    assert store.replace_conversation(revised, expected_revision=1) is ContextWriteResult.WRITTEN
     assert store.load_conversation("conv_architecture") == revised
 
 
@@ -359,10 +352,7 @@ def test_existing_conversation_can_move_into_a_newer_project(tmp_path: Path) -> 
         project_id=later_project.project_id,
         updated_at=NOW + timedelta(minutes=2),
     )
-    assert (
-        store.replace_conversation(moved, expected_revision=1)
-        is ContextWriteResult.WRITTEN
-    )
+    assert store.replace_conversation(moved, expected_revision=1) is ContextWriteResult.WRITTEN
     assert store.load_conversation(moved.conversation_id) == moved
 
 
@@ -402,8 +392,6 @@ def test_store_detects_fingerprint_and_column_corruption(tmp_path: Path) -> None
         )
     with pytest.raises(ContextStoreCorruptError, match="columns"):
         store2.load_account("acct_main")
-
-
 
 
 def test_store_rejects_history_head_mismatch(tmp_path: Path) -> None:
@@ -509,9 +497,7 @@ def test_store_rejects_unsupported_schema_version(tmp_path: Path) -> None:
     path = tmp_path / "context.sqlite3"
     ProviderContextStore(path)
     with sqlite3.connect(path) as connection:
-        connection.execute(
-            "UPDATE metadata SET value = '999' WHERE key = 'schema_version'"
-        )
+        connection.execute("UPDATE metadata SET value = '999' WHERE key = 'schema_version'")
     with pytest.raises(UnsupportedContextSchemaVersion):
         ProviderContextStore(path)
 
@@ -592,8 +578,6 @@ def test_store_rejects_extra_metadata_rows(tmp_path: Path) -> None:
     path = tmp_path / "context.sqlite3"
     ProviderContextStore(path)
     with sqlite3.connect(path) as connection:
-        connection.execute(
-            "INSERT INTO metadata(key, value) VALUES ('unexpected', 'value')"
-        )
+        connection.execute("INSERT INTO metadata(key, value) VALUES ('unexpected', 'value')")
     with pytest.raises(ContextStoreCorruptError, match="only schema_version"):
         ProviderContextStore(path)

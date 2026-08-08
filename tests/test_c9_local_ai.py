@@ -390,11 +390,9 @@ def test_runtime_continuity_rejects_executable_mismatch(
         "other-runtime.exe" if mismatch == "basename" else "ollama.exe"
     )
     replacement.write_bytes(
-        
-            b"reviewed native ollama executable"
-            if mismatch == "basename"
-            else b"runtime executable with another digest"
-        
+        b"reviewed native ollama executable"
+        if mismatch == "basename"
+        else b"runtime executable with another digest"
     )
     _patch_native_runtime_identity(
         monkeypatch,
@@ -831,12 +829,15 @@ def test_http_and_envelope_failures_are_static_and_redacted(
     declared_length: str | None,
     code: C9LocalAIErrorCode,
 ) -> None:
-    with _loopback_server(
-        body=body,
-        status=status,
-        content_type=content_type,
-        declared_length=declared_length,
-    ) as (endpoint, _state), pytest.raises(C9LocalAIError) as error:
+    with (
+        _loopback_server(
+            body=body,
+            status=status,
+            content_type=content_type,
+            declared_length=declared_length,
+        ) as (endpoint, _state),
+        pytest.raises(C9LocalAIError) as error,
+    ):
         _run(endpoint)
     assert error.value.code is code
     assert "sensitive" not in str(error.value)
@@ -844,10 +845,13 @@ def test_http_and_envelope_failures_are_static_and_redacted(
 
 
 def test_streamed_response_without_content_length_is_still_bounded() -> None:
-    with _loopback_server(
-        body=b"x" * 2_048,
-        omit_content_length=True,
-    ) as (endpoint, _state), pytest.raises(C9LocalAIError) as error:
+    with (
+        _loopback_server(
+            body=b"x" * 2_048,
+            omit_content_length=True,
+        ) as (endpoint, _state),
+        pytest.raises(C9LocalAIError) as error,
+    ):
         _run(endpoint, max_response_bytes=1_024)
     assert error.value.code is C9LocalAIErrorCode.RESPONSE_TOO_LARGE
 
@@ -855,14 +859,20 @@ def test_streamed_response_without_content_length_is_still_bounded() -> None:
 @pytest.mark.parametrize(
     "content",
     [
-        ('{"version":"1","image_nonce":"c9_image_nonce_0123456789",'
-        '"image_nonce":"c9_image_nonce_other_1234",'
-        '"document_nonce":"c9_document_nonce_012345"}'),
+        (
+            '{"version":"1","image_nonce":"c9_image_nonce_0123456789",'
+            '"image_nonce":"c9_image_nonce_other_1234",'
+            '"document_nonce":"c9_document_nonce_012345"}'
+        ),
         '{"version":"1","image_nonce":"too-short","document_nonce":"c9_document_nonce_012345"}',
-        ('{"version":"1","image_nonce":"c9_same_nonce_0123456789",'
-        '"document_nonce":"c9_same_nonce_0123456789"}'),
-        ('{"version":"1","image_nonce":"c9_image_nonce_0123456789",'
-        '"document_nonce":"c9_document_nonce_012345","unexpected":true}'),
+        (
+            '{"version":"1","image_nonce":"c9_same_nonce_0123456789",'
+            '"document_nonce":"c9_same_nonce_0123456789"}'
+        ),
+        (
+            '{"version":"1","image_nonce":"c9_image_nonce_0123456789",'
+            '"document_nonce":"c9_document_nonce_012345","unexpected":true}'
+        ),
     ],
 )
 def test_structured_output_rejects_duplicates_invalid_nonces_and_unknown_fields(

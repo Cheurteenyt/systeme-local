@@ -166,12 +166,8 @@ def test_c1_proof_checker_emits_a_two_hour_bounded_receipt(
 
     assert main(_argv(paths)) == 0
     bundle = json.loads(capsys.readouterr().out)
-    checked_at = datetime.fromisoformat(
-        bundle["correlation_receipt"]["checked_at"]
-    )
-    expires_at = datetime.fromisoformat(
-        bundle["correlation_receipt"]["expires_at"]
-    )
+    checked_at = datetime.fromisoformat(bundle["correlation_receipt"]["checked_at"])
+    expires_at = datetime.fromisoformat(bundle["correlation_receipt"]["expires_at"])
 
     assert expires_at - checked_at > timedelta(hours=1)
     assert expires_at - checked_at <= timedelta(hours=2)

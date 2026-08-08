@@ -690,63 +690,79 @@ def build_current_c1_official_evidence_profile() -> C1OfficialEvidenceProfile:
             "chat_and_work",
             "Get started with ChatGPT Work",
             "https://learn.chatgpt.com/docs/get-started-with-work",
-            ("Chat is documented for answers, explanations, brainstorming, and short drafts; "
-            "Work is a separately selected surface for tasks with a clear outcome. C1 may "
-            "visibly distinguish the selector but tests Chat only."),
+            (
+                "Chat is documented for answers, explanations, brainstorming, and short drafts; "
+                "Work is a separately selected surface for tasks with a clear outcome. C1 may "
+                "visibly distinguish the selector but tests Chat only."
+            ),
         ),
         (
             "chatgpt_and_codex_models",
             "Models",
             "https://learn.chatgpt.com/docs/models",
-            ("Current clients may visibly present model and reasoning controls. Codex canonical "
-            "reasoning labels include low, medium, high, xhigh, max, and ultra; visible ChatGPT "
-            "labels remain presentation evidence and do not establish hidden model routing."),
+            (
+                "Current clients may visibly present model and reasoning controls. Codex canonical "
+                "reasoning labels include low, medium, high, xhigh, max, and ultra; visible ChatGPT "
+                "labels remain presentation evidence and do not establish hidden model routing."
+            ),
         ),
         (
             "codex_configuration",
             "Config basics",
             "https://learn.chatgpt.com/docs/config-file/config-basic",
-            ("Codex configuration precedence is CLI overrides, project configuration, profile "
-            "configuration, user configuration, system configuration, then built-in defaults. "
-            "A config.toml value is a configured default, not active runtime proof."),
+            (
+                "Codex configuration precedence is CLI overrides, project configuration, profile "
+                "configuration, user configuration, system configuration, then built-in defaults. "
+                "A config.toml value is a configured default, not active runtime proof."
+            ),
         ),
         (
             "plugin_connection",
             "Connect and test your plugin",
             "https://developers.openai.com/plugins/deploy/connect-chatgpt",
-            ("A developer connects an MCP endpoint or Secure MCP Tunnel, reviews discovered tools, "
-            "and selects the reviewed connection in a new ChatGPT conversation. The documented "
-            "flow is scoped to the current conversation and does not expose account chat history."),
+            (
+                "A developer connects an MCP endpoint or Secure MCP Tunnel, reviews discovered tools, "
+                "and selects the reviewed connection in a new ChatGPT conversation. The documented "
+                "flow is scoped to the current conversation and does not expose account chat history."
+            ),
         ),
         (
             "plugin_authentication",
             "Authentication",
             "https://developers.openai.com/plugins/build/auth",
-            ("Plugin tools declare per-tool noauth or OAuth security schemes. C1 reuses only the "
-            "reviewed draft C0 noauth probe behind independent loopback bearer and tunnel controls."),
+            (
+                "Plugin tools declare per-tool noauth or OAuth security schemes. C1 reuses only the "
+                "reviewed draft C0 noauth probe behind independent loopback bearer and tunnel controls."
+            ),
         ),
         (
             "secure_mcp_tunnel",
             "Secure MCP Tunnel",
             "https://developers.openai.com/api/docs/guides/secure-mcp-tunnels",
-            ("The official customer-run tunnel client keeps the local MCP server private through "
-            "outbound-only connectivity and uses distinct Tunnel and Runtime API-key permissions."),
+            (
+                "The official customer-run tunnel client keeps the local MCP server private through "
+                "outbound-only connectivity and uses distinct Tunnel and Runtime API-key permissions."
+            ),
         ),
         (
             "gpt_5_6_models",
             "Models",
             "https://developers.openai.com/api/docs/models",
-            ("The official API catalog identifies gpt-5.6-sol, gpt-5.6-terra, and gpt-5.6-luna as "
-            "distinct model IDs. Those API identifiers may describe direct Codex runtime metadata "
-            "but must not be inferred from a ChatGPT Web display label."),
+            (
+                "The official API catalog identifies gpt-5.6-sol, gpt-5.6-terra, and gpt-5.6-luna as "
+                "distinct model IDs. Those API identifiers may describe direct Codex runtime metadata "
+                "but must not be inferred from a ChatGPT Web display label."
+            ),
         ),
         (
             "browser_boundary",
             "Browser",
             "https://learn.chatgpt.com/docs/browser",
-            ("The ChatGPT desktop in-app browser is a distinct browser surface. C1 limits control "
-            "to visible controls and two new sterile chats and does not inspect cookies, storage, "
-            "private requests, unrelated tabs, or existing chat history."),
+            (
+                "The ChatGPT desktop in-app browser is a distinct browser surface. C1 limits control "
+                "to visible controls and two new sterile chats and does not inspect cookies, storage, "
+                "private requests, unrelated tabs, or existing chat history."
+            ),
         ),
     )
     source_items = [

@@ -12,18 +12,12 @@ from typing import Any, Final, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
-C8_BASE_COMMIT: Final = (
-    "e0a1dccfa13c95a1ce077d2b6f9ef4f1ed70231f"
-)
+C8_BASE_COMMIT: Final = "e0a1dccfa13c95a1ce077d2b6f9ef4f1ed70231f"
 C8_BRANCH: Final = "codex/chatgpt-work-live-c8"
-C8_EVIDENCE_TAG: Final = (
-    "evidence/chatgpt-work-live-c8-v1"
-)
+C8_EVIDENCE_TAG: Final = "evidence/chatgpt-work-live-c8-v1"
 C8_MANIFEST_PATH = "governance/c8-change-manifest.json"
 C8_SEAL_PATH: Final = "governance/c8-change-seal.json"
-C8_FINAL_STATUS: Final = (
-    "COMPLETE_C8_TWO_WORK_CALLS_LIVE_CORRELATED_AND_REVOKED"
-)
+C8_FINAL_STATUS: Final = "COMPLETE_C8_TWO_WORK_CALLS_LIVE_CORRELATED_AND_REVOKED"
 
 _COMMIT_PATTERN = r"^[0-9a-f]{40}$"
 _SHA256_PATTERN = r"^[0-9a-f]{64}$"

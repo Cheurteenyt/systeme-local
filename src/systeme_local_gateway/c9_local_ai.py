@@ -812,27 +812,28 @@ def _exchange(*, config: C9LocalAIConfig, request_bytes: bytes) -> bytes:
     deadline = time.monotonic() + config.total_timeout_seconds
     try:
         timeout = _bounded_http_timeout(config)
-        with httpx.Client(
-            timeout=timeout,
-            follow_redirects=False,
-            trust_env=False,
-            headers={
-                "Accept": "application/json",
-                "Content-Type": "application/json",
-                "User-Agent": "systeme-local-c9-local-ai/1",
-            },
-        ) as client, client.stream(
-            "POST",
-            config.endpoint,
-            content=request_bytes,
-        ) as response:
+        with (
+            httpx.Client(
+                timeout=timeout,
+                follow_redirects=False,
+                trust_env=False,
+                headers={
+                    "Accept": "application/json",
+                    "Content-Type": "application/json",
+                    "User-Agent": "systeme-local-c9-local-ai/1",
+                },
+            ) as client,
+            client.stream(
+                "POST",
+                config.endpoint,
+                content=request_bytes,
+            ) as response,
+        ):
             if time.monotonic() > deadline:
                 raise _ExchangeFailure(C9LocalAIErrorCode.TIMEOUT)
             if response.status_code != 200:
                 raise _ExchangeFailure(C9LocalAIErrorCode.HTTP_FAILED)
-            content_type = (
-                response.headers.get("content-type", "").split(";", 1)[0].strip().lower()
-            )
+            content_type = response.headers.get("content-type", "").split(";", 1)[0].strip().lower()
             if content_type != "application/json":
                 raise _ExchangeFailure(C9LocalAIErrorCode.RESPONSE_INVALID)
             declared = response.headers.get("content-length")

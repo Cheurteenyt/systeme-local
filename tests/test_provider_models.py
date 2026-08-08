@@ -114,6 +114,7 @@ def test_capability_profile_preserves_unknown_visible_chat_behavior() -> None:
 
     assert profile.can_enumerate_visible_chats.state is CapabilitySupport.UNKNOWN
 
+
 def test_commit_text_turn_rejects_zero_byte_content() -> None:
     with pytest.raises(ValueError, match="at least one UTF-8 byte"):
         commit_text_turn(

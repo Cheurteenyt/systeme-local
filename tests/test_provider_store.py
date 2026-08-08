@@ -222,9 +222,7 @@ def test_provider_run_must_match_registered_turn(tmp_path) -> None:
     store.register_conversation(conversation)
     store.register_turn(turn)
 
-    mismatched = make_run().model_copy(
-        update={"trace_id": "trace_wrong_001"}
-    )
+    mismatched = make_run().model_copy(update={"trace_id": "trace_wrong_001"})
     with pytest.raises(EventStoreError, match="committed turn"):
         store.register_run(mismatched)
 
@@ -305,12 +303,8 @@ def test_corrupt_database_fails_closed(tmp_path) -> None:
 def test_unsupported_schema_version_fails_closed(tmp_path) -> None:
     path = tmp_path / "future.sqlite3"
     connection = sqlite3.connect(path)
-    connection.execute(
-        "CREATE TABLE metadata(key TEXT PRIMARY KEY, value TEXT NOT NULL)"
-    )
-    connection.execute(
-        "INSERT INTO metadata(key, value) VALUES ('schema_version', '999')"
-    )
+    connection.execute("CREATE TABLE metadata(key TEXT PRIMARY KEY, value TEXT NOT NULL)")
+    connection.execute("INSERT INTO metadata(key, value) VALUES ('schema_version', '999')")
     connection.commit()
     connection.close()
 
@@ -372,9 +366,7 @@ def test_denormalized_column_tampering_fails_closed(
 def test_turn_requires_active_conversation_and_valid_chronology(tmp_path) -> None:
     path = tmp_path / "lifecycle.sqlite3"
     store = LifecycleEventStore(path)
-    closed = make_conversation().model_copy(
-        update={"state": ConversationState.CLOSED}
-    )
+    closed = make_conversation().model_copy(update={"state": ConversationState.CLOSED})
     store.register_conversation(closed)
 
     with pytest.raises(EventStoreError, match="active conversation"):
@@ -401,8 +393,6 @@ def test_provider_run_cannot_precede_committed_turn(tmp_path) -> None:
     store.register_conversation(conversation)
     store.register_turn(turn)
 
-    early_run = make_run().model_copy(
-        update={"started_at": NOW - timedelta(microseconds=1)}
-    )
+    early_run = make_run().model_copy(update={"started_at": NOW - timedelta(microseconds=1)})
     with pytest.raises(EventStoreError, match="precede"):
         store.register_run(early_run)

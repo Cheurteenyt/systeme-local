@@ -746,21 +746,24 @@ class OpenAIDocsMcpClient:
         request_id = f"c6-{source.source_id}"
         response_bytes = bytearray()
         try:
-            with httpx.Client(
-                timeout=self._timeout,
-                follow_redirects=False,
-                trust_env=False,
-                transport=self._transport,
-                headers={
-                    "Accept": "application/json, text/event-stream",
-                    "Content-Type": "application/json",
-                    "User-Agent": "systeme-local-c6-revalidation/1",
-                },
-            ) as client, client.stream(
-                "POST",
-                self._endpoint,
-                content=canonical_json(_json_rpc_payload(source)),
-            ) as response:
+            with (
+                httpx.Client(
+                    timeout=self._timeout,
+                    follow_redirects=False,
+                    trust_env=False,
+                    transport=self._transport,
+                    headers={
+                        "Accept": "application/json, text/event-stream",
+                        "Content-Type": "application/json",
+                        "User-Agent": "systeme-local-c6-revalidation/1",
+                    },
+                ) as client,
+                client.stream(
+                    "POST",
+                    self._endpoint,
+                    content=canonical_json(_json_rpc_payload(source)),
+                ) as response,
+            ):
                 if response.status_code != 200:
                     raise C6AcquisitionError(
                         C6FailureCode.HTTP_FAILED,

@@ -284,11 +284,7 @@ class AttachmentCapabilityProfile(StrictModel):
                     or self.max_image_pixels <= 0
                 ):
                     raise ValueError("image support requires positive dimension limits")
-            elif (
-                self.max_image_width
-                or self.max_image_height
-                or self.max_image_pixels
-            ):
+            elif self.max_image_width or self.max_image_height or self.max_image_pixels:
                 raise ValueError("profiles without image media must use zero image limits")
         else:
             if (
@@ -401,9 +397,7 @@ class AttachmentBatchPlan(StrictModel):
         if [batch.batch_index for batch in self.batches] != list(range(len(self.batches))):
             raise ValueError("batch indices must be contiguous from zero")
         flattened = tuple(
-            attachment_id
-            for batch in self.batches
-            for attachment_id in batch.attachment_ids
+            attachment_id for batch in self.batches for attachment_id in batch.attachment_ids
         )
         if flattened != self.ordered_attachment_ids:
             raise ValueError("batches must preserve the full attachment order")
@@ -608,7 +602,6 @@ def attachment_manifest_sha256(
     return digest.hexdigest()
 
 
-
 def attachment_capability_profile_sha256(
     *,
     profile_id: str,
@@ -727,14 +720,9 @@ def commit_attachment_capability_profile(
     )
 
 
-
 def attachment_quota_snapshot_sha256(snapshot: ProviderQuotaSnapshot) -> str:
     observed_at = normalize_utc_timestamp(snapshot.observed_at)
-    reset_at = (
-        None
-        if snapshot.reset_at is None
-        else normalize_utc_timestamp(snapshot.reset_at)
-    )
+    reset_at = None if snapshot.reset_at is None else normalize_utc_timestamp(snapshot.reset_at)
     digest = sha256(b"systeme-local:attachment-quota-snapshot:v1\x00")
     for value in (
         snapshot.version,
@@ -757,6 +745,7 @@ def attachment_quota_snapshot_sha256(snapshot: ProviderQuotaSnapshot) -> str:
     ):
         _frame_int(digest, value)
     return digest.hexdigest()
+
 
 def attachment_plan_sha256(
     *,

@@ -160,9 +160,7 @@ def test_expired_request_is_pruned_before_capacity_check(tmp_path: Path) -> None
 
     first = store.create(_task(clock_value[0]))
     clock_value[0] += timedelta(seconds=31)
-    second = store.create(
-        _task(clock_value[0], task_id="approval-task-87654321", nonce="m" * 24)
-    )
+    second = store.create(_task(clock_value[0], task_id="approval-task-87654321", nonce="m" * 24))
     assert second.approval_id != first.approval_id
 
 
@@ -177,9 +175,7 @@ def test_capacity_exhaustion_fails_closed(tmp_path: Path) -> None:
     store.create(_task(now))
 
     with pytest.raises(ApprovalStoreUnavailableError, match="capacity"):
-        store.create(
-            _task(now, task_id="approval-task-87654321", nonce="m" * 24)
-        )
+        store.create(_task(now, task_id="approval-task-87654321", nonce="m" * 24))
 
 
 def test_concurrent_consumption_succeeds_only_once(tmp_path: Path) -> None:
@@ -219,8 +215,7 @@ def test_tampered_row_is_rejected(tmp_path: Path) -> None:
 
     with closing(sqlite3.connect(database)) as connection:
         connection.execute(
-            "UPDATE approvals SET capability = 'workspace.read_text' "
-            "WHERE approval_id = ?",
+            "UPDATE approvals SET capability = 'workspace.read_text' WHERE approval_id = ?",
             (pending.approval_id,),
         )
         connection.commit()
@@ -272,13 +267,9 @@ def test_signature_is_verified_before_local_approval() -> None:
     with pytest.raises(ValueError, match="signature"):
         verify_approval_task(task, KEY)
 
-    approved_envelope = _sign_task(
-        _task(now, approval_id="approval-id-1234567890")
-    )
+    approved_envelope = _sign_task(_task(now, approval_id="approval-id-1234567890"))
     with pytest.raises(ValueError, match="original request"):
         verify_approval_task(approved_envelope, KEY)
-
-
 
 
 def test_generated_approval_id_is_cli_safe(

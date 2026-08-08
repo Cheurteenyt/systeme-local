@@ -26,9 +26,7 @@ _ROW_HMAC_DOMAIN = b"approval-row-v1"
 _DEFAULT_BUSY_TIMEOUT_SECONDS = 5.0
 _APPROVAL_STATES = {"pending", "approved", "denied", "consumed"}
 _APPROVAL_ID_PREFIX = "apr_"
-_LEGACY_LEADING_DASH_APPROVAL_ID_PATTERN = re.compile(
-    r"^-[A-Za-z0-9_-]{31}$"
-)
+_LEGACY_LEADING_DASH_APPROVAL_ID_PATTERN = re.compile(r"^-[A-Za-z0-9_-]{31}$")
 
 ApprovalState = Literal["pending", "approved", "denied", "consumed"]
 
@@ -156,23 +154,16 @@ class ApprovalStore:
             with closing(self._connect()) as connection:
                 quick_check = connection.execute("PRAGMA quick_check").fetchone()
                 if quick_check is None or quick_check[0] != "ok":
-                    raise ApprovalStoreUnavailableError(
-                        "approval database integrity check failed"
-                    )
+                    raise ApprovalStoreUnavailableError("approval database integrity check failed")
 
                 schema_version = connection.execute(
                     "SELECT value FROM approval_metadata WHERE key = 'schema_version'"
                 ).fetchone()
                 if schema_version is None or schema_version[0] != str(_SCHEMA_VERSION):
-                    raise ApprovalStoreUnavailableError(
-                        "unsupported approval database schema"
-                    )
+                    raise ApprovalStoreUnavailableError("unsupported approval database schema")
 
                 columns = {
-                    row[1]
-                    for row in connection.execute(
-                        "PRAGMA table_info(approvals)"
-                    ).fetchall()
+                    row[1] for row in connection.execute("PRAGMA table_info(approvals)").fetchall()
                 }
                 expected_columns = {
                     "approval_id",
@@ -189,9 +180,7 @@ class ApprovalStore:
                     "row_hmac",
                 }
                 if columns != expected_columns:
-                    raise ApprovalStoreUnavailableError(
-                        "unexpected approval database schema"
-                    )
+                    raise ApprovalStoreUnavailableError("unexpected approval database schema")
 
                 rows = connection.execute(
                     """
@@ -211,16 +200,12 @@ class ApprovalStore:
         except ApprovalStoreUnavailableError:
             raise
         except (sqlite3.DatabaseError, OSError) as exc:
-            raise ApprovalStoreUnavailableError(
-                "approval database is unavailable"
-            ) from exc
+            raise ApprovalStoreUnavailableError("approval database is unavailable") from exc
 
     def create(self, task: TaskEnvelope) -> ApprovalRecord:
         now = self._clock()
         now_us = _datetime_to_microseconds(now)
-        expires_at_us = _datetime_to_microseconds(
-            now + timedelta(seconds=self._ttl_seconds)
-        )
+        expires_at_us = _datetime_to_microseconds(now + timedelta(seconds=self._ttl_seconds))
         request_hmac = self._request_hmac(task)
 
         try:
@@ -248,13 +233,9 @@ class ApprovalStore:
                         connection.commit()
                         return self._record_from_stored(stored)
 
-                    count = connection.execute(
-                        "SELECT COUNT(*) FROM approvals"
-                    ).fetchone()[0]
+                    count = connection.execute("SELECT COUNT(*) FROM approvals").fetchone()[0]
                     if count >= self._max_entries:
-                        raise ApprovalStoreUnavailableError(
-                            "approval store capacity exhausted"
-                        )
+                        raise ApprovalStoreUnavailableError("approval store capacity exhausted")
 
                     stored = self._new_stored(
                         task,
@@ -280,9 +261,7 @@ class ApprovalStore:
         except ApprovalStoreUnavailableError:
             raise
         except (sqlite3.DatabaseError, OSError) as exc:
-            raise ApprovalStoreUnavailableError(
-                "approval database is unavailable"
-            ) from exc
+            raise ApprovalStoreUnavailableError("approval database is unavailable") from exc
 
         self._restrict_database_permissions()
         return self._record_from_stored(stored)
@@ -317,9 +296,7 @@ class ApprovalStore:
         except ApprovalStoreUnavailableError:
             raise
         except (sqlite3.DatabaseError, OSError) as exc:
-            raise ApprovalStoreUnavailableError(
-                "approval database is unavailable"
-            ) from exc
+            raise ApprovalStoreUnavailableError("approval database is unavailable") from exc
 
     def inspect(self, approval_id: str, task: TaskEnvelope) -> ApprovalRecord:
         now_us = _datetime_to_microseconds(self._clock())
@@ -331,9 +308,7 @@ class ApprovalStore:
                 if stored.expires_at_us <= now_us:
                     raise ApprovalExpiredError("approval expired")
                 if not hmac.compare_digest(stored.request_hmac, request_hmac):
-                    raise ApprovalMismatchError(
-                        "approval does not match submitted task"
-                    )
+                    raise ApprovalMismatchError("approval does not match submitted task")
                 return self._record_from_stored(stored)
         except (
             ApprovalNotFoundError,
@@ -344,9 +319,7 @@ class ApprovalStore:
         except ApprovalStoreUnavailableError:
             raise
         except (sqlite3.DatabaseError, OSError) as exc:
-            raise ApprovalStoreUnavailableError(
-                "approval database is unavailable"
-            ) from exc
+            raise ApprovalStoreUnavailableError("approval database is unavailable") from exc
 
     def approve(self, approval_id: str, task: TaskEnvelope) -> ApprovalRecord:
         return self._decide(approval_id, "approved", task=task)
@@ -366,9 +339,7 @@ class ApprovalStore:
                     if stored.expires_at_us <= now_us:
                         raise ApprovalExpiredError("approval expired")
                     if not hmac.compare_digest(stored.request_hmac, request_hmac):
-                        raise ApprovalMismatchError(
-                            "approval does not match submitted task"
-                        )
+                        raise ApprovalMismatchError("approval does not match submitted task")
                     if stored.state == "pending":
                         raise ApprovalPendingError("approval is still pending")
                     if stored.state == "denied":
@@ -399,9 +370,7 @@ class ApprovalStore:
         except ApprovalStoreUnavailableError:
             raise
         except (sqlite3.DatabaseError, OSError) as exc:
-            raise ApprovalStoreUnavailableError(
-                "approval database is unavailable"
-            ) from exc
+            raise ApprovalStoreUnavailableError("approval database is unavailable") from exc
 
     def _decide(
         self,
@@ -423,16 +392,12 @@ class ApprovalStore:
                     if request_hmac is not None and not hmac.compare_digest(
                         stored.request_hmac, request_hmac
                     ):
-                        raise ApprovalMismatchError(
-                            "approval does not match submitted task"
-                        )
+                        raise ApprovalMismatchError("approval does not match submitted task")
                     if stored.state == decision:
                         connection.commit()
                         return self._record_from_stored(stored)
                     if stored.state != "pending":
-                        raise ApprovalStateError(
-                            f"approval is already {stored.state}"
-                        )
+                        raise ApprovalStateError(f"approval is already {stored.state}")
 
                     updated = self._replace_state(
                         stored,
@@ -455,9 +420,7 @@ class ApprovalStore:
         except ApprovalStoreUnavailableError:
             raise
         except (sqlite3.DatabaseError, OSError) as exc:
-            raise ApprovalStoreUnavailableError(
-                "approval database is unavailable"
-            ) from exc
+            raise ApprovalStoreUnavailableError("approval database is unavailable") from exc
 
     def _initialize(self) -> None:
         try:
@@ -532,9 +495,7 @@ class ApprovalStore:
                             (str(_SCHEMA_VERSION),),
                         )
                     elif existing_version[0] != str(_SCHEMA_VERSION):
-                        raise ApprovalStoreUnavailableError(
-                            "unsupported approval database schema"
-                        )
+                        raise ApprovalStoreUnavailableError("unsupported approval database schema")
 
                     self._delete_expired(
                         connection,
@@ -547,9 +508,7 @@ class ApprovalStore:
         except ApprovalStoreUnavailableError:
             raise
         except (sqlite3.DatabaseError, OSError) as exc:
-            raise ApprovalStoreUnavailableError(
-                "approval database is unavailable"
-            ) from exc
+            raise ApprovalStoreUnavailableError("approval database is unavailable") from exc
 
         self._restrict_database_permissions()
         self.verify()
@@ -561,9 +520,7 @@ class ApprovalStore:
             isolation_level=None,
         )
         try:
-            connection.execute(
-                f"PRAGMA busy_timeout = {int(self._busy_timeout_seconds * 1000)}"
-            )
+            connection.execute(f"PRAGMA busy_timeout = {int(self._busy_timeout_seconds * 1000)}")
             connection.execute("PRAGMA foreign_keys = ON")
             connection.execute("PRAGMA synchronous = FULL")
             connection.execute("PRAGMA trusted_schema = OFF")
@@ -780,13 +737,9 @@ class ApprovalStore:
 
         file_stat = self.database_path.lstat()
         if stat.S_ISLNK(file_stat.st_mode):
-            raise ApprovalStoreUnavailableError(
-                "approval database cannot be a symbolic link"
-            )
+            raise ApprovalStoreUnavailableError("approval database cannot be a symbolic link")
         if not stat.S_ISREG(file_stat.st_mode):
-            raise ApprovalStoreUnavailableError(
-                "approval database is not a regular file"
-            )
+            raise ApprovalStoreUnavailableError("approval database is not a regular file")
 
     def _restrict_database_permissions(self) -> None:
         try:
@@ -823,9 +776,7 @@ def verify_approval_task(task: TaskEnvelope, secret: str) -> None:
     from .auth import canonical_payload
 
     if task.approval_id is not None:
-        raise ValueError(
-            "approval task file must contain the original request without approval_id"
-        )
+        raise ValueError("approval task file must contain the original request without approval_id")
     digest = hmac.new(
         secret.encode("utf-8"),
         canonical_payload(task),
@@ -891,9 +842,7 @@ def _parse_cli_args(
     if (
         len(effective_argv) >= 2
         and effective_argv[0] in {"approve", "deny"}
-        and _LEGACY_LEADING_DASH_APPROVAL_ID_PATTERN.fullmatch(
-            effective_argv[1]
-        )
+        and _LEGACY_LEADING_DASH_APPROVAL_ID_PATTERN.fullmatch(effective_argv[1])
     ):
         legacy_approval_id = effective_argv[1]
         effective_argv[1] = "legacy-approval-id-placeholder"
@@ -905,9 +854,7 @@ def _parse_cli_args(
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(
-        description="Manage local Système Local approval requests"
-    )
+    parser = argparse.ArgumentParser(description="Manage local Système Local approval requests")
     subparsers = parser.add_subparsers(dest="command", required=True)
     subparsers.add_parser("list", help="list pending approvals")
     approve_parser = subparsers.add_parser("approve", help="approve one request")

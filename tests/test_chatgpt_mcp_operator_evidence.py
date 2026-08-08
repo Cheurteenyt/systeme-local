@@ -465,7 +465,10 @@ def test_failed_or_unknown_required_evidence_blocks(check_id, state, reason) -> 
     states = base_states()
     states[check_id] = state
     deployment_request = request(
-        developer_mode_enabled=not (check_id is McpReadinessCheckId.DEVELOPER_MODE and state is McpReadinessCheckState.FAILED)
+        developer_mode_enabled=not (
+            check_id is McpReadinessCheckId.DEVELOPER_MODE
+            and state is McpReadinessCheckState.FAILED
+        )
     )
     evaluation = evaluate_bundle(make_bundle(deployment_request=deployment_request, states=states))
     assert evaluation.decision.ready is False

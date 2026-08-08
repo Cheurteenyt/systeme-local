@@ -188,6 +188,4 @@ def test_error_response_is_typed_and_path_free() -> None:
 
 def test_private_package_does_not_change_provider_exports() -> None:
     assert len(providers.__all__) == 179
-    assert not any(
-        name.startswith(("Contract", "Custodian")) for name in providers.__all__
-    )
+    assert not any(name.startswith(("Contract", "Custodian")) for name in providers.__all__)

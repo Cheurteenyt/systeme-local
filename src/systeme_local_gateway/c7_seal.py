@@ -12,13 +12,9 @@ from typing import Any, Final, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
-C7_BASE_COMMIT: Final = (
-    "81bed9b81f266709fab0ea4178f98f0607c3da44"
-)
+C7_BASE_COMMIT: Final = "81bed9b81f266709fab0ea4178f98f0607c3da44"
 C7_BRANCH: Final = "codex/chatgpt-work-capability-c7"
-C7_EVIDENCE_TAG: Final = (
-    "evidence/chatgpt-work-prelive-c7-v1"
-)
+C7_EVIDENCE_TAG: Final = "evidence/chatgpt-work-prelive-c7-v1"
 C7_MANIFEST_PATH = "governance/c7-change-manifest.json"
 C7_SEAL_PATH: Final = "governance/c7-change-seal.json"
 

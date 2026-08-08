@@ -159,8 +159,10 @@ def _matrix_rows() -> tuple[McpCapabilityMatrixRow, ...]:
             claim=_claim(CapabilitySupport.UNSUPPORTED),
             source_ids=mcp,
             constraints=(
-                ("Approved tool definitions are frozen until an administrator "
-                "reviews and publishes updates."),
+                (
+                    "Approved tool definitions are frozen until an administrator "
+                    "reviews and publishes updates."
+                ),
             ),
         ),
         McpCapabilityMatrixRow(
@@ -209,8 +211,10 @@ def _matrix_rows() -> tuple[McpCapabilityMatrixRow, ...]:
             capability=McpCapabilityId.ENUMERATE_PERSONAL_CHATS,
             claim=_claim(CapabilitySupport.UNKNOWN),
             constraints=(
-                ("No official custom-MCP contract was found for account-wide personal "
-                "chat enumeration."),
+                (
+                    "No official custom-MCP contract was found for account-wide personal "
+                    "chat enumeration."
+                ),
             ),
         ),
         McpCapabilityMatrixRow(
@@ -225,8 +229,10 @@ def _matrix_rows() -> tuple[McpCapabilityMatrixRow, ...]:
             claim=_claim(CapabilitySupport.UNSUPPORTED),
             source_ids=mcp,
             constraints=(
-                ("Some especially risky actions may be blocked rather than offered for "
-                "confirmation."),
+                (
+                    "Some especially risky actions may be blocked rather than offered for "
+                    "confirmation."
+                ),
             ),
         ),
         McpCapabilityMatrixRow(
@@ -256,8 +262,10 @@ def _matrix_rows() -> tuple[McpCapabilityMatrixRow, ...]:
             claim=_claim(CapabilitySupport.SUPPORTED),
             source_ids=tuple(sorted(mcp + auth)),
             constraints=(
-                ("Persistent OAuth connectivity requires refresh-token issuance such as "
-                "offline_access."),
+                (
+                    "Persistent OAuth connectivity requires refresh-token issuance such as "
+                    "offline_access."
+                ),
             ),
         ),
         McpCapabilityMatrixRow(
@@ -265,8 +273,10 @@ def _matrix_rows() -> tuple[McpCapabilityMatrixRow, ...]:
             claim=_claim(CapabilitySupport.SUPPORTED),
             source_ids=projects,
             constraints=(
-                ("Projects can contain chats, files and project instructions with bounded "
-                "memory scope."),
+                (
+                    "Projects can contain chats, files and project instructions with bounded "
+                    "memory scope."
+                ),
             ),
         ),
         McpCapabilityMatrixRow(

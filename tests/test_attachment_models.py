@@ -409,9 +409,7 @@ def test_quota_snapshot_digest_is_canonical_across_timezone_offsets():
         unit=QuotaUnit.REQUESTS,
     )
     plus_two = timezone(timedelta(hours=2))
-    equivalent = snapshot.model_copy(
-        update={"observed_at": NOW.astimezone(plus_two)}
-    )
+    equivalent = snapshot.model_copy(update={"observed_at": NOW.astimezone(plus_two)})
     assert attachment_quota_snapshot_sha256(snapshot) == (
         attachment_quota_snapshot_sha256(equivalent)
     )

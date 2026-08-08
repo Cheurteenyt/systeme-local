@@ -90,9 +90,7 @@ def quota(state: QuotaState) -> ProviderQuotaSnapshot:
         dimension=QuotaDimension.WORK_AGENTIC,
         state=state,
         evidence=(
-            CapabilityEvidence.NONE
-            if state is QuotaState.UNKNOWN
-            else CapabilityEvidence.OBSERVED
+            CapabilityEvidence.NONE if state is QuotaState.UNKNOWN else CapabilityEvidence.OBSERVED
         ),
         observed_at=NOW,
     )

@@ -210,7 +210,10 @@ class ProviderQuotaSnapshot(StrictModel):
             raise ValueError("remaining_value cannot exceed limit_value")
         if self.state is QuotaState.EXHAUSTED and self.remaining_value not in (None, 0):
             raise ValueError("exhausted quota cannot report a positive remainder")
-        if self.state in (QuotaState.AVAILABLE, QuotaState.NEAR_LIMIT) and self.remaining_value == 0:
+        if (
+            self.state in (QuotaState.AVAILABLE, QuotaState.NEAR_LIMIT)
+            and self.remaining_value == 0
+        ):
             raise ValueError("usable quota cannot report zero remaining")
         return self
 

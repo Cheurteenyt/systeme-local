@@ -85,9 +85,7 @@ def test_expired_entries_are_pruned_before_capacity_check(tmp_path: Path) -> Non
     guard.check_and_mark("second-" + "n" * 16, clock_value[0] + timedelta(seconds=30))
 
     with closing(sqlite3.connect(database)) as connection:
-        rows = connection.execute(
-            "SELECT nonce_hmac, expires_at_us FROM seen_nonces"
-        ).fetchall()
+        rows = connection.execute("SELECT nonce_hmac, expires_at_us FROM seen_nonces").fetchall()
     assert len(rows) == 1
 
 

@@ -265,10 +265,15 @@ class WorkspaceSnapshot:
             return True
         if not is_directory and name in self._EXCLUDED_FILE_NAMES:
             return True
-        if not is_directory and name.startswith(".env.") and name not in {
-            ".env.example",
-            ".env.sample",
-        }:
+        if (
+            not is_directory
+            and name.startswith(".env.")
+            and name
+            not in {
+                ".env.example",
+                ".env.sample",
+            }
+        ):
             return True
         if ".git" in parts and parts[0] != ".git":
             return True

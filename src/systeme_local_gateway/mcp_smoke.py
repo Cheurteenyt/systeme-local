@@ -100,16 +100,19 @@ async def run_smoke(
     arguments: dict[str, Any],
 ) -> dict[str, Any]:
     headers = {"Authorization": f"Bearer {token}"} if token is not None else {}
-    async with httpx.AsyncClient(
-        headers=headers,
-        timeout=httpx.Timeout(timeout_seconds),
-        follow_redirects=False,
-        trust_env=False,
-    ) as http_client, streamable_http_client(
-        endpoint,
-        http_client=http_client,
-        terminate_on_close=False,
-    ) as (read_stream, write_stream, _session_id):
+    async with (
+        httpx.AsyncClient(
+            headers=headers,
+            timeout=httpx.Timeout(timeout_seconds),
+            follow_redirects=False,
+            trust_env=False,
+        ) as http_client,
+        streamable_http_client(
+            endpoint,
+            http_client=http_client,
+            terminate_on_close=False,
+        ) as (read_stream, write_stream, _session_id),
+    ):
         async with ClientSession(read_stream, write_stream) as session:
             await session.initialize()
             listed = await session.list_tools()
@@ -124,9 +127,7 @@ async def run_smoke(
                     raise McpSmokeInputError(f"requested tool is not advertised: {call_tool}")
                 result = await session.call_tool(call_tool, arguments)
                 if result.isError:
-                    raise McpSmokeInputError(
-                        f"requested tool returned an MCP error: {call_tool}"
-                    )
+                    raise McpSmokeInputError(f"requested tool returned an MCP error: {call_tool}")
                 payload["call"] = {
                     "tool": call_tool,
                     "structured_content": result.structuredContent,

@@ -119,15 +119,11 @@ def test_gateway_executes_a_locally_approved_action_once(
 
     gateway.approval_store.approve(approval_id, original_task)
 
-    second = gateway.submit_task(
-        _task(nonce="m" * 24, approval_id=approval_id)
-    )
+    second = gateway.submit_task(_task(nonce="m" * 24, approval_id=approval_id))
     assert second.status == "completed"
     assert len(executions) == 1
 
-    third = gateway.submit_task(
-        _task(nonce="p" * 24, approval_id=approval_id)
-    )
+    third = gateway.submit_task(_task(nonce="p" * 24, approval_id=approval_id))
     assert third.status == "denied"
     assert third.error == "approval was already used"
     assert len(executions) == 1

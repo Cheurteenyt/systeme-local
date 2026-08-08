@@ -44,14 +44,9 @@ def test_chatgpt_keeps_real_upload_capability_unknown():
     text = (ROOT / "docs/providers/chatgpt.md").read_text(encoding="utf-8")
     assert (
         "Real ChatGPT upload capability for an outbound local-agent "
-        "surface remains `unknown`."
-        in text
+        "surface remains `unknown`." in text
     )
-    assert (
-        "No local format validator or fake receipt proves a supported "
-        "ChatGPT transport."
-        in text
-    )
+    assert "No local format validator or fake receipt proves a supported ChatGPT transport." in text
 
 
 def test_public_attachment_exports_are_complete():

@@ -72,10 +72,15 @@ def checks(
     result = []
     for check_id in McpReadinessCheckId:
         state = overrides.get(check_id, McpReadinessCheckState.UNKNOWN)
-        evidence = DIGEST if state in (
-            McpReadinessCheckState.VERIFIED,
-            McpReadinessCheckState.FAILED,
-        ) else None
+        evidence = (
+            DIGEST
+            if state
+            in (
+                McpReadinessCheckState.VERIFIED,
+                McpReadinessCheckState.FAILED,
+            )
+            else None
+        )
         detail = "CHECK_FAILED" if state is McpReadinessCheckState.FAILED else None
         result.append(
             commit_mcp_readiness_check(
@@ -148,9 +153,7 @@ def test_ambiguous_finding_cannot_continue_policy_evaluation() -> None:
         commit_mcp_evidence_finding(
             finding_id=McpEvidenceFindingId.PLUS_CUSTOM_MCP_PLAN_SCOPE,
             status=McpEvidenceFindingStatus.AMBIGUOUS,
-            operational_resolution=(
-                McpEvidenceOperationalResolution.CONTINUE_POLICY_EVALUATION
-            ),
+            operational_resolution=(McpEvidenceOperationalResolution.CONTINUE_POLICY_EVALUATION),
             source_ids=("one", "two"),
             observations=("one", "two"),
             reviewed_at=NOW,
@@ -173,9 +176,7 @@ def test_finding_requires_sorted_unique_sources_and_observations() -> None:
     finding = commit_mcp_evidence_finding(
         finding_id=McpEvidenceFindingId.LOCAL_SERVER_TRANSPORT,
         status=McpEvidenceFindingStatus.CONSISTENT,
-        operational_resolution=(
-            McpEvidenceOperationalResolution.CONTINUE_POLICY_EVALUATION
-        ),
+        operational_resolution=(McpEvidenceOperationalResolution.CONTINUE_POLICY_EVALUATION),
         source_ids=("z", "a"),
         observations=("z", "a"),
         reviewed_at=NOW,

@@ -190,9 +190,7 @@ class SQLiteReplayGuard:
         try:
             self.database_path.parent.mkdir(parents=True, exist_ok=True)
         except OSError as exc:
-            raise ReplayGuardUnavailableError(
-                "replay database directory is unavailable"
-            ) from exc
+            raise ReplayGuardUnavailableError("replay database directory is unavailable") from exc
         self._assert_safe_database_path()
 
         try:
@@ -236,9 +234,7 @@ class SQLiteReplayGuard:
                             (str(_SCHEMA_VERSION),),
                         )
                     elif existing_version[0] != str(_SCHEMA_VERSION):
-                        raise ReplayGuardUnavailableError(
-                            "unsupported replay database schema"
-                        )
+                        raise ReplayGuardUnavailableError("unsupported replay database schema")
 
                     connection.execute(
                         "DELETE FROM seen_nonces WHERE expires_at_us <= ?",
@@ -263,9 +259,7 @@ class SQLiteReplayGuard:
             isolation_level=None,
         )
         try:
-            connection.execute(
-                f"PRAGMA busy_timeout = {int(self._busy_timeout_seconds * 1000)}"
-            )
+            connection.execute(f"PRAGMA busy_timeout = {int(self._busy_timeout_seconds * 1000)}")
             connection.execute("PRAGMA foreign_keys = ON")
             connection.execute("PRAGMA synchronous = FULL")
             connection.execute("PRAGMA trusted_schema = OFF")
