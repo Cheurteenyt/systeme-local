@@ -108,8 +108,7 @@ class ProviderContextStore:
                     new_revision=profile.revision,
                     created_at_matches=current.created_at == profile.created_at,
                     identity_matches=(
-                        current.provider == profile.provider
-                        and current.surface == profile.surface
+                        current.provider == profile.provider and current.surface == profile.surface
                     ),
                     updated_at_not_backwards=profile.updated_at >= current.updated_at,
                     provider_mapping_compatible=(
@@ -789,9 +788,7 @@ class ProviderContextStore:
                             )
                         metadata_columns = {
                             str(row["name"])
-                            for row in connection.execute(
-                                "PRAGMA table_info(metadata)"
-                            ).fetchall()
+                            for row in connection.execute("PRAGMA table_info(metadata)").fetchall()
                         }
                         if metadata_columns != {"key", "value"}:
                             raise ContextStoreCorruptError(
@@ -800,8 +797,7 @@ class ProviderContextStore:
                         schema_version = self._read_schema_version(connection)
                         if schema_version != _SCHEMA_VERSION:
                             raise UnsupportedContextSchemaVersion(
-                                "unsupported provider context schema version: "
-                                f"{schema_version}"
+                                f"unsupported provider context schema version: {schema_version}"
                             )
                     else:
                         connection.execute(
@@ -816,9 +812,7 @@ class ProviderContextStore:
                     self._verify_schema(connection)
                     self._verify_indexes(connection)
                     self._verify_semantic_integrity(connection)
-                    foreign_key_problem = connection.execute(
-                        "PRAGMA foreign_key_check"
-                    ).fetchone()
+                    foreign_key_problem = connection.execute("PRAGMA foreign_key_check").fetchone()
                     if foreign_key_problem is not None:
                         raise ContextStoreCorruptError("SQLite foreign key check failed")
                     connection.execute("COMMIT")
@@ -843,9 +837,7 @@ class ProviderContextStore:
 
     @staticmethod
     def _read_schema_version(connection: sqlite3.Connection) -> str:
-        rows = connection.execute(
-            "SELECT key, value FROM metadata ORDER BY key"
-        ).fetchall()
+        rows = connection.execute("SELECT key, value FROM metadata ORDER BY key").fetchall()
         if len(rows) != 1 or rows[0]["key"] != "schema_version":
             raise ContextStoreCorruptError(
                 "provider context metadata must contain only schema_version"
@@ -1034,9 +1026,7 @@ class ProviderContextStore:
                 (current.account_id, current.revision),
             ).fetchone()
             if history is None or cls._account_from_row(history) != current:
-                raise ContextStoreCorruptError(
-                    "account head does not match its version history"
-                )
+                raise ContextStoreCorruptError("account head does not match its version history")
         if set(account_history) != set(accounts):
             raise ContextStoreCorruptError("account history has no matching current head")
 
@@ -1065,9 +1055,7 @@ class ProviderContextStore:
                 (current.project_id, current.revision),
             ).fetchone()
             if history is None or cls._project_from_row(history) != current:
-                raise ContextStoreCorruptError(
-                    "project head does not match its version history"
-                )
+                raise ContextStoreCorruptError("project head does not match its version history")
         if set(project_history) != set(projects):
             raise ContextStoreCorruptError("project history has no matching current head")
 
@@ -1100,9 +1088,7 @@ class ProviderContextStore:
                     "conversation head does not match its version history"
                 )
         if set(conversation_history) != current_conversation_ids:
-            raise ContextStoreCorruptError(
-                "conversation history has no matching current head"
-            )
+            raise ContextStoreCorruptError("conversation history has no matching current head")
 
         for row in project_history_rows:
             cls._validate_project_semantics(
@@ -1138,20 +1124,11 @@ class ProviderContextStore:
     ) -> None:
         account = accounts.get(project.account_id)
         if account is None:
-            raise ContextStoreCorruptError(
-                "project references an unknown account"
-            )
-        if (
-            project.provider != account.provider
-            or project.surface != account.surface
-        ):
-            raise ContextStoreCorruptError(
-                "project does not match its account surface"
-            )
+            raise ContextStoreCorruptError("project references an unknown account")
+        if project.provider != account.provider or project.surface != account.surface:
+            raise ContextStoreCorruptError("project does not match its account surface")
         if project.created_at < account.created_at:
-            raise ContextStoreCorruptError(
-                "project predates its account"
-            )
+            raise ContextStoreCorruptError("project predates its account")
 
     @staticmethod
     def _validate_conversation_semantics(
@@ -1162,35 +1139,22 @@ class ProviderContextStore:
     ) -> None:
         account = accounts.get(conversation.account_id)
         if account is None:
-            raise ContextStoreCorruptError(
-                "conversation references an unknown account"
-            )
-        if (
-            conversation.provider != account.provider
-            or conversation.surface != account.surface
-        ):
-            raise ContextStoreCorruptError(
-                "conversation does not match its account surface"
-            )
+            raise ContextStoreCorruptError("conversation references an unknown account")
+        if conversation.provider != account.provider or conversation.surface != account.surface:
+            raise ContextStoreCorruptError("conversation does not match its account surface")
         if conversation.created_at < account.created_at:
-            raise ContextStoreCorruptError(
-                "conversation predates its account"
-            )
+            raise ContextStoreCorruptError("conversation predates its account")
         if conversation.project_id is None:
             return
         project = projects.get(conversation.project_id)
         if project is None:
-            raise ContextStoreCorruptError(
-                "conversation references an unknown project"
-            )
+            raise ContextStoreCorruptError("conversation references an unknown project")
         if (
             project.account_id != conversation.account_id
             or project.provider != conversation.provider
             or project.surface != conversation.surface
         ):
-            raise ContextStoreCorruptError(
-                "conversation does not match its project"
-            )
+            raise ContextStoreCorruptError("conversation does not match its project")
 
     @staticmethod
     def _validate_quota_semantics(
@@ -1200,13 +1164,9 @@ class ProviderContextStore:
     ) -> None:
         account = accounts.get(snapshot.account_id)
         if account is None:
-            raise ContextStoreCorruptError(
-                "quota snapshot references an unknown account"
-            )
+            raise ContextStoreCorruptError("quota snapshot references an unknown account")
         if snapshot.observed_at < account.created_at:
-            raise ContextStoreCorruptError(
-                "quota snapshot predates its account"
-            )
+            raise ContextStoreCorruptError("quota snapshot predates its account")
 
     @staticmethod
     def _verify_history_rows(
@@ -1227,9 +1187,7 @@ class ProviderContextStore:
                 )
             expected_revision = latest.get(model_id, 0) + 1
             if revision != expected_revision:
-                raise ContextStoreCorruptError(
-                    f"{model_name} version history is not contiguous"
-                )
+                raise ContextStoreCorruptError(f"{model_name} version history is not contiguous")
             latest[model_id] = revision
         return latest
 
@@ -1310,22 +1268,16 @@ class ProviderContextStore:
         expected = cls._expected_schema()
         actual_tables = cls._application_tables(connection)
         if actual_tables != set(expected):
-            raise ContextStoreCorruptError(
-                "unexpected provider context table set"
-            )
+            raise ContextStoreCorruptError("unexpected provider context table set")
         for table, columns in expected.items():
             rows = connection.execute(
                 f"PRAGMA table_info({table})"  # noqa: S608 - internal table names
             ).fetchall()
             actual = {str(row["name"]) for row in rows}
             if actual != columns:
-                raise ContextStoreCorruptError(
-                    f"unexpected provider context schema for {table}"
-                )
+                raise ContextStoreCorruptError(f"unexpected provider context schema for {table}")
         if cls._read_schema_version(connection) != _SCHEMA_VERSION:
-            raise UnsupportedContextSchemaVersion(
-                "unsupported provider context schema version"
-            )
+            raise UnsupportedContextSchemaVersion("unsupported provider context schema version")
 
     @staticmethod
     def _verify_indexes(connection: sqlite3.Connection) -> None:
@@ -1351,11 +1303,7 @@ class ProviderContextStore:
                 f"PRAGMA index_list({table})"  # noqa: S608 - internal table names
             ).fetchall()
             match = next((row for row in rows if row["name"] == index_name), None)
-            if (
-                match is None
-                or int(match["unique"]) != 1
-                or not bool(match["partial"])
-            ):
+            if match is None or int(match["unique"]) != 1 or not bool(match["partial"]):
                 raise ContextStoreCorruptError(
                     f"missing or invalid provider context index {index_name}"
                 )
@@ -1381,17 +1329,13 @@ class ProviderContextStore:
                 raise ContextStoreCorruptError(
                     f"missing provider context index SQL for {index_name}"
                 )
-            normalized_sql = " ".join(
-                str(index_sql_row["sql"]).lower().split()
-            )
+            normalized_sql = " ".join(str(index_sql_row["sql"]).lower().split())
             if not normalized_sql.endswith(expected_predicate):
                 raise ContextStoreCorruptError(
                     f"unexpected provider context index predicate for {index_name}"
                 )
 
-        quota_indexes = connection.execute(
-            "PRAGMA index_list(quota_snapshots)"
-        ).fetchall()
+        quota_indexes = connection.execute("PRAGMA index_list(quota_snapshots)").fetchall()
         quota_unique_found = False
         for row in quota_indexes:
             if int(row["unique"]) != 1 or bool(row["partial"]):
@@ -1406,9 +1350,7 @@ class ProviderContextStore:
                 quota_unique_found = True
                 break
         if not quota_unique_found:
-            raise ContextStoreCorruptError(
-                "quota observation uniqueness index is missing"
-            )
+            raise ContextStoreCorruptError("quota observation uniqueness index is missing")
 
     def _connect(self) -> sqlite3.Connection:
         connection = sqlite3.connect(self.path, timeout=5.0, isolation_level=None)
