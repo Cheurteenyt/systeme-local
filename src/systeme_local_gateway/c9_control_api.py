@@ -7,7 +7,7 @@ import secrets
 import threading
 from collections.abc import Callable
 from dataclasses import dataclass
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, datetime, timedelta, timezone
 from hashlib import sha256
 from pathlib import Path
 from typing import Any, Literal, TypeVar, cast
@@ -448,7 +448,7 @@ class C9LocalControlPlane:
             allow_missing_leaf=True,
         )
         self._audit_key = audit_key
-        self._clock = clock or (lambda: datetime.now(UTC))
+        self._clock = clock or (lambda: datetime.now(timezone.utc))
         self._lock = threading.RLock()
         self._staged: C9HandoffStageReceipt | None = None
         self._native_chat_handoff_id: str | None = None

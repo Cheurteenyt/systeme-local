@@ -8,7 +8,7 @@ import sys
 import tempfile
 from collections.abc import Iterator
 from contextlib import contextmanager
-from datetime import UTC, datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 from systeme_local_gateway.c9_local_ai import (
@@ -55,7 +55,7 @@ def _environment(state: Path, *, commit: str | None = None) -> dict[str, str]:
     provider_root = state.parents[2]
     endpoint = "http://127.0.0.1:11434/v1/chat/completions"
     model = "local-multimodal-test"
-    observed_at = datetime.now(UTC)
+    observed_at = datetime.now(timezone.utc)
     observation = commit_c9_local_ai_runtime_observation(
         cycle_id="c9_cycle_" + "1" * 32,
         provider_kind=C9LocalAIProviderKind.OTHER_REVIEWED_NATIVE,

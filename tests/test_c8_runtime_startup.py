@@ -5,7 +5,7 @@ import os
 import subprocess
 import sys
 import tempfile
-from datetime import UTC, datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 from systeme_local_gateway.c7_work_admission import (
@@ -92,7 +92,7 @@ def test_c8_provider_mode_builds_only_the_admitted_probe() -> None:
         state = Path(temporary)
         live_cycle_path = state / "live-cycle.json"
         live_cycle_path.write_text(
-            json.dumps(_live_cycle(datetime.now(UTC)).model_dump(mode="json")),
+            json.dumps(_live_cycle(datetime.now(timezone.utc)).model_dump(mode="json")),
             encoding="utf-8",
         )
         completed = subprocess.run(
@@ -122,7 +122,7 @@ def test_c8_provider_mode_rejects_wrong_audit_key_before_runtime_construction() 
         state = Path(temporary)
         live_cycle_path = state / "live-cycle.json"
         live_cycle_path.write_text(
-            json.dumps(_live_cycle(datetime.now(UTC)).model_dump(mode="json")),
+            json.dumps(_live_cycle(datetime.now(timezone.utc)).model_dump(mode="json")),
             encoding="utf-8",
         )
         environment = _runtime_environment(state, live_cycle_path)
