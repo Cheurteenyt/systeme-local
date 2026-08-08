@@ -18,7 +18,7 @@ dependencies = [
   "pydantic>=2.8,<3",
   "pydantic-settings>=2.4,<3",
   "pywin32>=312,<313; sys_platform == 'win32'",
-  "PyYAML>=6.0,<7",
+  "PyYAML>=6.0.3,<7",
   "uvicorn[standard]>=0.30,<1",
 ]
 
