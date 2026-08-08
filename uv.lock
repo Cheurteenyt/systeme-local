@@ -1564,7 +1564,7 @@ requires-dist = [
     { name = "pytest", marker = "extra == 'dev'", specifier = ">=9.0.3,<10" },
     { name = "pytest-cov", marker = "extra == 'dev'", specifier = ">=5,<7" },
     { name = "pywin32", marker = "sys_platform == 'win32'", specifier = ">=312,<313" },
-    { name = "pyyaml", specifier = ">=6.0,<7" },
+    { name = "pyyaml", specifier = ">=6.0.3,<7" },
     { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.6,<1" },
     { name = "types-psutil", marker = "extra == 'dev'", specifier = ">=6.1,<8" },
     { name = "uv", marker = "extra == 'dev'", specifier = "==0.11.29" },
