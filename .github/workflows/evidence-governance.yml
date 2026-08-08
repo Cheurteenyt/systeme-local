@@ -9,7 +9,7 @@ permissions:
   contents: read
 
 env:
-  UV_VERSION: "0.11.29"
+  PYTHONUNBUFFERED: "1"
 
 concurrency:
   group: evidence-governance
@@ -34,7 +34,7 @@ jobs:
           python-version: "3.12"
 
       - name: Install pinned dependency manager
-        run: python -m pip install --disable-pip-version-check "uv==${UV_VERSION}"
+        run: python -m pip install --disable-pip-version-check "uv==$(cat .uv-version)"
 
       - name: Sync frozen runtime
         run: uv sync --frozen --python python
