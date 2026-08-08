@@ -155,7 +155,6 @@ class DeterministicFakeAttachmentProvider:
         return receipt
 
 
-
 def verify_attachment_batch_receipt(
     *,
     receipt: AttachmentBatchReceipt,
@@ -214,12 +213,12 @@ def verify_attachment_batch_receipt(
             raise ValueError("non-accepting receipt cannot list accepted attachments")
 
 
-
 def _validate_model_integrity(model: object, model_type: type, message: str) -> None:
     try:
         model_type.model_validate(model.model_dump(mode="python"))
     except (AttributeError, ValidationError) as exc:
         raise ValueError(message) from exc
+
 
 def _batch_payload_digest(*, plan: AttachmentBatchPlan, batch_index: int) -> str:
     batch = plan.batches[batch_index]

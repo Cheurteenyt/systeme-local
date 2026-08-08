@@ -12,3 +12,4 @@ workspace/*
 
 .systeme-local/
 /target/
+.uv011_venv/

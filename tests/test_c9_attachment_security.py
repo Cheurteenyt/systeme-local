@@ -9,6 +9,7 @@ from pathlib import Path
 from threading import Event, Thread
 
 import pytest
+from conftest import NOW, png_chunk
 from pydantic import ValidationError
 
 import systeme_local_gateway.c9_attachment_security as security_module
@@ -26,8 +27,6 @@ from systeme_local_gateway.providers.attachment_models import (
     AttachmentMediaType,
     AttachmentSource,
 )
-
-from conftest import NOW, png_chunk
 
 
 def _png(*, width: int = 1, height: int = 1, metadata: bool = False) -> bytes:
@@ -651,7 +650,7 @@ def test_concurrent_close_cannot_resurrect_a_sanitized_lease(
                 operator_confirmed=True,
                 selected_at=NOW,
             )
-        except BaseException as exc:  # noqa: BLE001 - thread result capture
+        except BaseException as exc:
             failures.append(exc)
 
     worker = Thread(target=select)
@@ -695,7 +694,7 @@ def test_concurrent_close_cannot_register_a_manifest_after_terminal_close(
                 purpose="C9 concurrent manifest close proof",
                 created_at=NOW + timedelta(seconds=1),
             )
-        except BaseException as exc:  # noqa: BLE001 - thread result capture
+        except BaseException as exc:
             failures.append(exc)
 
     worker = Thread(target=create_manifest)

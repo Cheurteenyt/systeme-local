@@ -50,7 +50,7 @@ def test_commit_text_turn_is_deterministic_and_metadata_only() -> None:
 
     assert first == second
     assert first.part_count == 2
-    assert first.utf8_bytes == len("alphaβeta".encode("utf-8"))
+    assert first.utf8_bytes == len("alphaβeta".encode())
     serialized = first.model_dump_json()
     assert "alpha" not in serialized
     assert "βeta" not in serialized
@@ -113,6 +113,7 @@ def test_capability_profile_preserves_unknown_visible_chat_behavior() -> None:
     )
 
     assert profile.can_enumerate_visible_chats.state is CapabilitySupport.UNKNOWN
+
 
 def test_commit_text_turn_rejects_zero_byte_content() -> None:
     with pytest.raises(ValueError, match="at least one UTF-8 byte"):

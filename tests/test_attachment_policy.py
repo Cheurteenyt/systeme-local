@@ -3,6 +3,7 @@ from __future__ import annotations
 from datetime import timedelta
 
 import pytest
+from conftest import NOW
 from pydantic import ValidationError
 
 from systeme_local_gateway.providers.attachment_models import (
@@ -29,11 +30,11 @@ from systeme_local_gateway.providers.models import (
     CapabilitySupport,
 )
 
-from conftest import NOW
-
 
 def quota(*, account_id="account_main", state=QuotaState.AVAILABLE, age=0):
-    evidence = CapabilityEvidence.NONE if state is QuotaState.UNKNOWN else CapabilityEvidence.SIMULATED
+    evidence = (
+        CapabilityEvidence.NONE if state is QuotaState.UNKNOWN else CapabilityEvidence.SIMULATED
+    )
     return ProviderQuotaSnapshot(
         snapshot_id="quota_main",
         account_id=account_id,
@@ -43,9 +44,10 @@ def quota(*, account_id="account_main", state=QuotaState.AVAILABLE, age=0):
         observed_at=NOW - timedelta(seconds=age),
         remaining_value=10 if state in (QuotaState.AVAILABLE, QuotaState.NEAR_LIMIT) else None,
         limit_value=20 if state in (QuotaState.AVAILABLE, QuotaState.NEAR_LIMIT) else None,
-        unit=QuotaUnit.REQUESTS if state in (QuotaState.AVAILABLE, QuotaState.NEAR_LIMIT) else QuotaUnit.UNKNOWN,
+        unit=QuotaUnit.REQUESTS
+        if state in (QuotaState.AVAILABLE, QuotaState.NEAR_LIMIT)
+        else QuotaUnit.UNKNOWN,
     )
-
 
 
 def profile_with(profile, **updates):
@@ -106,7 +108,9 @@ def test_plan_ignores_unsolicited_quota_when_profile_requires_none(
     assert plan.upload_quota_sha256 is None
 
 
-def test_plan_preserves_order_and_splits_by_count(attachment_manifest, attachment_supported_profile):
+def test_plan_preserves_order_and_splits_by_count(
+    attachment_manifest, attachment_supported_profile
+):
     plan = plan_attachment_batches(
         plan_id="plan_main",
         account_id="account_main",
@@ -263,7 +267,9 @@ def test_plan_rejects_manifest_bytes(attachment_manifest, attachment_supported_p
         ("max_image_pixels", 199, AttachmentPlanningReason.IMAGE_PIXELS_EXCEEDED),
     ],
 )
-def test_plan_enforces_image_limits(attachment_manifest, attachment_supported_profile, field, value, reason):
+def test_plan_enforces_image_limits(
+    attachment_manifest, attachment_supported_profile, field, value, reason
+):
     profile = profile_with(attachment_supported_profile, **{field: value})
     with pytest.raises(AttachmentPlanningError) as exc_info:
         plan_attachment_batches(
@@ -277,7 +283,9 @@ def test_plan_enforces_image_limits(attachment_manifest, attachment_supported_pr
     assert exc_info.value.attachment_id == "attachment_0"
 
 
-def test_plan_splits_when_mixed_media_is_forbidden(attachment_manifest, attachment_supported_profile):
+def test_plan_splits_when_mixed_media_is_forbidden(
+    attachment_manifest, attachment_supported_profile
+):
     profile = profile_with(
         attachment_supported_profile,
         allows_mixed_media=False,
@@ -345,7 +353,9 @@ def test_required_quota_accepts_fresh_available(attachment_manifest, attachment_
         (quota(age=-1), NOW, AttachmentPlanningReason.QUOTA_FROM_FUTURE),
     ],
 )
-def test_required_quota_failures(attachment_manifest, attachment_supported_profile, snapshot, planned_at, reason):
+def test_required_quota_failures(
+    attachment_manifest, attachment_supported_profile, snapshot, planned_at, reason
+):
     profile = quota_profile(attachment_supported_profile)
     with pytest.raises(AttachmentPlanningError) as exc_info:
         plan_attachment_batches(
@@ -385,7 +395,9 @@ def test_quota_window_must_be_positive(attachment_manifest, attachment_supported
         )
 
 
-def test_verify_required_quota_plan_requires_same_snapshot(attachment_manifest, attachment_supported_profile):
+def test_verify_required_quota_plan_requires_same_snapshot(
+    attachment_manifest, attachment_supported_profile
+):
     profile = quota_profile(attachment_supported_profile)
     snapshot = quota()
     plan = plan_attachment_batches(

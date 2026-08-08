@@ -5,7 +5,7 @@ import hmac
 import json
 import os
 import sys
-from datetime import UTC, datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from types import SimpleNamespace
 from typing import Any, cast
@@ -44,8 +44,8 @@ from systeme_local_gateway.c9_handoff_runtime import (
     C9CoordinatorCloseReceipt,
     C9HandoffAdmission,
     C9HandoffStageReceipt,
-    C9StagedAttachment,
     C9RichExecutionDescriptor,
+    C9StagedAttachment,
 )
 from systeme_local_gateway.c9_live_cycle import (
     C9AdmissionDecision,
@@ -68,7 +68,7 @@ from systeme_local_gateway.providers.attachment_models import AttachmentMediaTyp
 
 AUDIT_KEY = "c9-attestation-test-audit-key-000000000000"
 OTHER_AUDIT_KEY = "other-c9-attestation-audit-key-00000000"
-START = datetime(2026, 7, 28, 8, 0, tzinfo=UTC)
+START = datetime(2026, 7, 28, 8, 0, tzinfo=timezone.utc)
 CYCLE_ID = "c9_cycle_" + "1" * 32
 GRANT_ID = "c9_grant_" + "2" * 32
 HANDOFF_ID = "c9_handoff_" + "3" * 32

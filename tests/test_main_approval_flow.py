@@ -3,7 +3,7 @@ from __future__ import annotations
 import importlib
 import sys
 import types
-from datetime import UTC, datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -15,7 +15,7 @@ def _task(
     nonce: str,
     approval_id: str | None = None,
 ) -> TaskEnvelope:
-    now = datetime.now(UTC)
+    now = datetime.now(timezone.utc)
     return TaskEnvelope(
         task_id="approval-flow-task-12345678",
         issued_at=now,
@@ -119,15 +119,11 @@ def test_gateway_executes_a_locally_approved_action_once(
 
     gateway.approval_store.approve(approval_id, original_task)
 
-    second = gateway.submit_task(
-        _task(nonce="m" * 24, approval_id=approval_id)
-    )
+    second = gateway.submit_task(_task(nonce="m" * 24, approval_id=approval_id))
     assert second.status == "completed"
     assert len(executions) == 1
 
-    third = gateway.submit_task(
-        _task(nonce="p" * 24, approval_id=approval_id)
-    )
+    third = gateway.submit_task(_task(nonce="p" * 24, approval_id=approval_id))
     assert third.status == "denied"
     assert third.error == "approval was already used"
     assert len(executions) == 1

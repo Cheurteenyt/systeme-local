@@ -3,6 +3,7 @@ from __future__ import annotations
 from datetime import timedelta, timezone
 
 import pytest
+from conftest import NOW
 from pydantic import ValidationError
 
 from systeme_local_gateway.providers.attachment_models import (
@@ -19,14 +20,11 @@ from systeme_local_gateway.providers.attachment_models import (
     commit_attachment_capability_profile,
     validate_attachment_display_name,
 )
-
 from systeme_local_gateway.providers.models import (
     CapabilityClaim,
     CapabilityEvidence,
     CapabilitySupport,
 )
-
-from conftest import NOW
 
 
 @pytest.mark.parametrize(
@@ -411,9 +409,7 @@ def test_quota_snapshot_digest_is_canonical_across_timezone_offsets():
         unit=QuotaUnit.REQUESTS,
     )
     plus_two = timezone(timedelta(hours=2))
-    equivalent = snapshot.model_copy(
-        update={"observed_at": NOW.astimezone(plus_two)}
-    )
+    equivalent = snapshot.model_copy(update={"observed_at": NOW.astimezone(plus_two)})
     assert attachment_quota_snapshot_sha256(snapshot) == (
         attachment_quota_snapshot_sha256(equivalent)
     )
