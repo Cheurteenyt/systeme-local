@@ -9,7 +9,7 @@ from typing import Any
 
 import pytest
 
-import systeme_local_gateway.c9_git as c9_git
+from systeme_local_gateway import c9_git
 
 
 def _trusted_git_executable() -> Path:

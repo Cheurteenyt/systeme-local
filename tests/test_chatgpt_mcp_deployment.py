@@ -410,7 +410,7 @@ def test_published_managed_app_use_does_not_require_developer_mode() -> None:
 
 
 def test_provider_package_exports_deployment_contract() -> None:
-    import systeme_local_gateway.providers as providers
+    from systeme_local_gateway import providers
 
     assert providers.ChatGptMcpCapabilityProfile is not None
     assert providers.evaluate_chatgpt_mcp_deployment is evaluate_chatgpt_mcp_deployment

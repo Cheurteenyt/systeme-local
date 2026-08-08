@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 import struct
 import zlib
-from datetime import datetime, timezone
+from datetime import UTC, datetime, timezone
 
 import pytest
 
@@ -27,9 +27,8 @@ from systeme_local_gateway.providers.models import (
     commit_text_turn,
 )
 
-
-UTC = timezone.utc
-NOW = datetime(2026, 7, 18, 12, 0, tzinfo=UTC)
+UTC = UTC
+NOW = datetime(2026, 7, 18, 12, 0, tzinfo=timezone.utc)
 
 
 def png_chunk(chunk_type: bytes, data: bytes) -> bytes:

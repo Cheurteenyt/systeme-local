@@ -12,8 +12,8 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator, model_valida
 from .c0_probe import C0_TOOL_NAME
 from .c4_admission import C4_CHATGPT_TOOL_PROTOCOL_SHA256
 from .c7_work_admission import (
-    C7_PROFILE_PATH,
     C7_POLICY_PATH,
+    C7_PROFILE_PATH,
     WorkCapabilityIdentity,
     canonical_sha256,
     current_work_identity,

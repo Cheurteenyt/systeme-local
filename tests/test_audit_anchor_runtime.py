@@ -26,10 +26,14 @@ def _components(
         ANCHOR_KEY,
         derive_audit_log_id(AUDIT_KEY),
     )
-    return log_path, anchor, AuditLog(
+    return (
         log_path,
-        AUDIT_KEY,
-        anchor=anchor,
+        anchor,
+        AuditLog(
+            log_path,
+            AUDIT_KEY,
+            anchor=anchor,
+        ),
     )
 
 
@@ -136,9 +140,7 @@ def test_anchor_write_failure_leaves_recoverable_audit_tail(
         nonlocal failed
         if not failed:
             failed = True
-            raise AuditAnchorIntegrityError(
-                "simulated anchor write failure"
-            )
+            raise AuditAnchorIntegrityError("simulated anchor write failure")
         original_append(
             records=records,
             last_hmac=last_hmac,

@@ -8,7 +8,6 @@ from systeme_local_gateway.c6_revalidation import (
     build_current_c6_policy,
 )
 
-
 ROOT = Path(__file__).resolve().parents[1]
 C6_DOC = ROOT / "docs/providers/chatgpt-web-c6-official-revalidation.md"
 C6_LEDGER = ROOT / "docs/providers/chatgpt-web-c6-test-evidence.md"

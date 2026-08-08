@@ -1,12 +1,12 @@
 import json
 from pathlib import Path
 
+from systeme_local_gateway.mcp_tools import McpToolRegistry
+from systeme_local_gateway.policy import PolicyEngine
 from systeme_local_gateway.providers import (
     build_current_chatgpt_mcp_capability_profile,
     build_current_chatgpt_mcp_evidence_reconciliation_profile,
 )
-from systeme_local_gateway.mcp_tools import McpToolRegistry
-from systeme_local_gateway.policy import PolicyEngine
 
 ROOT = Path(__file__).resolve().parents[1]
 C0_DOC = ROOT / "docs/providers/chatgpt-mcp-c0-connectivity.md"

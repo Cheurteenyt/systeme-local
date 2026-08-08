@@ -1,4 +1,4 @@
-from datetime import UTC, datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from hashlib import sha256
 
 import pytest
@@ -32,7 +32,7 @@ from systeme_local_gateway.providers.chatgpt_mcp_live_probe import (
     validate_chatgpt_mcp_live_probe_attestation_time_window,
 )
 
-STARTED = datetime(2026, 7, 26, 12, 0, tzinfo=UTC)
+STARTED = datetime(2026, 7, 26, 12, 0, tzinfo=timezone.utc)
 VERIFIED = STARTED + timedelta(minutes=5)
 POLICY_SHA256 = "a" * 64
 TOOL_SHA256 = "b" * 64

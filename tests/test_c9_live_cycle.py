@@ -3,7 +3,7 @@ from __future__ import annotations
 import hashlib
 import os
 import sys
-from datetime import UTC, datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -12,6 +12,7 @@ from pydantic import ValidationError
 
 import systeme_local_gateway.c9_live_cycle as live
 from systeme_local_gateway.c9_live_cycle import (
+    C9_TOOL_NAME,
     C9AdmissionReason,
     C9AdmissionStatus,
     C9C8SealDependency,
@@ -19,7 +20,6 @@ from systeme_local_gateway.c9_live_cycle import (
     C9LiveCycleGrant,
     C9OperatorAuthorization,
     C9SurfaceObservation,
-    C9_TOOL_NAME,
     commit_c9_operator_authorization,
     commit_c9_surface_observation,
     evaluate_c9_admission,
@@ -37,7 +37,7 @@ from systeme_local_gateway.c9_local_ai import (
 ROOT = Path(__file__).resolve().parents[1]
 AUDIT_KEY = "c9-test-audit-key-is-longer-than-thirty-two-characters"
 WRONG_KEY = "c9-wrong-audit-key-is-also-longer-than-thirty-two"
-NOW = datetime(2026, 7, 28, 12, 0, tzinfo=UTC)
+NOW = datetime(2026, 7, 28, 12, 0, tzinfo=timezone.utc)
 CYCLE_ID = "c9_cycle_" + "a" * 32
 GRANT_ID = "c9_grant_" + "b" * 32
 MANIFEST_SHA256 = "c" * 64

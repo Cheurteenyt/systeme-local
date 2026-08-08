@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import json
-from datetime import UTC, datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from hashlib import sha256
 from pathlib import Path
 
@@ -42,7 +42,7 @@ def _prepare(
     surface_expires_in: timedelta = timedelta(minutes=20),
 ) -> dict[str, Path]:
     paths = _paths(tmp_path)
-    now = datetime.now(UTC)
+    now = datetime.now(timezone.utc)
     observation = commit_c1_surface_observation(
         test_chat_label=C1TestChatLabel.CHAT_A,
         surface=surface,
@@ -166,12 +166,8 @@ def test_c1_proof_checker_emits_a_two_hour_bounded_receipt(
 
     assert main(_argv(paths)) == 0
     bundle = json.loads(capsys.readouterr().out)
-    checked_at = datetime.fromisoformat(
-        bundle["correlation_receipt"]["checked_at"].replace("Z", "+00:00")
-    )
-    expires_at = datetime.fromisoformat(
-        bundle["correlation_receipt"]["expires_at"].replace("Z", "+00:00")
-    )
+    checked_at = datetime.fromisoformat(bundle["correlation_receipt"]["checked_at"])
+    expires_at = datetime.fromisoformat(bundle["correlation_receipt"]["expires_at"])
 
     assert expires_at - checked_at > timedelta(hours=1)
     assert expires_at - checked_at <= timedelta(hours=2)

@@ -9,7 +9,6 @@ import pytest
 
 from systeme_local_gateway.sandbox import DockerSandboxRunner
 
-
 pytestmark = [
     pytest.mark.integration,
     pytest.mark.skipif(
