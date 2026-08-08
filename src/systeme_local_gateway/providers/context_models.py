@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from enum import StrEnum
 from typing import Literal
 
@@ -17,7 +17,7 @@ _MESSAGE_CODE_PATTERN = r"^[A-Z][A-Z0-9_]{2,63}$"
 def _require_aware(value: datetime) -> datetime:
     if value.tzinfo is None or value.utcoffset() is None:
         raise ValueError("timestamps must include a timezone")
-    return value.astimezone(UTC)
+    return value.astimezone(timezone.utc)
 
 
 def _optional_aware(value: datetime | None) -> datetime | None:
@@ -157,7 +157,7 @@ class ProviderAccountProfile(StrictModel):
     _aware_updated_at = field_validator("updated_at")(_require_aware)
 
     @model_validator(mode="after")
-    def validate_profile(self) -> ProviderAccountProfile:
+    def validate_profile(self) -> "ProviderAccountProfile":
         if self.updated_at < self.created_at:
             raise ValueError("updated_at must not precede created_at")
         if self.availability is AvailabilityState.UNKNOWN:
@@ -189,7 +189,7 @@ class ProviderQuotaSnapshot(StrictModel):
     _aware_reset_at = field_validator("reset_at")(_optional_aware)
 
     @model_validator(mode="after")
-    def validate_snapshot(self) -> ProviderQuotaSnapshot:
+    def validate_snapshot(self) -> "ProviderQuotaSnapshot":
         if self.state is QuotaState.UNKNOWN:
             if self.evidence is not CapabilityEvidence.NONE:
                 raise ValueError("unknown quota state requires evidence=none")
@@ -210,10 +210,7 @@ class ProviderQuotaSnapshot(StrictModel):
             raise ValueError("remaining_value cannot exceed limit_value")
         if self.state is QuotaState.EXHAUSTED and self.remaining_value not in (None, 0):
             raise ValueError("exhausted quota cannot report a positive remainder")
-        if (
-            self.state in (QuotaState.AVAILABLE, QuotaState.NEAR_LIMIT)
-            and self.remaining_value == 0
-        ):
+        if self.state in (QuotaState.AVAILABLE, QuotaState.NEAR_LIMIT) and self.remaining_value == 0:
             raise ValueError("usable quota cannot report zero remaining")
         return self
 
@@ -237,7 +234,7 @@ class ProviderProjectBinding(StrictModel):
     _aware_updated_at = field_validator("updated_at")(_require_aware)
 
     @model_validator(mode="after")
-    def validate_window(self) -> ProviderProjectBinding:
+    def validate_window(self) -> "ProviderProjectBinding":
         if self.updated_at < self.created_at:
             raise ValueError("updated_at must not precede created_at")
         return self
@@ -265,7 +262,7 @@ class ProviderConversationBinding(StrictModel):
     _aware_updated_at = field_validator("updated_at")(_require_aware)
 
     @model_validator(mode="after")
-    def validate_binding(self) -> ProviderConversationBinding:
+    def validate_binding(self) -> "ProviderConversationBinding":
         if self.updated_at < self.created_at:
             raise ValueError("updated_at must not precede created_at")
         if self.persistence is ConversationPersistence.TEMPORARY and self.project_id is not None:
@@ -297,7 +294,7 @@ class ExperienceSelectionDecision(StrictModel):
     _aware_evaluated_at = field_validator("evaluated_at")(_require_aware)
 
     @model_validator(mode="after")
-    def validate_decision(self) -> ExperienceSelectionDecision:
+    def validate_decision(self) -> "ExperienceSelectionDecision":
         unavailable_reasons = {
             SelectionReason.ACCOUNT_UNAVAILABLE,
             SelectionReason.ACCOUNT_UNKNOWN,

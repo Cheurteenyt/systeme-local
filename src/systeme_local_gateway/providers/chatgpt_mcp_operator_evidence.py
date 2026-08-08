@@ -1,8 +1,7 @@
 from __future__ import annotations
 
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 
-from .chatgpt_mcp_deployment import verify_chatgpt_mcp_capability_profile
 from .chatgpt_mcp_readiness import (
     evaluate_chatgpt_mcp_connection_readiness,
     verify_chatgpt_mcp_evidence_reconciliation_profile,
@@ -23,12 +22,13 @@ from .mcp_readiness_models import (
     commit_mcp_connection_readiness_observation,
     commit_mcp_readiness_check,
 )
+from .chatgpt_mcp_deployment import verify_chatgpt_mcp_capability_profile
 
 
 def _require_aware(value: datetime, *, field_name: str) -> datetime:
     if value.tzinfo is None or value.utcoffset() is None:
         raise ValueError(f"{field_name} must include a timezone")
-    return value.astimezone(UTC)
+    return value.astimezone(timezone.utc)
 
 
 def verify_mcp_operator_evidence_bundle(
@@ -69,20 +69,19 @@ def compile_chatgpt_mcp_operator_evidence_bundle(
             checked_at=record.observed_at,
             evidence_sha256=record.evidence_sha256,
             detail_code=(
-                record.failure_code.value if record.state is McpReadinessCheckState.FAILED else None
+                record.failure_code.value
+                if record.state is McpReadinessCheckState.FAILED
+                else None
             ),
         )
         for record in bundle.records
     )
 
-    tool_verified = (
-        next(
-            record
-            for record in bundle.records
-            if record.check_id is McpReadinessCheckId.TOOL_SNAPSHOT
-        ).state
-        is McpReadinessCheckState.VERIFIED
-    )
+    tool_verified = next(
+        record
+        for record in bundle.records
+        if record.check_id is McpReadinessCheckId.TOOL_SNAPSHOT
+    ).state is McpReadinessCheckState.VERIFIED
 
     tool_snapshot_sha256 = None
     tool_count = None
@@ -96,27 +95,28 @@ def compile_chatgpt_mcp_operator_evidence_bundle(
         write_tool_count = bundle.tool_review_summary.write_tool_count
         high_risk_tool_count = bundle.tool_review_summary.high_risk_tool_count
 
-    local_policy_verified = (
-        next(
-            record
-            for record in bundle.records
-            if record.check_id is McpReadinessCheckId.LOCAL_POLICY
-        ).state
-        is McpReadinessCheckState.VERIFIED
-    )
+    local_policy_verified = next(
+        record
+        for record in bundle.records
+        if record.check_id is McpReadinessCheckId.LOCAL_POLICY
+    ).state is McpReadinessCheckState.VERIFIED
 
-    observation: McpConnectionReadinessObservation = commit_mcp_connection_readiness_observation(
-        observation_id=observation_id,
-        request=bundle.request,
-        capability_profile_sha256=bundle.capability_profile_sha256,
-        reconciliation_profile_sha256=bundle.reconciliation_profile_sha256,
-        checks=checks,
-        tool_snapshot_sha256=tool_snapshot_sha256,
-        tool_count=tool_count,
-        write_tool_count=write_tool_count,
-        high_risk_tool_count=high_risk_tool_count,
-        local_policy_sha256=(bundle.local_policy_sha256 if local_policy_verified else None),
-        observed_at=bundle.collected_at,
+    observation: McpConnectionReadinessObservation = (
+        commit_mcp_connection_readiness_observation(
+            observation_id=observation_id,
+            request=bundle.request,
+            capability_profile_sha256=bundle.capability_profile_sha256,
+            reconciliation_profile_sha256=bundle.reconciliation_profile_sha256,
+            checks=checks,
+            tool_snapshot_sha256=tool_snapshot_sha256,
+            tool_count=tool_count,
+            write_tool_count=write_tool_count,
+            high_risk_tool_count=high_risk_tool_count,
+            local_policy_sha256=(
+                bundle.local_policy_sha256 if local_policy_verified else None
+            ),
+            observed_at=bundle.collected_at,
+        )
     )
 
     return commit_mcp_operator_evidence_compilation(
@@ -198,7 +198,9 @@ def verify_chatgpt_mcp_operator_evidence_evaluation(
     bundle: McpOperatorEvidenceBundle,
     evaluation: McpOperatorEvidenceEvaluation,
 ) -> McpOperatorEvidenceEvaluation:
-    evaluation = McpOperatorEvidenceEvaluation.model_validate(evaluation.model_dump(mode="python"))
+    evaluation = McpOperatorEvidenceEvaluation.model_validate(
+        evaluation.model_dump(mode="python")
+    )
     expected = evaluate_chatgpt_mcp_operator_evidence_bundle(
         capability_profile=capability_profile,
         reconciliation_profile=reconciliation_profile,

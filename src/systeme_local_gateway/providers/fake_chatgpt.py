@@ -164,7 +164,7 @@ class DeterministicFakeChatGptAdapter:
                 observed_at=turn.committed_at,
                 provider_event_id=_stable_id("fakeevt_", provider_run_id, "2"),
                 delta_sha256=_digest_text("fake completed output"),
-                utf8_bytes=len(b"fake completed output"),
+                utf8_bytes=len("fake completed output".encode("utf-8")),
             )
             terminal = self._terminal_event(
                 run=run,

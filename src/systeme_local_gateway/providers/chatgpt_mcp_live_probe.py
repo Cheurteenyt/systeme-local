@@ -21,9 +21,9 @@ from ..c0_proof_check import (
     verify_c0_pending_live_proof_receipt,
 )
 from .chatgpt_mcp_deployment import evaluate_chatgpt_mcp_deployment
+from .mcp_deployment_models import ChatGptMcpCapabilityProfile
 from .mcp_deployment_models import (
     ChatGptClientSurface,
-    ChatGptMcpCapabilityProfile,
     ChatGptPlan,
     McpAccessMode,
     McpAuthenticationKind,
@@ -113,7 +113,7 @@ class ChatGptMcpLiveProbeAttestation(BaseModel):
     _aware_expires_at = field_validator("expires_at")(_require_aware)
 
     @model_validator(mode="after")
-    def validate_attestation(self) -> ChatGptMcpLiveProbeAttestation:
+    def validate_attestation(self) -> "ChatGptMcpLiveProbeAttestation":
         if self.verified_at < self.started_at:
             raise ValueError("live verification cannot predate its start")
         if self.expires_at <= self.verified_at:

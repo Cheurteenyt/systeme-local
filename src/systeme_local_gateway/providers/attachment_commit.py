@@ -26,8 +26,8 @@ from .attachment_models import (
 from .models import CommittedTurn
 
 _PNG_SIGNATURE = b"\x89PNG\r\n\x1a\n"
-_PDF_HEADER = re.compile(rb"%PDF-(?:1\.[0-7]|2\.0)(?:\r\n|\r|\n)")
-_PDF_EOF = re.compile(rb"startxref\s+[0-9]+\s+%%EOF\s*\Z", re.DOTALL)
+_PDF_HEADER = re.compile(br"%PDF-(?:1\.[0-7]|2\.0)(?:\r\n|\r|\n)")
+_PDF_EOF = re.compile(br"startxref\s+[0-9]+\s+%%EOF\s*\Z", re.DOTALL)
 _JPEG_SOF_MARKERS = frozenset(
     {
         0xC0,
@@ -292,7 +292,10 @@ def verify_attachment_manifest(
             AttachmentVerificationReason.MANIFEST_BINDING_CHANGED,
             "attachment manifest predates the committed turn",
         )
-    if any(item.inspection.inspected_at < turn.committed_at for item in manifest.attachments):
+    if any(
+        item.inspection.inspected_at < turn.committed_at
+        for item in manifest.attachments
+    ):
         raise AttachmentVerificationError(
             AttachmentVerificationReason.MANIFEST_BINDING_CHANGED,
             "attachment inspection predates the committed turn",
@@ -308,6 +311,7 @@ def verify_attachment_manifest(
             AttachmentVerificationReason.MANIFEST_BINDING_CHANGED,
             "attachment manifest does not match the committed turn",
         )
+
 
 
 def _validate_attachment_integrity(attachment: CommittedAttachment) -> None:
@@ -328,7 +332,6 @@ def _validate_manifest_integrity(manifest: AttachmentManifest) -> None:
             AttachmentVerificationReason.MANIFEST_INTEGRITY_CHANGED,
             "attachment manifest integrity validation failed",
         ) from exc
-
 
 def _inspect_png(content: bytes) -> tuple[int, int]:
     if len(content) < 8 + 12 or not content.startswith(_PNG_SIGNATURE):
@@ -400,9 +403,7 @@ def _inspect_png(content: bytes) -> tuple[int, int]:
                 _inspection_error(AttachmentInspectionReason.INVALID_PNG, "invalid PNG IEND")
             saw_iend = True
             if crc_end != len(content):
-                _inspection_error(
-                    AttachmentInspectionReason.INVALID_PNG, "trailing bytes after PNG IEND"
-                )
+                _inspection_error(AttachmentInspectionReason.INVALID_PNG, "trailing bytes after PNG IEND")
             break
 
         offset = crc_end
@@ -433,24 +434,16 @@ def _inspect_jpeg(content: bytes) -> tuple[int, int]:
         offset += 1
 
         if marker == 0x00:
-            _inspection_error(
-                AttachmentInspectionReason.INVALID_JPEG, "unexpected stuffed JPEG marker"
-            )
+            _inspection_error(AttachmentInspectionReason.INVALID_JPEG, "unexpected stuffed JPEG marker")
         if marker in (*range(0xD0, 0xD8), 0x01):
             continue
         if marker in (0xD8, 0xD9):
-            _inspection_error(
-                AttachmentInspectionReason.INVALID_JPEG, "unexpected JPEG boundary marker"
-            )
+            _inspection_error(AttachmentInspectionReason.INVALID_JPEG, "unexpected JPEG boundary marker")
         if offset + 2 > len(content):
-            _inspection_error(
-                AttachmentInspectionReason.INVALID_JPEG, "truncated JPEG segment length"
-            )
+            _inspection_error(AttachmentInspectionReason.INVALID_JPEG, "truncated JPEG segment length")
         segment_length = int.from_bytes(content[offset : offset + 2], "big")
         if segment_length < 2:
-            _inspection_error(
-                AttachmentInspectionReason.INVALID_JPEG, "invalid JPEG segment length"
-            )
+            _inspection_error(AttachmentInspectionReason.INVALID_JPEG, "invalid JPEG segment length")
         segment_end = offset + segment_length
         if segment_end > len(content):
             _inspection_error(AttachmentInspectionReason.INVALID_JPEG, "truncated JPEG segment")
@@ -483,13 +476,9 @@ def _inspect_jpeg(content: bytes) -> tuple[int, int]:
         offset = segment_end
 
     if width is None or height is None:
-        _inspection_error(
-            AttachmentInspectionReason.INVALID_JPEG, "JPEG has no bounded SOF dimensions"
-        )
+        _inspection_error(AttachmentInspectionReason.INVALID_JPEG, "JPEG has no bounded SOF dimensions")
     if not saw_sos or scan_data_start is None:
-        _inspection_error(
-            AttachmentInspectionReason.INVALID_JPEG, "JPEG has no start-of-scan segment"
-        )
+        _inspection_error(AttachmentInspectionReason.INVALID_JPEG, "JPEG has no start-of-scan segment")
     if scan_data_start >= len(content) - 2:
         _inspection_error(AttachmentInspectionReason.INVALID_JPEG, "JPEG scan data is empty")
     return width, height
@@ -508,9 +497,7 @@ def _inspect_pdf(content: bytes) -> None:
 
 def _inspect_text(content: bytes) -> str:
     if b"\x00" in content:
-        _inspection_error(
-            AttachmentInspectionReason.NUL_BYTE, "text attachments cannot contain NUL"
-        )
+        _inspection_error(AttachmentInspectionReason.NUL_BYTE, "text attachments cannot contain NUL")
     try:
         return content.decode("utf-8", errors="strict")
     except UnicodeDecodeError as exc:
@@ -522,9 +509,7 @@ def _inspect_text(content: bytes) -> str:
 
 def _inspect_json(content: bytes) -> None:
     if content.startswith(b"\xef\xbb\xbf"):
-        _inspection_error(
-            AttachmentInspectionReason.INVALID_JSON, "JSON attachment cannot use UTF-8 BOM"
-        )
+        _inspection_error(AttachmentInspectionReason.INVALID_JSON, "JSON attachment cannot use UTF-8 BOM")
     text = _inspect_text(content)
 
     def reject_constant(value: str) -> NoReturn:

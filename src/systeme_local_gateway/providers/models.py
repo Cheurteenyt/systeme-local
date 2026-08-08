@@ -1,10 +1,9 @@
 from __future__ import annotations
 
-from collections.abc import Sequence
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from enum import StrEnum
 from hashlib import sha256
-from typing import Annotated, Literal, TypeAlias
+from typing import Annotated, Literal, Sequence, TypeAlias
 
 from pydantic import BaseModel, ConfigDict, Field, TypeAdapter, field_validator, model_validator
 
@@ -22,7 +21,7 @@ class StrictModel(BaseModel):
 def _require_aware(value: datetime) -> datetime:
     if value.tzinfo is None or value.utcoffset() is None:
         raise ValueError("timestamps must include a timezone")
-    return value.astimezone(UTC)
+    return value.astimezone(timezone.utc)
 
 
 class CapabilitySupport(StrEnum):
@@ -43,7 +42,7 @@ class CapabilityClaim(StrictModel):
     evidence: CapabilityEvidence
 
     @model_validator(mode="after")
-    def validate_evidence(self) -> CapabilityClaim:
+    def validate_evidence(self) -> "CapabilityClaim":
         if self.state is CapabilitySupport.UNKNOWN and self.evidence is not CapabilityEvidence.NONE:
             raise ValueError("unknown capabilities must use evidence=none")
         if self.state is not CapabilitySupport.UNKNOWN and self.evidence is CapabilityEvidence.NONE:
@@ -151,7 +150,7 @@ class ConversationHandle(StrictModel):
     _aware_updated_at = field_validator("updated_at")(_require_aware)
 
     @model_validator(mode="after")
-    def validate_window(self) -> ConversationHandle:
+    def validate_window(self) -> "ConversationHandle":
         if self.updated_at < self.created_at:
             raise ValueError("updated_at must not precede created_at")
         return self
@@ -232,7 +231,7 @@ class ToolCallResolvedEvent(LifecycleEventBase):
     result_sha256: str | None = Field(default=None, pattern=_SHA256_PATTERN)
 
     @model_validator(mode="after")
-    def require_result_digest(self) -> ToolCallResolvedEvent:
+    def require_result_digest(self) -> "ToolCallResolvedEvent":
         if self.outcome is ToolResolutionOutcome.COMPLETED and self.result_sha256 is None:
             raise ValueError("completed tool calls require result_sha256")
         return self
@@ -259,7 +258,7 @@ class ResponseTerminalEvent(LifecycleEventBase):
     error_code: str | None = Field(default=None, pattern=_ERROR_CODE_PATTERN)
 
     @model_validator(mode="after")
-    def validate_error_code(self) -> ResponseTerminalEvent:
+    def validate_error_code(self) -> "ResponseTerminalEvent":
         if self.status is ProviderResponseStatus.COMPLETED and self.error_code is not None:
             raise ValueError("completed responses cannot carry an error_code")
         if self.status is not ProviderResponseStatus.COMPLETED and self.error_code is None:

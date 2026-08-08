@@ -6,12 +6,13 @@ from hashlib import sha256
 from typing import Literal
 
 from pydantic import ConfigDict, Field, field_validator, model_validator
-
 from ._canonicalization import (
     _canonical_json,
     _require_aware,
     _validate_sorted_unique_enum_tuple,
 )
+
+
 from .mcp_deployment_models import (
     ChatGptClientSurface,
     ChatGptPlan,
@@ -207,7 +208,7 @@ class McpOperatorEvidenceRecord(StrictModel):
     _aware_valid_until = field_validator("valid_until")(_require_aware)
 
     @model_validator(mode="after")
-    def validate_record(self) -> McpOperatorEvidenceRecord:
+    def validate_record(self) -> "McpOperatorEvidenceRecord":
         if self.assertion is not _ASSERTION_BY_CHECK[self.check_id]:
             raise ValueError("operator evidence assertion does not match check_id")
         if self.valid_until <= self.observed_at:
@@ -276,7 +277,7 @@ class McpTransportEvidenceSummary(StrictModel):
     _aware_valid_until = field_validator("valid_until")(_require_aware)
 
     @model_validator(mode="after")
-    def validate_summary(self) -> McpTransportEvidenceSummary:
+    def validate_summary(self) -> "McpTransportEvidenceSummary":
         if self.server_location is McpServerLocation.UNKNOWN:
             raise ValueError("transport evidence cannot use an unknown server location")
         if self.valid_until <= self.observed_at:
@@ -336,7 +337,7 @@ class McpAuthenticationEvidenceSummary(StrictModel):
     _aware_valid_until = field_validator("valid_until")(_require_aware)
 
     @model_validator(mode="after")
-    def validate_summary(self) -> McpAuthenticationEvidenceSummary:
+    def validate_summary(self) -> "McpAuthenticationEvidenceSummary":
         if self.authentication not in (
             McpAuthenticationKind.OAUTH,
             McpAuthenticationKind.OPENID_CONNECT,
@@ -386,7 +387,7 @@ class McpToolReviewEvidenceSummary(StrictModel):
     _aware_valid_until = field_validator("valid_until")(_require_aware)
 
     @model_validator(mode="after")
-    def validate_summary(self) -> McpToolReviewEvidenceSummary:
+    def validate_summary(self) -> "McpToolReviewEvidenceSummary":
         if self.write_tool_count > self.tool_count:
             raise ValueError("write_tool_count cannot exceed tool_count")
         if self.high_risk_tool_count > self.tool_count:
@@ -436,7 +437,7 @@ class McpOperatorEvidenceBundle(StrictModel):
     _aware_expires_at = field_validator("expires_at")(_require_aware)
 
     @model_validator(mode="after")
-    def validate_bundle(self) -> McpOperatorEvidenceBundle:
+    def validate_bundle(self) -> "McpOperatorEvidenceBundle":
         if self.expires_at <= self.collected_at:
             raise ValueError("bundle expires_at must follow collected_at")
         if self.expires_at - self.collected_at > timedelta(minutes=15):
@@ -637,7 +638,7 @@ class McpOperatorEvidenceCompilation(StrictModel):
     _aware_compiled_at = field_validator("compiled_at")(_require_aware)
 
     @model_validator(mode="after")
-    def validate_compilation(self) -> McpOperatorEvidenceCompilation:
+    def validate_compilation(self) -> "McpOperatorEvidenceCompilation":
         if self.compiled_at > self.bundle_expires_at:
             raise ValueError("operator evidence compilation cannot use an expired bundle")
         if self.observation.observed_at > self.compiled_at:
@@ -670,7 +671,7 @@ class McpOperatorEvidenceEvaluation(StrictModel):
     _aware_evaluated_at = field_validator("evaluated_at")(_require_aware)
 
     @model_validator(mode="after")
-    def validate_evaluation(self) -> McpOperatorEvidenceEvaluation:
+    def validate_evaluation(self) -> "McpOperatorEvidenceEvaluation":
         if self.evaluated_at != self.decision.evaluated_at:
             raise ValueError("evaluation timestamp must match readiness decision")
         if self.compilation.observation.observation_sha256 != self.decision.observation_sha256:

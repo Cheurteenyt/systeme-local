@@ -6,13 +6,14 @@ from hashlib import sha256
 from typing import Literal
 
 from pydantic import ConfigDict, Field, field_validator, model_validator
-
 from ._canonicalization import (
     _canonical_json,
     _require_aware,
     _validate_sorted_unique_enum_tuple,
     _validate_sorted_unique_string_tuple,
 )
+
+
 from .mcp_deployment_models import (
     McpDecisionReason,
     McpDeploymentRequest,
@@ -63,7 +64,7 @@ class McpEvidenceFinding(StrictModel):
     _aware_reviewed_at = field_validator("reviewed_at")(_require_aware)
 
     @model_validator(mode="after")
-    def validate_finding(self) -> McpEvidenceFinding:
+    def validate_finding(self) -> "McpEvidenceFinding":
         _validate_sorted_unique_string_tuple(
             self.source_ids,
             field_name="finding source_ids",
@@ -112,7 +113,7 @@ class ChatGptMcpEvidenceReconciliationProfile(StrictModel):
     _aware_revalidate_after = field_validator("revalidate_after")(_require_aware)
 
     @model_validator(mode="after")
-    def validate_profile(self) -> ChatGptMcpEvidenceReconciliationProfile:
+    def validate_profile(self) -> "ChatGptMcpEvidenceReconciliationProfile":
         if self.revalidate_after <= self.reviewed_at:
             raise ValueError("revalidate_after must follow reviewed_at")
         if self.revalidate_after - self.reviewed_at > timedelta(days=31):
@@ -200,7 +201,7 @@ class McpReadinessCheck(StrictModel):
     _aware_checked_at = field_validator("checked_at")(_require_aware)
 
     @model_validator(mode="after")
-    def validate_check(self) -> McpReadinessCheck:
+    def validate_check(self) -> "McpReadinessCheck":
         if self.state in (
             McpReadinessCheckState.VERIFIED,
             McpReadinessCheckState.FAILED,
@@ -279,7 +280,7 @@ class McpConnectionReadinessObservation(StrictModel):
     _aware_observed_at = field_validator("observed_at")(_require_aware)
 
     @model_validator(mode="after")
-    def validate_observation(self) -> McpConnectionReadinessObservation:
+    def validate_observation(self) -> "McpConnectionReadinessObservation":
         check_ids = tuple(check.check_id for check in self.checks)
         _validate_sorted_unique_enum_tuple(
             check_ids,
@@ -371,7 +372,7 @@ class McpConnectionReadinessDecision(StrictModel):
     _aware_evaluated_at = field_validator("evaluated_at")(_require_aware)
 
     @model_validator(mode="after")
-    def validate_decision(self) -> McpConnectionReadinessDecision:
+    def validate_decision(self) -> "McpConnectionReadinessDecision":
         _validate_sorted_unique_enum_tuple(self.reasons, field_name="readiness reasons")
         _validate_sorted_unique_enum_tuple(self.warnings, field_name="readiness warnings")
         _validate_sorted_unique_enum_tuple(

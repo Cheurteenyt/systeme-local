@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from enum import StrEnum
 from hashlib import sha256
 from typing import Literal
@@ -29,7 +29,7 @@ MAX_DISPLAY_NAME_UTF8_BYTES = 240
 def normalize_utc_timestamp(value: datetime) -> datetime:
     if value.tzinfo is None or value.utcoffset() is None:
         raise ValueError("timestamps must include a timezone")
-    return value.astimezone(UTC)
+    return value.astimezone(timezone.utc)
 
 
 def _require_aware(value: datetime) -> datetime:
@@ -113,7 +113,7 @@ class AttachmentInspection(StrictModel):
     _aware_inspected_at = field_validator("inspected_at")(_require_aware)
 
     @model_validator(mode="after")
-    def validate_dimensions(self) -> AttachmentInspection:
+    def validate_dimensions(self) -> "AttachmentInspection":
         family = media_family(self.media_type)
         if family is AttachmentMediaFamily.IMAGE:
             if self.image_width is None or self.image_height is None:
@@ -145,7 +145,7 @@ class CommittedAttachment(StrictModel):
         return validate_attachment_display_name(value)
 
     @model_validator(mode="after")
-    def validate_commitment(self) -> CommittedAttachment:
+    def validate_commitment(self) -> "CommittedAttachment":
         if self.committed_at < self.inspection.inspected_at:
             raise ValueError("committed_at must not precede inspected_at")
         expected = attachment_metadata_sha256(
@@ -185,7 +185,7 @@ class AttachmentManifest(StrictModel):
     _aware_committed_at = field_validator("committed_at")(_require_aware)
 
     @model_validator(mode="after")
-    def validate_manifest(self) -> AttachmentManifest:
+    def validate_manifest(self) -> "AttachmentManifest":
         if self.attachment_count != len(self.attachments):
             raise ValueError("attachment_count does not match attachments")
         if self.total_bytes != sum(item.inspection.byte_size for item in self.attachments):
@@ -250,7 +250,7 @@ class AttachmentCapabilityProfile(StrictModel):
     _aware_observed_at = field_validator("observed_at")(_require_aware)
 
     @model_validator(mode="after")
-    def validate_profile(self) -> AttachmentCapabilityProfile:
+    def validate_profile(self) -> "AttachmentCapabilityProfile":
         unique_media = set(self.supported_media_types)
         if len(unique_media) != len(self.supported_media_types):
             raise ValueError("supported_media_types must be unique")
@@ -284,7 +284,11 @@ class AttachmentCapabilityProfile(StrictModel):
                     or self.max_image_pixels <= 0
                 ):
                     raise ValueError("image support requires positive dimension limits")
-            elif self.max_image_width or self.max_image_height or self.max_image_pixels:
+            elif (
+                self.max_image_width
+                or self.max_image_height
+                or self.max_image_pixels
+            ):
                 raise ValueError("profiles without image media must use zero image limits")
         else:
             if (
@@ -339,7 +343,7 @@ class AttachmentBatch(StrictModel):
     media_families: tuple[AttachmentMediaFamily, ...] = Field(min_length=1, max_length=2)
 
     @model_validator(mode="after")
-    def validate_batch(self) -> AttachmentBatch:
+    def validate_batch(self) -> "AttachmentBatch":
         if len(set(self.attachment_ids)) != len(self.attachment_ids):
             raise ValueError("duplicate attachment_id in batch")
         if len(set(self.media_families)) != len(self.media_families):
@@ -380,7 +384,7 @@ class AttachmentBatchPlan(StrictModel):
     )
 
     @model_validator(mode="after")
-    def validate_plan(self) -> AttachmentBatchPlan:
+    def validate_plan(self) -> "AttachmentBatchPlan":
         quota_fields = (
             self.upload_quota_snapshot_id,
             self.upload_quota_observed_at,
@@ -397,7 +401,9 @@ class AttachmentBatchPlan(StrictModel):
         if [batch.batch_index for batch in self.batches] != list(range(len(self.batches))):
             raise ValueError("batch indices must be contiguous from zero")
         flattened = tuple(
-            attachment_id for batch in self.batches for attachment_id in batch.attachment_ids
+            attachment_id
+            for batch in self.batches
+            for attachment_id in batch.attachment_ids
         )
         if flattened != self.ordered_attachment_ids:
             raise ValueError("batches must preserve the full attachment order")
@@ -444,7 +450,7 @@ class AttachmentBatchReceipt(StrictModel):
     _aware_observed_at = field_validator("observed_at")(_require_aware)
 
     @model_validator(mode="after")
-    def validate_receipt(self) -> AttachmentBatchReceipt:
+    def validate_receipt(self) -> "AttachmentBatchReceipt":
         if len(self.accepted_attachment_ids) != len(self.provider_upload_ids):
             raise ValueError("accepted attachments require matching provider upload ids")
         if len(set(self.accepted_attachment_ids)) != len(self.accepted_attachment_ids):
@@ -602,6 +608,7 @@ def attachment_manifest_sha256(
     return digest.hexdigest()
 
 
+
 def attachment_capability_profile_sha256(
     *,
     profile_id: str,
@@ -720,9 +727,14 @@ def commit_attachment_capability_profile(
     )
 
 
+
 def attachment_quota_snapshot_sha256(snapshot: ProviderQuotaSnapshot) -> str:
     observed_at = normalize_utc_timestamp(snapshot.observed_at)
-    reset_at = None if snapshot.reset_at is None else normalize_utc_timestamp(snapshot.reset_at)
+    reset_at = (
+        None
+        if snapshot.reset_at is None
+        else normalize_utc_timestamp(snapshot.reset_at)
+    )
     digest = sha256(b"systeme-local:attachment-quota-snapshot:v1\x00")
     for value in (
         snapshot.version,
@@ -745,7 +757,6 @@ def attachment_quota_snapshot_sha256(snapshot: ProviderQuotaSnapshot) -> str:
     ):
         _frame_int(digest, value)
     return digest.hexdigest()
-
 
 def attachment_plan_sha256(
     *,

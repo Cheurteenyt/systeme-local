@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import UTC, datetime, timedelta, timezone
+from datetime import datetime, timedelta, timezone
 
 from .chatgpt_mcp_deployment import (
     evaluate_chatgpt_mcp_deployment,
@@ -277,7 +277,7 @@ def evaluate_chatgpt_mcp_connection_readiness(
     observation = verify_mcp_connection_readiness_observation(observation)
     if evaluated_at.tzinfo is None or evaluated_at.utcoffset() is None:
         raise ValueError("evaluated_at must include a timezone")
-    evaluated_at = evaluated_at.astimezone(UTC)
+    evaluated_at = evaluated_at.astimezone(timezone.utc)
 
     if observation.capability_profile_sha256 != capability_profile.profile_sha256:
         raise ValueError("readiness observation capability profile digest mismatch")

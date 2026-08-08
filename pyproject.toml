@@ -67,6 +67,13 @@ ignore = [
   "UP017", # datetime.now(timezone.utc) -> datetime.now(UTC): the evidence
            # governance check requires the literal timezone.utc form
 ]
+
+# The provider facade test (test_provider_canonicalization_compatibility)
+# computes a SHA256 over the import-order-dependent __all__ and origin map.
+# Import sorting (I001) would reshuffle that order and break the approved
+# baseline, so it is disabled for the providers package on purpose.
+[tool.ruff.lint.per-file-ignores]
+"src/systeme_local_gateway/providers/**" = ["I001"]
 [tool.mypy]
 python_version = "3.11"
 cache_dir = ".systeme-local/mypy-cache"

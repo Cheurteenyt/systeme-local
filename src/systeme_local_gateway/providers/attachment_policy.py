@@ -122,7 +122,8 @@ def plan_attachment_batches(
 
     effective_upload_quota = (
         upload_quota
-        if profile.quota_requirement is AttachmentQuotaRequirement.FRESH_UPLOAD_QUOTA
+        if profile.quota_requirement
+        is AttachmentQuotaRequirement.FRESH_UPLOAD_QUOTA
         else None
     )
     if effective_upload_quota is not None:
@@ -185,7 +186,9 @@ def plan_attachment_batches(
         exceeds_count = len(current_ids) + 1 > profile.max_files_per_batch
         exceeds_bytes = current_bytes + inspection.byte_size > profile.max_batch_bytes
         changes_family = (
-            not profile.allows_mixed_media and current_families and family not in current_families
+            not profile.allows_mixed_media
+            and current_families
+            and family not in current_families
         )
 
         if exceeds_count or exceeds_bytes or changes_family:
@@ -217,10 +220,14 @@ def plan_attachment_batches(
         capability_profile_revision=profile.revision,
         capability_profile_sha256=profile.profile_sha256,
         upload_quota_snapshot_id=(
-            None if effective_upload_quota is None else effective_upload_quota.snapshot_id
+            None
+            if effective_upload_quota is None
+            else effective_upload_quota.snapshot_id
         ),
         upload_quota_observed_at=(
-            None if effective_upload_quota is None else effective_upload_quota.observed_at
+            None
+            if effective_upload_quota is None
+            else effective_upload_quota.observed_at
         ),
         upload_quota_sha256=upload_quota_sha256,
         ordered_attachment_ids=ordered_attachment_ids,
@@ -238,10 +245,14 @@ def plan_attachment_batches(
         capability_profile_revision=profile.revision,
         capability_profile_sha256=profile.profile_sha256,
         upload_quota_snapshot_id=(
-            None if effective_upload_quota is None else effective_upload_quota.snapshot_id
+            None
+            if effective_upload_quota is None
+            else effective_upload_quota.snapshot_id
         ),
         upload_quota_observed_at=(
-            None if effective_upload_quota is None else effective_upload_quota.observed_at
+            None
+            if effective_upload_quota is None
+            else effective_upload_quota.observed_at
         ),
         upload_quota_sha256=upload_quota_sha256,
         ordered_attachment_ids=ordered_attachment_ids,
@@ -251,6 +262,7 @@ def plan_attachment_batches(
         planned_at=planned_at,
         plan_sha256=digest,
     )
+
 
 
 def verify_attachment_batch_plan(
@@ -347,7 +359,8 @@ def verify_attachment_batch_plan(
         if (
             plan.upload_quota_snapshot_id != upload_quota.snapshot_id
             or plan.upload_quota_observed_at != upload_quota.observed_at
-            or plan.upload_quota_sha256 != attachment_quota_snapshot_sha256(upload_quota)
+            or plan.upload_quota_sha256
+            != attachment_quota_snapshot_sha256(upload_quota)
         ):
             _planning_error(
                 AttachmentPlanningReason.PLAN_BINDING_MISMATCH,
@@ -435,6 +448,8 @@ def verify_attachment_batch_plan(
             )
 
 
+
+
 def _validate_model_integrity(
     *,
     model: object,
@@ -446,7 +461,6 @@ def _validate_model_integrity(
         model_type.model_validate(model.model_dump(mode="python"))
     except (AttributeError, ValidationError) as exc:
         raise AttachmentPlanningError(reason, message) from exc
-
 
 def _validate_profile_support(
     *,

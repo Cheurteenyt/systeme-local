@@ -47,7 +47,9 @@ class AppendResult(StrEnum):
 class LifecycleEventStore:
     def __init__(self, path: str | Path) -> None:
         self.path = Path(path)
-        if self.path.exists() and (self.path.is_symlink() or not self.path.is_file()):
+        if self.path.exists() and (
+            self.path.is_symlink() or not self.path.is_file()
+        ):
             raise EventStoreError("event store path must be a regular file")
         self.path.parent.mkdir(parents=True, exist_ok=True)
         self._initialize()
@@ -81,7 +83,9 @@ class LifecycleEventStore:
                     if stored == conversation and existing["fingerprint"] == fingerprint:
                         connection.execute("COMMIT")
                         return AppendResult.DUPLICATE
-                    raise EventConflictError("conflicting conversation_id registration")
+                    raise EventConflictError(
+                        "conflicting conversation_id registration"
+                    )
 
                 if conversation.provider_conversation_id is not None:
                     mapping = connection.execute(
@@ -152,10 +156,14 @@ class LifecycleEventStore:
                     (turn.conversation_id,),
                 ).fetchone()
                 if conversation_row is None:
-                    raise EventStoreError("committed turn requires a registered conversation")
+                    raise EventStoreError(
+                        "committed turn requires a registered conversation"
+                    )
                 conversation = self._conversation_from_row(conversation_row)
                 if turn.principal.agent_id != conversation.created_by_agent:
-                    raise EventStoreError("committed turn principal does not own the conversation")
+                    raise EventStoreError(
+                        "committed turn principal does not own the conversation"
+                    )
                 if conversation.state is not ConversationState.ACTIVE:
                     raise EventStoreError("committed turn requires an active conversation")
                 if turn.committed_at < conversation.created_at:
@@ -190,7 +198,9 @@ class LifecycleEventStore:
                     (turn.idempotency_key,),
                 ).fetchone()
                 if idempotency_row is not None:
-                    raise EventConflictError("idempotency_key is already bound to another turn")
+                    raise EventConflictError(
+                        "idempotency_key is already bound to another turn"
+                    )
 
                 connection.execute(
                     """
@@ -239,7 +249,9 @@ class LifecycleEventStore:
                     (run.conversation_id,),
                 ).fetchone()
                 if conversation_row is None:
-                    raise EventStoreError("provider run requires a registered conversation")
+                    raise EventStoreError(
+                        "provider run requires a registered conversation"
+                    )
                 conversation = self._conversation_from_row(conversation_row)
 
                 turn_row = connection.execute(
@@ -256,7 +268,9 @@ class LifecycleEventStore:
                     (run.turn_id,),
                 ).fetchone()
                 if turn_row is None:
-                    raise EventStoreError("provider run requires a registered committed turn")
+                    raise EventStoreError(
+                        "provider run requires a registered committed turn"
+                    )
                 turn = self._turn_from_row(turn_row)
 
                 if (
@@ -264,9 +278,16 @@ class LifecycleEventStore:
                     or run.trace_id != turn.trace_id
                     or run.idempotency_key != turn.idempotency_key
                 ):
-                    raise EventStoreError("provider run does not match its committed turn")
-                if run.provider != conversation.provider or run.surface != conversation.surface:
-                    raise EventStoreError("provider run does not match its conversation surface")
+                    raise EventStoreError(
+                        "provider run does not match its committed turn"
+                    )
+                if (
+                    run.provider != conversation.provider
+                    or run.surface != conversation.surface
+                ):
+                    raise EventStoreError(
+                        "provider run does not match its conversation surface"
+                    )
                 if conversation.state is not ConversationState.ACTIVE:
                     raise EventStoreError("provider run requires an active conversation")
                 if run.started_at < turn.committed_at:
@@ -321,7 +342,9 @@ class LifecycleEventStore:
                         (run.provider, run.surface, run.provider_run_id),
                     ).fetchone()
                     if provider_binding is not None:
-                        raise EventConflictError("provider_run_id is already registered")
+                        raise EventConflictError(
+                            "provider_run_id is already registered"
+                        )
 
                 connection.execute(
                     """
@@ -381,7 +404,9 @@ class LifecycleEventStore:
                     (event.run_id,),
                 ).fetchone()
                 if run_row is None:
-                    raise EventStoreError("event requires a registered provider run")
+                    raise EventStoreError(
+                        "event requires a registered provider run"
+                    )
                 run = self._run_from_row(run_row)
 
                 sequence_row = connection.execute(
@@ -403,7 +428,9 @@ class LifecycleEventStore:
                     if stored == event and sequence_row["fingerprint"] == fingerprint:
                         connection.execute("COMMIT")
                         return AppendResult.DUPLICATE
-                    raise EventConflictError("conflicting event already occupies this sequence")
+                    raise EventConflictError(
+                        "conflicting event already occupies this sequence"
+                    )
 
                 id_row = connection.execute(
                     """
@@ -414,7 +441,9 @@ class LifecycleEventStore:
                     (event.event_id,),
                 ).fetchone()
                 if id_row is not None:
-                    raise EventConflictError("event_id has already been persisted")
+                    raise EventConflictError(
+                        "event_id has already been persisted"
+                    )
 
                 if event.provider_event_id is not None:
                     provider_id_row = connection.execute(
@@ -426,7 +455,9 @@ class LifecycleEventStore:
                         (event.run_id, event.provider_event_id),
                     ).fetchone()
                     if provider_id_row is not None:
-                        raise EventConflictError("provider_event_id has already been persisted")
+                        raise EventConflictError(
+                            "provider_event_id has already been persisted"
+                        )
 
                 rows = connection.execute(
                     """
@@ -592,7 +623,9 @@ class LifecycleEventStore:
             with self._connect() as connection:
                 result = connection.execute("PRAGMA quick_check").fetchone()
                 if result is None or result[0] != "ok":
-                    raise EventStoreCorruptError("SQLite quick_check failed")
+                    raise EventStoreCorruptError(
+                        "SQLite quick_check failed"
+                    )
 
                 self._begin(connection)
                 try:
@@ -621,7 +654,8 @@ class LifecycleEventStore:
                         )
                     elif row["value"] != _SCHEMA_VERSION:
                         raise UnsupportedSchemaVersion(
-                            f"unsupported lifecycle schema version: {row['value']}"
+                            "unsupported lifecycle schema version: "
+                            f"{row['value']}"
                         )
 
                     connection.execute(
@@ -717,9 +751,13 @@ class LifecycleEventStore:
                     )
 
                     self._verify_schema(connection)
-                    foreign_key_problem = connection.execute("PRAGMA foreign_key_check").fetchone()
+                    foreign_key_problem = connection.execute(
+                        "PRAGMA foreign_key_check"
+                    ).fetchone()
                     if foreign_key_problem is not None:
-                        raise EventStoreCorruptError("SQLite foreign key check failed")
+                        raise EventStoreCorruptError(
+                            "SQLite foreign key check failed"
+                        )
                     connection.execute("COMMIT")
                 except Exception:
                     connection.execute("ROLLBACK")
@@ -729,7 +767,9 @@ class LifecycleEventStore:
         except EventStoreCorruptError:
             raise
         except sqlite3.DatabaseError as exc:
-            raise EventStoreCorruptError("invalid or corrupt lifecycle event store") from exc
+            raise EventStoreCorruptError(
+                "invalid or corrupt lifecycle event store"
+            ) from exc
 
     def _connect(self) -> sqlite3.Connection:
         connection = sqlite3.connect(
@@ -786,10 +826,14 @@ class LifecycleEventStore:
             },
         }
         for table, expected_columns in expected.items():
-            rows = connection.execute(f"PRAGMA table_info({table})").fetchall()
+            rows = connection.execute(
+                f"PRAGMA table_info({table})"  # noqa: S608
+            ).fetchall()
             actual_columns = {str(row["name"]) for row in rows}
             if actual_columns != expected_columns:
-                raise EventStoreCorruptError(f"unexpected lifecycle schema for table {table}")
+                raise EventStoreCorruptError(
+                    f"unexpected lifecycle schema for table {table}"
+                )
 
     @staticmethod
     def _conversation_from_row(
@@ -807,7 +851,9 @@ class LifecycleEventStore:
             or model.surface != row["surface"]
             or model.provider_conversation_id != row["provider_conversation_id"]
         ):
-            raise EventStoreCorruptError("conversation columns do not match its payload")
+            raise EventStoreCorruptError(
+                "conversation columns do not match its payload"
+            )
         return model
 
     @staticmethod
@@ -823,7 +869,9 @@ class LifecycleEventStore:
             or model.conversation_id != row["conversation_id"]
             or model.idempotency_key != row["idempotency_key"]
         ):
-            raise EventStoreCorruptError("committed turn columns do not match its payload")
+            raise EventStoreCorruptError(
+                "committed turn columns do not match its payload"
+            )
         return model
 
     @staticmethod
@@ -843,7 +891,9 @@ class LifecycleEventStore:
             or model.surface != row["surface"]
             or model.provider_run_id != row["provider_run_id"]
         ):
-            raise EventStoreCorruptError("provider run columns do not match its payload")
+            raise EventStoreCorruptError(
+                "provider run columns do not match its payload"
+            )
         return model
 
     @staticmethod
@@ -851,11 +901,15 @@ class LifecycleEventStore:
         payload = str(row["payload_json"])
         fingerprint = str(row["fingerprint"])
         if _fingerprint(payload) != fingerprint:
-            raise EventStoreCorruptError("lifecycle event fingerprint mismatch")
+            raise EventStoreCorruptError(
+                "lifecycle event fingerprint mismatch"
+            )
         try:
             event = LIFECYCLE_EVENT_ADAPTER.validate_json(payload)
         except (TypeError, ValueError) as exc:
-            raise EventStoreCorruptError("invalid lifecycle event payload") from exc
+            raise EventStoreCorruptError(
+                "invalid lifecycle event payload"
+            ) from exc
         if (
             event.run_id != row["run_id"]
             or event.sequence != row["sequence"]
@@ -863,7 +917,9 @@ class LifecycleEventStore:
             or event.provider_event_id != row["provider_event_id"]
             or lifecycle_event_fingerprint(event) != fingerprint
         ):
-            raise EventStoreCorruptError("lifecycle event columns do not match its payload")
+            raise EventStoreCorruptError(
+                "lifecycle event columns do not match its payload"
+            )
         return event
 
     @staticmethod
@@ -875,14 +931,20 @@ class LifecycleEventStore:
         validator: Any,
     ) -> Any:
         if _fingerprint(payload) != fingerprint:
-            raise EventStoreCorruptError(f"{model_name} fingerprint mismatch")
+            raise EventStoreCorruptError(
+                f"{model_name} fingerprint mismatch"
+            )
         try:
             model = validator(payload)
         except (TypeError, ValueError) as exc:
-            raise EventStoreCorruptError(f"invalid {model_name} payload") from exc
+            raise EventStoreCorruptError(
+                f"invalid {model_name} payload"
+            ) from exc
         normalized = model.model_dump_json(exclude_none=False)
         if _fingerprint(normalized) != fingerprint:
-            raise EventStoreCorruptError(f"{model_name} payload is not canonical")
+            raise EventStoreCorruptError(
+                f"{model_name} payload is not canonical"
+            )
         return model
 
 

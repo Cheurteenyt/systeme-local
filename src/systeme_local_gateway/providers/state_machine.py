@@ -134,7 +134,10 @@ def apply_lifecycle_event(
     if any(item.event_id == event.event_id for item in state.applied_events):
         raise EventConflictError("event_id has already been used")
 
-    if event.provider_event_id is not None and event.provider_event_id in state.provider_event_ids:
+    if (
+        event.provider_event_id is not None
+        and event.provider_event_id in state.provider_event_ids
+    ):
         raise EventConflictError("provider_event_id has already been used")
 
     if state.audit_id is not None:
@@ -177,10 +180,7 @@ def apply_lifecycle_event(
         _require_active_response(updated)
         if event.tool_call_id not in updated.pending_tool_calls:
             raise InvalidLifecycleTransition("approval requires a pending tool call")
-        if (
-            event.approval_id in updated.pending_approvals
-            or event.approval_id in updated.resolved_approvals
-        ):
+        if event.approval_id in updated.pending_approvals or event.approval_id in updated.resolved_approvals:
             raise EventConflictError("approval_id has already been used")
         updated.pending_approvals[event.approval_id] = event.tool_call_id
 
