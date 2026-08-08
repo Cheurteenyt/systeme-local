@@ -14,7 +14,7 @@ from typing import Any, Final, Literal
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 C5_MANIFEST_PATH = "governance/c5-integration-manifest.json"
-C5_SEAL_PATH: Final = "governance/c5-change-seal.json"
+C5_SEAL_PATH: Final[Literal["governance/c5-change-seal.json"]] = "governance/c5-change-seal.json"
 C5_EVIDENCE_TAG = "evidence/c0-c4-main-integration-v2"
 C5_MAIN_BASE = "32515ac9cbb9d658b2ddcb2723ab3c0a71f2b418"
 C5_ACCEPTED_MAIN_COMMIT = "418112758d8675326835d9947ccce3a1b12f6f25"

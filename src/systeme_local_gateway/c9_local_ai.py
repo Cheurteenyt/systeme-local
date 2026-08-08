@@ -1043,8 +1043,8 @@ def _open_runtime_executable_descriptor(path: Path) -> int:
     try:
         msvcrt: Any = importlib.import_module("msvcrt")
         wintypes: Any = importlib.import_module("ctypes.wintypes")
-        win_dll: Any = ctypes.WinDLL
-        get_last_error: Any = ctypes.get_last_error
+        win_dll: Any = getattr(ctypes, "WinDLL", None)
+        get_last_error: Any = getattr(ctypes, "get_last_error", lambda: 0)
         kernel32: Any = win_dll("kernel32", use_last_error=True)
         create_file = kernel32.CreateFileW
         create_file.argtypes = (
