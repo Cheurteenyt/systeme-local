@@ -490,7 +490,7 @@ def test_pytest_security_floor_is_locked_without_audit_ignore() -> None:
 
     package_start = lock.index('name = "pytest"')
     pytest_block = lock[package_start : package_start + 240]
-    assert 'version = "9.0.3"' in pytest_block
+    assert 'version = "9.1.1"' in pytest_block
     assert 'version = "8.4.2"' not in pytest_block
 
     assert "PYSEC-2026-1845" in governance
