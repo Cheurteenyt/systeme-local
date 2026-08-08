@@ -5,7 +5,7 @@ import json
 import os
 import subprocess
 import sys
-from datetime import UTC, datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
 
@@ -16,11 +16,11 @@ from .c1_observability import (
     C1C0DependencyStatus,
     C1ChatProofBundle,
     C1NegativeTestReceipt,
+    C1RevocationReceipt,
     C1RuntimeSetupObservation,
     C1SetupField,
     C1SurfaceObservation,
     C1VisibleModelObservation,
-    C1RevocationReceipt,
     build_current_c1_official_evidence_profile,
     commit_c1_final_attestation,
 )
@@ -150,7 +150,7 @@ def main(argv: list[str] | None = None) -> int:
         if abs((negative.observed_at - revocation.verified_at).total_seconds()) > 600:
             raise ValueError("C1 post-revocation evidence and receipt are not contemporaneous")
 
-        now = datetime.now(UTC)
+        now = datetime.now(timezone.utc)
         evidence_expiries = [
             setup.expires_at,
             visible.expires_at,

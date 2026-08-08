@@ -13,7 +13,7 @@ import stat
 import sys
 import time
 from dataclasses import dataclass
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, datetime, timedelta, timezone
 from enum import StrEnum
 from pathlib import Path
 from typing import Any, Literal, NoReturn
@@ -616,14 +616,14 @@ def run_c9_local_ai_inference(
     if len(request_bytes) > C9_LOCAL_AI_MAX_REQUEST_BYTES:
         raise C9LocalAIError(C9LocalAIErrorCode.REQUEST_TOO_LARGE)
 
-    started_at = datetime.now(UTC)
+    started_at = datetime.now(timezone.utc)
     started_monotonic = time.monotonic_ns()
     response_bytes = _exchange(
         config=config,
         request_bytes=request_bytes,
     )
     completed_monotonic = time.monotonic_ns()
-    completed_at = datetime.now(UTC)
+    completed_at = datetime.now(timezone.utc)
     output = _parse_completion(response_bytes)
     _verify_nonce_hashes(
         output=output,
@@ -735,7 +735,7 @@ def _validate_inputs(
     if attachment_media_type is None or document_media_type != "text/plain":
         raise C9LocalAIError(C9LocalAIErrorCode.INPUT_INVALID)
     try:
-        inspected_at = datetime.now(UTC)
+        inspected_at = datetime.now(timezone.utc)
         image_inspection = inspect_attachment_bytes(
             content=image_bytes,
             media_type=attachment_media_type,
@@ -812,50 +812,50 @@ def _exchange(*, config: C9LocalAIConfig, request_bytes: bytes) -> bytes:
     deadline = time.monotonic() + config.total_timeout_seconds
     try:
         timeout = _bounded_http_timeout(config)
-        with httpx.Client(
-            timeout=timeout,
-            follow_redirects=False,
-            trust_env=False,
-            headers={
-                "Accept": "application/json",
-                "Content-Type": "application/json",
-                "User-Agent": "systeme-local-c9-local-ai/1",
-            },
-        ) as client:
-            with client.stream(
+        with (
+            httpx.Client(
+                timeout=timeout,
+                follow_redirects=False,
+                trust_env=False,
+                headers={
+                    "Accept": "application/json",
+                    "Content-Type": "application/json",
+                    "User-Agent": "systeme-local-c9-local-ai/1",
+                },
+            ) as client,
+            client.stream(
                 "POST",
                 config.endpoint,
                 content=request_bytes,
-            ) as response:
+            ) as response,
+        ):
+            if time.monotonic() > deadline:
+                raise _ExchangeFailure(C9LocalAIErrorCode.TIMEOUT)
+            if response.status_code != 200:
+                raise _ExchangeFailure(C9LocalAIErrorCode.HTTP_FAILED)
+            content_type = response.headers.get("content-type", "").split(";", 1)[0].strip().lower()
+            if content_type != "application/json":
+                raise _ExchangeFailure(C9LocalAIErrorCode.RESPONSE_INVALID)
+            declared = response.headers.get("content-length")
+            if declared is not None:
+                try:
+                    declared_bytes = int(declared)
+                except ValueError:
+                    raise _ExchangeFailure(C9LocalAIErrorCode.RESPONSE_INVALID) from None
+                if declared_bytes < 1:
+                    raise _ExchangeFailure(C9LocalAIErrorCode.RESPONSE_INVALID)
+                if declared_bytes > config.max_response_bytes:
+                    raise _ExchangeFailure(C9LocalAIErrorCode.RESPONSE_TOO_LARGE)
+            buffer = bytearray()
+            for chunk in response.iter_bytes():
                 if time.monotonic() > deadline:
                     raise _ExchangeFailure(C9LocalAIErrorCode.TIMEOUT)
-                if response.status_code != 200:
-                    raise _ExchangeFailure(C9LocalAIErrorCode.HTTP_FAILED)
-                content_type = (
-                    response.headers.get("content-type", "").split(";", 1)[0].strip().lower()
-                )
-                if content_type != "application/json":
-                    raise _ExchangeFailure(C9LocalAIErrorCode.RESPONSE_INVALID)
-                declared = response.headers.get("content-length")
-                if declared is not None:
-                    try:
-                        declared_bytes = int(declared)
-                    except ValueError:
-                        raise _ExchangeFailure(C9LocalAIErrorCode.RESPONSE_INVALID) from None
-                    if declared_bytes < 1:
-                        raise _ExchangeFailure(C9LocalAIErrorCode.RESPONSE_INVALID)
-                    if declared_bytes > config.max_response_bytes:
-                        raise _ExchangeFailure(C9LocalAIErrorCode.RESPONSE_TOO_LARGE)
-                buffer = bytearray()
-                for chunk in response.iter_bytes():
-                    if time.monotonic() > deadline:
-                        raise _ExchangeFailure(C9LocalAIErrorCode.TIMEOUT)
-                    if len(buffer) + len(chunk) > config.max_response_bytes:
-                        raise _ExchangeFailure(C9LocalAIErrorCode.RESPONSE_TOO_LARGE)
-                    buffer.extend(chunk)
-                if not buffer:
-                    raise _ExchangeFailure(C9LocalAIErrorCode.RESPONSE_INVALID)
-                response_bytes = bytes(buffer)
+                if len(buffer) + len(chunk) > config.max_response_bytes:
+                    raise _ExchangeFailure(C9LocalAIErrorCode.RESPONSE_TOO_LARGE)
+                buffer.extend(chunk)
+            if not buffer:
+                raise _ExchangeFailure(C9LocalAIErrorCode.RESPONSE_INVALID)
+            response_bytes = bytes(buffer)
     except _ExchangeFailure as error:
         failure = error.code
     except httpx.TimeoutException:
@@ -1043,8 +1043,8 @@ def _open_runtime_executable_descriptor(path: Path) -> int:
     try:
         msvcrt: Any = importlib.import_module("msvcrt")
         wintypes: Any = importlib.import_module("ctypes.wintypes")
-        win_dll: Any = getattr(ctypes, "WinDLL")
-        get_last_error: Any = getattr(ctypes, "get_last_error")
+        win_dll: Any = getattr(ctypes, "WinDLL", None)
+        get_last_error: Any = getattr(ctypes, "get_last_error", lambda: 0)
         kernel32: Any = win_dll("kernel32", use_last_error=True)
         create_file = kernel32.CreateFileW
         create_file.argtypes = (
@@ -1136,7 +1136,7 @@ def _inspect_runtime_executable(path: Path) -> tuple[str, str]:
 
 def _parse_runtime_timestamp(value: str | None) -> datetime:
     if value is None:
-        return datetime.now(UTC)
+        return datetime.now(timezone.utc)
     normalized = value[:-1] + "+00:00" if value.endswith("Z") else value
     return _aware_utc(datetime.fromisoformat(normalized))
 

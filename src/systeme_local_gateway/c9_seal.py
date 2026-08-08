@@ -15,6 +15,8 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator, model_valida
 
 from .c8_seal import (
     C8_BASE_COMMIT as C8_SEAL_BASE_COMMIT,
+)
+from .c8_seal import (
     C8_EVIDENCE_TAG,
     C8_FINAL_STATUS,
     C8_MANIFEST_PATH,

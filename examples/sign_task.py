@@ -4,14 +4,14 @@ import hmac
 import json
 import os
 import secrets
-from datetime import UTC, datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from uuid import uuid4
 
 from systeme_local_gateway.auth import canonical_payload
 from systeme_local_gateway.models import AgentIdentity, TaskEnvelope
 
 secret = os.environ.get("SLG_SHARED_SECRET", "replace-with-at-least-32-random-characters")
-now = datetime.now(UTC)
+now = datetime.now(timezone.utc)
 task = TaskEnvelope(
     version="1",
     task_id=os.environ.get("SLG_TASK_ID", str(uuid4())),

@@ -3,7 +3,7 @@ import hashlib
 import hmac
 import json
 import runpy
-from datetime import UTC, datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 import pytest
@@ -15,7 +15,7 @@ SECRET = "x" * 32
 
 
 def signed_task(nonce: str = "n" * 24) -> TaskEnvelope:
-    now = datetime.now(UTC)
+    now = datetime.now(timezone.utc)
     task = TaskEnvelope(
         task_id="task-12345678",
         issued_at=now,

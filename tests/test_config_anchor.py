@@ -90,9 +90,7 @@ def test_anchor_placeholder_key_is_rejected(
             _env_file=None,
             **_base(tmp_path),
             audit_anchor_log=tmp_path / "anchor.jsonl",
-            audit_anchor_key=(
-                "replace-with-third-independent-at-least-32-random-characters"
-            ),
+            audit_anchor_key=("replace-with-third-independent-at-least-32-random-characters"),
         )
 
 
@@ -120,7 +118,6 @@ def test_anchor_and_audit_paths_must_not_overlap(
             audit_anchor_log=tmp_path / anchor_name,
             audit_anchor_key="b" * 48,
         )
-
 
 
 def test_validation_errors_hide_secret_values(
@@ -184,7 +181,5 @@ def test_valid_anchor_configuration_is_accepted(
         audit_anchor_log=tmp_path / "external" / "anchor.jsonl",
         audit_anchor_key="b" * 48,
     )
-    assert settings.audit_anchor_log == (
-        tmp_path / "external" / "anchor.jsonl"
-    )
+    assert settings.audit_anchor_log == (tmp_path / "external" / "anchor.jsonl")
     assert settings.audit_anchor_key == "b" * 48

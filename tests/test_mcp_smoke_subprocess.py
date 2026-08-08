@@ -9,7 +9,6 @@ import sys
 import time
 from pathlib import Path
 
-
 ROOT = Path(__file__).resolve().parents[1]
 MCP_TOKEN = "mcp-smoke-token-" + ("t" * 64)
 SHARED_SECRET = "mcp-smoke-shared-" + ("s" * 64)
