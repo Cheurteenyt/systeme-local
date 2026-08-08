@@ -4,7 +4,7 @@ import hashlib
 import hmac
 import json
 import re
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, datetime, timedelta, timezone
 from enum import StrEnum
 from typing import Any, Literal
 
@@ -681,10 +681,10 @@ def commit_official_source_reference(
 
 
 def build_current_c1_official_evidence_profile() -> C1OfficialEvidenceProfile:
-    consulted = datetime(2026, 7, 26, 17, 36, 35, tzinfo=UTC)
-    revalidate = datetime(2026, 8, 9, 17, 36, 35, tzinfo=UTC)
-    plugin_surface_consulted = datetime(2026, 7, 27, 0, 45, tzinfo=UTC)
-    plugin_surface_revalidate = datetime(2026, 8, 10, 0, 45, tzinfo=UTC)
+    consulted = datetime(2026, 7, 26, 17, 36, 35, tzinfo=timezone.utc)
+    revalidate = datetime(2026, 8, 9, 17, 36, 35, tzinfo=timezone.utc)
+    plugin_surface_consulted = datetime(2026, 7, 27, 0, 45, tzinfo=timezone.utc)
+    plugin_surface_revalidate = datetime(2026, 8, 10, 0, 45, tzinfo=timezone.utc)
     raw = (
         (
             "chat_and_work",

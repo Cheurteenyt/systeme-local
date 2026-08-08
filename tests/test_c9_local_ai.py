@@ -7,7 +7,7 @@ import threading
 import time
 from collections.abc import Iterator
 from contextlib import contextmanager
-from datetime import UTC, datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from types import SimpleNamespace
@@ -187,7 +187,7 @@ def _runtime_observation(
     observed_at: datetime | None = None,
     expires_at: datetime | None = None,
 ) -> c9_local_ai.C9LocalAIRuntimeObservation:
-    at = observed_at or datetime(2026, 7, 28, 12, 0, tzinfo=UTC)
+    at = observed_at or datetime(2026, 7, 28, 12, 0, tzinfo=timezone.utc)
     executable = tmp_path / "ollama.exe"
     executable.write_bytes(b"reviewed native ollama executable")
     return commit_c9_local_ai_runtime_observation(
@@ -310,7 +310,7 @@ def test_runtime_observation_accepts_lm_studio_llmster_listener(
 ) -> None:
     executable = tmp_path / "llmster.exe"
     executable.write_bytes(b"reviewed native LM Studio llmster executable")
-    observed_at = datetime(2026, 7, 28, 8, 0, tzinfo=UTC)
+    observed_at = datetime(2026, 7, 28, 8, 0, tzinfo=timezone.utc)
     observation = commit_c9_local_ai_runtime_observation(
         cycle_id="c9_cycle_" + ("3" * 32),
         provider_kind=C9LocalAIProviderKind.LM_STUDIO,

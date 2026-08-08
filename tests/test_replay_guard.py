@@ -7,7 +7,7 @@ import sqlite3
 import threading
 from concurrent.futures import ThreadPoolExecutor
 from contextlib import closing
-from datetime import UTC, datetime, timedelta, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 import pytest
@@ -72,7 +72,7 @@ def test_invalid_signature_does_not_consume_nonce(tmp_path: Path) -> None:
 
 def test_expired_entries_are_pruned_before_capacity_check(tmp_path: Path) -> None:
     database = tmp_path / "replay.sqlite3"
-    clock_value = [datetime(2026, 1, 1, tzinfo=UTC)]
+    clock_value = [datetime(2026, 1, 1, tzinfo=timezone.utc)]
     guard = SQLiteReplayGuard(
         database,
         SECRET,
@@ -91,7 +91,7 @@ def test_expired_entries_are_pruned_before_capacity_check(tmp_path: Path) -> Non
 
 def test_capacity_exhaustion_fails_closed(tmp_path: Path) -> None:
     database = tmp_path / "replay.sqlite3"
-    now = datetime(2026, 1, 1, tzinfo=UTC)
+    now = datetime(2026, 1, 1, tzinfo=timezone.utc)
     guard = SQLiteReplayGuard(
         database,
         SECRET,
@@ -106,7 +106,7 @@ def test_capacity_exhaustion_fails_closed(tmp_path: Path) -> None:
 
 def test_concurrent_duplicate_is_accepted_only_once(tmp_path: Path) -> None:
     database = tmp_path / "replay.sqlite3"
-    now = datetime(2026, 1, 1, tzinfo=UTC)
+    now = datetime(2026, 1, 1, tzinfo=timezone.utc)
     barrier = threading.Barrier(2)
 
     def attempt() -> str:
@@ -142,7 +142,7 @@ class _TrackingConnection(sqlite3.Connection):
 
 def test_every_sqlite_connection_is_closed(tmp_path: Path, monkeypatch) -> None:
     database = tmp_path / "replay.sqlite3"
-    now = datetime(2026, 1, 1, tzinfo=UTC)
+    now = datetime(2026, 1, 1, tzinfo=timezone.utc)
     connections: list[_TrackingConnection] = []
     real_connect = sqlite3.connect
 

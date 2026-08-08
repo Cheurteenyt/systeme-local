@@ -39,8 +39,8 @@ from systeme_local_gateway.c3_evidence import (
 C6_POLICY_PATH = "governance/c6-revalidation-policy.json"
 C6_C3_REGISTRY_PATH = "governance/c3-capability-registry.json"
 C6_DOCS_MCP_ENDPOINT = "https://developers.openai.com/mcp"
-C6_REVIEWED_AT = datetime(2026, 8, 7, 14, 42, tzinfo=UTC)
-C6_REVALIDATE_AFTER = datetime(2026, 8, 21, 14, 42, tzinfo=UTC)
+C6_REVIEWED_AT = datetime(2026, 8, 7, 14, 42, tzinfo=timezone.utc)
+C6_REVALIDATE_AFTER = datetime(2026, 8, 21, 14, 42, tzinfo=timezone.utc)
 C6_REVALIDATION_WARNING_DAYS = 7
 C6_MAX_MCP_ENVELOPE_BYTES = 262_144
 C6_MAX_NORMALIZED_SOURCE_BYTES = 16_384

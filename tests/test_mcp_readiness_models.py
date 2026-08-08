@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import UTC, datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 import pytest
 from pydantic import ValidationError
@@ -39,7 +39,7 @@ from systeme_local_gateway.providers.mcp_readiness_models import (
     commit_mcp_readiness_check,
 )
 
-NOW = datetime(2026, 7, 18, 15, 0, tzinfo=UTC)
+NOW = datetime(2026, 7, 18, 15, 0, tzinfo=timezone.utc)
 DIGEST = "a" * 64
 
 

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import json
-from datetime import UTC, datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 import pytest
@@ -44,7 +44,7 @@ from systeme_local_gateway.c1_observability import (
 from systeme_local_gateway.mcp_tools import McpToolRegistry
 from systeme_local_gateway.policy import PolicyEngine
 
-NOW = datetime(2026, 7, 26, 17, 40, tzinfo=UTC)
+NOW = datetime(2026, 7, 26, 17, 40, tzinfo=timezone.utc)
 AUDIT_KEY = "c1-independent-audit-key-that-is-long-enough"
 COMMIT = "1" * 40
 POLICY = "2" * 64

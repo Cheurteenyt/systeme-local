@@ -6,7 +6,7 @@ import os
 import shutil
 import subprocess
 import sys
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -45,7 +45,7 @@ from systeme_local_gateway.mcp_tools import McpToolRegistry
 from systeme_local_gateway.policy import PolicyEngine
 
 ROOT = Path(__file__).resolve().parents[1]
-NOW = datetime(2026, 8, 7, 12, 0, tzinfo=UTC)
+NOW = datetime(2026, 8, 7, 12, 0, tzinfo=timezone.utc)
 SHA_A = "a" * 64
 SHA_B = "b" * 64
 SHA_C = "c" * 64
@@ -359,7 +359,7 @@ def test_cross_identity_evidence_substitution_denies() -> None:
 def test_evidence_time_substitution_denies() -> None:
     request = _request(
         RuntimeAdmissionAction.TUNNEL_START,
-        evaluated_at=datetime(2026, 8, 7, 12, 0, 1, tzinfo=UTC),
+        evaluated_at=datetime(2026, 8, 7, 12, 0, 1, tzinfo=timezone.utc),
     )
     decision = evaluate_runtime_admission(request, _evidence(), _registry())
 

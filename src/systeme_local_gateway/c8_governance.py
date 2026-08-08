@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import json
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, datetime, timedelta, timezone
 from enum import StrEnum
 from pathlib import Path
 from typing import Any, Literal
@@ -23,7 +23,7 @@ from .c7_work_admission import (
 C8_REVALIDATION_PATH = "governance/c8-official-work-revalidation.json"
 C8_POLICY_PATH = "governance/c8-live-work-policy.json"
 C8_ACCEPTED_C7_MAIN = "e0a1dccfa13c95a1ce077d2b6f9ef4f1ed70231f"
-C8_REVIEWED_AT = datetime(2026, 8, 7, 17, 33, tzinfo=UTC)
+C8_REVIEWED_AT = datetime(2026, 8, 7, 17, 33, tzinfo=timezone.utc)
 C8_REVALIDATE_AFTER = C8_REVIEWED_AT + timedelta(days=14)
 _SHA256_PATTERN = r"^[0-9a-f]{64}$"
 _SOURCE_ID_PATTERN = r"^[a-z][a-z0-9_]{2,63}$"

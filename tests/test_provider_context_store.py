@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import sqlite3
-from datetime import UTC, datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from hashlib import sha256
 from pathlib import Path
 
@@ -38,7 +38,7 @@ from systeme_local_gateway.providers.models import (
     CapabilitySupport,
 )
 
-NOW = datetime(2026, 7, 18, 10, 0, tzinfo=UTC)
+NOW = datetime(2026, 7, 18, 10, 0, tzinfo=timezone.utc)
 
 
 def context_fingerprint(payload: str) -> str:

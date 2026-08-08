@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import json
-from datetime import UTC, datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 import httpx
@@ -46,7 +46,7 @@ from systeme_local_gateway.c6_revalidation import (
 ROOT = Path(__file__).resolve().parents[1]
 POLICY_PATH = ROOT / "governance/c6-revalidation-policy.json"
 C3_REGISTRY_PATH = ROOT / "governance/c3-capability-registry.json"
-NOW = datetime(2026, 8, 7, 15, 0, tzinfo=UTC)
+NOW = datetime(2026, 8, 7, 15, 0, tzinfo=timezone.utc)
 
 
 def _synthetic_policy() -> tuple[C6RevalidationPolicy, dict[str, str]]:

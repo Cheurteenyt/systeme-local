@@ -4,7 +4,7 @@ import argparse
 import hashlib
 import json
 import re
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, datetime, timedelta, timezone
 from enum import StrEnum
 from pathlib import Path, PurePosixPath
 from typing import Any, Literal
@@ -16,7 +16,7 @@ from systeme_local_gateway.c0_probe import C0_SHA256_PATTERN
 
 C3_BASE_COMMIT = "cf05e963ba30539f9b2c9ec2f5f71326cbba8399"
 C3_EXPECTED_BRANCH = "interop/provider-capability-revalidation-c3"
-C3_REVIEWED_AT = datetime(2026, 8, 7, 11, 55, 0, tzinfo=UTC)
+C3_REVIEWED_AT = datetime(2026, 8, 7, 11, 55, 0, tzinfo=timezone.utc)
 C3_REVALIDATE_AFTER = C3_REVIEWED_AT + timedelta(days=14)
 C3_REVALIDATION_WARNING_DAYS = 7
 C3_PROFILE_ID = "chatgpt_chat_c3_20260727"
@@ -54,7 +54,7 @@ def _require_aware(value: datetime) -> datetime:
 
 def _parse_timestamp(value: str | None) -> datetime:
     if value is None:
-        return datetime.now(tz=UTC)
+        return datetime.now(tz=timezone.utc)
     normalized = value[:-1] + "+00:00" if value.endswith("Z") else value
     return _require_aware(datetime.fromisoformat(normalized))
 

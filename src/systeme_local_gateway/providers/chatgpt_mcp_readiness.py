@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, datetime, timedelta, timezone
 
 from .chatgpt_mcp_deployment import (
     evaluate_chatgpt_mcp_deployment,
@@ -32,7 +32,7 @@ from .mcp_readiness_models import (
     commit_mcp_evidence_finding,
 )
 
-_REVIEWED_AT = datetime(2026, 7, 26, 0, 0, tzinfo=UTC)
+_REVIEWED_AT = datetime(2026, 7, 26, 0, 0, tzinfo=timezone.utc)
 _REVALIDATE_AFTER = _REVIEWED_AT + timedelta(days=14)
 
 

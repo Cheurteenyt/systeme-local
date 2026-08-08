@@ -5,7 +5,7 @@ import hashlib
 import hmac
 import json
 import re
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, datetime, timedelta, timezone
 from enum import StrEnum
 from pathlib import Path
 from typing import Any, Literal
@@ -22,7 +22,7 @@ C7_PROFILE_PATH = "governance/c7-chatgpt-work-capability-profile.json"
 C7_POLICY_PATH = "governance/c7-work-prelive-policy.json"
 C7_C6_POLICY_PATH = "governance/c6-revalidation-policy.json"
 C7_CHAT_PROFILE_PATH = "governance/c3-chatgpt-chat-capability-profile.json"
-C7_REVIEWED_AT = datetime(2026, 8, 7, 15, 42, 0, tzinfo=UTC)
+C7_REVIEWED_AT = datetime(2026, 8, 7, 15, 42, 0, tzinfo=timezone.utc)
 C7_REVALIDATE_AFTER = C7_REVIEWED_AT + timedelta(days=14)
 C7_REVALIDATION_WARNING_DAYS = 7
 C7_MAX_LIVE_CYCLE_SECONDS = 1_200
@@ -69,7 +69,7 @@ def _require_utc(value: datetime) -> datetime:
 
 def _parse_timestamp(value: str | None) -> datetime:
     if value is None:
-        return datetime.now(tz=UTC)
+        return datetime.now(tz=timezone.utc)
     normalized = value[:-1] + "+00:00" if value.endswith("Z") else value
     return _require_utc(datetime.fromisoformat(normalized))
 

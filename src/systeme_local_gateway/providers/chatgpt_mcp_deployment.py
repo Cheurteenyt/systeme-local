@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timezone
 
 from .mcp_deployment_models import (
     ChatGptMcpCapabilityProfile,
@@ -24,8 +24,8 @@ from .mcp_deployment_models import (
 )
 from .models import CapabilityClaim, CapabilityEvidence, CapabilitySupport
 
-_REVIEWED_AT = datetime(2026, 7, 26, 0, 0, tzinfo=UTC)
-_REVALIDATE_AFTER = datetime(2026, 8, 25, 0, 0, tzinfo=UTC)
+_REVIEWED_AT = datetime(2026, 7, 26, 0, 0, tzinfo=timezone.utc)
+_REVALIDATE_AFTER = datetime(2026, 8, 25, 0, 0, tzinfo=timezone.utc)
 _ALL_ROLES = tuple(
     sorted(
         (

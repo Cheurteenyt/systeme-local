@@ -1,4 +1,4 @@
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 
 import pytest
 from pydantic import ValidationError
@@ -14,7 +14,7 @@ from systeme_local_gateway.providers import (
     McpReadinessCheckState,
 )
 
-NOW = datetime(2026, 7, 26, 12, 0, tzinfo=UTC)
+NOW = datetime(2026, 7, 26, 12, 0, tzinfo=timezone.utc)
 
 
 def _checks() -> dict[McpReadinessCheckId, McpReadinessCheckState]:

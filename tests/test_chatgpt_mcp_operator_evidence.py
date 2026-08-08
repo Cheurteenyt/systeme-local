@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import ast
-from datetime import UTC, datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 import pytest
@@ -48,7 +48,7 @@ from systeme_local_gateway.providers.mcp_readiness_models import (
     McpReadinessStage,
 )
 
-NOW = datetime(2026, 7, 26, 18, 0, tzinfo=UTC)
+NOW = datetime(2026, 7, 26, 18, 0, tzinfo=timezone.utc)
 DIGESTS = tuple(f"{index:x}" * 64 for index in range(1, 10))
 
 SOURCE_BY_CHECK = {

@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from hashlib import sha256
 
 import pytest
@@ -15,7 +15,7 @@ from systeme_local_gateway.providers import (
     commit_text_turn,
 )
 
-NOW = datetime(2026, 7, 17, 20, 30, tzinfo=UTC)
+NOW = datetime(2026, 7, 17, 20, 30, tzinfo=timezone.utc)
 
 
 def make_principal() -> AgentPrincipalRef:

@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import UTC, datetime, timedelta, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 import pytest
@@ -19,7 +19,7 @@ from systeme_local_gateway.providers.fake_chatgpt_context import (
 )
 from systeme_local_gateway.providers.models import CapabilitySupport
 
-NOW = datetime(2026, 7, 18, 10, 0, tzinfo=UTC)
+NOW = datetime(2026, 7, 18, 10, 0, tzinfo=timezone.utc)
 
 
 @pytest.mark.parametrize("scenario", list(FakeChatGptContextScenario))

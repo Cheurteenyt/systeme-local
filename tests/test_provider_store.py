@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import sqlite3
-from datetime import UTC, datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from hashlib import sha256
 
 import pytest
@@ -26,7 +26,7 @@ from systeme_local_gateway.providers import (
     commit_text_turn,
 )
 
-NOW = datetime(2026, 7, 17, 20, 30, tzinfo=UTC)
+NOW = datetime(2026, 7, 17, 20, 30, tzinfo=timezone.utc)
 RAW_PROMPT = "secret prompt that must not enter the lifecycle ledger"
 
 

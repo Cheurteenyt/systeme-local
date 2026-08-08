@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import UTC, datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 import pytest
 
@@ -26,7 +26,7 @@ from systeme_local_gateway.providers.mcp_deployment_models import (
 )
 from systeme_local_gateway.providers.models import CapabilitySupport
 
-NOW = datetime(2026, 7, 26, 12, 0, tzinfo=UTC)
+NOW = datetime(2026, 7, 26, 12, 0, tzinfo=timezone.utc)
 
 
 def request(**updates: object) -> McpDeploymentRequest:
@@ -62,8 +62,8 @@ def decide(**updates: object):
 def test_profile_is_complete_digest_bound_and_current() -> None:
     profile = build_current_chatgpt_mcp_capability_profile()
     assert len(profile.rows) == len(McpCapabilityId)
-    assert profile.reviewed_at == datetime(2026, 7, 26, tzinfo=UTC)
-    assert profile.revalidate_after == datetime(2026, 8, 25, tzinfo=UTC)
+    assert profile.reviewed_at == datetime(2026, 7, 26, tzinfo=timezone.utc)
+    assert profile.revalidate_after == datetime(2026, 8, 25, tzinfo=timezone.utc)
     assert verify_chatgpt_mcp_capability_profile(profile) == profile
     tampered = profile.model_copy(update={"profile_sha256": "0" * 64})
     with pytest.raises(ValueError, match="digest mismatch"):
