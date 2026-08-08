@@ -10,7 +10,7 @@ import tempfile
 import unicodedata
 from collections.abc import Callable
 from dataclasses import dataclass
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, datetime, timedelta, timezone
 from enum import StrEnum
 from pathlib import Path, PurePosixPath
 from typing import Any, Literal
@@ -103,7 +103,7 @@ def _require_aware(value: datetime) -> datetime:
 
 def _parse_timestamp(value: str | None) -> datetime:
     if value is None:
-        return datetime.now(UTC)
+        return datetime.now(timezone.utc)
     parsed = datetime.fromisoformat(value)
     return _require_aware(parsed)
 

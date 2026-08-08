@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import json
-from datetime import UTC, datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from hashlib import sha256
 from pathlib import Path
 
@@ -42,7 +42,7 @@ def _prepare(
     surface_expires_in: timedelta = timedelta(minutes=20),
 ) -> dict[str, Path]:
     paths = _paths(tmp_path)
-    now = datetime.now(UTC)
+    now = datetime.now(timezone.utc)
     observation = commit_c1_surface_observation(
         test_chat_label=C1TestChatLabel.CHAT_A,
         surface=surface,

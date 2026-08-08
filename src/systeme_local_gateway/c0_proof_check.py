@@ -7,7 +7,7 @@ import json
 import os
 import subprocess
 import sys
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any, Literal
 
@@ -179,7 +179,7 @@ def main(argv: list[str] | None = None) -> int:
             args.challenge.stat().st_mtime,
             UTC,
         )
-        checked_at = datetime.now(UTC)
+        checked_at = datetime.now(timezone.utc)
         if checked_at - challenge_created_at > timedelta(minutes=30):
             raise ValueError("local C0 challenge is stale")
         if response.observed_at < challenge_created_at - timedelta(seconds=5):

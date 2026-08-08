@@ -14,7 +14,7 @@ import time
 from collections.abc import Iterator, Mapping, Sequence
 from contextlib import contextmanager
 from dataclasses import dataclass
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 from uuid import uuid4
@@ -316,7 +316,7 @@ class AuditLog:
         record: dict[str, object] = {
             "version": _RECORD_VERSION,
             "audit_id": audit_id,
-            "timestamp": datetime.now(UTC).isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             "previous_hmac": verification.last_hmac,
             **project_audit_event(event, self._key),
         }

@@ -5,7 +5,7 @@ import re
 import threading
 from collections.abc import Callable
 from dataclasses import dataclass
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timezone
 from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
@@ -95,7 +95,7 @@ class C0ConnectivityProbe:
     ):
         self._context = context
         self._replay_guard = replay_guard or C0ChallengeReplayGuard()
-        self._clock = clock or (lambda: datetime.now(UTC))
+        self._clock = clock or (lambda: datetime.now(timezone.utc))
 
     def execute(self, arguments: dict[str, Any]) -> dict[str, Any]:
         if set(arguments) != {"challenge"}:

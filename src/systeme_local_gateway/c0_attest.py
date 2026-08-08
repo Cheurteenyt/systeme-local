@@ -6,7 +6,7 @@ import json
 import os
 import subprocess
 import sys
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any, Literal
 
@@ -217,7 +217,7 @@ def main(argv: list[str] | None = None) -> int:
             raise ValueError("pending live proof postdates revocation verification")
         if response.observed_at > revocation.verified_at:
             raise ValueError("live response postdates revocation verification")
-        if revocation.verified_at > datetime.now(UTC) + timedelta(minutes=1):
+        if revocation.verified_at > datetime.now(timezone.utc) + timedelta(minutes=1):
             raise ValueError("revocation verification timestamp is in the future")
 
         policy = PolicyEngine(args.policy)

@@ -10,7 +10,7 @@ import stat
 import threading
 from collections.abc import Callable
 from contextlib import closing
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Protocol
 
@@ -58,7 +58,7 @@ class ReplayGuard:
             raise ValueError("max_entries must be positive")
         self._seen: dict[str, float] = {}
         self._max_entries = max_entries
-        self._clock = clock or (lambda: datetime.now(UTC))
+        self._clock = clock or (lambda: datetime.now(timezone.utc))
         self._lock = threading.Lock()
 
     def check_and_mark(self, nonce: str, expires_at: datetime) -> None:
@@ -107,7 +107,7 @@ class SQLiteReplayGuard:
         self.database_path = Path(database_path)
         self._key = key_bytes
         self._max_entries = max_entries
-        self._clock = clock or (lambda: datetime.now(UTC))
+        self._clock = clock or (lambda: datetime.now(timezone.utc))
         self._busy_timeout_seconds = busy_timeout_seconds
         self._initialize()
 
@@ -306,7 +306,7 @@ def verify_task(
     max_clock_skew_seconds: int = 60,
     max_task_lifetime_seconds: int = 300,
 ) -> None:
-    now = datetime.now(UTC)
+    now = datetime.now(timezone.utc)
     lifetime_seconds = (task.expires_at - task.issued_at).total_seconds()
     if lifetime_seconds > max_task_lifetime_seconds:
         raise ValueError("task lifetime exceeds maximum")

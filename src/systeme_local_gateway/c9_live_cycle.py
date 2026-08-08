@@ -8,7 +8,7 @@ import os
 import re
 import subprocess
 import unicodedata
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, datetime, timedelta, timezone
 from enum import StrEnum
 from pathlib import Path
 from typing import Any, Final, Literal
@@ -64,7 +64,7 @@ def _timestamp(value: datetime) -> str:
 
 def _parse_timestamp(value: str | None) -> datetime:
     if value is None:
-        return datetime.now(UTC)
+        return datetime.now(timezone.utc)
     normalized = value[:-1] + "+00:00" if value.endswith("Z") else value
     return _utc(datetime.fromisoformat(normalized))
 

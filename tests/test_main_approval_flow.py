@@ -3,7 +3,7 @@ from __future__ import annotations
 import importlib
 import sys
 import types
-from datetime import UTC, datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -15,7 +15,7 @@ def _task(
     nonce: str,
     approval_id: str | None = None,
 ) -> TaskEnvelope:
-    now = datetime.now(UTC)
+    now = datetime.now(timezone.utc)
     return TaskEnvelope(
         task_id="approval-flow-task-12345678",
         issued_at=now,

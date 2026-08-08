@@ -9,7 +9,7 @@ import stat
 import struct
 import threading
 import zlib
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timezone
 from enum import StrEnum
 from hashlib import sha256
 from pathlib import Path
@@ -499,7 +499,7 @@ class C9SyntheticFixtureHandle:
         with self._lock:
             if self._cleanup_receipt is not None:
                 return self._cleanup_receipt
-            at = _utc(cleaned_at or datetime.now(UTC))
+            at = _utc(cleaned_at or datetime.now(timezone.utc))
             removed = self._remove_private_paths()
             payload = {
                 "version": "1",
@@ -605,7 +605,7 @@ def generate_c9_synthetic_fixtures(
     root_info = root.lstat()
     root_identity = (int(root_info.st_dev), int(root_info.st_ino))
     root_resolved = root.resolve(strict=True)
-    at = _utc(generated_at or datetime.now(UTC))
+    at = _utc(generated_at or datetime.now(timezone.utc))
     png_nonce = _new_nonce()
     text_nonce = _new_nonce(excluding=png_nonce)
     png = _build_png(png_nonce)

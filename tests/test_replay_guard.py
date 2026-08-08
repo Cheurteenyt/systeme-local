@@ -7,7 +7,7 @@ import sqlite3
 import threading
 from concurrent.futures import ThreadPoolExecutor
 from contextlib import closing
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, datetime, timedelta, timezone
 from pathlib import Path
 
 import pytest
@@ -41,7 +41,7 @@ def _signed_task(nonce: str, now: datetime) -> TaskEnvelope:
 
 def test_replay_is_rejected_after_guard_restart(tmp_path: Path) -> None:
     database = tmp_path / "replay.sqlite3"
-    now = datetime.now(UTC)
+    now = datetime.now(timezone.utc)
     task = _signed_task("persistent-nonce-" + "n" * 16, now)
 
     first_guard = SQLiteReplayGuard(database, SECRET, max_entries=10)
@@ -57,7 +57,7 @@ def test_replay_is_rejected_after_guard_restart(tmp_path: Path) -> None:
 
 def test_invalid_signature_does_not_consume_nonce(tmp_path: Path) -> None:
     database = tmp_path / "replay.sqlite3"
-    now = datetime.now(UTC)
+    now = datetime.now(timezone.utc)
     task = _signed_task("invalid-signature-" + "n" * 16, now)
     valid_signature = task.signature
     task.signature = "z" * len(task.signature)

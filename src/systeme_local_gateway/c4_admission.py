@@ -4,7 +4,7 @@ import argparse
 import json
 import re
 import threading
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timezone
 from enum import StrEnum
 from hashlib import sha256
 from pathlib import Path
@@ -67,7 +67,7 @@ def _require_aware(value: datetime) -> datetime:
 
 def _parse_timestamp(value: str | None) -> datetime:
     if value is None:
-        return datetime.now(UTC)
+        return datetime.now(timezone.utc)
     normalized = value[:-1] + "+00:00" if value.endswith("Z") else value
     return _require_aware(datetime.fromisoformat(normalized))
 

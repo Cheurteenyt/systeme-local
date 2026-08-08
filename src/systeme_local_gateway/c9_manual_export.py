@@ -7,7 +7,7 @@ import secrets
 import stat
 import threading
 from dataclasses import dataclass
-from datetime import UTC, datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from enum import StrEnum
 from hashlib import sha256
 from pathlib import Path
@@ -540,7 +540,7 @@ class C9ManualExportManager:
         self._root_identity = _directory_identity(root_info)
         self._root_resolved = self._root.resolve(strict=True)
         self._startup_cleanup_receipts = self._cleanup_startup_orphans(
-            _utc(started_at or datetime.now(UTC))
+            _utc(started_at or datetime.now(timezone.utc))
         )
 
     @property

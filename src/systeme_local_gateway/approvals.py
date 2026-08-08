@@ -14,7 +14,7 @@ import sys
 from collections.abc import Callable, Mapping
 from contextlib import closing
 from dataclasses import dataclass
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, datetime, timedelta, timezone
 from pathlib import Path
 from typing import Literal
 
@@ -144,7 +144,7 @@ class ApprovalStore:
         self._key = key_bytes
         self._max_entries = max_entries
         self._ttl_seconds = ttl_seconds
-        self._clock = clock or (lambda: datetime.now(UTC))
+        self._clock = clock or (lambda: datetime.now(timezone.utc))
         self._busy_timeout_seconds = busy_timeout_seconds
         self._initialize()
 

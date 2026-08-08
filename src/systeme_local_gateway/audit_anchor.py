@@ -11,7 +11,7 @@ import time
 from collections.abc import Iterator
 from contextlib import contextmanager
 from dataclasses import dataclass
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 from uuid import UUID, uuid4
@@ -359,7 +359,7 @@ class FileAuditAnchor:
         checkpoint: dict[str, object] = {
             "version": _ANCHOR_VERSION,
             "checkpoint_id": str(uuid4()),
-            "timestamp": datetime.now(UTC).isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             "audit_log_id": self._audit_log_id,
             "records": records,
             "last_hmac": last_hmac,

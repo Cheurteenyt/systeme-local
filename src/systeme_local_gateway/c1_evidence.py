@@ -7,7 +7,7 @@ import platform
 import subprocess
 import sys
 import tomllib
-from datetime import UTC, datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 from pydantic import BaseModel
@@ -88,7 +88,7 @@ def _setting(
 
 
 def _runtime(args: argparse.Namespace) -> BaseModel:
-    now = datetime.now(UTC)
+    now = datetime.now(timezone.utc)
     root = Path.cwd().resolve()
     default_model, default_reasoning, mcp_names = _safe_config()
     policy = PolicyEngine(root / "policy.c0.yaml")
@@ -277,7 +277,7 @@ def _runtime(args: argparse.Namespace) -> BaseModel:
 
 
 def _surface(args: argparse.Namespace) -> BaseModel:
-    now = datetime.now(UTC)
+    now = datetime.now(timezone.utc)
     return commit_c1_surface_observation(
         test_chat_label=C1TestChatLabel(f"c1-test-chat-{args.test_chat}"),
         surface=C1Surface(args.surface),
@@ -289,7 +289,7 @@ def _surface(args: argparse.Namespace) -> BaseModel:
 
 
 def _visible_model(args: argparse.Namespace) -> BaseModel:
-    now = datetime.now(UTC)
+    now = datetime.now(timezone.utc)
     model_state = (
         C1EvidenceState.OBSERVED
         if args.visible_model_label is not None
@@ -319,7 +319,7 @@ def _visible_model(args: argparse.Namespace) -> BaseModel:
 
 
 def _negative(args: argparse.Namespace) -> BaseModel:
-    now = datetime.now(UTC)
+    now = datetime.now(timezone.utc)
     outcomes = {
         check_id: C1NegativeOutcome(getattr(args, check_id.value)) for check_id in C1NegativeCheckId
     }
@@ -342,7 +342,7 @@ def _revocation(args: argparse.Namespace) -> BaseModel:
     )
     if not all(required):
         raise ValueError("C1 revocation requires every explicit operator confirmation")
-    now = datetime.now(UTC)
+    now = datetime.now(timezone.utc)
     return commit_c1_revocation_receipt(
         verified_at=now,
         expires_at=now + C1_MANUAL_EVIDENCE_TTL,

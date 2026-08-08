@@ -3,7 +3,7 @@ from __future__ import annotations
 import logging
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
-from datetime import UTC, datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from secrets import token_hex
 from typing import TYPE_CHECKING, cast
 
@@ -51,7 +51,7 @@ if settings.mcp_enabled:
 
         if settings.provider_runtime_root is None:
             raise RuntimeError("C4 provider runtime root is missing")
-        evaluated_at = datetime.now(UTC)
+        evaluated_at = datetime.now(timezone.utc)
         reviewed_registry = build_current_c4_adapter_registry()
         adapter = reviewed_registry.adapters[0]
         request = commit_runtime_admission_request(
@@ -93,7 +93,7 @@ if settings.mcp_enabled:
             bundle=load_live_cycle_bundle(settings.c8_live_cycle_file),
             root=settings.provider_runtime_root,
             audit_key=settings.audit_key,
-            evaluated_at=datetime.now(UTC),
+            evaluated_at=datetime.now(timezone.utc),
         )
         if not c8_decision.live_actions_allowed or c8_decision.effective_tool_count != 1:
             raise RuntimeError("C8 provider runtime admission denied")
@@ -193,7 +193,7 @@ if settings.mcp_enabled:
         ):
             raise RuntimeError("C9 policy must admit exactly the attachment handoff tool")
 
-        now = datetime.now(UTC)
+        now = datetime.now(timezone.utc)
         initial_evidence = C9CapabilityEvidence.DOCUMENTED_AND_LOCAL_SERVER_VALIDATED
         c9_capabilities: dict[C9RichSurface | str, C9McpHostCapabilities] = {
             C9RichSurface.WORK: commit_mcp_host_capabilities(

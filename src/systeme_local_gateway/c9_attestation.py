@@ -11,7 +11,7 @@ import stat
 import subprocess
 import sys
 import tempfile
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timezone
 from enum import StrEnum
 from pathlib import Path
 from typing import Any, Literal, NoReturn, TypeVar
@@ -79,7 +79,7 @@ def _timestamp(value: datetime) -> str:
 
 def _parse_timestamp(value: str | None) -> datetime:
     if value is None:
-        return datetime.now(UTC)
+        return datetime.now(timezone.utc)
     normalized = value[:-1] + "+00:00" if value.endswith("Z") else value
     return _utc(datetime.fromisoformat(normalized))
 

@@ -64,6 +64,8 @@ ignore = [
   "SIM102", # nested if: cosmetic
   "PLW0127", # self/cls assignment in __post_init__: intentional
   "PLR1704", # else after raise: cosmetic
+  "UP017", # datetime.now(timezone.utc) -> datetime.now(UTC): the evidence
+           # governance check requires the literal timezone.utc form
 ]
 [tool.mypy]
 python_version = "3.11"

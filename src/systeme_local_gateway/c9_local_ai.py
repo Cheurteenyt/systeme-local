@@ -13,7 +13,7 @@ import stat
 import sys
 import time
 from dataclasses import dataclass
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, datetime, timedelta, timezone
 from enum import StrEnum
 from pathlib import Path
 from typing import Any, Literal, NoReturn
@@ -616,14 +616,14 @@ def run_c9_local_ai_inference(
     if len(request_bytes) > C9_LOCAL_AI_MAX_REQUEST_BYTES:
         raise C9LocalAIError(C9LocalAIErrorCode.REQUEST_TOO_LARGE)
 
-    started_at = datetime.now(UTC)
+    started_at = datetime.now(timezone.utc)
     started_monotonic = time.monotonic_ns()
     response_bytes = _exchange(
         config=config,
         request_bytes=request_bytes,
     )
     completed_monotonic = time.monotonic_ns()
-    completed_at = datetime.now(UTC)
+    completed_at = datetime.now(timezone.utc)
     output = _parse_completion(response_bytes)
     _verify_nonce_hashes(
         output=output,
@@ -735,7 +735,7 @@ def _validate_inputs(
     if attachment_media_type is None or document_media_type != "text/plain":
         raise C9LocalAIError(C9LocalAIErrorCode.INPUT_INVALID)
     try:
-        inspected_at = datetime.now(UTC)
+        inspected_at = datetime.now(timezone.utc)
         image_inspection = inspect_attachment_bytes(
             content=image_bytes,
             media_type=attachment_media_type,
@@ -1136,7 +1136,7 @@ def _inspect_runtime_executable(path: Path) -> tuple[str, str]:
 
 def _parse_runtime_timestamp(value: str | None) -> datetime:
     if value is None:
-        return datetime.now(UTC)
+        return datetime.now(timezone.utc)
     normalized = value[:-1] + "+00:00" if value.endswith("Z") else value
     return _aware_utc(datetime.fromisoformat(normalized))
 
