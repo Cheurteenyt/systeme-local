@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from datetime import UTC, datetime, timedelta
 import json
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 import pytest
@@ -44,7 +44,7 @@ from systeme_local_gateway.c1_observability import (
 from systeme_local_gateway.mcp_tools import McpToolRegistry
 from systeme_local_gateway.policy import PolicyEngine
 
-NOW = datetime(2026, 7, 26, 17, 40, tzinfo=UTC)
+NOW = datetime(2026, 7, 26, 17, 40, tzinfo=timezone.utc)
 AUDIT_KEY = "c1-independent-audit-key-that-is-long-enough"
 COMMIT = "1" * 40
 POLICY = "2" * 64
@@ -666,8 +666,8 @@ def test_surface_cli_uses_two_hour_manual_evidence_window(
         ]
     )
     output = json.loads(capsys.readouterr().out)
-    observed_at = datetime.fromisoformat(output["observed_at"].replace("Z", "+00:00"))
-    expires_at = datetime.fromisoformat(output["expires_at"].replace("Z", "+00:00"))
+    observed_at = datetime.fromisoformat(output["observed_at"])
+    expires_at = datetime.fromisoformat(output["expires_at"])
 
     assert result == 0
     assert expires_at - observed_at == timedelta(hours=2)

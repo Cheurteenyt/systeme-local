@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from datetime import UTC, datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from types import SimpleNamespace
 from typing import Any
 
@@ -90,7 +90,7 @@ def _task(
     approval_id: str | None = None,
     nonce: str = "n" * 24,
 ) -> TaskEnvelope:
-    now = datetime.now(UTC)
+    now = datetime.now(timezone.utc)
     return TaskEnvelope(
         task_id="task-processor-test-12345678",
         issued_at=now,
@@ -109,7 +109,7 @@ def _task(
 
 
 def _approval_record(*, state: str) -> ApprovalRecord:
-    now = datetime.now(UTC)
+    now = datetime.now(timezone.utc)
     return ApprovalRecord(
         approval_id="apr_" + ("a" * 24),
         request_fingerprint="f" * 64,

@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import UTC, datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
 
@@ -41,7 +41,7 @@ from systeme_local_gateway.c8_live_cycle import (
 
 ROOT = Path(__file__).resolve().parents[1]
 AUDIT_KEY = "c8-test-audit-key-is-longer-than-thirty-two-characters"
-NOW = datetime(2026, 7, 27, 17, 0, tzinfo=UTC)
+NOW = datetime(2026, 7, 27, 17, 0, tzinfo=timezone.utc)
 CYCLE_ID = "c8_cycle_0123456789abcdef0123456789abcdef"
 GRANT_ID = "c8_fedcba9876543210fedcba9876543210"
 

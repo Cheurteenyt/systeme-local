@@ -79,8 +79,7 @@ class BrainRouter:
             for profile in profiles
             if self._common_eligibility(request, profile)
             and profile.transport is BrainTransport.INTERACTIVE_HANDOFF
-            and profile.availability
-            not in {Availability.OFFLINE, Availability.QUOTA_EXHAUSTED}
+            and profile.availability not in {Availability.OFFLINE, Availability.QUOTA_EXHAUSTED}
         ]
         selected = self._select(request, eligible)
         return RouteDecision(
@@ -118,7 +117,7 @@ class BrainRouter:
                 )
 
         # Stable deterministic ordering prevents routing changes caused by list order.
-        return sorted(profiles, key=lambda p: (-p.priority, p.provider_id))[0]
+        return min(profiles, key=lambda p: (-p.priority, p.provider_id))
 
     @staticmethod
     def _reason(request: BrainRequest, profile: BrainProfile) -> str:

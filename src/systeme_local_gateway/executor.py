@@ -3,9 +3,9 @@ from pathlib import Path
 from types import MappingProxyType
 from typing import Any, Protocol
 
+from .c0_probe import C0_TOOL_NAME, C0ConnectivityProbe
 from .paths import resolve_inside
 from .sandbox import DockerSandboxRunner
-from .c0_probe import C0ConnectivityProbe, C0_TOOL_NAME
 
 
 class SandboxRunner(Protocol):

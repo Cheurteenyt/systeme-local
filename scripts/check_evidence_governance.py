@@ -5,7 +5,7 @@ import ast
 import sys
 import tomllib
 from dataclasses import dataclass
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import Any
 
@@ -27,7 +27,7 @@ def _parse_utc(value: str) -> datetime:
     parsed = datetime.fromisoformat(normalized)
     if parsed.tzinfo is None or parsed.utcoffset() is None:
         raise ValueError(f"timestamp is not timezone-aware: {value}")
-    return parsed.astimezone(timezone.utc)
+    return parsed.astimezone(UTC)
 
 
 def _datetime_call_from_ast(node: ast.Call) -> datetime:
@@ -75,7 +75,7 @@ def _datetime_call_from_ast(node: ast.Call) -> datetime:
         hour,
         minute,
         second,
-        tzinfo=timezone.utc,
+        tzinfo=UTC,
     )
 
 
@@ -252,7 +252,7 @@ def main(argv: list[str] | None = None) -> int:
     if args.fail_within_days < 0 or args.fail_within_days > 31:
         parser.error("--fail-within-days must be between 0 and 31")
 
-    as_of = _parse_utc(args.as_of) if args.as_of else datetime.now(tz=timezone.utc)
+    as_of = _parse_utc(args.as_of) if args.as_of else datetime.now(tz=UTC)
     errors = check_profiles(
         args.root.resolve(),
         as_of=as_of,

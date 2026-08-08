@@ -7,7 +7,7 @@ from pathlib import Path
 import pytest
 from pydantic import ValidationError
 
-import systeme_local_gateway.providers as providers
+from systeme_local_gateway import providers
 from systeme_local_gateway.providers._operator_evidence import (
     ContractErrorResponse,
     ContractRequest,
@@ -22,7 +22,6 @@ from systeme_local_gateway.providers._operator_evidence import (
     parse_contract_response_text,
     run_contract_probe,
 )
-
 
 ROOT = Path(__file__).resolve().parents[1]
 FIXTURES = ROOT / "tests" / "fixtures" / "operator_evidence_custodian"
@@ -171,7 +170,7 @@ def test_runner_fails_closed(
 
 def test_error_response_is_typed_and_path_free() -> None:
     response = parse_contract_response_text(
-        ('{"protocol_version":1,"request_id":null,"status":"error","error_code":"unknown_field"}\n')
+        '{"protocol_version":1,"request_id":null,"status":"error","error_code":"unknown_field"}\n'
     )
 
     assert isinstance(response, ContractErrorResponse)
@@ -189,6 +188,4 @@ def test_error_response_is_typed_and_path_free() -> None:
 
 def test_private_package_does_not_change_provider_exports() -> None:
     assert len(providers.__all__) == 179
-    assert not any(
-        name.startswith("Contract") or name.startswith("Custodian") for name in providers.__all__
-    )
+    assert not any(name.startswith(("Contract", "Custodian")) for name in providers.__all__)

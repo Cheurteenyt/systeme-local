@@ -8,7 +8,7 @@ import os
 import re
 import subprocess
 import unicodedata
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, datetime, timedelta, timezone
 from enum import StrEnum
 from pathlib import Path
 from typing import Any, Final, Literal
@@ -25,9 +25,7 @@ from .c9_local_ai import (
 )
 from .c9_seal import verify_c9_c8_seal_exact
 
-C9_TOOL_NAME: Final[Literal["systeme_local_attachment_handoff"]] = (
-    "systeme_local_attachment_handoff"
-)
+C9_TOOL_NAME: Final = "systeme_local_attachment_handoff"
 C9_MAX_AUTHORIZATION_SECONDS = 86_400
 C9_MAX_SURFACE_OBSERVATION_SECONDS = 600
 C9_MAX_LIVE_CYCLE_SECONDS = 1_200
@@ -66,7 +64,7 @@ def _timestamp(value: datetime) -> str:
 
 def _parse_timestamp(value: str | None) -> datetime:
     if value is None:
-        return datetime.now(UTC)
+        return datetime.now(timezone.utc)
     normalized = value[:-1] + "+00:00" if value.endswith("Z") else value
     return _utc(datetime.fromisoformat(normalized))
 

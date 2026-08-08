@@ -9,12 +9,13 @@ import threading
 import time
 import unicodedata
 import zlib
+from collections.abc import Callable
 from dataclasses import dataclass
-from datetime import UTC, datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from enum import StrEnum
 from hashlib import sha256
 from pathlib import Path
-from typing import Callable, Literal, NoReturn, TypeVar
+from typing import Literal, NoReturn, TypeVar
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
@@ -592,7 +593,7 @@ def _sanitize_png(content: bytes, policy: C9AttachmentPolicy) -> tuple[bytes, bo
         inspection = inspect_attachment_bytes(
             content=content,
             media_type=AttachmentMediaType.PNG,
-            inspected_at=datetime.now(UTC),
+            inspected_at=datetime.now(timezone.utc),
         )
     except AttachmentInspectionError as exc:
         raise C9AttachmentSecurityError(
@@ -727,7 +728,7 @@ def _sanitize_jpeg(content: bytes, policy: C9AttachmentPolicy) -> tuple[bytes, b
         inspection = inspect_attachment_bytes(
             content=content,
             media_type=AttachmentMediaType.JPEG,
-            inspected_at=datetime.now(UTC),
+            inspected_at=datetime.now(timezone.utc),
         )
     except AttachmentInspectionError as exc:
         raise C9AttachmentSecurityError(
@@ -836,7 +837,7 @@ def _sanitize_text(content: bytes, policy: C9AttachmentPolicy) -> tuple[bytes, b
         inspect_attachment_bytes(
             content=content,
             media_type=AttachmentMediaType.TEXT,
-            inspected_at=datetime.now(UTC),
+            inspected_at=datetime.now(timezone.utc),
         )
         text = content.decode("utf-8", errors="strict")
     except (AttachmentInspectionError, UnicodeDecodeError) as exc:

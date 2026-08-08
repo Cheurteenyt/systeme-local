@@ -5,17 +5,18 @@ import json
 import os
 import threading
 import time
+from collections.abc import Iterator
 from contextlib import contextmanager
-from datetime import UTC, datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from types import SimpleNamespace
-from typing import Iterator
 
 import pytest
+from conftest import make_png
 from pydantic import ValidationError
 
-import systeme_local_gateway.c9_local_ai as c9_local_ai
+from systeme_local_gateway import c9_local_ai
 from systeme_local_gateway.c9_local_ai import (
     C9_LOCAL_AI_MAX_DOCUMENT_BYTES,
     C9_LOCAL_AI_MAX_IMAGE_BYTES,
@@ -25,15 +26,13 @@ from systeme_local_gateway.c9_local_ai import (
     C9LocalAIErrorCode,
     C9LocalAIInference,
     C9LocalAIProviderKind,
-    capture_c9_local_ai_runtime_continuity,
     c9_local_ai_runtime_observation_sha256,
+    capture_c9_local_ai_runtime_continuity,
     commit_c9_local_ai_runtime_observation,
     run_c9_local_ai_inference,
     validate_c9_local_ai_endpoint,
     verify_c9_local_ai_runtime_observation,
 )
-
-from conftest import make_png
 
 IMAGE_NONCE = "c9_image_nonce_0123456789"
 DOCUMENT_NONCE = "c9_document_nonce_012345"
@@ -105,7 +104,7 @@ def _loopback_server(
     class Handler(BaseHTTPRequestHandler):
         protocol_version = "HTTP/1.1"
 
-        def do_POST(self) -> None:  # noqa: N802
+        def do_POST(self) -> None:
             length = int(self.headers.get("content-length", "0"))
             request_body = self.rfile.read(length)
             state.requests.append(
@@ -188,7 +187,7 @@ def _runtime_observation(
     observed_at: datetime | None = None,
     expires_at: datetime | None = None,
 ) -> c9_local_ai.C9LocalAIRuntimeObservation:
-    at = observed_at or datetime(2026, 7, 28, 12, 0, tzinfo=UTC)
+    at = observed_at or datetime(2026, 7, 28, 12, 0, tzinfo=timezone.utc)
     executable = tmp_path / "ollama.exe"
     executable.write_bytes(b"reviewed native ollama executable")
     return commit_c9_local_ai_runtime_observation(
@@ -311,7 +310,7 @@ def test_runtime_observation_accepts_lm_studio_llmster_listener(
 ) -> None:
     executable = tmp_path / "llmster.exe"
     executable.write_bytes(b"reviewed native LM Studio llmster executable")
-    observed_at = datetime(2026, 7, 28, 8, 0, tzinfo=UTC)
+    observed_at = datetime(2026, 7, 28, 8, 0, tzinfo=timezone.utc)
     observation = commit_c9_local_ai_runtime_observation(
         cycle_id="c9_cycle_" + ("3" * 32),
         provider_kind=C9LocalAIProviderKind.LM_STUDIO,
@@ -391,11 +390,9 @@ def test_runtime_continuity_rejects_executable_mismatch(
         "other-runtime.exe" if mismatch == "basename" else "ollama.exe"
     )
     replacement.write_bytes(
-        (
-            b"reviewed native ollama executable"
-            if mismatch == "basename"
-            else b"runtime executable with another digest"
-        )
+        b"reviewed native ollama executable"
+        if mismatch == "basename"
+        else b"runtime executable with another digest"
     )
     _patch_native_runtime_identity(
         monkeypatch,
@@ -832,40 +829,50 @@ def test_http_and_envelope_failures_are_static_and_redacted(
     declared_length: str | None,
     code: C9LocalAIErrorCode,
 ) -> None:
-    with _loopback_server(
-        body=body,
-        status=status,
-        content_type=content_type,
-        declared_length=declared_length,
-    ) as (endpoint, _state):
-        with pytest.raises(C9LocalAIError) as error:
-            _run(endpoint)
+    with (
+        _loopback_server(
+            body=body,
+            status=status,
+            content_type=content_type,
+            declared_length=declared_length,
+        ) as (endpoint, _state),
+        pytest.raises(C9LocalAIError) as error,
+    ):
+        _run(endpoint)
     assert error.value.code is code
     assert "sensitive" not in str(error.value)
     assert endpoint not in str(error.value)
 
 
 def test_streamed_response_without_content_length_is_still_bounded() -> None:
-    with _loopback_server(
-        body=b"x" * 2_048,
-        omit_content_length=True,
-    ) as (endpoint, _state):
-        with pytest.raises(C9LocalAIError) as error:
-            _run(endpoint, max_response_bytes=1_024)
+    with (
+        _loopback_server(
+            body=b"x" * 2_048,
+            omit_content_length=True,
+        ) as (endpoint, _state),
+        pytest.raises(C9LocalAIError) as error,
+    ):
+        _run(endpoint, max_response_bytes=1_024)
     assert error.value.code is C9LocalAIErrorCode.RESPONSE_TOO_LARGE
 
 
 @pytest.mark.parametrize(
     "content",
     [
-        '{"version":"1","image_nonce":"c9_image_nonce_0123456789",'
-        '"image_nonce":"c9_image_nonce_other_1234",'
-        '"document_nonce":"c9_document_nonce_012345"}',
+        (
+            '{"version":"1","image_nonce":"c9_image_nonce_0123456789",'
+            '"image_nonce":"c9_image_nonce_other_1234",'
+            '"document_nonce":"c9_document_nonce_012345"}'
+        ),
         '{"version":"1","image_nonce":"too-short","document_nonce":"c9_document_nonce_012345"}',
-        '{"version":"1","image_nonce":"c9_same_nonce_0123456789",'
-        '"document_nonce":"c9_same_nonce_0123456789"}',
-        '{"version":"1","image_nonce":"c9_image_nonce_0123456789",'
-        '"document_nonce":"c9_document_nonce_012345","unexpected":true}',
+        (
+            '{"version":"1","image_nonce":"c9_same_nonce_0123456789",'
+            '"document_nonce":"c9_same_nonce_0123456789"}'
+        ),
+        (
+            '{"version":"1","image_nonce":"c9_image_nonce_0123456789",'
+            '"document_nonce":"c9_document_nonce_012345","unexpected":true}'
+        ),
     ],
 )
 def test_structured_output_rejects_duplicates_invalid_nonces_and_unknown_fields(

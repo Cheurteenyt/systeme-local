@@ -4,7 +4,7 @@ import hashlib
 import hmac
 import json
 import re
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, datetime, timedelta, timezone
 from enum import StrEnum
 from typing import Any, Literal
 
@@ -236,7 +236,7 @@ class C1OfficialSourceReference(BaseModel):
     _aware_revalidate_after = field_validator("revalidate_after")(_require_aware)
 
     @model_validator(mode="after")
-    def validate_reference(self) -> "C1OfficialSourceReference":
+    def validate_reference(self) -> C1OfficialSourceReference:
         if _SOURCE_ID_RE.fullmatch(self.source_id) is None:
             raise ValueError("C1 official source ID is invalid")
         if _OFFICIAL_HOST_RE.match(self.url) is None:
@@ -262,7 +262,7 @@ class C1OfficialEvidenceProfile(BaseModel):
     profile_sha256: str = Field(pattern=C0_SHA256_PATTERN)
 
     @model_validator(mode="after")
-    def validate_profile(self) -> "C1OfficialEvidenceProfile":
+    def validate_profile(self) -> C1OfficialEvidenceProfile:
         ids = tuple(source.source_id for source in self.sources)
         if ids != tuple(sorted(ids)) or len(ids) != len(set(ids)):
             raise ValueError("C1 official sources must be sorted and unique")
@@ -297,7 +297,7 @@ class C1SettingObservation(BaseModel):
         return value
 
     @model_validator(mode="after")
-    def validate_state(self) -> "C1SettingObservation":
+    def validate_state(self) -> C1SettingObservation:
         if self.state in (
             C1EvidenceState.OBSERVED,
             C1EvidenceState.CONFIGURED_DEFAULT,
@@ -325,7 +325,7 @@ class C1RuntimeSetupObservation(BaseModel):
     _aware_expires_at = field_validator("expires_at")(_require_aware)
 
     @model_validator(mode="after")
-    def validate_setup(self) -> "C1RuntimeSetupObservation":
+    def validate_setup(self) -> C1RuntimeSetupObservation:
         if set(self.settings) != set(C1SetupField):
             raise ValueError("C1 runtime setup requires every typed setting exactly once")
         expected_precedence = tuple(
@@ -350,9 +350,8 @@ class C1RuntimeSetupObservation(BaseModel):
                 raise ValueError("configured defaults cannot prove active runtime values")
         for key in (C1SetupField.ENABLED_PLUGIN_NAMES, C1SetupField.CONFIGURED_MCP_SERVER_NAMES):
             value = self.settings[key].value
-            if isinstance(value, tuple):
-                if value != tuple(sorted(set(value))):
-                    raise ValueError(f"{key.value} must be sorted and unique")
+            if isinstance(value, tuple) and value != tuple(sorted(set(value))):
+                raise ValueError(f"{key.value} must be sorted and unique")
         _validate_window(
             observed_at=self.observed_at,
             expires_at=self.expires_at,
@@ -387,7 +386,7 @@ class C1SurfaceObservation(BaseModel):
     _aware_expires_at = field_validator("expires_at")(_require_aware)
 
     @model_validator(mode="after")
-    def validate_surface(self) -> "C1SurfaceObservation":
+    def validate_surface(self) -> C1SurfaceObservation:
         _validate_window(
             observed_at=self.observed_at,
             expires_at=self.expires_at,
@@ -428,7 +427,7 @@ class C1VisibleModelObservation(BaseModel):
         return None if value is None else _reject_secret_like(value)
 
     @model_validator(mode="after")
-    def validate_visible_model(self) -> "C1VisibleModelObservation":
+    def validate_visible_model(self) -> C1VisibleModelObservation:
         _validate_window(
             observed_at=self.observed_at,
             expires_at=self.expires_at,
@@ -487,7 +486,7 @@ class C1TestChatObservation(BaseModel):
     _aware_expires_at = field_validator("expires_at")(_require_aware)
 
     @model_validator(mode="after")
-    def validate_chat(self) -> "C1TestChatObservation":
+    def validate_chat(self) -> C1TestChatObservation:
         _validate_window(
             observed_at=self.observed_at,
             expires_at=self.expires_at,
@@ -520,7 +519,7 @@ class C1ChatCorrelationReceipt(BaseModel):
     _aware_expires_at = field_validator("expires_at")(_require_aware)
 
     @model_validator(mode="after")
-    def validate_receipt(self) -> "C1ChatCorrelationReceipt":
+    def validate_receipt(self) -> C1ChatCorrelationReceipt:
         _validate_window(
             observed_at=self.checked_at,
             expires_at=self.expires_at,
@@ -537,7 +536,7 @@ class C1ChatProofBundle(BaseModel):
     correlation_receipt: C1ChatCorrelationReceipt
 
     @model_validator(mode="after")
-    def validate_bundle(self) -> "C1ChatProofBundle":
+    def validate_bundle(self) -> C1ChatProofBundle:
         if self.observation.test_chat_label is not self.correlation_receipt.test_chat_label:
             raise ValueError("C1 proof bundle label mismatch")
         if self.correlation_receipt.observation_sha256 != canonical_sha256(
@@ -566,7 +565,7 @@ class C1NegativeTestReceipt(BaseModel):
     _aware_expires_at = field_validator("expires_at")(_require_aware)
 
     @model_validator(mode="after")
-    def validate_negative_tests(self) -> "C1NegativeTestReceipt":
+    def validate_negative_tests(self) -> C1NegativeTestReceipt:
         if set(self.outcomes) != set(C1NegativeCheckId):
             raise ValueError("C1 negative receipt requires all ten checks exactly once")
         post = self.outcomes[C1NegativeCheckId.POST_REVOCATION_CALL]
@@ -605,7 +604,7 @@ class C1RevocationReceipt(BaseModel):
     _aware_expires_at = field_validator("expires_at")(_require_aware)
 
     @model_validator(mode="after")
-    def validate_revocation(self) -> "C1RevocationReceipt":
+    def validate_revocation(self) -> C1RevocationReceipt:
         _validate_window(
             observed_at=self.verified_at,
             expires_at=self.expires_at,
@@ -645,7 +644,7 @@ class C1FinalAttestation(BaseModel):
     _aware_expires_at = field_validator("expires_at")(_require_aware)
 
     @model_validator(mode="after")
-    def validate_attestation(self) -> "C1FinalAttestation":
+    def validate_attestation(self) -> C1FinalAttestation:
         _validate_window(
             observed_at=self.verified_at,
             expires_at=self.expires_at,
@@ -682,72 +681,88 @@ def commit_official_source_reference(
 
 
 def build_current_c1_official_evidence_profile() -> C1OfficialEvidenceProfile:
-    consulted = datetime(2026, 7, 26, 17, 36, 35, tzinfo=UTC)
-    revalidate = datetime(2026, 8, 9, 17, 36, 35, tzinfo=UTC)
-    plugin_surface_consulted = datetime(2026, 7, 27, 0, 45, tzinfo=UTC)
-    plugin_surface_revalidate = datetime(2026, 8, 10, 0, 45, tzinfo=UTC)
+    consulted = datetime(2026, 7, 26, 17, 36, 35, tzinfo=timezone.utc)
+    revalidate = datetime(2026, 8, 9, 17, 36, 35, tzinfo=timezone.utc)
+    plugin_surface_consulted = datetime(2026, 7, 27, 0, 45, tzinfo=timezone.utc)
+    plugin_surface_revalidate = datetime(2026, 8, 10, 0, 45, tzinfo=timezone.utc)
     raw = (
         (
             "chat_and_work",
             "Get started with ChatGPT Work",
             "https://learn.chatgpt.com/docs/get-started-with-work",
-            "Chat is documented for answers, explanations, brainstorming, and short drafts; "
-            "Work is a separately selected surface for tasks with a clear outcome. C1 may "
-            "visibly distinguish the selector but tests Chat only.",
+            (
+                "Chat is documented for answers, explanations, brainstorming, and short drafts; "
+                "Work is a separately selected surface for tasks with a clear outcome. C1 may "
+                "visibly distinguish the selector but tests Chat only."
+            ),
         ),
         (
             "chatgpt_and_codex_models",
             "Models",
             "https://learn.chatgpt.com/docs/models",
-            "Current clients may visibly present model and reasoning controls. Codex canonical "
-            "reasoning labels include low, medium, high, xhigh, max, and ultra; visible ChatGPT "
-            "labels remain presentation evidence and do not establish hidden model routing.",
+            (
+                "Current clients may visibly present model and reasoning controls. Codex canonical "
+                "reasoning labels include low, medium, high, xhigh, max, and ultra; visible ChatGPT "
+                "labels remain presentation evidence and do not establish hidden model routing."
+            ),
         ),
         (
             "codex_configuration",
             "Config basics",
             "https://learn.chatgpt.com/docs/config-file/config-basic",
-            "Codex configuration precedence is CLI overrides, project configuration, profile "
-            "configuration, user configuration, system configuration, then built-in defaults. "
-            "A config.toml value is a configured default, not active runtime proof.",
+            (
+                "Codex configuration precedence is CLI overrides, project configuration, profile "
+                "configuration, user configuration, system configuration, then built-in defaults. "
+                "A config.toml value is a configured default, not active runtime proof."
+            ),
         ),
         (
             "plugin_connection",
             "Connect and test your plugin",
             "https://developers.openai.com/plugins/deploy/connect-chatgpt",
-            "A developer connects an MCP endpoint or Secure MCP Tunnel, reviews discovered tools, "
-            "and selects the reviewed connection in a new ChatGPT conversation. The documented "
-            "flow is scoped to the current conversation and does not expose account chat history.",
+            (
+                "A developer connects an MCP endpoint or Secure MCP Tunnel, reviews discovered tools, "
+                "and selects the reviewed connection in a new ChatGPT conversation. The documented "
+                "flow is scoped to the current conversation and does not expose account chat history."
+            ),
         ),
         (
             "plugin_authentication",
             "Authentication",
             "https://developers.openai.com/plugins/build/auth",
-            "Plugin tools declare per-tool noauth or OAuth security schemes. C1 reuses only the "
-            "reviewed draft C0 noauth probe behind independent loopback bearer and tunnel controls.",
+            (
+                "Plugin tools declare per-tool noauth or OAuth security schemes. C1 reuses only the "
+                "reviewed draft C0 noauth probe behind independent loopback bearer and tunnel controls."
+            ),
         ),
         (
             "secure_mcp_tunnel",
             "Secure MCP Tunnel",
             "https://developers.openai.com/api/docs/guides/secure-mcp-tunnels",
-            "The official customer-run tunnel client keeps the local MCP server private through "
-            "outbound-only connectivity and uses distinct Tunnel and Runtime API-key permissions.",
+            (
+                "The official customer-run tunnel client keeps the local MCP server private through "
+                "outbound-only connectivity and uses distinct Tunnel and Runtime API-key permissions."
+            ),
         ),
         (
             "gpt_5_6_models",
             "Models",
             "https://developers.openai.com/api/docs/models",
-            "The official API catalog identifies gpt-5.6-sol, gpt-5.6-terra, and gpt-5.6-luna as "
-            "distinct model IDs. Those API identifiers may describe direct Codex runtime metadata "
-            "but must not be inferred from a ChatGPT Web display label.",
+            (
+                "The official API catalog identifies gpt-5.6-sol, gpt-5.6-terra, and gpt-5.6-luna as "
+                "distinct model IDs. Those API identifiers may describe direct Codex runtime metadata "
+                "but must not be inferred from a ChatGPT Web display label."
+            ),
         ),
         (
             "browser_boundary",
             "Browser",
             "https://learn.chatgpt.com/docs/browser",
-            "The ChatGPT desktop in-app browser is a distinct browser surface. C1 limits control "
-            "to visible controls and two new sterile chats and does not inspect cookies, storage, "
-            "private requests, unrelated tabs, or existing chat history.",
+            (
+                "The ChatGPT desktop in-app browser is a distinct browser surface. C1 limits control "
+                "to visible controls and two new sterile chats and does not inspect cookies, storage, "
+                "private requests, unrelated tabs, or existing chat history."
+            ),
         ),
     )
     source_items = [

@@ -10,6 +10,7 @@ from datetime import timedelta
 from pathlib import Path
 
 import pytest
+from conftest import NOW, png_chunk
 
 from systeme_local_gateway.c9_attachment_security import (
     C9AttachmentDescriptor,
@@ -29,8 +30,6 @@ from systeme_local_gateway.c9_private_state import (
     C9PrivateStateError,
     C9PrivateStateReason,
 )
-
-from conftest import NOW, png_chunk
 
 _MANIFEST_SHA256 = "a" * 64
 
