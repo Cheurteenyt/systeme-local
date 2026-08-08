@@ -103,31 +103,29 @@ async def test_official_client_initialize_list_and_call(
         app=app,
         client=("127.0.0.1", 50_000),
     )
-    async with app.router.lifespan_context(app):
-        async with httpx.AsyncClient(
-            transport=transport,
-            base_url="http://127.0.0.1",
-            headers={"Authorization": f"Bearer {'t' * 48}"},
-        ) as http_client:
-            async with streamable_http_client(
-                "http://127.0.0.1/mcp",
-                http_client=http_client,
-                terminate_on_close=False,
-            ) as (read_stream, write_stream, _session_id):
-                async with ClientSession(read_stream, write_stream) as session:
-                    await session.initialize()
-                    listed = await session.list_tools()
-                    assert [tool.name for tool in listed.tools] == ["workspace.list"]
+    async with app.router.lifespan_context(app), httpx.AsyncClient(
+        transport=transport,
+        base_url="http://127.0.0.1",
+        headers={"Authorization": f"Bearer {'t' * 48}"},
+    ) as http_client, streamable_http_client(
+        "http://127.0.0.1/mcp",
+        http_client=http_client,
+        terminate_on_close=False,
+    ) as (read_stream, write_stream, _session_id):
+        async with ClientSession(read_stream, write_stream) as session:
+            await session.initialize()
+            listed = await session.list_tools()
+            assert [tool.name for tool in listed.tools] == ["workspace.list"]
 
-                    result = await session.call_tool(
-                        "workspace.list",
-                        {"path": "."},
-                    )
-                    assert result.isError is False
-                    assert result.structuredContent == {
-                        "path": ".",
-                        "entries": [],
-                    }
+            result = await session.call_tool(
+                "workspace.list",
+                {"path": "."},
+            )
+            assert result.isError is False
+            assert result.structuredContent == {
+                "path": ".",
+                "entries": [],
+            }
 
     assert len(processor.tasks) == 1
     task = processor.tasks[0]
@@ -145,24 +143,22 @@ async def test_sdk_rejects_extra_arguments_before_execution(
         app=app,
         client=("127.0.0.1", 50_001),
     )
-    async with app.router.lifespan_context(app):
-        async with httpx.AsyncClient(
-            transport=transport,
-            base_url="http://127.0.0.1",
-            headers={"Authorization": f"Bearer {'t' * 48}"},
-        ) as http_client:
-            async with streamable_http_client(
-                "http://127.0.0.1/mcp",
-                http_client=http_client,
-                terminate_on_close=False,
-            ) as (read_stream, write_stream, _session_id):
-                async with ClientSession(read_stream, write_stream) as session:
-                    await session.initialize()
-                    result = await session.call_tool(
-                        "workspace.list",
-                        {"path": ".", "unexpected": True},
-                    )
-                    assert result.isError is True
+    async with app.router.lifespan_context(app), httpx.AsyncClient(
+        transport=transport,
+        base_url="http://127.0.0.1",
+        headers={"Authorization": f"Bearer {'t' * 48}"},
+    ) as http_client, streamable_http_client(
+        "http://127.0.0.1/mcp",
+        http_client=http_client,
+        terminate_on_close=False,
+    ) as (read_stream, write_stream, _session_id):
+        async with ClientSession(read_stream, write_stream) as session:
+            await session.initialize()
+            result = await session.call_tool(
+                "workspace.list",
+                {"path": ".", "unexpected": True},
+            )
+            assert result.isError is True
 
     assert processor.tasks == []
 
@@ -176,21 +172,19 @@ async def test_unlisted_tool_reaches_fail_closed_task_processor(
         app=app,
         client=("127.0.0.1", 50_002),
     )
-    async with app.router.lifespan_context(app):
-        async with httpx.AsyncClient(
-            transport=transport,
-            base_url="http://127.0.0.1",
-            headers={"Authorization": f"Bearer {'t' * 48}"},
-        ) as http_client:
-            async with streamable_http_client(
-                "http://127.0.0.1/mcp",
-                http_client=http_client,
-                terminate_on_close=False,
-            ) as (read_stream, write_stream, _session_id):
-                async with ClientSession(read_stream, write_stream) as session:
-                    await session.initialize()
-                    result = await session.call_tool("unknown.tool", {})
-                    assert result.isError is True
+    async with app.router.lifespan_context(app), httpx.AsyncClient(
+        transport=transport,
+        base_url="http://127.0.0.1",
+        headers={"Authorization": f"Bearer {'t' * 48}"},
+    ) as http_client, streamable_http_client(
+        "http://127.0.0.1/mcp",
+        http_client=http_client,
+        terminate_on_close=False,
+    ) as (read_stream, write_stream, _session_id):
+        async with ClientSession(read_stream, write_stream) as session:
+            await session.initialize()
+            result = await session.call_tool("unknown.tool", {})
+            assert result.isError is True
 
     assert len(processor.tasks) == 1
     assert processor.tasks[0].capability == "unknown.tool"
@@ -205,53 +199,51 @@ async def test_authentication_origin_and_loopback_guards(
         app=app,
         client=("127.0.0.1", 50_003),
     )
-    async with app.router.lifespan_context(app):
-        async with httpx.AsyncClient(
-            transport=loopback_transport,
-            base_url="http://127.0.0.1",
-        ) as client:
-            missing = await client.post("/mcp", json={})
-            assert missing.status_code == 401
-            assert missing.headers["www-authenticate"] == "Bearer"
+    async with app.router.lifespan_context(app), httpx.AsyncClient(
+        transport=loopback_transport,
+        base_url="http://127.0.0.1",
+    ) as client:
+        missing = await client.post("/mcp", json={})
+        assert missing.status_code == 401
+        assert missing.headers["www-authenticate"] == "Bearer"
 
-            wrong = await client.post(
-                "/mcp",
-                json={},
-                headers={"Authorization": "Bearer wrong"},
-            )
-            assert wrong.status_code == 401
+        wrong = await client.post(
+            "/mcp",
+            json={},
+            headers={"Authorization": "Bearer wrong"},
+        )
+        assert wrong.status_code == 401
 
-            standalone_sse = await client.get(
-                "/mcp",
-                headers={"Authorization": f"Bearer {'t' * 48}"},
-            )
-            assert standalone_sse.status_code == 405
-            assert standalone_sse.headers["allow"] == "POST, DELETE"
+        standalone_sse = await client.get(
+            "/mcp",
+            headers={"Authorization": f"Bearer {'t' * 48}"},
+        )
+        assert standalone_sse.status_code == 405
+        assert standalone_sse.headers["allow"] == "POST, DELETE"
 
-            hostile_origin = await client.post(
-                "/mcp",
-                json={},
-                headers={
-                    "Authorization": f"Bearer {'t' * 48}",
-                    "Origin": "https://hostile.example",
-                    "Accept": "application/json, text/event-stream",
-                },
-            )
-            assert hostile_origin.status_code == 403
+        hostile_origin = await client.post(
+            "/mcp",
+            json={},
+            headers={
+                "Authorization": f"Bearer {'t' * 48}",
+                "Origin": "https://hostile.example",
+                "Accept": "application/json, text/event-stream",
+            },
+        )
+        assert hostile_origin.status_code == 403
 
     remote_app, _remote_processor = _build_runtime(tmp_path / "remote")
     remote_transport = httpx.ASGITransport(
         app=remote_app,
         client=("192.0.2.10", 50_004),
     )
-    async with remote_app.router.lifespan_context(remote_app):
-        async with httpx.AsyncClient(
-            transport=remote_transport,
-            base_url="http://127.0.0.1",
-            headers={"Authorization": f"Bearer {'t' * 48}"},
-        ) as client:
-            remote = await client.post("/mcp", json={})
-            assert remote.status_code == 403
+    async with remote_app.router.lifespan_context(remote_app), httpx.AsyncClient(
+        transport=remote_transport,
+        base_url="http://127.0.0.1",
+        headers={"Authorization": f"Bearer {'t' * 48}"},
+    ) as client:
+        remote = await client.post("/mcp", json={})
+        assert remote.status_code == 403
 
 
 @pytest.mark.anyio
@@ -267,19 +259,18 @@ async def test_invalid_transport_request_does_not_starve_following_requests(
         "Authorization": f"Bearer {'t' * 48}",
         "Accept": "application/json, text/event-stream",
     }
-    async with app.router.lifespan_context(app):
-        async with httpx.AsyncClient(
-            transport=transport,
-            base_url="http://127.0.0.1",
-            headers=headers,
-        ) as client:
-            with anyio.fail_after(1):
-                invalid = await client.post("/mcp", content=b"{}")
-            assert invalid.status_code == 400
+    async with app.router.lifespan_context(app), httpx.AsyncClient(
+        transport=transport,
+        base_url="http://127.0.0.1",
+        headers=headers,
+    ) as client:
+        with anyio.fail_after(1):
+            invalid = await client.post("/mcp", content=b"{}")
+        assert invalid.status_code == 400
 
-            with anyio.fail_after(1):
-                following = await client.post("/mcp", json={})
-            assert following.status_code == 400
+        with anyio.fail_after(1):
+            following = await client.post("/mcp", json={})
+        assert following.status_code == 400
 
 
 @pytest.mark.anyio
@@ -292,17 +283,16 @@ async def test_request_size_and_rate_limits(tmp_path: Path) -> None:
         app=size_app,
         client=("127.0.0.1", 50_005),
     )
-    async with size_app.router.lifespan_context(size_app):
-        async with httpx.AsyncClient(
-            transport=size_transport,
-            base_url="http://127.0.0.1",
-            headers={"Authorization": f"Bearer {'t' * 48}"},
-        ) as client:
-            oversized = await client.post(
-                "/mcp",
-                json={"payload": "x" * 128},
-            )
-            assert oversized.status_code == 413
+    async with size_app.router.lifespan_context(size_app), httpx.AsyncClient(
+        transport=size_transport,
+        base_url="http://127.0.0.1",
+        headers={"Authorization": f"Bearer {'t' * 48}"},
+    ) as client:
+        oversized = await client.post(
+            "/mcp",
+            json={"payload": "x" * 128},
+        )
+        assert oversized.status_code == 413
 
     rate_app, _rate_processor = _build_runtime(
         tmp_path / "rate",
@@ -316,17 +306,16 @@ async def test_request_size_and_rate_limits(tmp_path: Path) -> None:
         "Authorization": f"Bearer {'t' * 48}",
         "Accept": "application/json, text/event-stream",
     }
-    async with rate_app.router.lifespan_context(rate_app):
-        async with httpx.AsyncClient(
-            transport=rate_transport,
-            base_url="http://127.0.0.1",
-            headers=headers,
-        ) as client:
-            first = await client.post("/mcp", json={})
-            assert first.status_code != 429
-            limited = await client.post("/mcp", json={})
-            assert limited.status_code == 429
-            assert limited.headers["retry-after"] == "60"
+    async with rate_app.router.lifespan_context(rate_app), httpx.AsyncClient(
+        transport=rate_transport,
+        base_url="http://127.0.0.1",
+        headers=headers,
+    ) as client:
+        first = await client.post("/mcp", json={})
+        assert first.status_code != 429
+        limited = await client.post("/mcp", json={})
+        assert limited.status_code == 429
+        assert limited.headers["retry-after"] == "60"
 
 
 @pytest.mark.anyio
@@ -394,37 +383,35 @@ capabilities:
         client=("127.0.0.1", 50_007),
     )
     challenge = "c0_0123456789abcdef0123456789abcdef"
-    async with app.router.lifespan_context(app):
-        async with httpx.AsyncClient(
-            transport=transport,
-            base_url="http://127.0.0.1",
-            headers={"Authorization": f"Bearer {'t' * 48}"},
-        ) as http_client:
-            async with streamable_http_client(
-                "http://127.0.0.1/mcp",
-                http_client=http_client,
-                terminate_on_close=False,
-            ) as (read_stream, write_stream, _session_id):
-                async with ClientSession(read_stream, write_stream) as session:
-                    await session.initialize()
-                    listed = await session.list_tools()
-                    assert len(listed.tools) == 1
-                    tool = listed.tools[0]
-                    assert tool.name == C0_TOOL_NAME
-                    assert tool.annotations is not None
-                    assert tool.annotations.readOnlyHint is True
-                    assert tool.annotations.destructiveHint is False
-                    assert tool.annotations.idempotentHint is True
-                    assert tool.annotations.openWorldHint is False
-                    assert tool.outputSchema is not None
+    async with app.router.lifespan_context(app), httpx.AsyncClient(
+        transport=transport,
+        base_url="http://127.0.0.1",
+        headers={"Authorization": f"Bearer {'t' * 48}"},
+    ) as http_client, streamable_http_client(
+        "http://127.0.0.1/mcp",
+        http_client=http_client,
+        terminate_on_close=False,
+    ) as (read_stream, write_stream, _session_id):
+        async with ClientSession(read_stream, write_stream) as session:
+            await session.initialize()
+            listed = await session.list_tools()
+            assert len(listed.tools) == 1
+            tool = listed.tools[0]
+            assert tool.name == C0_TOOL_NAME
+            assert tool.annotations is not None
+            assert tool.annotations.readOnlyHint is True
+            assert tool.annotations.destructiveHint is False
+            assert tool.annotations.idempotentHint is True
+            assert tool.annotations.openWorldHint is False
+            assert tool.outputSchema is not None
 
-                    result = await session.call_tool(
-                        C0_TOOL_NAME,
-                        {"challenge": challenge},
-                    )
-                    assert result.isError is False
-                    assert result.structuredContent is not None
-                    assert result.structuredContent["audit_correlation"] == audit_id
-                    assert result.structuredContent["write_actions_enabled"] is False
-                    assert result.structuredContent["real_evidence_access"] is False
-                    assert result.structuredContent["protocol_v2_reachable"] is False
+            result = await session.call_tool(
+                C0_TOOL_NAME,
+                {"challenge": challenge},
+            )
+            assert result.isError is False
+            assert result.structuredContent is not None
+            assert result.structuredContent["audit_correlation"] == audit_id
+            assert result.structuredContent["write_actions_enabled"] is False
+            assert result.structuredContent["real_evidence_access"] is False
+            assert result.structuredContent["protocol_v2_reachable"] is False

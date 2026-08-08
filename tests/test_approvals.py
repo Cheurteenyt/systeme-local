@@ -20,8 +20,10 @@ from systeme_local_gateway.approvals import (
     ApprovalPendingError,
     ApprovalStore,
     ApprovalStoreUnavailableError,
-    main as approvals_main,
     verify_approval_task,
+)
+from systeme_local_gateway.approvals import (
+    main as approvals_main,
 )
 from systeme_local_gateway.auth import canonical_payload
 from systeme_local_gateway.models import AgentIdentity, TaskEnvelope

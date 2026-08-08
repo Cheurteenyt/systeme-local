@@ -4,7 +4,7 @@ import argparse
 import hashlib
 import json
 import re
-from datetime import UTC, datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from enum import StrEnum
 from pathlib import Path
 from typing import Any, Literal
@@ -15,7 +15,7 @@ from systeme_local_gateway.c0_probe import C0_SHA256_PATTERN
 
 C2_BASE_COMMIT = "2aee36fdfa3d20c23acdc75eb3348bc54536ef4f"
 C2_EXPECTED_BRANCH = "interop/chatgpt-web-capability-gating-c2"
-C2_REVIEWED_AT = datetime(2026, 8, 7, 1, 40, 0, tzinfo=timezone.utc)
+C2_REVIEWED_AT = datetime(2026, 8, 7, 1, 40, 0, tzinfo=UTC)
 C2_REVALIDATE_AFTER = C2_REVIEWED_AT + timedelta(days=14)
 
 _OFFICIAL_HOST_RE = re.compile(r"^https://(?:developers\.openai\.com|learn\.chatgpt\.com)/")

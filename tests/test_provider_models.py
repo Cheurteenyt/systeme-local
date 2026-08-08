@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from hashlib import sha256
 
 import pytest
@@ -15,7 +15,7 @@ from systeme_local_gateway.providers import (
     commit_text_turn,
 )
 
-NOW = datetime(2026, 7, 17, 20, 30, tzinfo=timezone.utc)
+NOW = datetime(2026, 7, 17, 20, 30, tzinfo=UTC)
 
 
 def make_principal() -> AgentPrincipalRef:
@@ -50,7 +50,7 @@ def test_commit_text_turn_is_deterministic_and_metadata_only() -> None:
 
     assert first == second
     assert first.part_count == 2
-    assert first.utf8_bytes == len("alphaβeta".encode("utf-8"))
+    assert first.utf8_bytes == len("alphaβeta".encode())
     serialized = first.model_dump_json()
     assert "alpha" not in serialized
     assert "βeta" not in serialized

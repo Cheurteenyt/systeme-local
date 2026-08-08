@@ -15,8 +15,8 @@ from typing import Any, Protocol
 from uuid import uuid4
 
 import anyio
-import mcp.types as types
 from fastapi import Request, Response
+from mcp import types
 from mcp.server.lowlevel import Server
 from mcp.server.streamable_http_manager import StreamableHTTPSessionManager
 from mcp.server.transport_security import TransportSecuritySettings

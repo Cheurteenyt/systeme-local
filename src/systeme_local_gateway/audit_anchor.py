@@ -203,13 +203,12 @@ class FileAuditAnchor:
 
     @contextmanager
     def transaction(self) -> Iterator[AuditAnchorTransaction]:
-        with _THREAD_LOCK:
-            with self._process_lock():
-                transaction = AuditAnchorTransaction(self)
-                try:
-                    yield transaction
-                finally:
-                    transaction._close()
+        with _THREAD_LOCK, self._process_lock():
+            transaction = AuditAnchorTransaction(self)
+            try:
+                yield transaction
+            finally:
+                transaction._close()
 
     def verify(self) -> AuditAnchorVerification:
         with self.transaction() as transaction:

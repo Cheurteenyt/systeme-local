@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 import struct
 import zlib
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 import pytest
 
@@ -27,8 +27,7 @@ from systeme_local_gateway.providers.models import (
     commit_text_turn,
 )
 
-
-UTC = timezone.utc
+UTC = UTC
 NOW = datetime(2026, 7, 18, 12, 0, tzinfo=UTC)
 
 

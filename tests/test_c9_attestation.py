@@ -44,8 +44,8 @@ from systeme_local_gateway.c9_handoff_runtime import (
     C9CoordinatorCloseReceipt,
     C9HandoffAdmission,
     C9HandoffStageReceipt,
-    C9StagedAttachment,
     C9RichExecutionDescriptor,
+    C9StagedAttachment,
 )
 from systeme_local_gateway.c9_live_cycle import (
     C9AdmissionDecision,

@@ -16,11 +16,11 @@ from .c1_observability import (
     C1C0DependencyStatus,
     C1ChatProofBundle,
     C1NegativeTestReceipt,
+    C1RevocationReceipt,
     C1RuntimeSetupObservation,
     C1SetupField,
     C1SurfaceObservation,
     C1VisibleModelObservation,
-    C1RevocationReceipt,
     build_current_c1_official_evidence_profile,
     commit_c1_final_attestation,
 )

@@ -3,12 +3,13 @@ from __future__ import annotations
 from datetime import timedelta
 
 import pytest
+from conftest import NOW
 
 from systeme_local_gateway.providers.attachment_models import (
     AttachmentBatchReceipt,
     AttachmentRetryDirective,
-    attachment_receipt_sha256,
     AttachmentTransferStatus,
+    attachment_receipt_sha256,
 )
 from systeme_local_gateway.providers.attachment_policy import plan_attachment_batches
 from systeme_local_gateway.providers.fake_attachment_provider import (
@@ -17,8 +18,6 @@ from systeme_local_gateway.providers.fake_attachment_provider import (
     FakeAttachmentScenario,
     verify_attachment_batch_receipt,
 )
-
-from conftest import NOW
 
 
 @pytest.fixture
@@ -312,6 +311,7 @@ def test_receipt_digest_detects_tampering(plan):
     payload = receipt.model_dump()
     payload["receipt_sha256"] = "0" * 64
     from pydantic import ValidationError
+
     from systeme_local_gateway.providers.attachment_models import AttachmentBatchReceipt
 
     with pytest.raises(ValidationError, match="receipt digest mismatch"):

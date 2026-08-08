@@ -3,6 +3,7 @@ from __future__ import annotations
 import hashlib
 import importlib
 import json
+import sys
 from datetime import datetime
 from enum import StrEnum
 from pathlib import Path
@@ -11,7 +12,6 @@ from typing import get_origin, get_type_hints
 import pytest
 from pydantic import BaseModel
 from pydantic_core import PydanticUndefined
-import sys
 
 FIXTURE_PATH = (
     Path(__file__).parent / "fixtures" / "provider_canonicalization_compatibility_v1.json"
@@ -215,7 +215,7 @@ class CapturingHash:
         self._record(result.hex())
         return result
 
-    def copy(self) -> "CapturingHash":
+    def copy(self) -> CapturingHash:
         copied = object.__new__(CapturingHash)
         copied._inner = self._inner.copy()
         copied._chunks = list(self._chunks)

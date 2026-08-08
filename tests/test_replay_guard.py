@@ -20,7 +20,6 @@ from systeme_local_gateway.auth import (
 )
 from systeme_local_gateway.models import AgentIdentity, TaskEnvelope
 
-
 SECRET = "s" * 48
 
 

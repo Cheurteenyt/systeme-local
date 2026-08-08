@@ -75,7 +75,7 @@ class C0PendingLiveProofReceipt(BaseModel):
     _aware_checked_at = field_validator("checked_at")(_require_aware)
 
     @model_validator(mode="after")
-    def validate_freshness_window(self) -> "C0PendingLiveProofReceipt":
+    def validate_freshness_window(self) -> C0PendingLiveProofReceipt:
         if self.checked_at < self.challenge_created_at:
             raise ValueError("C0 pending proof predates its challenge")
         if self.checked_at - self.challenge_created_at > timedelta(minutes=30):

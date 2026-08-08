@@ -5,6 +5,7 @@ import struct
 from datetime import timedelta
 
 import pytest
+from conftest import NOW, make_jpeg, make_pdf, make_png, png_chunk
 from pydantic import ValidationError
 
 from systeme_local_gateway.providers.attachment_commit import (
@@ -25,8 +26,6 @@ from systeme_local_gateway.providers.attachment_models import (
     AttachmentSource,
 )
 from systeme_local_gateway.providers.models import commit_text_turn
-
-from conftest import NOW, make_jpeg, make_pdf, make_png, png_chunk
 
 
 @pytest.mark.parametrize(

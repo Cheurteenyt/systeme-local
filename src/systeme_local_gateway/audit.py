@@ -242,54 +242,50 @@ class AuditLog:
         self._lock_timeout_seconds = lock_timeout_seconds
 
     def verify(self) -> AuditVerification:
-        with _LOCK:
-            with self._process_lock():
-                if self._anchor is None:
-                    return self._verify_unlocked()
-                with self._anchor.transaction() as anchor:
-                    return self._verify_anchored_unlocked(anchor)
+        with _LOCK, self._process_lock():
+            if self._anchor is None:
+                return self._verify_unlocked()
+            with self._anchor.transaction() as anchor:
+                return self._verify_anchored_unlocked(anchor)
 
     def bootstrap_anchor(self) -> AuditVerification:
         if self._anchor is None:
             raise ValueError("audit anchoring is not configured")
-        with _LOCK:
-            with self._process_lock():
-                with self._anchor.transaction() as anchor:
-                    verification = self._verify_unlocked()
-                    anchor_verification = anchor.bootstrap(
-                        verification.records,
-                        verification.last_hmac,
-                    )
-                    return AuditVerification(
-                        records=verification.records,
-                        last_hmac=verification.last_hmac,
-                        anchor_checkpoints=anchor_verification.checkpoints,
-                    )
+        with _LOCK, self._process_lock(), self._anchor.transaction() as anchor:
+            verification = self._verify_unlocked()
+            anchor_verification = anchor.bootstrap(
+                verification.records,
+                verification.last_hmac,
+            )
+            return AuditVerification(
+                records=verification.records,
+                last_hmac=verification.last_hmac,
+                anchor_checkpoints=anchor_verification.checkpoints,
+            )
 
     def append(self, event: Mapping[str, object]) -> str:
-        with _LOCK:
-            with self._process_lock():
-                if self._anchor is None:
-                    verification = self._verify_unlocked()
-                    audit_id, _ = self._append_verified_unlocked(
+        with _LOCK, self._process_lock():
+            if self._anchor is None:
+                verification = self._verify_unlocked()
+                audit_id, _ = self._append_verified_unlocked(
+                    event,
+                    verification,
+                )
+                return audit_id
+
+            with self._anchor.transaction() as anchor:
+                verification = self._verify_anchored_unlocked(anchor)
+                audit_id, next_verification = (
+                    self._append_verified_unlocked(
                         event,
                         verification,
                     )
-                    return audit_id
-
-                with self._anchor.transaction() as anchor:
-                    verification = self._verify_anchored_unlocked(anchor)
-                    audit_id, next_verification = (
-                        self._append_verified_unlocked(
-                            event,
-                            verification,
-                        )
-                    )
-                    anchor.append(
-                        next_verification.records,
-                        next_verification.last_hmac,
-                    )
-                    return audit_id
+                )
+                anchor.append(
+                    next_verification.records,
+                    next_verification.last_hmac,
+                )
+                return audit_id
 
     def _verify_anchored_unlocked(
         self,

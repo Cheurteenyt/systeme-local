@@ -95,16 +95,15 @@ def test_workspace_snapshot_rejects_symlinks(tmp_path: Path) -> None:
     except OSError:
         pytest.skip("symbolic links are unavailable on this platform")
 
-    with pytest.raises(SnapshotViolation, match="symbolic links"):
-        with WorkspaceSnapshot(
-            source,
-            tmp_path / "sandboxes",
-            include_git=False,
-            max_files=100,
-            max_bytes=1_000_000,
-            max_change_entries=10,
-        ):
-            pass
+    with pytest.raises(SnapshotViolation, match="symbolic links"), WorkspaceSnapshot(
+        source,
+        tmp_path / "sandboxes",
+        include_git=False,
+        max_files=100,
+        max_bytes=1_000_000,
+        max_change_entries=10,
+    ):
+        pass
 
 
 def test_docker_runner_never_mounts_original_workspace(tmp_path: Path) -> None:
@@ -169,16 +168,15 @@ def test_snapshot_root_must_be_outside_workspace(tmp_path: Path) -> None:
     source = tmp_path / "workspace"
     source.mkdir()
 
-    with pytest.raises(SnapshotViolation, match="outside"):
-        with WorkspaceSnapshot(
-            source,
-            source / ".sandboxes",
-            include_git=False,
-            max_files=100,
-            max_bytes=1_000_000,
-            max_change_entries=10,
-        ):
-            pass
+    with pytest.raises(SnapshotViolation, match="outside"), WorkspaceSnapshot(
+        source,
+        source / ".sandboxes",
+        include_git=False,
+        max_files=100,
+        max_bytes=1_000_000,
+        max_change_entries=10,
+    ):
+        pass
 
 
 def test_git_snapshot_copies_only_required_metadata(tmp_path: Path) -> None:
@@ -215,16 +213,15 @@ def test_snapshot_limits_file_count(tmp_path: Path) -> None:
     (source / "one.txt").write_text("1", encoding="utf-8")
     (source / "two.txt").write_text("2", encoding="utf-8")
 
-    with pytest.raises(SnapshotViolation, match="file limit"):
-        with WorkspaceSnapshot(
-            source,
-            tmp_path / "sandboxes",
-            include_git=False,
-            max_files=1,
-            max_bytes=1_000_000,
-            max_change_entries=10,
-        ):
-            pass
+    with pytest.raises(SnapshotViolation, match="file limit"), WorkspaceSnapshot(
+        source,
+        tmp_path / "sandboxes",
+        include_git=False,
+        max_files=1,
+        max_bytes=1_000_000,
+        max_change_entries=10,
+    ):
+        pass
 
 
 def test_snapshot_detects_growth_beyond_byte_limit(tmp_path: Path) -> None:

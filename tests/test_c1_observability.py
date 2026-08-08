@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from datetime import UTC, datetime, timedelta
 import json
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
 import pytest
@@ -666,8 +666,8 @@ def test_surface_cli_uses_two_hour_manual_evidence_window(
         ]
     )
     output = json.loads(capsys.readouterr().out)
-    observed_at = datetime.fromisoformat(output["observed_at"].replace("Z", "+00:00"))
-    expires_at = datetime.fromisoformat(output["expires_at"].replace("Z", "+00:00"))
+    observed_at = datetime.fromisoformat(output["observed_at"])
+    expires_at = datetime.fromisoformat(output["expires_at"])
 
     assert result == 0
     assert expires_at - observed_at == timedelta(hours=2)

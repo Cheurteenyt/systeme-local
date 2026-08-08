@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta, timezone
 
 import pytest
 from pydantic import ValidationError
@@ -32,7 +32,7 @@ from systeme_local_gateway.providers.mcp_operator_evidence_models import (
     commit_mcp_transport_evidence_summary,
 )
 
-NOW = datetime(2026, 7, 18, 18, 0, tzinfo=timezone.utc)
+NOW = datetime(2026, 7, 18, 18, 0, tzinfo=UTC)
 DIGESTS = tuple(f"{index:x}" * 64 for index in range(1, 10))
 
 

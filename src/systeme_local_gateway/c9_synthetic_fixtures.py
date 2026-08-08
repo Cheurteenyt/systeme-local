@@ -342,9 +342,7 @@ def _build_png(nonce: str) -> bytes:
 def _build_text(nonce: str) -> bytes:
     if not re.fullmatch(_NONCE_PATTERN, nonce):
         raise ValueError("invalid C9 synthetic nonce")
-    content = (f"C9 SYNTHETIC TEXT ATTACHMENT PROOF\nNONCE {nonce}\nSYNTHETIC DATA ONLY\n").encode(
-        "utf-8"
-    )
+    content = (f"C9 SYNTHETIC TEXT ATTACHMENT PROOF\nNONCE {nonce}\nSYNTHETIC DATA ONLY\n").encode()
     if b"\r" in content or len(content) > C9_SYNTHETIC_TEXT_MAX_BYTES:
         _fail(
             C9SyntheticFixtureReason.SIZE_LIMIT_EXCEEDED,

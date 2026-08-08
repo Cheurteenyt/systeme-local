@@ -1,7 +1,8 @@
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
+from .chatgpt_mcp_deployment import verify_chatgpt_mcp_capability_profile
 from .chatgpt_mcp_readiness import (
     evaluate_chatgpt_mcp_connection_readiness,
     verify_chatgpt_mcp_evidence_reconciliation_profile,
@@ -22,13 +23,12 @@ from .mcp_readiness_models import (
     commit_mcp_connection_readiness_observation,
     commit_mcp_readiness_check,
 )
-from .chatgpt_mcp_deployment import verify_chatgpt_mcp_capability_profile
 
 
 def _require_aware(value: datetime, *, field_name: str) -> datetime:
     if value.tzinfo is None or value.utcoffset() is None:
         raise ValueError(f"{field_name} must include a timezone")
-    return value.astimezone(timezone.utc)
+    return value.astimezone(UTC)
 
 
 def verify_mcp_operator_evidence_bundle(

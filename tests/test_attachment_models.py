@@ -3,6 +3,7 @@ from __future__ import annotations
 from datetime import timedelta, timezone
 
 import pytest
+from conftest import NOW
 from pydantic import ValidationError
 
 from systeme_local_gateway.providers.attachment_models import (
@@ -19,14 +20,11 @@ from systeme_local_gateway.providers.attachment_models import (
     commit_attachment_capability_profile,
     validate_attachment_display_name,
 )
-
 from systeme_local_gateway.providers.models import (
     CapabilityClaim,
     CapabilityEvidence,
     CapabilitySupport,
 )
-
-from conftest import NOW
 
 
 @pytest.mark.parametrize(

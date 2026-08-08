@@ -21,8 +21,8 @@ from .c0_probe import (
 )
 from .c7_work_admission import (
     C7_MAX_WORK_OBSERVATION_AGE_SECONDS,
-    C7_PROFILE_PATH,
     C7_POLICY_PATH,
+    C7_PROFILE_PATH,
     C7ProtectedAction,
     C7WorkPrelivePolicy,
     C8LiveCycleGrant,

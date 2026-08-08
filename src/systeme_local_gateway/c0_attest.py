@@ -106,7 +106,7 @@ class C0ManualWebObservation(BaseModel):
     _aware_started_at = field_validator("started_at")(_require_aware)
 
     @model_validator(mode="after")
-    def validate_manual_observation(self) -> "C0ManualWebObservation":
+    def validate_manual_observation(self) -> C0ManualWebObservation:
         if self.plan in (
             ChatGptPlan.FREE,
             ChatGptPlan.GO,

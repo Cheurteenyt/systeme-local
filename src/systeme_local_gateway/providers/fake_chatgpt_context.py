@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from enum import StrEnum
 from hashlib import sha256
 
@@ -54,7 +54,7 @@ class DeterministicFakeChatGptContext:
     ) -> FakeChatGptContextSnapshot:
         if observed_at.tzinfo is None or observed_at.utcoffset() is None:
             raise ValueError("timestamps must include a timezone")
-        observed_at = observed_at.astimezone(timezone.utc)
+        observed_at = observed_at.astimezone(UTC)
         account_id = _stable_id("acct_", scenario.value)
         plan_kind, plan_code, work_support, quota_state = _scenario_values(scenario)
         account = ProviderAccountProfile(

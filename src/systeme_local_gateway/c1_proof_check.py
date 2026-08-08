@@ -14,9 +14,9 @@ from .audit import AuditLog
 from .c0_probe import C0_CHALLENGE_PATTERN, C0_TOOL_NAME, C0ConnectivityProbeResponse
 from .c0_proof_check import canonical_c0_audit_record_sha256, canonical_c0_response_sha256
 from .c1_observability import (
-    C1ChatProofBundle,
     C1_MANUAL_EVIDENCE_TTL,
     C1_SURFACE_TO_RESPONSE_MAX_AGE,
+    C1ChatProofBundle,
     C1Surface,
     C1SurfaceObservation,
     C1TestChatLabel,

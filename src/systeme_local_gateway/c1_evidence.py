@@ -11,6 +11,7 @@ from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
 from pydantic import BaseModel
+
 from .c1_observability import (
     C1_CONFIGURATION_PRECEDENCE,
     C1_MANUAL_EVIDENCE_TTL,

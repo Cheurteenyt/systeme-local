@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 import pytest
 
@@ -35,7 +35,7 @@ from systeme_local_gateway.providers.mcp_readiness_models import (
     commit_mcp_readiness_check,
 )
 
-NOW = datetime(2026, 7, 26, 15, 0, tzinfo=timezone.utc)
+NOW = datetime(2026, 7, 26, 15, 0, tzinfo=UTC)
 DIGEST = "a" * 64
 
 
@@ -551,7 +551,7 @@ def test_blocked_decision_never_selects_transport() -> None:
 
 
 def test_provider_package_exports_readiness_contract() -> None:
-    import systeme_local_gateway.providers as providers
+    from systeme_local_gateway import providers
 
     for name in (
         "ChatGptMcpEvidenceReconciliationProfile",

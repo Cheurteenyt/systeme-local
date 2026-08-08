@@ -209,9 +209,8 @@ def verify_attachment_batch_receipt(
         AttachmentTransferStatus.CANCELLED,
         AttachmentTransferStatus.REJECTED,
         AttachmentTransferStatus.AMBIGUOUS,
-    ):
-        if accepted:
-            raise ValueError("non-accepting receipt cannot list accepted attachments")
+    ) and accepted:
+        raise ValueError("non-accepting receipt cannot list accepted attachments")
 
 
 

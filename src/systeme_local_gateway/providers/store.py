@@ -827,7 +827,7 @@ class LifecycleEventStore:
         }
         for table, expected_columns in expected.items():
             rows = connection.execute(
-                f"PRAGMA table_info({table})"  # noqa: S608
+                f"PRAGMA table_info({table})"
             ).fetchall()
             actual_columns = {str(row["name"]) for row in rows}
             if actual_columns != expected_columns:

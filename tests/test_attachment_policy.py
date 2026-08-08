@@ -3,6 +3,7 @@ from __future__ import annotations
 from datetime import timedelta
 
 import pytest
+from conftest import NOW
 from pydantic import ValidationError
 
 from systeme_local_gateway.providers.attachment_models import (
@@ -28,8 +29,6 @@ from systeme_local_gateway.providers.models import (
     CapabilityEvidence,
     CapabilitySupport,
 )
-
-from conftest import NOW
 
 
 def quota(*, account_id="account_main", state=QuotaState.AVAILABLE, age=0):

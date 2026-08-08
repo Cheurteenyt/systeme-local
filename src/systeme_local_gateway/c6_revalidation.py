@@ -8,11 +8,12 @@ import re
 import stat
 import tempfile
 import unicodedata
+from collections.abc import Callable
 from dataclasses import dataclass
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from enum import StrEnum
 from pathlib import Path, PurePosixPath
-from typing import Any, Callable, Literal
+from typing import Any, Literal
 from urllib.parse import urlparse
 
 import httpx
@@ -38,8 +39,8 @@ from systeme_local_gateway.c3_evidence import (
 C6_POLICY_PATH = "governance/c6-revalidation-policy.json"
 C6_C3_REGISTRY_PATH = "governance/c3-capability-registry.json"
 C6_DOCS_MCP_ENDPOINT = "https://developers.openai.com/mcp"
-C6_REVIEWED_AT = datetime(2026, 8, 7, 14, 42, tzinfo=timezone.utc)
-C6_REVALIDATE_AFTER = datetime(2026, 8, 21, 14, 42, tzinfo=timezone.utc)
+C6_REVIEWED_AT = datetime(2026, 8, 7, 14, 42, tzinfo=UTC)
+C6_REVALIDATE_AFTER = datetime(2026, 8, 21, 14, 42, tzinfo=UTC)
 C6_REVALIDATION_WARNING_DAYS = 7
 C6_MAX_MCP_ENVELOPE_BYTES = 262_144
 C6_MAX_NORMALIZED_SOURCE_BYTES = 16_384
@@ -97,13 +98,13 @@ def _text_sha256(value: str) -> str:
 def _require_aware(value: datetime) -> datetime:
     if value.tzinfo is None or value.utcoffset() is None:
         raise ValueError("C6 timestamps must be timezone-aware")
-    return value.astimezone(timezone.utc)
+    return value.astimezone(UTC)
 
 
 def _parse_timestamp(value: str | None) -> datetime:
     if value is None:
-        return datetime.now(timezone.utc)
-    parsed = datetime.fromisoformat(value.replace("Z", "+00:00"))
+        return datetime.now(UTC)
+    parsed = datetime.fromisoformat(value)
     return _require_aware(parsed)
 
 
@@ -755,49 +756,48 @@ class OpenAIDocsMcpClient:
                     "Content-Type": "application/json",
                     "User-Agent": "systeme-local-c6-revalidation/1",
                 },
-            ) as client:
-                with client.stream(
-                    "POST",
-                    self._endpoint,
-                    content=canonical_json(_json_rpc_payload(source)),
-                ) as response:
-                    if response.status_code != 200:
+            ) as client, client.stream(
+                "POST",
+                self._endpoint,
+                content=canonical_json(_json_rpc_payload(source)),
+            ) as response:
+                if response.status_code != 200:
+                    raise C6AcquisitionError(
+                        C6FailureCode.HTTP_FAILED,
+                        source_id=source.source_id,
+                    )
+                content_length = response.headers.get("content-length")
+                if content_length is not None:
+                    try:
+                        declared_length = int(content_length)
+                    except ValueError as error:
                         raise C6AcquisitionError(
                             C6FailureCode.HTTP_FAILED,
                             source_id=source.source_id,
-                        )
-                    content_length = response.headers.get("content-length")
-                    if content_length is not None:
-                        try:
-                            declared_length = int(content_length)
-                        except ValueError as error:
-                            raise C6AcquisitionError(
-                                C6FailureCode.HTTP_FAILED,
-                                source_id=source.source_id,
-                            ) from error
-                        if declared_length < 0 or declared_length > C6_MAX_MCP_ENVELOPE_BYTES:
-                            raise C6AcquisitionError(
-                                C6FailureCode.RESPONSE_TOO_LARGE,
-                                source_id=source.source_id,
-                            )
-                    content_type = (
-                        response.headers.get("content-type", "").split(";", 1)[0].strip().lower()
-                    )
-                    if content_type not in {
-                        "application/json",
-                        "text/event-stream",
-                    }:
+                        ) from error
+                    if declared_length < 0 or declared_length > C6_MAX_MCP_ENVELOPE_BYTES:
                         raise C6AcquisitionError(
-                            C6FailureCode.CONTENT_TYPE_INVALID,
+                            C6FailureCode.RESPONSE_TOO_LARGE,
                             source_id=source.source_id,
                         )
-                    for chunk in response.iter_bytes():
-                        if len(response_bytes) + len(chunk) > C6_MAX_MCP_ENVELOPE_BYTES:
-                            raise C6AcquisitionError(
-                                C6FailureCode.RESPONSE_TOO_LARGE,
-                                source_id=source.source_id,
-                            )
-                        response_bytes.extend(chunk)
+                content_type = (
+                    response.headers.get("content-type", "").split(";", 1)[0].strip().lower()
+                )
+                if content_type not in {
+                    "application/json",
+                    "text/event-stream",
+                }:
+                    raise C6AcquisitionError(
+                        C6FailureCode.CONTENT_TYPE_INVALID,
+                        source_id=source.source_id,
+                    )
+                for chunk in response.iter_bytes():
+                    if len(response_bytes) + len(chunk) > C6_MAX_MCP_ENVELOPE_BYTES:
+                        raise C6AcquisitionError(
+                            C6FailureCode.RESPONSE_TOO_LARGE,
+                            source_id=source.source_id,
+                        )
+                    response_bytes.extend(chunk)
         except C6AcquisitionError:
             raise
         except httpx.HTTPError as error:
@@ -1206,12 +1206,11 @@ def main(argv: list[str] | None = None) -> int:
                 _safe_state_output(root=root, value=args.receipt_output),
                 result.report,
             )
-        if args.candidate_output is not None:
-            if result.candidate is not None:
-                _atomic_write_json(
-                    _safe_state_output(root=root, value=args.candidate_output),
-                    result.candidate,
-                )
+        if args.candidate_output is not None and result.candidate is not None:
+            _atomic_write_json(
+                _safe_state_output(root=root, value=args.candidate_output),
+                result.candidate,
+            )
     except C6AcquisitionError as error:
         failure = _failure_report(
             failed_at=evaluated_at,

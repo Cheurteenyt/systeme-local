@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import sqlite3
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from hashlib import sha256
 
 import pytest
@@ -26,7 +26,7 @@ from systeme_local_gateway.providers import (
     commit_text_turn,
 )
 
-NOW = datetime(2026, 7, 17, 20, 30, tzinfo=timezone.utc)
+NOW = datetime(2026, 7, 17, 20, 30, tzinfo=UTC)
 RAW_PROMPT = "secret prompt that must not enter the lifecycle ledger"
 
 
@@ -359,7 +359,7 @@ def test_denormalized_column_tampering_fails_closed(
 
     connection = sqlite3.connect(path)
     connection.execute(
-        f"UPDATE {table} SET {column} = ?",  # noqa: S608
+        f"UPDATE {table} SET {column} = ?",
         (replacement,),
     )
     connection.commit()

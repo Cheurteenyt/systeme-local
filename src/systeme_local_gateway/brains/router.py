@@ -118,7 +118,7 @@ class BrainRouter:
                 )
 
         # Stable deterministic ordering prevents routing changes caused by list order.
-        return sorted(profiles, key=lambda p: (-p.priority, p.provider_id))[0]
+        return min(profiles, key=lambda p: (-p.priority, p.provider_id))
 
     @staticmethod
     def _reason(request: BrainRequest, profile: BrainProfile) -> str:

@@ -1,10 +1,11 @@
 from __future__ import annotations
 
 import sqlite3
+from collections.abc import Callable
 from enum import StrEnum
 from hashlib import sha256
 from pathlib import Path
-from typing import Any, Callable, TypeVar
+from typing import Any, TypeVar
 
 from .context_models import (
     ProviderAccountProfile,
@@ -395,7 +396,7 @@ class ProviderContextStore:
                         {id_column}, revision, account_id, provider, surface,
                         {provider_id_column}, fingerprint, payload_json
                     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-                    """,  # noqa: S608 - table and column names are internal constants
+                    """,
                     (
                         binding_id,
                         binding.revision,
@@ -478,7 +479,7 @@ class ProviderContextStore:
                     SET revision = ?, account_id = ?, provider = ?, surface = ?,
                         {provider_id_column} = ?, fingerprint = ?, payload_json = ?
                     WHERE {id_column} = ? AND revision = ?
-                    """,  # noqa: S608 - table and column names are internal constants
+                    """,
                     (
                         binding.revision,
                         binding.account_id,
@@ -594,7 +595,7 @@ class ProviderContextStore:
             FROM {table}
             WHERE provider = ? AND surface = ? AND {provider_id_column} = ?
               AND {id_column} <> ?
-            """,  # noqa: S608 - table and column names are internal constants
+            """,
             (binding.provider, binding.surface, provider_id, binding_id),
         ).fetchone()
         if row is not None:
@@ -646,7 +647,7 @@ class ProviderContextStore:
                 {id_column}, revision, account_id, provider, surface,
                 {provider_id_column}, fingerprint, payload_json
             ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-            """,  # noqa: S608 - table and column names are internal constants
+            """,
             (
                 getattr(binding, id_column),
                 binding.revision,
@@ -1315,7 +1316,7 @@ class ProviderContextStore:
             )
         for table, columns in expected.items():
             rows = connection.execute(
-                f"PRAGMA table_info({table})"  # noqa: S608 - internal table names
+                f"PRAGMA table_info({table})"
             ).fetchall()
             actual = {str(row["name"]) for row in rows}
             if actual != columns:
@@ -1348,7 +1349,7 @@ class ProviderContextStore:
         }
         for index_name, (table, columns, expected_predicate) in expected_named.items():
             rows = connection.execute(
-                f"PRAGMA index_list({table})"  # noqa: S608 - internal table names
+                f"PRAGMA index_list({table})"
             ).fetchall()
             match = next((row for row in rows if row["name"] == index_name), None)
             if (
@@ -1362,7 +1363,7 @@ class ProviderContextStore:
             index_columns = tuple(
                 str(row["name"])
                 for row in connection.execute(
-                    f"PRAGMA index_info({index_name})"  # noqa: S608
+                    f"PRAGMA index_info({index_name})"
                 ).fetchall()
             )
             if index_columns != columns:
@@ -1399,7 +1400,7 @@ class ProviderContextStore:
             columns = tuple(
                 str(item["name"])
                 for item in connection.execute(
-                    f"PRAGMA index_info({row['name']})"  # noqa: S608
+                    f"PRAGMA index_info({row['name']})"
                 ).fetchall()
             )
             if columns == ("account_id", "dimension", "observed_at"):

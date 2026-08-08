@@ -12,6 +12,7 @@ from pydantic import ValidationError
 
 import systeme_local_gateway.c9_live_cycle as live
 from systeme_local_gateway.c9_live_cycle import (
+    C9_TOOL_NAME,
     C9AdmissionReason,
     C9AdmissionStatus,
     C9C8SealDependency,
@@ -19,7 +20,6 @@ from systeme_local_gateway.c9_live_cycle import (
     C9LiveCycleGrant,
     C9OperatorAuthorization,
     C9SurfaceObservation,
-    C9_TOOL_NAME,
     commit_c9_operator_authorization,
     commit_c9_surface_observation,
     evaluate_c9_admission,

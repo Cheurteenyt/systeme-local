@@ -7,7 +7,8 @@ import re
 import secrets
 import threading
 from collections.abc import Callable, Mapping
-from dataclasses import dataclass, field as dataclass_field
+from dataclasses import dataclass
+from dataclasses import field as dataclass_field
 from datetime import UTC, datetime, timedelta
 from enum import StrEnum
 from hashlib import sha256
@@ -32,8 +33,8 @@ from .c9_local_ai import (
     C9LocalAIReceipt,
     C9LocalAIRuntimeContinuitySnapshot,
     C9LocalAIRuntimeObservation,
-    capture_c9_local_ai_runtime_continuity,
     c9_local_ai_runtime_observation_sha256,
+    capture_c9_local_ai_runtime_continuity,
     run_c9_local_ai_inference,
     verify_c9_local_ai_runtime_continuity_pair,
     verify_c9_local_ai_runtime_observation,

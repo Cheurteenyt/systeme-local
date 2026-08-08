@@ -3,7 +3,7 @@ from __future__ import annotations
 import ast
 from pathlib import Path
 
-import systeme_local_gateway.providers as providers
+from systeme_local_gateway import providers
 
 ROOT = Path(__file__).resolve().parents[1]
 

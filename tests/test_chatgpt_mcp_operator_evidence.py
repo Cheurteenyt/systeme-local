@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import ast
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
 import pytest
@@ -48,7 +48,7 @@ from systeme_local_gateway.providers.mcp_readiness_models import (
     McpReadinessStage,
 )
 
-NOW = datetime(2026, 7, 26, 18, 0, tzinfo=timezone.utc)
+NOW = datetime(2026, 7, 26, 18, 0, tzinfo=UTC)
 DIGESTS = tuple(f"{index:x}" * 64 for index in range(1, 10))
 
 SOURCE_BY_CHECK = {
@@ -465,9 +465,7 @@ def test_failed_or_unknown_required_evidence_blocks(check_id, state, reason) -> 
     states = base_states()
     states[check_id] = state
     deployment_request = request(
-        developer_mode_enabled=False
-        if check_id is McpReadinessCheckId.DEVELOPER_MODE and state is McpReadinessCheckState.FAILED
-        else True
+        developer_mode_enabled=not (check_id is McpReadinessCheckId.DEVELOPER_MODE and state is McpReadinessCheckState.FAILED)
     )
     evaluation = evaluate_bundle(make_bundle(deployment_request=deployment_request, states=states))
     assert evaluation.decision.ready is False

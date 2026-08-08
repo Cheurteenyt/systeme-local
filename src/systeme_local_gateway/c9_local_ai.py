@@ -821,41 +821,40 @@ def _exchange(*, config: C9LocalAIConfig, request_bytes: bytes) -> bytes:
                 "Content-Type": "application/json",
                 "User-Agent": "systeme-local-c9-local-ai/1",
             },
-        ) as client:
-            with client.stream(
-                "POST",
-                config.endpoint,
-                content=request_bytes,
-            ) as response:
+        ) as client, client.stream(
+            "POST",
+            config.endpoint,
+            content=request_bytes,
+        ) as response:
+            if time.monotonic() > deadline:
+                raise _ExchangeFailure(C9LocalAIErrorCode.TIMEOUT)
+            if response.status_code != 200:
+                raise _ExchangeFailure(C9LocalAIErrorCode.HTTP_FAILED)
+            content_type = (
+                response.headers.get("content-type", "").split(";", 1)[0].strip().lower()
+            )
+            if content_type != "application/json":
+                raise _ExchangeFailure(C9LocalAIErrorCode.RESPONSE_INVALID)
+            declared = response.headers.get("content-length")
+            if declared is not None:
+                try:
+                    declared_bytes = int(declared)
+                except ValueError:
+                    raise _ExchangeFailure(C9LocalAIErrorCode.RESPONSE_INVALID) from None
+                if declared_bytes < 1:
+                    raise _ExchangeFailure(C9LocalAIErrorCode.RESPONSE_INVALID)
+                if declared_bytes > config.max_response_bytes:
+                    raise _ExchangeFailure(C9LocalAIErrorCode.RESPONSE_TOO_LARGE)
+            buffer = bytearray()
+            for chunk in response.iter_bytes():
                 if time.monotonic() > deadline:
                     raise _ExchangeFailure(C9LocalAIErrorCode.TIMEOUT)
-                if response.status_code != 200:
-                    raise _ExchangeFailure(C9LocalAIErrorCode.HTTP_FAILED)
-                content_type = (
-                    response.headers.get("content-type", "").split(";", 1)[0].strip().lower()
-                )
-                if content_type != "application/json":
-                    raise _ExchangeFailure(C9LocalAIErrorCode.RESPONSE_INVALID)
-                declared = response.headers.get("content-length")
-                if declared is not None:
-                    try:
-                        declared_bytes = int(declared)
-                    except ValueError:
-                        raise _ExchangeFailure(C9LocalAIErrorCode.RESPONSE_INVALID) from None
-                    if declared_bytes < 1:
-                        raise _ExchangeFailure(C9LocalAIErrorCode.RESPONSE_INVALID)
-                    if declared_bytes > config.max_response_bytes:
-                        raise _ExchangeFailure(C9LocalAIErrorCode.RESPONSE_TOO_LARGE)
-                buffer = bytearray()
-                for chunk in response.iter_bytes():
-                    if time.monotonic() > deadline:
-                        raise _ExchangeFailure(C9LocalAIErrorCode.TIMEOUT)
-                    if len(buffer) + len(chunk) > config.max_response_bytes:
-                        raise _ExchangeFailure(C9LocalAIErrorCode.RESPONSE_TOO_LARGE)
-                    buffer.extend(chunk)
-                if not buffer:
-                    raise _ExchangeFailure(C9LocalAIErrorCode.RESPONSE_INVALID)
-                response_bytes = bytes(buffer)
+                if len(buffer) + len(chunk) > config.max_response_bytes:
+                    raise _ExchangeFailure(C9LocalAIErrorCode.RESPONSE_TOO_LARGE)
+                buffer.extend(chunk)
+            if not buffer:
+                raise _ExchangeFailure(C9LocalAIErrorCode.RESPONSE_INVALID)
+            response_bytes = bytes(buffer)
     except _ExchangeFailure as error:
         failure = error.code
     except httpx.TimeoutException:
@@ -1043,8 +1042,8 @@ def _open_runtime_executable_descriptor(path: Path) -> int:
     try:
         msvcrt: Any = importlib.import_module("msvcrt")
         wintypes: Any = importlib.import_module("ctypes.wintypes")
-        win_dll: Any = getattr(ctypes, "WinDLL")
-        get_last_error: Any = getattr(ctypes, "get_last_error")
+        win_dll: Any = ctypes.WinDLL
+        get_last_error: Any = ctypes.get_last_error
         kernel32: Any = win_dll("kernel32", use_last_error=True)
         create_file = kernel32.CreateFileW
         create_file.argtypes = (

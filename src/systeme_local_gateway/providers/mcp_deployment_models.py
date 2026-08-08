@@ -7,14 +7,13 @@ from typing import Literal
 from urllib.parse import urlsplit
 
 from pydantic import ConfigDict, Field, field_validator, model_validator
+
 from ._canonicalization import (
     _canonical_json,
     _require_aware,
     _validate_sorted_unique_enum_tuple,
     _validate_sorted_unique_string_tuple,
 )
-
-
 from .models import CapabilityClaim, CapabilitySupport, StrictModel
 
 _ID_PATTERN = r"^[a-z][a-z0-9_]{2,127}$"
@@ -182,7 +181,7 @@ class OfficialSourceReference(StrictModel):
         return value
 
     @model_validator(mode="after")
-    def verify_statement_digest(self) -> "OfficialSourceReference":
+    def verify_statement_digest(self) -> OfficialSourceReference:
         payload = {
             "source_id": self.source_id,
             "title": self.title,
@@ -207,7 +206,7 @@ class McpCapabilityMatrixRow(StrictModel):
     constraints: tuple[str, ...] = ()
 
     @model_validator(mode="after")
-    def validate_row(self) -> "McpCapabilityMatrixRow":
+    def validate_row(self) -> McpCapabilityMatrixRow:
         _validate_sorted_unique_string_tuple(self.source_ids, field_name="source_ids")
         _validate_sorted_unique_string_tuple(self.constraints, field_name="constraints")
         if self.claim.state is CapabilitySupport.UNKNOWN:
@@ -232,7 +231,7 @@ class McpPlanEntitlement(StrictModel):
     role_refusal_reason: McpDecisionReason | None = None
 
     @model_validator(mode="after")
-    def validate_entitlement(self) -> "McpPlanEntitlement":
+    def validate_entitlement(self) -> McpPlanEntitlement:
         if self.plan is ChatGptPlan.UNKNOWN:
             raise ValueError("unknown plan is not a committed entitlement row")
         _validate_sorted_unique_enum_tuple(self.allowed_roles, field_name="allowed_roles")
@@ -287,7 +286,7 @@ class ChatGptMcpCapabilityProfile(StrictModel):
     _aware_revalidate_after = field_validator("revalidate_after")(_require_aware)
 
     @model_validator(mode="after")
-    def validate_profile(self) -> "ChatGptMcpCapabilityProfile":
+    def validate_profile(self) -> ChatGptMcpCapabilityProfile:
         if self.revalidate_after <= self.reviewed_at:
             raise ValueError("revalidate_after must follow reviewed_at")
         if self.revalidate_after - self.reviewed_at > timedelta(days=31):
@@ -386,7 +385,7 @@ class McpDeploymentRequest(StrictModel):
     _aware_requested_at = field_validator("requested_at")(_require_aware)
 
     @model_validator(mode="after")
-    def validate_authentication(self) -> "McpDeploymentRequest":
+    def validate_authentication(self) -> McpDeploymentRequest:
         if self.authentication is McpAuthenticationKind.NONE:
             if self.refresh_token_capability is not RefreshTokenCapability.NOT_APPLICABLE:
                 raise ValueError(
@@ -423,7 +422,7 @@ class McpDeploymentDecision(StrictModel):
     _aware_evaluated_at = field_validator("evaluated_at")(_require_aware)
 
     @model_validator(mode="after")
-    def validate_decision(self) -> "McpDeploymentDecision":
+    def validate_decision(self) -> McpDeploymentDecision:
         _validate_sorted_unique_enum_tuple(self.reasons, field_name="decision reasons")
         approved = {
             McpDecisionReason.APPROVED_READ_FETCH,

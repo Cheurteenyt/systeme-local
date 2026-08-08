@@ -16,7 +16,6 @@ from typing import Protocol
 
 from .models import TaskEnvelope
 
-
 _SCHEMA_VERSION = 1
 _NONCE_HMAC_DOMAIN = b"replay-nonce-v1"
 _DEFAULT_BUSY_TIMEOUT_SECONDS = 5.0

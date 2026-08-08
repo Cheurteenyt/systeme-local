@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 from .context_models import (
     AvailabilityState,
@@ -15,7 +15,6 @@ from .context_models import (
     SelectionReason,
 )
 from .models import CapabilitySupport
-
 
 DEFAULT_WORK_QUOTA_MAX_AGE = timedelta(minutes=5)
 
@@ -191,4 +190,4 @@ def _decision(
 def _require_aware(value: datetime) -> datetime:
     if value.tzinfo is None or value.utcoffset() is None:
         raise ValueError("timestamps must include a timezone")
-    return value.astimezone(timezone.utc)
+    return value.astimezone(UTC)

@@ -25,7 +25,7 @@ from .c9_local_ai import (
 )
 from .c9_seal import verify_c9_c8_seal_exact
 
-C9_TOOL_NAME: Final[Literal["systeme_local_attachment_handoff"]] = (
+C9_TOOL_NAME: Final = (
     "systeme_local_attachment_handoff"
 )
 C9_MAX_AUTHORIZATION_SECONDS = 86_400

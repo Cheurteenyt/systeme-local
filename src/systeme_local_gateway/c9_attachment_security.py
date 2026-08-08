@@ -9,12 +9,13 @@ import threading
 import time
 import unicodedata
 import zlib
+from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
 from enum import StrEnum
 from hashlib import sha256
 from pathlib import Path
-from typing import Callable, Literal, NoReturn, TypeVar
+from typing import Literal, NoReturn, TypeVar
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
